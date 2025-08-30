@@ -1,0 +1,36 @@
+config/config.ini
+config/.codecarbon.config
+config/credentials.json
+conda_envs/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+.cache/
+logs/emissions.csv
+logs/.cache/
+logs/workdir/
+tests/work_dir/
+Drain_result/
+results/
+.DS_Store
+tests/__pycache__/
+tests/config.py
+output/
+plots/
+tests/
+
+
