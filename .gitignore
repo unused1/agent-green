@@ -1,3 +1,7 @@
+# Environment files
+.env
+.env.local
+
 config/config.ini
 config/.codecarbon.config
 config/credentials.json

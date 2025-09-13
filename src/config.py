@@ -1,6 +1,12 @@
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 # Directory paths
-PROJECT_ROOT = '/home/user/Desktop/agent-green'
+PROJECT_ROOT = os.getenv('PROJECT_ROOT', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 LOG_DIR = f'{PROJECT_ROOT}/logs'
 DATA_DIR = f'{PROJECT_ROOT}/data'
 WORK_DIR = f'{PROJECT_ROOT}/tests/work_dir'
@@ -9,7 +15,8 @@ PLOT_DIR = f'{PROJECT_ROOT}/plots'
 
 # Model/LLM settings
 LLM_SERVICE = "ollama"
-LLM_MODEL = "qwen2.5-coder:7b-instruct"
+LLM_MODEL = os.getenv('LLM_MODEL', 'qwen2.5-coder:7b-instruct')
+OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
 TEMPERATURE = 0.0
 
 LLM_CONFIG = {
@@ -17,7 +24,7 @@ LLM_CONFIG = {
     "config_list": [
         {
             "model": LLM_MODEL,
-            "api_base": "http://localhost:11434",
+            "api_base": OLLAMA_HOST,
             "api_type": LLM_SERVICE,
             "num_ctx": 131072,
             #"num_ctx": 8192,
