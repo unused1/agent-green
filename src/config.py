@@ -9,7 +9,7 @@ PLOT_DIR = f'{PROJECT_ROOT}/plots'
 
 # Model/LLM settings
 LLM_SERVICE = "ollama"
-LLM_MODEL = "qwen2.5-coder:7b-instruct"
+LLM_MODEL = "qwen3:4b-thinking"  #"qwen2.5-coder:7b-instruct"
 TEMPERATURE = 0.0
 
 LLM_CONFIG = {
@@ -200,3 +200,173 @@ SYS_MSG_COMPARATOR_REFINER_ZERO_SHOT = """
         If both templates are wrong, attempt to correct and return a valid one.
         """
 
+
+
+
+# ========================================================================================
+# Single-agent VULNERABILITY DETECTION CONFIGURATION
+# ========================================================================================
+
+# Base Task Prompt (using your COT_P format)
+VULNERABILITY_TASK_PROMPT = """Please analyze the following code:
+```
+{func}
+```
+Please indicate your analysis result with one of the options: 
+(1) YES: A security vulnerability detected.
+(2) NO: No security vulnerability. 
+
+Make sure to include one of the options above "explicitly" (EXPLICITLY!!!) in your response.
+Let's think step-by-step.
+"""
+
+# Few-Shot System Prompt (with examples)
+SYS_MSG_VULNERABILITY_DETECTOR_FEW_SHOT = """You are a security expert that is good at static program analysis.
+
+Here are some examples of how to analyze code:
+
+Example 1:
+Code:
+```c
+char buffer[10];
+strcpy(buffer, user_input);
+```
+Analysis: Let's think step-by-step. This code declares a fixed-size buffer of 10 characters and uses strcpy() to copy user_input into it. The strcpy() function does not perform bounds checking, so if user_input is longer than 9 characters (plus null terminator), it will cause a buffer overflow. This is a classic security vulnerability.
+(1) YES: A security vulnerability detected.
+
+Example 2:
+Code:
+```c
+if (fd >= ctx->nr_user_files)
+    return -EBADF;
+fd = array_index_nospec(fd, ctx->nr_user_files);
+```
+Analysis: Let's think step-by-step. This code checks if fd is greater than or equal to ctx->nr_user_files before using it as an array index. However, this is an off-by-one error because valid array indices should be from 0 to (ctx->nr_user_files - 1). The condition should be fd >= ctx->nr_user_files to prevent accessing one element beyond the array bounds.
+(1) YES: A security vulnerability detected.
+
+Example 3:
+Code:
+```java
+String query = "SELECT * FROM users WHERE id = '" + userId + "'";
+return executeQuery(query);
+```
+Analysis: Let's think step-by-step. This Java code constructs a SQL query by directly concatenating user input (userId) into the query string. This allows an attacker to inject malicious SQL code through the userId parameter, leading to SQL injection attacks. The code should use parameterized queries instead.
+(1) YES: A security vulnerability detected.
+
+Example 4:
+Code:
+```c
+if (!dest || !src || dest_size == 0) {
+    return -1;
+}
+strncpy(dest, src, dest_size - 1);
+dest[dest_size - 1] = '\0';
+```
+Analysis: Let's think step-by-step. This code properly validates input parameters (checking for null pointers and zero size), uses strncpy with a size limit that leaves room for null termination, and explicitly null-terminates the destination buffer. These are good security practices that prevent buffer overflows.
+(2) NO: No security vulnerability.
+
+Example 5:
+Code:
+```javascript
+function displayContent(userInput) {
+    document.getElementById('content').innerHTML = userInput;
+}
+```
+Analysis: Let's think step-by-step. This JavaScript code directly inserts user input into the DOM using innerHTML without any sanitization. This allows an attacker to inject malicious HTML/JavaScript code that will execute in the user's browser, leading to Cross-Site Scripting (XSS) attacks.
+(1) YES: A security vulnerability detected.
+
+Example 6:
+Code:
+```java
+if (userId == null || !userId.matches("^[0-9]+$")) {
+    throw new IllegalArgumentException("Invalid user ID");
+}
+PreparedStatement stmt = connection.prepareStatement("SELECT * FROM users WHERE id = ?");
+stmt.setString(1, userId);
+```
+Analysis: Let's think step-by-step. This code validates the userId parameter using regex to ensure it contains only digits, then uses a PreparedStatement with parameterized queries. The input validation prevents injection of non-numeric data, and the parameterized query prevents SQL injection. These are proper security practices.
+(2) NO: No security vulnerability.
+
+Now analyze the following code using the same approach:"""
+
+# Zero-Shot System Prompt (using your S_P format)
+SYS_MSG_VULNERABILITY_DETECTOR_ZERO_SHOT = """You are a security expert that is good at static program analysis."""
+
+
+
+
+
+# ========================================================================================
+# MULTI-AGENT VULNERABILITY DETECTION CONFIGURATION 
+# ========================================================================================
+
+# Security Researcher Agent Prompt (from PDF Appendix A)
+SYS_MSG_SECURITY_RESEARCHER = """You are the Security Researcher.
+Identify all potential security vulnerabilities in the given code snippet.
+Provide your output as a JSON array. Each element in the array represents one identified vulnerability and should include:
+• "vulnerability": A short name or description of the vulnerability.
+• "reason": A detailed explanation of why this is a vulnerability and how it could be exploited.
+• "impact": The potential consequences if this vulnerability were exploited.
+
+Analyze the code thoroughly for common security issues like buffer overflows, injection attacks, authentication bypasses, improper input validation, memory safety issues, race conditions, and other security weaknesses."""
+
+# Code Author Agent Prompt (from PDF Appendix B)  
+SYS_MSG_CODE_AUTHOR = """You are the Code Author of the attached code.
+The Security Researcher has presented a JSON array of alleged vulnerabilities. You must respond as if you are presenting your case to a group of decision-makers who will evaluate each claim. Your tone should be respectful, authoritative, and confident, as if you are defending the integrity of your work to a panel of experts.
+
+For each identified vulnerability, produce a corresponding JSON object with the following fields:
+• "vulnerability": The same name/description from the Security Researcher's entry.
+• "response-type": 'refutation' if you believe this concern is unfounded, or 'mitigation' if you acknowledge it and propose a workable solution.
+• "reason": A concise explanation of why the vulnerability is refuted or how you propose to mitigate it."""
+
+# Moderator Agent Prompt (from PDF Appendix C)
+SYS_MSG_MODERATOR = """You are the Moderator, and your role is to provide a neutral summary.
+After reviewing both the Security Researcher's identified vulnerabilities and the Code Author's responses, provide a JSON object with two fields:
+• "security_researcher_summary": A concise summary of the vulnerabilities and reasoning presented by the Security Researcher.
+• "author_summary": A concise summary of the Code Author's counterarguments or mitigation strategies."""
+
+# Review Board Agent Prompt (from PDF Appendix D)
+SYS_MSG_REVIEW_BOARD = """You are the Review Board. After reviewing the Moderator's summary, Code Author's and Security Researcher's argument, and code, produce a JSON array of verdicts for each vulnerability identified by the Security Researcher. Each object in the array should include:
+• "vulnerability": The same name as given by the Security Researcher.
+• "decision": One of 'valid', 'invalid', or 'partially valid'.
+• "severity": If valid or partially valid, assign a severity ('low', 'medium', 'high'); if invalid, use 'none'.
+• "recommended_action": Suggest what should be done next (e.g., 'fix immediately', 'monitor', 'no action needed').
+• "reason": A brief explanation of why you reached this conclusion, considering both the Security Researcher's and Code Author's perspectives."""
+
+# Multi-Agent Task Messages
+MULTI_AGENT_TASK_SECURITY_RESEARCHER = "Analyze the following code for security vulnerabilities:\n\n```\n{code}\n```"
+
+MULTI_AGENT_TASK_CODE_AUTHOR = """The Security Researcher found these potential vulnerabilities in your code:
+
+{researcher_findings}
+
+Code:
+```
+{code}
+```
+
+Please respond to each finding."""
+
+MULTI_AGENT_TASK_MODERATOR = """Provide a neutral summary of this vulnerability discussion:
+
+Security Researcher findings:
+{researcher_findings}
+
+Code Author response:
+{author_response}"""
+
+MULTI_AGENT_TASK_REVIEW_BOARD = """Review the following vulnerability assessment and make final decisions:
+
+Moderator Summary:
+{moderator_summary}
+
+Original Code:
+```
+{code}
+```
+
+Security Researcher Analysis:
+{researcher_findings}
+
+Code Author Response:
+{author_response}"""
