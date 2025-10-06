@@ -208,12 +208,16 @@ SYS_MSG_COMPARATOR_REFINER_ZERO_SHOT = """
 
 
 
+# ========================================================================================
+# VULNERABILITY DETECTION
+# ========================================================================================
+
 
 # ========================================================================================
-# Single-agent VULNERABILITY DETECTION CONFIGURATION
+# Single-agent VULNERABILITY DETECTION
 # ========================================================================================
 
-# Base Task Prompt
+# Base Task Prompt 
 VULNERABILITY_TASK_PROMPT = """Please analyze the following code:
 ```
 {func}
@@ -329,94 +333,6 @@ Be thorough but decisive. You MUST answer either YES or NO."""
 
 
 
-
-# ========================================================================================
-# MULTI-AGENT VULNERABILITY DETECTION CONFIGURATION 
-# ========================================================================================
-
-# Security Researcher Agent Prompt (from PDF Appendix A)
-SYS_MSG_SECURITY_RESEARCHER = """You are the Security Researcher.
-Identify all potential security vulnerabilities in the given code snippet.
-Provide your output as a JSON array. Each element in the array represents one identified vulnerability and should include:
-• "vulnerability": A short name or description of the vulnerability.
-• "reason": A detailed explanation of why this is a vulnerability and how it could be exploited.
-• "impact": The potential consequences if this vulnerability were exploited.
-
-Analyze the code thoroughly for common security issues like buffer overflows, injection attacks, authentication bypasses, improper input validation, memory safety issues, race conditions, and other security weaknesses."""
-
-# Code Author Agent Prompt (from PDF Appendix B)  
-SYS_MSG_CODE_AUTHOR = """You are the Code Author of the attached code.
-The Security Researcher has presented a JSON array of alleged vulnerabilities. You must respond as if you are presenting your case to a group of decision-makers who will evaluate each claim. Your tone should be respectful, authoritative, and confident, as if you are defending the integrity of your work to a panel of experts.
-
-For each identified vulnerability, produce a corresponding JSON object with the following fields:
-• "vulnerability": The same name/description from the Security Researcher's entry.
-• "response-type": 'refutation' if you believe this concern is unfounded, or 'mitigation' if you acknowledge it and propose a workable solution.
-• "reason": A concise explanation of why the vulnerability is refuted or how you propose to mitigate it."""
-
-# Moderator Agent Prompt (from PDF Appendix C)
-SYS_MSG_MODERATOR = """You are the Moderator, and your role is to provide a neutral summary.
-After reviewing both the Security Researcher's identified vulnerabilities and the Code Author's responses, provide a JSON object with two fields:
-• "security_researcher_summary": A concise summary of the vulnerabilities and reasoning presented by the Security Researcher.
-• "author_summary": A concise summary of the Code Author's counterarguments or mitigation strategies."""
-
-# Review Board Agent Prompt (from PDF Appendix D)
-#Four agents
-# SYS_MSG_REVIEW_BOARD = """You are the Review Board. After reviewing the Moderator's summary, Code Author's and Security Researcher's argument, and code, produce a JSON array of verdicts for each vulnerability identified by the Security Researcher. Each object in the array should include:
-# • "vulnerability": The same name as given by the Security Researcher.
-# • "decision": One of 'valid', 'invalid', or 'partially valid'.
-# • "severity": If valid or partially valid, assign a severity ('low', 'medium', 'high'); if invalid, use 'none'.
-# • "recommended_action": Suggest what should be done next (e.g., 'fix immediately', 'monitor', 'no action needed').
-# • "reason": A brief explanation of why you reached this conclusion, considering both the Security Researcher's and Code Author's perspectives."""
-#Three agents
-# SYS_MSG_REVIEW_BOARD = """You are the Review Board. After reviewing the Security Researcher's analysis and Code Author's response directly, produce a JSON array of verdicts for each vulnerability identified by the Security Researcher. Each object in the array should include:
-# - "vulnerability": The same name as given by the Security Researcher.
-# - "decision": One of 'valid', 'invalid', or 'partially valid'.
-# - "severity": If valid or partially valid, assign a severity ('low', 'medium', 'high'); if invalid, use 'none'.
-# - "recommended_action": Suggest what should be done next (e.g., 'fix immediately', 'monitor', 'no action needed').
-# - "reason": A brief explanation of why you reached this conclusion, considering both the Security Researcher's and Code Author's perspectives."""
-
-
-# Multi-Agent Task Messages
-MULTI_AGENT_TASK_SECURITY_RESEARCHER = "Analyze the following code for security vulnerabilities:\n\n```\n{code}\n```"
-
-MULTI_AGENT_TASK_CODE_AUTHOR = """The Security Researcher found these potential vulnerabilities in your code:
-
-{researcher_findings}
-
-Code:
-```
-{code}
-```
-
-Please respond to each finding."""
-
-MULTI_AGENT_TASK_MODERATOR = """Provide a neutral summary of this vulnerability discussion:
-
-Security Researcher findings:
-{researcher_findings}
-
-Code Author response:
-{author_response}"""
-
-MULTI_AGENT_TASK_REVIEW_BOARD = """Review the following vulnerability assessment and make final decisions:
-
-Moderator Summary:
-{moderator_summary}
-
-Original Code:
-```
-{code}
-```
-
-Security Researcher Analysis:
-{researcher_findings}
-
-Code Author Response:
-{author_response}"""
-
-
-
-
 # ========================================================================================
 # DUAL-AGENT VULNERABILITY DETECTION CONFIGURATION
 # ========================================================================================
@@ -521,12 +437,108 @@ Provide your final decision as JSON format:
 Consider the author's responses and determine if valid security vulnerabilities exist."""
 
 
-# ========================================================================================
-# SINGLE-AGENT CODE GENERATION CONFIGURATION
-# ========================================================================================
 
 
-# Base Task Prompt for code generation
+# ========================================================================================
+# MULTI-AGENT VULNERABILITY DETECTION CONFIGURATION 
+# ========================================================================================
+
+# Security Researcher Agent Prompt (from PDF Appendix A)
+SYS_MSG_SECURITY_RESEARCHER = """You are the Security Researcher.
+Identify all potential security vulnerabilities in the given code snippet.
+Provide your output as a JSON array. Each element in the array represents one identified vulnerability and should include:
+• "vulnerability": A short name or description of the vulnerability.
+• "reason": A detailed explanation of why this is a vulnerability and how it could be exploited.
+• "impact": The potential consequences if this vulnerability were exploited.
+
+Analyze the code thoroughly for common security issues like buffer overflows, injection attacks, authentication bypasses, improper input validation, memory safety issues, race conditions, and other security weaknesses."""
+
+# Code Author Agent Prompt (from PDF Appendix B)  
+SYS_MSG_CODE_AUTHOR = """You are the Code Author of the attached code.
+The Security Researcher has presented a JSON array of alleged vulnerabilities. You must respond as if you are presenting your case to a group of decision-makers who will evaluate each claim. Your tone should be respectful, authoritative, and confident, as if you are defending the integrity of your work to a panel of experts.
+
+For each identified vulnerability, produce a corresponding JSON object with the following fields:
+• "vulnerability": The same name/description from the Security Researcher's entry.
+• "response-type": 'refutation' if you believe this concern is unfounded, or 'mitigation' if you acknowledge it and propose a workable solution.
+• "reason": A concise explanation of why the vulnerability is refuted or how you propose to mitigate it."""
+
+# Moderator Agent Prompt (from PDF Appendix C)
+SYS_MSG_MODERATOR = """You are the Moderator, and your role is to provide a neutral summary.
+After reviewing both the Security Researcher's identified vulnerabilities and the Code Author's responses, provide a JSON object with two fields:
+• "security_researcher_summary": A concise summary of the vulnerabilities and reasoning presented by the Security Researcher.
+• "author_summary": A concise summary of the Code Author's counterarguments or mitigation strategies."""
+
+# Review Board Agent Prompt (from PDF Appendix D)
+#Four agents
+# SYS_MSG_REVIEW_BOARD = """You are the Review Board. After reviewing the Moderator's summary, Code Author's and Security Researcher's argument, and code, produce a JSON array of verdicts for each vulnerability identified by the Security Researcher. Each object in the array should include:
+# • "vulnerability": The same name as given by the Security Researcher.
+# • "decision": One of 'valid', 'invalid', or 'partially valid'.
+# • "severity": If valid or partially valid, assign a severity ('low', 'medium', 'high'); if invalid, use 'none'.
+# • "recommended_action": Suggest what should be done next (e.g., 'fix immediately', 'monitor', 'no action needed').
+# • "reason": A brief explanation of why you reached this conclusion, considering both the Security Researcher's and Code Author's perspectives."""
+#Three agents
+# SYS_MSG_REVIEW_BOARD = """You are the Review Board. After reviewing the Security Researcher's analysis and Code Author's response directly, produce a JSON array of verdicts for each vulnerability identified by the Security Researcher. Each object in the array should include:
+# - "vulnerability": The same name as given by the Security Researcher.
+# - "decision": One of 'valid', 'invalid', or 'partially valid'.
+# - "severity": If valid or partially valid, assign a severity ('low', 'medium', 'high'); if invalid, use 'none'.
+# - "recommended_action": Suggest what should be done next (e.g., 'fix immediately', 'monitor', 'no action needed').
+# - "reason": A brief explanation of why you reached this conclusion, considering both the Security Researcher's and Code Author's perspectives."""
+
+
+# Multi-Agent Task Messages
+MULTI_AGENT_TASK_SECURITY_RESEARCHER = "Analyze the following code for security vulnerabilities:\n\n```\n{code}\n```"
+
+MULTI_AGENT_TASK_CODE_AUTHOR = """The Security Researcher found these potential vulnerabilities in your code:
+
+{researcher_findings}
+
+Code:
+```
+{code}
+```
+
+Please respond to each finding."""
+
+MULTI_AGENT_TASK_MODERATOR = """Provide a neutral summary of this vulnerability discussion:
+
+Security Researcher findings:
+{researcher_findings}
+
+Code Author response:
+{author_response}"""
+
+MULTI_AGENT_TASK_REVIEW_BOARD = """Review the following vulnerability assessment and make final decisions:
+
+Moderator Summary:
+{moderator_summary}
+
+Original Code:
+```
+{code}
+```
+
+Security Researcher Analysis:
+{researcher_findings}
+
+Code Author Response:
+{author_response}"""
+
+
+
+
+
+# ================================================================================
+# HumanEval CODE GENERATION
+# ================================================================================
+
+
+
+# ================================================================================
+# Single Agent- CODE GENERATION 
+# ================================================================================
+
+SYS_MSG_CODE_GENERATOR_ZERO_SHOT = """You are an expert Python programmer that is good at implementing functions based on their specifications."""
+
 CODE_GENERATION_TASK_PROMPT = """Please analyze the following programming problem and implement the required function:
 
 {prompt}
@@ -540,52 +552,35 @@ Please provide your complete function implementation. Make sure to:
 Let's think step-by-step.
 """
 
-# Few-Shot System Prompt (with examples)
 SYS_MSG_CODE_GENERATOR_FEW_SHOT = """You are an expert Python programmer that is good at implementing functions based on their specifications.
 
 Here are some examples of how to approach different programming problems:
 
 Example 1:
 Problem:
-```python
 def has_close_elements(numbers: List[float], threshold: float) -> bool:
-    \"\"\" Check if in given list of numbers, are any two numbers closer to each other than
-    given threshold.
-    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
-    False
-    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
-    True
-    \"\"\"
-```
-Implementation: Let's think step-by-step. I need to compare every pair of numbers in the list and check if their absolute difference is less than the threshold. I'll use nested loops to compare each element with every other element.
-```python
+    Check if in given list of numbers, are any two numbers closer to each other than given threshold.
+
+Implementation: Let's think step-by-step. I need to compare every pair of numbers in the list and check if their absolute difference is less than the threshold.
+
 def has_close_elements(numbers: List[float], threshold: float) -> bool:
     for i in range(len(numbers)):
         for j in range(i + 1, len(numbers)):
             if abs(numbers[i] - numbers[j]) < threshold:
                 return True
     return False
-```
 
 Example 2:
 Problem:
-```python
 def separate_paren_groups(paren_string: str) -> List[str]:
-    \"\"\" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to
-    separate those group into separate strings and return the list of those.
-    Separate groups are balanced (each open brace is properly closed) and not nested within each other
-    Ignore any spaces in the input string.
-    >>> separate_paren_groups('( ) (( )) (( )( ))')
-    ['()', '(())', '(()())']
-    \"\"\"
-```
-Implementation: Let's think step-by-step. I need to track the depth of parentheses and collect characters for each group. When depth returns to 0, I have a complete group.
-```python
+    Separate groups of nested parentheses into separate strings.
+
+Implementation: Let's think step-by-step. I need to track the depth of parentheses and collect characters for each group.
+
 def separate_paren_groups(paren_string: str) -> List[str]:
     result = []
     current_string = []
     current_depth = 0
-
     for c in paren_string:
         if c == '(':
             current_depth += 1
@@ -593,228 +588,183 @@ def separate_paren_groups(paren_string: str) -> List[str]:
         elif c == ')':
             current_depth -= 1
             current_string.append(c)
-
             if current_depth == 0:
                 result.append(''.join(current_string))
                 current_string = []
-
     return result
-```
 
 Example 3:
 Problem:
-```python
 def truncate_number(number: float) -> float:
-    \"\"\" Given a positive floating point number, it can be decomposed into
-    and integer part (largest integer smaller than given number) and decimals
-    (leftover part always smaller than 1).
-
     Return the decimal part of the number.
-    >>> truncate_number(3.5)
-    0.5
-    \"\"\"
-```
-Implementation: Let's think step-by-step. I need to extract just the decimal part of a number. The modulo operator with 1.0 will give me the fractional part.
-```python
+
+Implementation:
 def truncate_number(number: float) -> float:
     return number % 1.0
-```
 
 Now implement the following function using the same approach:"""
 
-# Zero-Shot System Prompt 
-SYS_MSG_CODE_GENERATOR_ZERO_SHOT = """You are an expert Python programmer that is good at implementing functions based on their specifications."""
 
 
+# ============================================================================
+# DUAL-AGENT - Code Generation
+# ============================================================================
 
-# ========================================================================================
-# DUAL-AGENT CODE GENERATION CONFIGURATION
-# ========================================================================================
+SYS_MSG_PROGRAMMER = """You are an expert Python programmer. Your code always passes all test cases on the first try."""
 
-# Programmer Agent Prompt
-SYS_MSG_PROGRAMMER = """You are an expert programmer responsible for implementing Python functions based on specifications.
+SYS_MSG_CODE_REVIEWER = """You are a code reviewer. Only point out actual bugs that cause test failures. Ignore style issues."""
 
-Your responsibilities include:
-1. Analyzing function requirements from prompts and docstrings
-2. Implementing clean, efficient, and correct Python code
-3. Following Python best practices and conventions
-4. Revising code based on feedback from code reviewers
+# Turn 1: Generate (copy single-agent few-shot approach)
+DUAL_AGENT_TASK_CODE_GENERATION = """You are an expert Python programmer that is good at implementing functions based on their specifications.
 
-When generating code:
-- Read the function signature and docstring carefully
-- Implement the logic to meet all specified requirements
-- Handle edge cases appropriately
-- Write readable and maintainable code
-- Ensure correct return types and function behavior
+Here are examples of correct implementations:
 
-When revising code based on feedback:
-- Address all concerns raised by the code reviewer
-- Improve code quality, correctness, and efficiency
-- Maintain the original function requirements while fixing issues"""
+Example 1:
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    for i in range(len(numbers)):
+        for j in range(i + 1, len(numbers)):
+            if abs(numbers[i] - numbers[j]) < threshold:
+                return True
+    return False
 
-# Code Reviewer Agent Prompt
-SYS_MSG_CODE_REVIEWER = """You are a senior code reviewer responsible for analyzing code quality and correctness.
+Example 2:
+def separate_paren_groups(paren_string: str) -> List[str]:
+    result = []
+    current_string = []
+    current_depth = 0
+    for c in paren_string:
+        if c == '(':
+            current_depth += 1
+            current_string.append(c)
+        elif c == ')':
+            current_depth -= 1
+            current_string.append(c)
+            if current_depth == 0:
+                result.append(''.join(current_string))
+                current_string = []
+    return result
 
-Your responsibilities include:
-1. Reviewing Python code for correctness and quality
-2. Identifying potential bugs, edge cases, and improvements
-3. Providing constructive feedback to programmers
-4. Making final assessments on code quality
-
-When reviewing code:
-- Check if the code meets the specified requirements
-- Verify correct handling of edge cases
-- Assess code readability and maintainability
-- Look for potential runtime errors or logical issues
-- Consider efficiency and best practices
-
-When providing feedback:
-- Be specific about issues found
-- Suggest concrete improvements
-- Explain why changes are needed
-- Balance constructive criticism with positive observations
-
-When making final assessments, provide your evaluation as JSON format:
-{
-    "code_quality": "good/acceptable/poor",
-    "reasoning": "detailed explanation of your assessment",
-    "passes_requirements": true/false
-}"""
-
-# Dual Agent Task Messages
-
-# Task 1: Initial code generation
-DUAL_AGENT_TASK_CODE_GENERATION = """Please implement the following Python function:
+Now implement:
 
 {prompt}
 
-Provide a complete, working implementation that meets all the requirements specified in the docstring. Focus on correctness and clarity."""
+Provide complete working code."""
 
-# Task 2: Code review and feedback
-DUAL_AGENT_TASK_CODE_REVIEW = """Please review the following code implementation:
+# Turn 2: Review (ONLY if there's an obvious bug)
+DUAL_AGENT_TASK_CODE_REVIEW = """Check this code for bugs that would cause test failures:
 
-Original Requirements:
-{prompt}
-
-Generated Code:
 {generated_code}
 
-Provide detailed feedback on:
-1. Correctness - Does it meet the requirements?
-2. Edge cases - Are they handled properly?
-3. Code quality - Is it readable and well-structured?
-4. Potential improvements or issues
+If the code is correct, output: CORRECT
+If there are bugs, list them in one line."""
 
-Be specific about any problems you identify and suggest concrete improvements."""
-
-# Task 3: Code revision based on feedback
-DUAL_AGENT_TASK_CODE_REVISION = """Based on the code review feedback, please revise your implementation:
-
-Original Requirements:
-{original_prompt}
-
-Your Initial Code:
+# Turn 3: Revise (only if bugs found)
+DUAL_AGENT_TASK_CODE_REVISION = """Original code:
 {initial_code}
 
-Reviewer Feedback:
-{feedback}
+Bug: {feedback}
 
-Please provide an improved version of the code that addresses the feedback while maintaining correctness and meeting all original requirements."""
+Provide corrected code."""
 
-# Task 4: Final assessment
-DUAL_AGENT_TASK_FINAL_ASSESSMENT = """Please make your final assessment of the revised code:
-
-Original Requirements:
-{original_prompt}
-
-Revised Code:
-{revised_code}
-
-Your Previous Feedback:
-{previous_feedback}
-
-Provide your final evaluation as JSON format:
-{{
-    "code_quality": "good/acceptable/poor",
-    "reasoning": "detailed explanation of your final assessment",
-    "passes_requirements": true/false,
-    "improvements_made": "summary of improvements from the revision"
-}}
-
-Consider whether the programmer adequately addressed your feedback and if the code now meets the requirements."""
+# Turn 4: Skip assessment
+DUAL_AGENT_TASK_FINAL_ASSESSMENT = """APPROVED"""
 
 
+# ================================================================================
+# MULTI-AGENT CODE GENERATION 
+# ================================================================================
 
+SYS_MSG_REQUIREMENTS_ANALYST = """You are an expert Python programmer analyzing requirements.
 
-# ========================================================================================
-# MULTI-AGENT CODE GENERATION CONFIGURATION 
-# ========================================================================================
+Example correct implementations:
 
-# Requirements Analyst Agent Prompt
-SYS_MSG_REQUIREMENTS_ANALYST = """You are the Requirements Analyst.
-Analyze the given programming requirements and identify all potential implementation challenges and considerations.
-Provide your output as a JSON array. Each element in the array represents one identified challenge and should include:
-• "challenge": A short name or description of the implementation challenge.
-• "reason": A detailed explanation of why this is challenging and what issues might arise.
-• "impact": The potential consequences if this challenge is not properly addressed.
+Example 1 - Comparing pairs:
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    for i in range(len(numbers)):
+        for j in range(i + 1, len(numbers)):
+            if abs(numbers[i] - numbers[j]) < threshold:
+                return True
+    return False
 
-Analyze the requirements thoroughly for common implementation issues like edge cases, input validation, algorithm complexity, data structure choices, error handling, and other programming considerations."""
+Example 2 - Tracking depth:
+def separate_paren_groups(paren_string: str) -> List[str]:
+    result = []
+    current_string = []
+    current_depth = 0
+    for c in paren_string:
+        if c == '(':
+            current_depth += 1
+            current_string.append(c)
+        elif c == ')':
+            current_depth -= 1
+            current_string.append(c)
+            if current_depth == 0:
+                result.append(''.join(current_string))
+                current_string = []
+    return result
 
-# Programmer Agent Prompt  
-SYS_MSG_PROGRAMMER_MA = """You are the Programmer responsible for implementing the code.
-The Requirements Analyst has presented a JSON array of potential implementation challenges. You must respond by addressing each concern and providing a complete implementation. Your tone should be professional and confident, as if you are presenting your solution to a technical review panel.
+Briefly identify the key approach (max 2 lines)."""
 
-For each identified challenge, produce a corresponding JSON object with the following fields:
-• "challenge": The same name/description from the Requirements Analyst's entry.
-• "approach": 'addressed' if you handle this concern in your implementation, or 'acknowledged' if you recognize it but explain why it's not applicable.
-• "solution": A concise explanation of how your implementation addresses this challenge.
+SYS_MSG_PROGRAMMER_MA = """You are an expert Python programmer. Provide clean, working implementations.
 
-Then provide your complete Python function implementation that addresses all concerns."""
+Rules:
+- Write simple, direct code
+- Follow the exact function signature
+- Handle edge cases mentioned in docstring
+- Use straightforward approaches
+- Provide only the code implementation"""
 
-# Moderator Agent Prompt
-SYS_MSG_MODERATOR_CODE = """You are the Moderator, and your role is to provide a neutral summary.
-After reviewing both the Requirements Analyst's identified challenges and the Programmer's responses, provide a JSON object with two fields:
-• "analyst_summary": A concise summary of the implementation challenges and concerns presented by the Requirements Analyst.
-• "programmer_summary": A concise summary of the Programmer's approach and how they addressed the identified challenges."""
+SYS_MSG_MODERATOR_CODE = """You are a code reviewer checking for bugs that would cause test failures.
 
-# Review Board Agent Prompt
-SYS_MSG_REVIEW_BOARD_CODE = """You are the Review Board. After reviewing the Requirements Analyst's analysis and Programmer's response directly, produce a JSON array of assessments for each aspect of the implementation. Each object in the array should include:
-- "aspect": The implementation aspect being evaluated (e.g., "correctness", "edge_cases", "efficiency", "code_quality").
-- "decision": One of 'good', 'acceptable', 'needs_revision'.
-- "quality_score": A score from 1-10 for this aspect.
-- "recommendation": Suggest what should be done (e.g., 'approve', 'minor_revisions', 'major_revisions').
-- "reason": A brief explanation of your assessment, considering both the Requirements Analyst's concerns and Programmer's solutions."""
+Respond EXACTLY:
+- If code will pass all tests: "CODE LOOKS CORRECT"
+- If there are bugs: "BUG: [one-line description]"
 
-# Multi-Agent Task Messages
-MULTI_AGENT_TASK_REQUIREMENTS_ANALYST = "Analyze the following programming requirements for potential implementation challenges:\n\n{prompt}"
+Focus only on correctness, not style."""
 
-MULTI_AGENT_TASK_PROGRAMMER = """The Requirements Analyst identified these potential implementation challenges:
+SYS_MSG_REVIEW_BOARD_CODE = """You are a code fixer. Provide the corrected implementation based on the bug report."""
 
-{analyst_findings}
+# ================================================================================
+# TASK PROMPTS
+# ================================================================================
 
-Programming Requirements:
+MULTI_AGENT_TASK_REQUIREMENTS_ANALYST = """Analyze this problem:
+
 {prompt}
 
-Please address each challenge and provide your complete implementation."""
+Key approach (max 2 lines):"""
 
-MULTI_AGENT_TASK_MODERATOR_CODE = """Provide a neutral summary of this code generation discussion:
+MULTI_AGENT_TASK_PROGRAMMER = """Analysis: {analyst_findings}
 
-Requirements Analyst findings:
-{analyst_findings}
+Implement this function:
+{prompt}
 
-Programmer response:
-{programmer_response}"""
+Provide clean, working code:"""
 
-MULTI_AGENT_TASK_REVIEW_BOARD_CODE = """Review the following code generation process and make final assessments:
+MULTI_AGENT_TASK_MODERATOR_CODE = """Review this implementation for bugs:
 
-Moderator Summary:
+Problem:
+{prompt}
+
+Code:
+```python
+{programmer_response}
+
+
+Will this pass all test cases? Respond "CODE LOOKS CORRECT" or "BUG: [description]":"""
+MULTI_AGENT_TASK_REVIEW_BOARD_CODE = """Fix this code:
+Problem:
+{prompt}
+Original code:
+
+{programmer_response}
+
+Bug found:
 {moderator_summary}
+Provide corrected code:"""
 
-Original Requirements:
-{prompt}
 
-Requirements Analyst Analysis:
-{analyst_findings}
+
 
 Programmer Response:
 {programmer_response}"""
