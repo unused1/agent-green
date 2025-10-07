@@ -1,12 +1,12 @@
 import os
 import json
+import time
 import config
 from datetime import datetime
+from autogen import AssistantAgent
 from codecarbon import OfflineEmissionsTracker
-from code_evaluation import evaluate_and_save_code_generation, normalize_code_basic
-from agent_utils_vuln import create_agent
-from autogen.agentchat.conversable_agent import ConversableAgent
-from pathlib import Path
+import sys
+import subprocess
 
 # --- Configuration ---
 llm_config = config.LLM_CONFIG
@@ -14,304 +14,234 @@ DATASET_FILE = config.HUMANEVAL_DATASET
 RESULT_DIR = config.RESULT_DIR
 os.makedirs(RESULT_DIR, exist_ok=True)
 
-DESIGN = "DA-code-two"  # Dual Agent design
+DESIGN = "DA-code-gen"
 model = llm_config["config_list"][0]["model"].replace(":", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 exp_name = f"{DESIGN}_{model}_{timestamp}"
 
+print(f"Experiment: {exp_name}")
+print(f"Dataset: {DATASET_FILE}")
 
 # --- Agent Creation ---
-def create_code_generation_agents(llm_config):
-    """Create the two code generation agents"""
-    user_proxy = create_agent(
-        "conversable",
-        "user_proxy_agent",
-        llm_config,
-        sys_prompt="A human admin coordinating the code generation process.",
-        description="A proxy for human input coordinating the dual-agent code generation."
+def create_programmer_agent(llm_config, sys_prompt):
+    return AssistantAgent(
+        name="programmer",
+        system_message=sys_prompt,
+        llm_config=llm_config,
+        human_input_mode="NEVER",
     )
 
-    programmer = create_agent(
-        "assistant",
-        "programmer_agent",
-        llm_config,
-        sys_prompt=config.SYS_MSG_PROGRAMMER,
-        description="Generate and revise code based on requirements and feedback."
+def create_critic_agent(llm_config, sys_prompt):
+    return AssistantAgent(
+        name="critic",
+        system_message=sys_prompt,
+        llm_config=llm_config,
+        human_input_mode="NEVER",
     )
 
-    code_reviewer = create_agent(
-        "assistant", 
-        "code_reviewer_agent",
-        llm_config,
-        sys_prompt=config.SYS_MSG_CODE_REVIEWER,
-        description="Review code for correctness, provide feedback, and make final assessment."
-    )
-
-    return user_proxy, programmer, code_reviewer
-
-
-# --- Data Loading ---
-def load_code_generation_dataset(file_path):
-    """Load code generation dataset from JSONL file"""
-    samples = []
-    with open(file_path, 'r', encoding='utf-8') as f:
+# --- Data Reading ---
+def read_code_generation_data(dataset_path):
+    code_problems = []
+    with open(dataset_path, 'r', encoding='utf-8') as f:
         for line in f:
-            try:
-                data = json.loads(line.strip())
-                if 'prompt' in data and 'task_id' in data:
-                    sample = {
-                        'task_id': data['task_id'],
-                        'prompt': data['prompt'],
-                        'entry_point': data.get('entry_point', ''),
-                        'canonical_solution': data.get('canonical_solution', ''),
-                        'test': data.get('test', ''),
-                        'docstring': data.get('docstring', '')
-                    }
-                    samples.append(sample)
-            except json.JSONDecodeError:
-                continue
-    return samples
+            code_problems.append(json.loads(line.strip()))
+    return code_problems
 
-
-# --- Result Helpers ---
-def initialize_results_files(exp_name, result_dir):
-    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
-    csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
-    energy_file = os.path.join(result_dir, f"{exp_name}_energy_tracking.json")
-
-    with open(csv_file, 'w') as f:
-        f.write("task_id,prompt,entry_point,canonical_solution,test,"
-                "generated_solution,final_code_quality,reasoning,"
-                "iteration_1_feedback,iteration_2_decision\n")
-
-    return detailed_file, csv_file, energy_file
-
-
-def append_result(result, detailed_file, csv_file):
-    """Append a result to both JSONL and CSV"""
-    with open(detailed_file, 'a') as f:
-        f.write(json.dumps(result) + '\n')
-
-    with open(csv_file, 'a') as f:
-        def escape(field):
-            if field is None:
-                return ""
-            field_str = str(field)
-            if ',' in field_str or '"' in field_str or '\n' in field_str:
-                return '"' + field_str.replace('"', '""') + '"'
-            return field_str
-
-        row = [
-            escape(result['task_id']),
-            escape(result['prompt']),
-            escape(result['entry_point']),
-            escape(result['canonical_solution']),
-            escape(result['test']),
-            escape(result['generated_solution']),
-            escape(result.get('final_code_quality', '')),
-            escape(result['reasoning']),
-            escape(result.get('iteration_1_feedback', '')),
-            escape(result.get('iteration_2_decision', ''))
-        ]
-        f.write(','.join(row) + '\n')
-
-
+# --- Code Extraction ---
 def extract_code_from_response(response_text):
-    """Extract Python code from response"""
+    """Extract code from <ANS></ANS> tags"""
+    import re
+    
     if not response_text:
         return ""
     
-    # Look for code blocks
-    if "```python" in response_text:
-        parts = response_text.split("```python")
-        if len(parts) > 1:
-            code_part = parts[1].split("```")[0]
-            return code_part.strip()
-    elif "```" in response_text:
-        parts = response_text.split("```")
-        if len(parts) >= 3:
-            code_part = parts[1]
-            return code_part.strip()
+    response_text = re.sub(r'<think>.*?</think>', '', response_text, flags=re.DOTALL)
+    response_text = response_text.strip()
     
-    # Try to find function definition
-    lines = response_text.split('\n')
-    code_lines = []
-    found_def = False
+    ans_pattern = r'<ANS>(.*?)</ANS>'
+    matches = re.findall(ans_pattern, response_text, re.DOTALL | re.IGNORECASE)
     
-    for line in lines:
-        if line.strip().startswith('def '):
-            found_def = True
-        
-        if found_def:
-            code_lines.append(line)
+    if matches:
+        code = matches[0].strip().strip('`').strip()
+        if code.startswith('python\n'):
+            code = code[7:]
+        elif code.startswith('python '):
+            code = code[7:]
+        return code
     
-    if code_lines:
-        return '\n'.join(code_lines).strip()
+    ans_start = re.search(r'<ANS>', response_text, re.IGNORECASE)
+    if ans_start:
+        code = response_text[ans_start.end():]
+        ans_end = re.search(r'</ANS>', code, re.IGNORECASE)
+        if ans_end:
+            code = code[:ans_end.start()]
+        code = code.strip().strip('`').strip()
+        if code.startswith('python\n'):
+            code = code[7:]
+        elif code.startswith('python '):
+            code = code[7:]
+        return code
     
-    return response_text.strip()
+    return ""
 
-
-def extract_code_quality_assessment(reviewer_response):
-    """Parse code reviewer response for final assessment"""
-    try:
-        # Try to parse as JSON first
-        if reviewer_response.strip().startswith('{') or reviewer_response.strip().startswith('['):
-            assessment_data = json.loads(reviewer_response.strip())
-            if isinstance(assessment_data, dict):
-                quality = assessment_data.get('code_quality', 'unknown')
-                reasoning = assessment_data.get('reasoning', reviewer_response)
-            else:
-                quality = 'unknown'
-                reasoning = reviewer_response
-        else:
-            # Parse text-based response
-            text = reviewer_response.lower()
-            if any(keyword in text for keyword in ['excellent', 'good', 'correct', 'passes']):
-                quality = 'good'
-            elif any(keyword in text for keyword in ['poor', 'incorrect', 'fails', 'error']):
-                quality = 'poor'
-            else:
-                quality = 'acceptable'
-            reasoning = reviewer_response
-            
-        return quality, reasoning
-    except Exception as e:
-        print(f"Error parsing reviewer response: {e}")
-        return 'unknown', reviewer_response
-
-
-# --- Dual Agent Inference ---
-def run_dual_agent_inference_with_emissions(samples, llm_config, exp_name, result_dir):
-    detailed_file, csv_file, energy_file = initialize_results_files(exp_name, result_dir)
+# --- Dual-Agent Inference ---
+def run_inference_with_emissions(code_samples, llm_config, sys_msg_programmer, sys_msg_reviewer, exp_name, result_dir):
+    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
+    summary_file = os.path.join(result_dir, f"{exp_name}_summary.json")
+    
+    if os.path.exists(detailed_file):
+        os.remove(detailed_file)
+    
     tracker = OfflineEmissionsTracker(
         project_name=exp_name,
         output_dir=result_dir,
-        save_to_file=True,
-        country_iso_code="CAN"
+        country_iso_code="CAN",
+        save_to_file=True
     )
-
     tracker.start()
-
-    user_proxy, programmer, code_reviewer = create_code_generation_agents(llm_config)
-    results = []
-
+    
+    stats = {
+        'total_samples': len(code_samples),
+        'successful_extractions': 0,
+        'failed_extractions': 0,
+        'skipped_revision': 0,
+        'full_pipeline': 0
+    }
+    
     try:
-        for i, sample in enumerate(samples):
-            print(f"\n--- Processing sample {i+1}/{len(samples)} (task_id: {sample['task_id']}) ---")
-
-            # ITERATION 1: Initial code generation and review
-            print("Iteration 1: Code generation and initial review...")
+        programmer = create_programmer_agent(llm_config, sys_msg_programmer)
+        reviewer = create_critic_agent(llm_config, sys_msg_reviewer)
+        
+        for i, sample in enumerate(code_samples):
+            task_id = sample.get('task_id', f'sample_{i}')
+            print(f"\n{'='*60}")
+            print(f"Processing {i+1}/{len(code_samples)}: {task_id}")
+            print(f"{'='*60}")
             
-            # Programmer generates initial code
-            initial_code = user_proxy.initiate_chat(
-                recipient=programmer,
-                message=config.DUAL_AGENT_TASK_CODE_GENERATION.format(prompt=sample['prompt']),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
-
-            # Code reviewer provides feedback
-            feedback = user_proxy.initiate_chat(
-                recipient=code_reviewer,
-                message=config.DUAL_AGENT_TASK_CODE_REVIEW.format(
-                    prompt=sample['prompt'],
-                    generated_code=initial_code
-                ),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
-
-            # ITERATION 2: Code revision and final assessment
-            print("Iteration 2: Code revision and final assessment...")
+            problem_prompt = sample.get('prompt', '')
             
-            # Programmer revises based on feedback
-            revised_code = user_proxy.initiate_chat(
-                recipient=programmer,
-                message=config.DUAL_AGENT_TASK_CODE_REVISION.format(
-                    original_prompt=sample['prompt'],
+            # === TURN 1: Programmer generates initial code ===
+            print("Turn 1: Programmer generating code...")
+            gen_task = config.DUAL_AGENT_TASK_CODE_GENERATION.format(prompt=problem_prompt)
+            res1 = programmer.generate_reply(messages=[{"content": gen_task, "role": "user"}])
+            programmer_response = res1.get("content", "") if res1 else ""
+            initial_code = extract_code_from_response(programmer_response)
+            print(f"  Generated: {len(initial_code)} chars")
+            
+            # === TURN 2: Reviewer checks code ===
+            print("Turn 2: Reviewer checking...")
+            review_task = config.DUAL_AGENT_TASK_CODE_REVIEW.format(generated_code=initial_code)
+            res2 = reviewer.generate_reply(messages=[{"content": review_task, "role": "user"}])
+            review_feedback = res2.get("content", "") if res2 else ""
+            print(f"  Feedback: {review_feedback[:100]}")
+            
+            # === SKIP LOGIC ===
+            review_upper = review_feedback.upper()
+            code_approved = ("CORRECT" in review_upper or len(review_feedback.strip()) < 20)
+            
+            if code_approved:
+                print("  ✓ Code approved - skipping Turn 3")
+                final_code = initial_code
+                revision_response = "APPROVED - Skipped revision"
+                stats['skipped_revision'] += 1
+            else:
+                # === TURN 3: Programmer revises ===
+                print("Turn 3: Programmer revising...")
+                revision_task = config.DUAL_AGENT_TASK_CODE_REVISION.format(
                     initial_code=initial_code,
-                    feedback=feedback
-                ),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
-
-            # Code reviewer makes final assessment
-            final_assessment = user_proxy.initiate_chat(
-                recipient=code_reviewer,
-                message=config.DUAL_AGENT_TASK_FINAL_ASSESSMENT.format(
-                    original_prompt=sample['prompt'],
-                    revised_code=revised_code,
-                    previous_feedback=feedback
-                ),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
-
-            # Extract final code and quality assessment
-            final_code = extract_code_from_response(revised_code)
-            code_quality, reasoning = extract_code_quality_assessment(final_assessment)
-
+                    feedback=review_feedback,
+                    prompt=problem_prompt
+                )
+                res3 = programmer.generate_reply(messages=[{"content": revision_task, "role": "user"}])
+                revision_response = res3.get("content", "") if res3 else ""
+                final_code = extract_code_from_response(revision_response)
+                stats['full_pipeline'] += 1
+                print(f"  Revised: {len(final_code)} chars")
+            
+            # === Validate ===
+            if final_code and 'def' in final_code:
+                stats['successful_extractions'] += 1
+                print(f"  ✓ Valid code extracted")
+            else:
+                stats['failed_extractions'] += 1
+                print(f"  ✗ No valid function definition")
+            
+            # === Save ===
             result = {
-                'task_id': sample['task_id'],
-                'prompt': sample['prompt'],
-                'entry_point': sample['entry_point'],
-                'canonical_solution': sample['canonical_solution'],
-                'test': sample['test'],
+                'task_id': task_id,
+                'prompt': problem_prompt,
+                'entry_point': sample.get('entry_point', ''),
+                'canonical_solution': sample.get('canonical_solution', ''),
+                'test': sample.get('test', ''),
                 'generated_solution': final_code,
-                'final_code_quality': code_quality,
-                'reasoning': reasoning,
-                'dual_agent_conversation': {
-                    'iteration_1_initial_code': initial_code,
-                    'iteration_1_feedback': feedback,
-                    'iteration_2_revised_code': revised_code,
-                    'iteration_2_final_assessment': final_assessment
+                'conversation': {
+                    'programmer_response': programmer_response,
+                    'review_feedback': review_feedback,
+                    'revision_response': revision_response
                 },
-                'iteration_1_feedback': feedback,
-                'iteration_2_decision': final_assessment,
-                'session': 1,
-                'timestamp': datetime.now().isoformat()
+                'metadata': {
+                    'revision_skipped': code_approved,
+                    'timestamp': datetime.now().isoformat()
+                }
             }
-
-            append_result(result, detailed_file, csv_file)
-            results.append(result)
-
-            if (i + 1) % 5 == 0:
-                print(f"Progress saved: {i+1} samples")
-
+            
+            with open(detailed_file, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(result) + '\n')
+            
+            if (i + 1) % 10 == 0:
+                print(f"\n✓ Progress: {i + 1}/{len(code_samples)} | Success: {stats['successful_extractions']}")
+    
     finally:
         emissions = tracker.stop()
-        print(f"\nEmissions this run: {emissions:.6f} kg CO2")
+        stats['emissions_kg_co2'] = emissions
+        
+        print(f"\n{'='*60}")
+        print("DUAL-AGENT GENERATION COMPLETED")
+        print(f"{'='*60}")
+        print(f"Total: {stats['total_samples']}")
+        print(f"Success: {stats['successful_extractions']} ({stats['successful_extractions']/stats['total_samples']*100:.1f}%)")
+        print(f"Skipped Turn 3: {stats['skipped_revision']}")
+        print(f"Emissions: {emissions:.6f} kg CO2")
+        
+        with open(summary_file, 'w', encoding='utf-8') as f:
+            json.dump(stats, f, indent=2)
+    
+    return detailed_file
 
-    return results
-
-
-# --- Main Execution ---
+# --- Main ---
 def main():
-    print("Loading dataset...")
-    samples = load_code_generation_dataset(DATASET_FILE)
-    print(f"Loaded {len(samples)} samples")
-
-    print(f"Running {DESIGN} dual-agent code generation...")
-    results = run_dual_agent_inference_with_emissions(samples, llm_config, exp_name, RESULT_DIR)
-
-    predictions = [r['generated_solution'] for r in results]
-
+    print("\n" + "="*60)
+    print("DUAL-AGENT CODE GENERATION")
+    print("="*60)
+    
+    code_samples = read_code_generation_data(DATASET_FILE)
+    
+    detailed_file = run_inference_with_emissions(
+        code_samples,
+        llm_config,
+        config.SYS_MSG_PROGRAMMER,
+        config.SYS_MSG_CODE_REVIEWER,
+        exp_name,
+        RESULT_DIR
+    )
+    
+    print(f"\nResults saved to: {detailed_file}")
+    
+    # Evaluate
+    print("\n" + "="*60)
+    print("STARTING EVALUATION")
+    print("="*60)
+    
     try:
-        eval_results = evaluate_and_save_code_generation(
-            normalize_code_basic,
-            predictions,
-            DATASET_FILE,
-            exp_name
+        eval_result = subprocess.run(
+            ["python", "src/evaluate_code_generation.py", detailed_file],
+            capture_output=True,
+            text=True,
+            timeout=600
         )
-        print("Evaluation Results:", eval_results)
+        print(eval_result.stdout)
     except Exception as e:
-        print("Evaluation failed:", e)
-
-    print("\n=== FINAL SUMMARY ===")
-    print(f"Samples processed: {len(results)}")
-    print("Dual-agent code generation completed!")
-
+        print(f"Evaluation failed: {e}")
 
 if __name__ == "__main__":
     main()
