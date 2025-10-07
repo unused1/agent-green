@@ -528,29 +528,30 @@ Code Author Response:
 
 
 # ================================================================================
-# HumanEval CODE GENERATION
+# HumanEval CODE GENERATION 
 # ================================================================================
 
-
-
 # ================================================================================
-# Single Agent- CODE GENERATION 
+# Single Agent - CODE GENERATION 
 # ================================================================================
 
-SYS_MSG_CODE_GENERATOR_ZERO_SHOT = """You are an expert Python programmer that is good at implementing functions based on their specifications."""
+CODE_GENERATION_TASK_PROMPT = """You are a Python expert. 
 
-CODE_GENERATION_TASK_PROMPT = """Please analyze the following programming problem and implement the required function:
+Given the following programming problem:
 
 {prompt}
 
-Please provide your complete function implementation. Make sure to:
-- Follow the exact function signature
-- Implement the logic described in the docstring
-- Handle all specified requirements and edge cases
-- Return the correct data type
+Output ONLY the complete Python function implementation.
+Your entire output MUST be enclosed in <ANS> and </ANS> tags, like this:
 
-Let's think step-by-step.
-"""
+<ANS>
+def function_name(...):
+    ...
+</ANS>
+
+Do NOT output anything else."""
+
+
 
 SYS_MSG_CODE_GENERATOR_FEW_SHOT = """You are an expert Python programmer that is good at implementing functions based on their specifications.
 
@@ -561,7 +562,9 @@ Problem:
 def has_close_elements(numbers: List[float], threshold: float) -> bool:
     Check if in given list of numbers, are any two numbers closer to each other than given threshold.
 
-Implementation: Let's think step-by-step. I need to compare every pair of numbers in the list and check if their absolute difference is less than the threshold.
+Implementation:
+<ANS>
+from typing import List
 
 def has_close_elements(numbers: List[float], threshold: float) -> bool:
     for i in range(len(numbers)):
@@ -569,13 +572,16 @@ def has_close_elements(numbers: List[float], threshold: float) -> bool:
             if abs(numbers[i] - numbers[j]) < threshold:
                 return True
     return False
+</ANS>
 
 Example 2:
 Problem:
 def separate_paren_groups(paren_string: str) -> List[str]:
     Separate groups of nested parentheses into separate strings.
 
-Implementation: Let's think step-by-step. I need to track the depth of parentheses and collect characters for each group.
+Implementation:
+<ANS>
+from typing import List
 
 def separate_paren_groups(paren_string: str) -> List[str]:
     result = []
@@ -592,6 +598,7 @@ def separate_paren_groups(paren_string: str) -> List[str]:
                 result.append(''.join(current_string))
                 current_string = []
     return result
+</ANS>
 
 Example 3:
 Problem:
@@ -599,12 +606,16 @@ def truncate_number(number: float) -> float:
     Return the decimal part of the number.
 
 Implementation:
+<ANS>
 def truncate_number(number: float) -> float:
     return number % 1.0
+</ANS>
 
-Now implement the following function using the same approach:"""
+Now implement the following function:
 
+{prompt}
 
+# Complete the function implementation based on the provided docstring, and print only the completed function surrounded by <ANS> and </ANS>. Never print any extra explanations about how the code was generated."""
 
 # ============================================================================
 # DUAL-AGENT - Code Generation
@@ -614,20 +625,27 @@ SYS_MSG_PROGRAMMER = """You are an expert Python programmer. Your code always pa
 
 SYS_MSG_CODE_REVIEWER = """You are a code reviewer. Only point out actual bugs that cause test failures. Ignore style issues."""
 
-# Turn 1: Generate (copy single-agent few-shot approach)
+# Turn 1: Generate
 DUAL_AGENT_TASK_CODE_GENERATION = """You are an expert Python programmer that is good at implementing functions based on their specifications.
 
 Here are examples of correct implementations:
 
 Example 1:
+<ANS>
+from typing import List
+
 def has_close_elements(numbers: List[float], threshold: float) -> bool:
     for i in range(len(numbers)):
         for j in range(i + 1, len(numbers)):
             if abs(numbers[i] - numbers[j]) < threshold:
                 return True
     return False
+</ANS>
 
 Example 2:
+<ANS>
+from typing import List
+
 def separate_paren_groups(paren_string: str) -> List[str]:
     result = []
     current_string = []
@@ -643,14 +661,15 @@ def separate_paren_groups(paren_string: str) -> List[str]:
                 result.append(''.join(current_string))
                 current_string = []
     return result
+</ANS>
 
 Now implement:
 
 {prompt}
 
-Provide complete working code."""
+# Complete the function implementation based on the provided docstring, and print only the completed function surrounded by <ANS> and </ANS>. Never print any extra explanations about how the code was generated."""
 
-# Turn 2: Review (ONLY if there's an obvious bug)
+# Turn 2: Review
 DUAL_AGENT_TASK_CODE_REVIEW = """Check this code for bugs that would cause test failures:
 
 {generated_code}
@@ -658,17 +677,19 @@ DUAL_AGENT_TASK_CODE_REVIEW = """Check this code for bugs that would cause test 
 If the code is correct, output: CORRECT
 If there are bugs, list them in one line."""
 
-# Turn 3: Revise (only if bugs found)
+# Turn 3: Revise
 DUAL_AGENT_TASK_CODE_REVISION = """Original code:
 {initial_code}
 
 Bug: {feedback}
 
-Provide corrected code."""
+Problem:
+{prompt}
+
+# Complete the function implementation based on the provided docstring, and print only the completed function surrounded by <ANS> and </ANS>. Never print any extra explanations about how the code was generated."""
 
 # Turn 4: Skip assessment
 DUAL_AGENT_TASK_FINAL_ASSESSMENT = """APPROVED"""
-
 
 # ================================================================================
 # MULTI-AGENT CODE GENERATION 
@@ -679,14 +700,21 @@ SYS_MSG_REQUIREMENTS_ANALYST = """You are an expert Python programmer analyzing 
 Example correct implementations:
 
 Example 1 - Comparing pairs:
+<ANS>
+from typing import List
+
 def has_close_elements(numbers: List[float], threshold: float) -> bool:
     for i in range(len(numbers)):
         for j in range(i + 1, len(numbers)):
             if abs(numbers[i] - numbers[j]) < threshold:
                 return True
     return False
+</ANS>
 
 Example 2 - Tracking depth:
+<ANS>
+from typing import List
+
 def separate_paren_groups(paren_string: str) -> List[str]:
     result = []
     current_string = []
@@ -702,17 +730,11 @@ def separate_paren_groups(paren_string: str) -> List[str]:
                 result.append(''.join(current_string))
                 current_string = []
     return result
+</ANS>
 
 Briefly identify the key approach (max 2 lines)."""
 
-SYS_MSG_PROGRAMMER_MA = """You are an expert Python programmer. Provide clean, working implementations.
-
-Rules:
-- Write simple, direct code
-- Follow the exact function signature
-- Handle edge cases mentioned in docstring
-- Use straightforward approaches
-- Provide only the code implementation"""
+SYS_MSG_PROGRAMMER_MA = """You are an expert Python programmer. Provide clean, working implementations."""
 
 SYS_MSG_MODERATOR_CODE = """You are a code reviewer checking for bugs that would cause test failures.
 
@@ -739,7 +761,7 @@ MULTI_AGENT_TASK_PROGRAMMER = """Analysis: {analyst_findings}
 Implement this function:
 {prompt}
 
-Provide clean, working code:"""
+# Complete the function implementation based on the provided docstring, and print only the completed function surrounded by <ANS> and </ANS>. Never print any extra explanations about how the code was generated."""
 
 MULTI_AGENT_TASK_MODERATOR_CODE = """Review this implementation for bugs:
 
@@ -747,24 +769,21 @@ Problem:
 {prompt}
 
 Code:
-```python
 {programmer_response}
 
-
 Will this pass all test cases? Respond "CODE LOOKS CORRECT" or "BUG: [description]":"""
+
 MULTI_AGENT_TASK_REVIEW_BOARD_CODE = """Fix this code:
+
 Problem:
 {prompt}
-Original code:
 
+Original code:
 {programmer_response}
 
 Bug found:
 {moderator_summary}
-Provide corrected code:"""
+
+# Complete the function implementation based on the provided docstring, and print only the completed function surrounded by <ANS> and </ANS>. Never print any extra explanations about how the code was generated."""
 
 
-
-
-Programmer Response:
-{programmer_response}"""
