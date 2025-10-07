@@ -61,3 +61,19 @@ agent-green/
 3. Configure paths and settings in `config/` (for codecarbon) and `src/config.py` (for project folders, LLM configs, and prompts).
 4. Place your log files and ground truth templates in the `logs/` folder.
 5. Run the notebooks in `src/` to reproduce experiments and results.
+
+
+
+## How to run Vuln Detection scripts
+
+Single Agent Usage
+```
+python script/single_agent_vuln.py sa-few    # run with few-shot
+python script/single_agent_vuln.py sa-zero   # run with zero-shot
+
+```
+
+Multi Agent Usage
+```
+python script/multi_agent_vuln.py
+```
