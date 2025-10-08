@@ -15,7 +15,7 @@ DATASET_FILE = config.HUMANEVAL_DATASET
 RESULT_DIR = config.RESULT_DIR
 os.makedirs(RESULT_DIR, exist_ok=True)
 
-DESIGN = "MA-code-gen"
+DESIGN = "MA-optimized"
 model = llm_config["config_list"][0]["model"].replace(":", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 exp_name = f"{DESIGN}_{model}_{timestamp}"
@@ -82,51 +82,57 @@ def read_code_generation_data(dataset_path):
     return code_problems
 
 
-### code extraction ###
+# --- Helper Functions ---
 def extract_code_from_response(response_text):
-    """Extract code from <ANS></ANS> tags"""
-    import re
-    
+    """Extract Python code from model response, removing thinking blocks"""
     if not response_text:
         return ""
     
-    # Remove thinking blocks if present
+    # Remove <think> blocks
+    import re
     response_text = re.sub(r'<think>.*?</think>', '', response_text, flags=re.DOTALL)
     response_text = response_text.strip()
     
-    # Extract content between <ANS> and </ANS>
-    ans_pattern = r'<ANS>(.*?)</ANS>'
-    matches = re.findall(ans_pattern, response_text, re.DOTALL | re.IGNORECASE)
+    # Method 1: ```python blocks
+    if "```python" in response_text:
+        parts = response_text.split("```python")
+        if len(parts) > 1:
+            code = parts[1].split("```")[0]
+            return code.strip()
     
-    if matches:
-        code = matches[0].strip()
-        # Remove markdown backticks if present
-        code = code.strip('`').strip()
-        # If code starts with "python", remove it
-        if code.startswith('python\n'):
-            code = code[7:]
-        elif code.startswith('python '):
-            code = code[7:]
-        return code
+    # Method 2: ``` blocks
+    if "```" in response_text:
+        parts = response_text.split("```")
+        if len(parts) >= 3:
+            code = parts[1]
+            lines = code.split('\n')
+            if lines[0].strip() in ['python', 'py', 'json']:
+                code = '\n'.join(lines[1:])
+            return code.strip()
     
-    # Handle malformed tags - content after <ANS> without closing tag
-    ans_start = re.search(r'<ANS>', response_text, re.IGNORECASE)
-    if ans_start:
-        code = response_text[ans_start.end():]
-        # Try to find closing tag
-        ans_end = re.search(r'</ANS>', code, re.IGNORECASE)
-        if ans_end:
-            code = code[:ans_end.start()]
-        code = code.strip().strip('`').strip()
-        if code.startswith('python\n'):
-            code = code[7:]
-        elif code.startswith('python '):
-            code = code[7:]
-        return code
+    # Method 3: Extract from 'def' or 'from' to end
+    lines = response_text.split('\n')
+    code_lines = []
+    found_start = False
     
-    # If no ANS tags found, return empty
-    return ""
-
+    for line in lines:
+        stripped = line.strip()
+        
+        # Skip explanatory text
+        if not found_start and stripped.startswith(('To solve', 'The ', 'This ', 'Here', 'Note:', '**', '[', 'I ', 'First', 'Challenge', 'Wait,', 'Let', 'So ', 'Yes,', 'Okay')):
+            continue
+        
+        # Start collecting from code
+        if stripped.startswith(('def ', 'from ', 'import ', 'class ')):
+            found_start = True
+        
+        if found_start:
+            code_lines.append(line)
+    
+    if code_lines:
+        return '\n'.join(code_lines).strip()
+    
+    return response_text.strip()
 
 # --- With CodeCarbon Emissions Tracking ---
 def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir):
@@ -301,7 +307,7 @@ def main():
     
     try:
         eval_result = subprocess.run(
-            ["python", "src/evaluate_code_generation.py", detailed_file],
+            ["python", "evaluate_code_generation.py", detailed_file],
             capture_output=True,
             text=True,
             timeout=600
