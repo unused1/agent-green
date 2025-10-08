@@ -8,8 +8,9 @@ from evaluate import load
 
 os.environ["HF_ALLOW_CODE_EVAL"] = "1"
 
+
 def extract_code_from_prediction(prediction):
-    
+    """Extract actual Python code from prediction"""
     import re
     
     if not prediction:
@@ -17,48 +18,75 @@ def extract_code_from_prediction(prediction):
     
     prediction = str(prediction).strip()
     
-    # Remove <think> blocks
+    # Remove <think> blocks entirely
     prediction = re.sub(r'<think>.*?</think>', '', prediction, flags=re.DOTALL)
     
-    # Method 1: Extract content between <ANS> and </ANS>
-    ans_pattern = r'<ANS>(.*?)</ANS>'
-    matches = re.findall(ans_pattern, prediction, re.DOTALL | re.IGNORECASE)
+    # Remove <ANS> tags but keep content
+    prediction = prediction.replace("<ANS>", "").replace("</ANS>", "")
     
-    if matches:
-        code = matches[-1].strip()
-        code = code.strip('`').strip()
-        
-        if code.startswith('python\n'):
-            code = code[7:]
-        elif code.startswith('python '):
-            code = code[7:]
-        
+    # PRIORITY 1: Look for explicit code markers
+    if "=== CODE START ===" in prediction and "=== CODE END ===" in prediction:
+        start_idx = prediction.find("=== CODE START ===") + len("=== CODE START ===")
+        end_idx = prediction.find("=== CODE END ===")
+        code = prediction[start_idx:end_idx].strip()
         return code
     
-    # Method 2: Handle malformed tags
-    ans_start = re.search(r'<ANS>', prediction, re.IGNORECASE)
-    if ans_start:
-        code = prediction[ans_start.end():]
-        ans_end = re.search(r'</ANS>', code, re.IGNORECASE)
-        if ans_end:
-            code = code[:ans_end.start()]
-        
-        code = code.strip().strip('`').strip()
-        if code.startswith('python\n'):
-            code = code[7:]
-        elif code.startswith('python '):
-            code = code[7:]
-        
-        return code
+    # PRIORITY 2: Extract from markdown code blocks (get LAST one for multi-turn)
+    python_blocks = re.findall(r'```python\s*\n(.*?)\n```', prediction, re.DOTALL)
+    if python_blocks:
+        return python_blocks[-1].strip()  # Return LAST code block
     
-    # Method 3: No ANS tags - return empty
-    return ""
+    # Try generic code blocks
+    generic_blocks = re.findall(r'```\s*\n(.*?)\n```', prediction, re.DOTALL)
+    if generic_blocks:
+        # Filter for blocks that contain 'def ' (actual code, not JSON)
+        code_blocks = [block for block in generic_blocks if 'def ' in block]
+        if code_blocks:
+            return code_blocks[-1].strip()  # Return LAST code block
+    
+    # PRIORITY 3: Look for function definitions
+    func_match = re.search(r'((?:from|import).*?\n)?def\s+\w+.*', prediction, re.DOTALL)
+    if func_match:
+        code = func_match.group(0).strip()
+        # Remove trailing explanation text and stop markers
+        for marker in ['\n\n#', '\nNote:', '\nExplanation:', '\n###', '\nThis ', 
+                       '\nChallenge', '\nAPPROVED', '\nISSUES', '\n=== CODE END']:
+            if marker in code:
+                code = code[:code.index(marker)]
+        return code.strip()
+    
+    # PRIORITY 4: If no function found, try to clean up and return
+    lines = prediction.strip().split('\n')
+    code_lines = []
+    in_code = False
+    
+    for line in lines:
+        stripped = line.strip()
+        
+        # Skip explanation lines
+        if stripped.startswith(('To solve', 'The ', 'This ', '### ', '**', 'Here', 
+                               'Challenge', 'APPROVED', 'ISSUES', '===')):
+            if not in_code:
+                continue
+            else:
+                break  # Stop at explanation after code
+        
+        # Start collecting at function/import
+        if 'def ' in line or 'import ' in line or 'from ' in line:
+            in_code = True
+        
+        if in_code:
+            code_lines.append(line)
+    
+    return '\n'.join(code_lines).strip() if code_lines else prediction.strip()
 
 
 def evaluate_code_generation(results_file, k=[1]):
     """Evaluate code generation results"""
+    # Load the evaluation function
     code_eval = load("code_eval")
     
+    # Read results file
     data = []
     with open(results_file, 'r') as f:
         for line in f:
@@ -193,19 +221,26 @@ if __name__ == "__main__":
         print(f"Error: Results file not found: {results_file}")
         sys.exit(1)
     
+    # Extract model name from results file
     model_name = Path(results_file).stem
+    
     k_values = [1]
     
+    # Run evaluation
     print(f"Evaluating {results_file}...")
     pass_at_k, results, df = evaluate_code_generation(results_file, k=k_values)
     
+    # Print results
     print(f"\nResults for {model_name}:")
     print(f"Pass@1: {pass_at_k['pass@1']:.4f}")
     
+    # Add test oracle to dataframe
     df = copy_test_results_to_df(df, results)
     
+    # Save evaluation results
     json_file, txt_file = save_evaluation_results(results_file, pass_at_k, df, model_name)
     
+    # Also save detailed CSV with extracted code
     results_dir = Path(results_file).parent
     csv_file = results_dir / f"{model_name}_evaluated.csv"
     df.to_csv(csv_file, index=False)
