@@ -66,6 +66,13 @@ agent-green/
 
 ## How to run Vuln Detection scripts
 
+No Agent Usage 
+
+```
+python script/no_agent_vuln.py
+
+```
+
 Single Agent Usage
 ```
 python script/single_agent_vuln.py sa-few    # run with few-shot
@@ -73,7 +80,45 @@ python script/single_agent_vuln.py sa-zero   # run with zero-shot
 
 ```
 
+Dual Agent Usage 
+```
+python script/dual_agent_vuln.py
+
+```
+
 Multi Agent Usage
 ```
 python script/multi_agent_vuln.py
+
 ```
+
+
+
+## How to run Code Generation scripts
+
+No Agent Usage 
+
+```
+python script/no_agent_code_generation.py
+
+```
+
+Single Agent Usage
+```
+python script/single_agent_code_generation.py SA-few    # run with few-shot
+python script/single_agent_code_generation.py SA-zero   # run with zero-shot
+
+```
+
+Dual Agent Usage 
+```
+python script/dual_agent_code_generation.py
+
+```
+
+Multi Agent Usage
+```
+python script/multi_agent_code_generation.py
+
+```
+

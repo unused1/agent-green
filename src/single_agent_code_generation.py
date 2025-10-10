@@ -12,7 +12,7 @@ import subprocess
 llm_config = config.LLM_CONFIG
 task = config.CODE_GENERATION_TASK_PROMPT
 sys_prompt_few_shot = config.SYS_MSG_CODE_GENERATOR_FEW_SHOT
-sys_prompt_zero_shot = config.CODE_GENERATION_TASK_PROMPT #config.SYS_MSG_CODE_GENERATOR_ZERO_SHOT
+sys_prompt_zero_shot = config.SYS_MSG_CODE_GENERATOR_ZERO_SHOT
 
 DATASET_FILE = config.HUMANEVAL_DATASET
 RESULT_DIR = config.RESULT_DIR
@@ -59,58 +59,57 @@ print(f"Reading dataset from: {DATASET_FILE}")
 code_samples = read_code_generation_data(DATASET_FILE)
 print(f"Loaded {len(code_samples)} code samples")
 
-### code extraction ###
+# --- Helper Functions ---
 def extract_code_from_response(response_text):
-    """Extract code from <ANS></ANS> tags"""
-    import re
-    
+    """Extract Python code from model response"""
     if not response_text:
         return ""
     
-    # Remove thinking blocks if present
-    response_text = re.sub(r'<think>.*?</think>', '', response_text, flags=re.DOTALL)
     response_text = response_text.strip()
     
-    # Extract content between <ANS> and </ANS>
-    ans_pattern = r'<ANS>(.*?)</ANS>'
-    matches = re.findall(ans_pattern, response_text, re.DOTALL | re.IGNORECASE)
+    # Check for code blocks
+    if "```python" in response_text:
+        parts = response_text.split("```python")
+        if len(parts) > 1:
+            code_part = parts[1].split("```")[0]
+            return code_part.strip()
+    elif "```" in response_text:
+        parts = response_text.split("```")
+        if len(parts) >= 3:
+            code_part = parts[1]
+            return code_part.strip()
     
-    if matches:
-        code = matches[0].strip()
-        # Remove markdown backticks if present
-        code = code.strip('`').strip()
-        # If code starts with "python", remove it
-        if code.startswith('python\n'):
-            code = code[7:]
-        elif code.startswith('python '):
-            code = code[7:]
-        return code
+    # Find function definition
+    lines = response_text.split('\n')
+    code_lines = []
+    found_def = False
     
-    # Handle malformed tags - content after <ANS> without closing tag
-    ans_start = re.search(r'<ANS>', response_text, re.IGNORECASE)
-    if ans_start:
-        code = response_text[ans_start.end():]
-        # Try to find closing tag
-        ans_end = re.search(r'</ANS>', code, re.IGNORECASE)
-        if ans_end:
-            code = code[:ans_end.start()]
-        code = code.strip().strip('`').strip()
-        if code.startswith('python\n'):
-            code = code[7:]
-        elif code.startswith('python '):
-            code = code[7:]
-        return code
+    for line in lines:
+        stripped = line.strip()
+        
+        if stripped.startswith(('To solve', 'The ', 'This ', 'Here', 'Note:', '**')):
+            if not found_def:
+                continue
+            else:
+                break
+        
+        if stripped.startswith(('def ', 'from ', 'import ')):
+            found_def = True
+        
+        if found_def:
+            code_lines.append(line)
     
-    # If no ANS tags found, return empty
-    return ""
-
+    if code_lines:
+        return '\n'.join(code_lines).strip()
+    
+    return response_text.strip()
 
 # --- With CodeCarbon Emissions Tracking ---
 def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp_name, result_dir):
     """Run code generation with emissions tracking and incremental saving"""
     
     # Create the output file path
-    detailed_file = os.path.join(result_dir, f"{exp_name}-code-gen_detailed_results.jsonl")
+    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
     
     tracker = OfflineEmissionsTracker(
         project_name=exp_name, 
