@@ -19,11 +19,42 @@ HUMANEVAL_DATASET = f"{PROJECT_ROOT}/vuln_database/HumanEval.jsonl"
 
 
 
+# ========================================================================================
+# REASONING MODE CONFIGURATION
+# ========================================================================================
+
+# Toggle reasoning mode via environment variable
+ENABLE_REASONING = os.getenv('ENABLE_REASONING', 'false').lower() == 'true'
+
+# Model configurations for reasoning vs non-reasoning
+REASONING_MODEL = os.getenv('REASONING_MODEL', 'qwen3:4b-thinking')
+BASELINE_MODEL = os.getenv('BASELINE_MODEL', 'qwen3:4b')
+
+# Endpoints (for RunPod/vLLM deployment)
+REASONING_ENDPOINT = os.getenv('REASONING_ENDPOINT', os.getenv('OLLAMA_HOST', 'http://localhost:11434'))
+BASELINE_ENDPOINT = os.getenv('BASELINE_ENDPOINT', os.getenv('OLLAMA_HOST', 'http://localhost:11434'))
+
+# API Keys (for RunPod)
+REASONING_API_KEY = os.getenv('REASONING_API_KEY', '')
+BASELINE_API_KEY = os.getenv('BASELINE_API_KEY', '')
+
 # Model/LLM settings
 LLM_SERVICE = "ollama"
-LLM_MODEL = os.getenv('LLM_MODEL', 'qwen3:4b-thinking')
-OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
 TEMPERATURE = 0.0
+
+# Dynamic model selection based on reasoning mode
+if ENABLE_REASONING:
+    LLM_MODEL = REASONING_MODEL
+    OLLAMA_HOST = REASONING_ENDPOINT
+    API_KEY = REASONING_API_KEY
+else:
+    LLM_MODEL = BASELINE_MODEL
+    OLLAMA_HOST = BASELINE_ENDPOINT
+    API_KEY = BASELINE_API_KEY
+
+# Allow manual override via LLM_MODEL env var
+LLM_MODEL = os.getenv('LLM_MODEL', LLM_MODEL)
+OLLAMA_HOST = os.getenv('OLLAMA_HOST', OLLAMA_HOST)
 
 LLM_CONFIG = {
     "cache_seed": None,
@@ -39,6 +70,14 @@ LLM_CONFIG = {
     ],
     "temperature": TEMPERATURE
 }
+
+# Add API key to config if provided (for RunPod/vLLM)
+if API_KEY:
+    LLM_CONFIG["config_list"][0]["api_key"] = API_KEY
+
+print(f"[CONFIG] Reasoning mode: {'ENABLED' if ENABLE_REASONING else 'DISABLED'}")
+print(f"[CONFIG] Model: {LLM_MODEL}")
+print(f"[CONFIG] Endpoint: {OLLAMA_HOST}")
 
 
 TASK_PROMPT = """Look at the following log message and print the template corresponding to the log message:\n"""

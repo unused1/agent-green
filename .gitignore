@@ -36,5 +36,5 @@ tests/config.py
 output/
 plots/
 tests/
-
-
+docs/
+scripts/
