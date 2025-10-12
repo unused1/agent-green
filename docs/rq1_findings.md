@@ -43,7 +43,7 @@ This document presents findings from RQ1 experiments comparing the **Thinking mo
 - Recall: Thinking 24.09% vs Baseline 9.85% (+14.24 percentage points)
 - F1 Score: Thinking 33.16% vs Baseline 16.08% (+17.08 percentage points)
 
-**Key Finding**: Thinking model shows **2.1x higher F1 score** and significantly better recall (+14.24pp), but at the cost of 2.2x more energy.
+**Key Finding**: Thinking model shows **2.1x higher F1 score** and significantly better recall (+14.24pp), but at the cost of 4.39x more energy.
 
 **Zero-shot vs Few-shot**:
 - Baseline: Few-shot has higher precision (62.50% vs 50.91%) but lower recall (5.18% vs 14.51%)
@@ -154,7 +154,7 @@ We validate data consistency by comparing:
 **Summary**:
 - **Baseline average**: 0.134 kg CO2, 0.789 kWh (per experiment)
 - **Thinking average**: 0.589 kg CO2, 3.465 kWh (per experiment)
-- **Energy ratio**: Thinking uses **2.2x** more energy than Baseline (comparing averages)
+- **Energy ratio**: Thinking uses **4.39x** more energy than Baseline (comparing averages)
 
 ### 2.3 Hardware Component Breakdown
 
@@ -179,11 +179,11 @@ Energy consumption by component:
 ### 2.4 Energy Efficiency
 
 **Thinking Model Energy Cost**:
-- Average energy ratio: Thinking uses **2.2x** more energy than Baseline
+- Average energy ratio: Thinking uses **4.39x** more energy than Baseline
 - Per-sample cost:
-  - Baseline average: 0.000695 kg CO2 per sample (0.00409 kWh)
-  - Thinking average: 0.001534 kg CO2 per sample (0.00902 kWh)
-  - Increase: **2.2x higher** per sample
+  - Baseline average: 0.00070 kg CO2 per sample (0.00410 kWh)
+  - Thinking average: 0.00307 kg CO2 per sample (0.01804 kWh)
+  - Increase: **4.39x higher** per sample
 
 **Zero-shot vs Few-shot Comparison**:
 - Baseline: Few-shot uses 73% of zero-shot energy (more efficient)
@@ -194,7 +194,7 @@ Energy consumption by component:
 - Additional energy cost: +2.68 kWh per 384 samples for thinking mode (average)
 - F1 improvement: +17.08 percentage points
 - Efficiency: **0.16 kWh per percentage point F1 improvement**
-- Is the energy cost justified? Yes for high-stakes vulnerability detection where recall matters
+- Is the energy cost justified? Depends on use case - 4.39x energy for 2.1x F1 improvement
 
 ---
 
@@ -283,30 +283,30 @@ Energy consumption by component:
 
 ### 5.2 Energy (Confirmed Results)
 1. **GPU dominance**: GPU accounts for **43%** of total energy, single largest component
-2. **Thinking cost**: **2.2x higher** energy consumption than Baseline (comparing averages)
+2. **Thinking cost**: **4.39x higher** energy consumption than Baseline (comparing averages)
 3. **Absolute increase**: +0.455 kg CO2 per experiment (Thinking avg: 0.589 kg vs Baseline avg: 0.134 kg)
-4. **Per-sample cost**: Thinking uses 0.00154 kg CO2/sample vs Baseline 0.00070 kg CO2/sample
+4. **Per-sample cost**: Thinking uses 0.00307 kg CO2/sample vs Baseline 0.00070 kg CO2/sample
 5. **Data validation**: Perfect cross-validation (< 0.001% difference between sources)
 6. **Few-shot efficiency**: Few-shot is more energy-efficient than zero-shot for both models
 
 ### 5.3 Practical Implications
 1. **Energy-performance tradeoff analysis**:
-   - **Cost**: 2.2x more energy (2.68 kWh additional per 384 samples on average)
+   - **Cost**: 4.39x more energy (2.68 kWh additional per 384 samples on average)
    - **Benefit**: 2.1x higher F1 score (17.08 percentage points improvement)
    - **Efficiency**: ~0.16 kWh per percentage point F1 improvement
-   - **Verdict**: Favorable tradeoff for high-stakes vulnerability detection where recall matters
+   - **Verdict**: Tradeoff may be justified for high-stakes vulnerability detection where recall matters
 
 2. **Deployment considerations**:
-   - Thinking mode adds moderate inference cost:
-     - Energy: +0.00084 kg CO2 per sample (2.2x increase)
-     - Time: 3.4x longer execution (6.5 hours vs 1.9 hours average)
-     - Cost estimate: ~$0.27 per 1000 samples additional (at $0.10/kWh)
+   - Thinking mode adds significant inference cost:
+     - Energy: +0.00237 kg CO2 per sample (4.39x increase)
+     - Time: 4.4x longer execution (6.5 hours vs 1.5 hours average)
+     - Cost estimate: ~$0.45 per 1000 samples additional (at $0.10/kWh)
    - Best for: Critical security applications where missing vulnerabilities (FN) is costly
 
 3. **Environmental impact**:
-   - For 1 million samples: +0.84 metric tons CO2 for thinking mode
-   - Equivalent to: ~2,100 miles driven by average car
-   - Recommendation: Suitable for routine use in security-critical contexts
+   - For 1 million samples: +2.37 metric tons CO2 for thinking mode
+   - Equivalent to: ~5,900 miles driven by average car
+   - Recommendation: Use selectively, not as default for all code scanning
 
 4. **Use case recommendations**:
    - **Use Thinking mode**: High-value targets, security-critical code, zero-day detection

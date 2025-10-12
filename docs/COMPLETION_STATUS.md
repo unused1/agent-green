@@ -77,10 +77,10 @@
 
 | Metric | Baseline Avg | Thinking Avg | Ratio |
 |---|---|---|---|
-| CO2 per experiment (kg) | 0.134 | 0.589 | 2.2x |
-| Energy per experiment (kWh) | 0.789 | 3.465 | 2.2x |
-| Per sample (kg CO2) | 0.000695 | 0.001534 | 2.2x |
-| Avg duration (hours) | 1.49 | 6.54 | 4.4x |
+| CO2 per experiment (kg) | 0.134 | 0.589 | 4.39x |
+| Energy per experiment (kWh) | 0.789 | 3.465 | 4.39x |
+| Per sample (kg CO2) | 0.00070 | 0.00307 | 4.39x |
+| Avg duration (hours) | 1.49 | 6.54 | 4.39x |
 
 ### Hardware Breakdown
 
@@ -105,7 +105,7 @@ All experiments: ✓ PERFECT MATCH (< 0.001% difference)
 4. **Best configuration**: Thinking Zero-shot (F1: 39.19%)
 
 ### Energy
-5. **Thinking mode has 2.2x energy cost** compared to Baseline (comparing averages)
+5. **Thinking mode has 4.39x energy cost** compared to Baseline
 6. **GPU is the dominant component** (43% of total energy)
 7. **Energy-performance tradeoff**: 0.16 kWh per percentage point F1 improvement
 8. **Data validation successful** - two independent sources match perfectly
@@ -178,13 +178,13 @@ All experiments: ✓ PERFECT MATCH (< 0.001% difference)
 
 ## 📝 Paper-Ready Findings
 
-**Main Result**: Thinking mode achieves 2.1x higher F1 score at 2.2x energy cost
+**Main Result**: Thinking mode achieves 2.1x higher F1 score but at 4.39x energy cost
 
-**Key Trade-off**: 0.16 kWh per percentage point F1 improvement (favorable tradeoff)
+**Key Trade-off**: 0.16 kWh per percentage point F1 improvement
 
 **Recommendation**:
-- Use Thinking Zero-shot for high-stakes vulnerability detection (best F1: 39.19%)
-- Use Baseline for routine/large-scale scanning (lower energy footprint)
+- Use Thinking Zero-shot for high-stakes vulnerability detection
+- Use Baseline for routine/large-scale scanning
 - Avoid Few-shot prompting (no benefit, wastes energy)
 
 ---
