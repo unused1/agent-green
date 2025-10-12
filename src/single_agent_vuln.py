@@ -40,7 +40,7 @@ else:
 print(f"Running with design: {DESIGN}")
 
 
-model = llm_config["config_list"][0]["model"].replace(":", "-")
+model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 project_name = DESIGN.capitalize()
 exp_name = f"{project_name}_{model}_{timestamp}"
@@ -133,21 +133,62 @@ def load_vulnerability_dataset(file_path):
     return samples
 
 # --- Initialize Results Files ---
-def initialize_results_files(exp_name, result_dir):
-    """Initialize result files for incremental saving"""
-    
+def find_most_recent_results(result_dir, design, model):
+    """Find the most recent result files for this design/model combination"""
+    import glob
+    pattern = f"{design.capitalize()}_{model}_*_detailed_results.jsonl"
+    matching_files = glob.glob(os.path.join(result_dir, pattern))
+
+    if matching_files:
+        # Sort by modification time, get most recent
+        most_recent = max(matching_files, key=os.path.getmtime)
+        # Extract the base name (without _detailed_results.jsonl)
+        base_name = os.path.basename(most_recent).replace('_detailed_results.jsonl', '')
+        print(f"[RESUME] Found existing results: {most_recent}")
+        print(f"[RESUME] Will continue from where it left off")
+        return base_name
+    return None
+
+def initialize_results_files(exp_name, result_dir, design, model):
+    """Initialize result files for incremental saving, or resume existing"""
+
+    skip_next_sample = False
+
+    # Check if we should resume from an existing run
+    existing_base = find_most_recent_results(result_dir, design, model)
+    if existing_base:
+        # Prompt user to decide whether to resume
+        print(f"\n[FOUND] Existing experiment: {existing_base}")
+        print("Options:")
+        print("  1. Resume from last completed sample (continue normally)")
+        print("  2. Skip the next sample and mark as failed (if it's problematic)")
+        print("  3. Start a fresh new experiment")
+
+        response = input("\nEnter choice (1/2/3): ").strip()
+
+        if response == '1':
+            exp_name = existing_base
+            print(f"[RESUME] Continuing with experiment: {exp_name}")
+        elif response == '2':
+            exp_name = existing_base
+            skip_next_sample = True
+            print(f"[RESUME] Will skip the next problematic sample and mark as FAILED")
+        else:
+            print(f"[NEW] Starting fresh experiment: {exp_name}")
+
     # Initialize detailed results JSON file
     detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
-    
-    # Initialize CSV file with headers
+
+    # Initialize CSV file with headers (only if new file)
     csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
-    with open(csv_file, 'w') as f:
-        f.write("idx,project,commit_id,project_url,commit_url,commit_message,ground_truth,vuln,reasoning,cwe,cve,cve_desc\n")
-    
+    if not os.path.exists(csv_file):
+        with open(csv_file, 'w') as f:
+            f.write("idx,project,commit_id,project_url,commit_url,commit_message,ground_truth,vuln,reasoning,cwe,cve,cve_desc,error\n")
+
     # Initialize energy tracking file
     energy_file = os.path.join(result_dir, f"{exp_name}_energy_tracking.json")
-    
-    return detailed_file, csv_file, energy_file
+
+    return detailed_file, csv_file, energy_file, skip_next_sample
 
 # --- Save Templates (following original pattern) ---
 def save_templates(vulnerability_predictions, llm_config, design, result_dir):
@@ -157,7 +198,7 @@ def save_templates(vulnerability_predictions, llm_config, design, result_dir):
     predictions = [r['vuln'] for r in vulnerability_predictions]
     
     # Save predictions in simple format (similar to original save_templates)
-    model = llm_config["config_list"][0]["model"].replace(":", "-")
+    model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     
     predictions_file = os.path.join(result_dir, f"{design}_{model}_{timestamp}_predictions.json")
@@ -221,7 +262,8 @@ def append_result(result, detailed_file, csv_file):
             escape_csv_field(result['reasoning']),
             escape_csv_field(result['cwe']),
             escape_csv_field(result['cve']),
-            escape_csv_field(result['cve_desc'])
+            escape_csv_field(result['cve_desc']),
+            escape_csv_field(result.get('error', ''))  # Add error field (empty if no error)
         ]
         f.write(','.join(row) + '\n')
 
@@ -238,45 +280,86 @@ def load_existing_results(detailed_file):
     return results
 
 # --- With CodeCarbon Emissions Tracking (following original pattern) ---
-def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerability_detector, task, exp_name, result_dir):
+def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerability_detector, task, exp_name, result_dir, design, model):
     """Run vulnerability detection with emissions tracking and incremental saving"""
-    
-    # Initialize result files
-    detailed_file, csv_file, energy_file = initialize_results_files(exp_name, result_dir)
-    
+
+    # Initialize result files (will resume from existing if found)
+    detailed_file, csv_file, energy_file, skip_next_sample = initialize_results_files(exp_name, result_dir, design, model)
+
     # Load existing results and energy data if any (for resuming interrupted runs)
     existing_results = load_existing_results(detailed_file)
     energy_data = load_existing_energy(energy_file)
     processed_indices = {r['idx'] for r in existing_results}
-    
+
     # Filter out already processed samples
     remaining_samples = [s for s in code_samples if s['idx'] not in processed_indices]
+
+    # If user chose to skip the next sample, mark it as failed and remove from queue
+    if skip_next_sample and remaining_samples:
+        skip_sample = remaining_samples[0]
+        print(f"[SKIP] Marking sample {skip_sample['idx']} as FAILED and skipping")
+
+        # Create failed result
+        failed_result = {
+            'idx': skip_sample['idx'],
+            'project': skip_sample['project'],
+            'commit_id': skip_sample['commit_id'],
+            'project_url': skip_sample['project_url'],
+            'commit_url': skip_sample['commit_url'],
+            'commit_message': skip_sample['commit_message'],
+            'ground_truth': skip_sample['target'],
+            'cwe': skip_sample['cwe'],
+            'cve': skip_sample['cve'],
+            'cve_desc': skip_sample['cve_desc'],
+            'vuln': 0,
+            'reasoning': 'SKIPPED: Sample manually skipped by user (likely problematic/stuck)',
+            'error': 'skipped'
+        }
+
+        # Save the skipped sample
+        append_result(failed_result, detailed_file, csv_file)
+        existing_results.append(failed_result)
+
+        # Remove from remaining samples
+        remaining_samples = remaining_samples[1:]
+        print(f"[SKIP] Continuing with {len(remaining_samples)} remaining samples")
     
     if len(remaining_samples) < len(code_samples):
         print(f"Resuming from {len(existing_results)} existing results")
         print(f"Processing remaining {len(remaining_samples)} samples")
-        print(f"Previous energy consumption: {energy_data['total_emissions']:.6f} kg CO2")
+        if config.ENABLE_CODECARBON:
+            print(f"Previous energy consumption: {energy_data['total_emissions']:.6f} kg CO2")
     
     # Start new emissions tracking session
     session_start_time = datetime.now().isoformat()
-    tracker = OfflineEmissionsTracker(
-        project_name=f"{exp_name}_session_{energy_data['sessions'] + 1}", 
-        output_dir=result_dir, 
-        country_iso_code="CAN",
-        save_to_file=True
-    )
-    tracker.start()
+
+    # CodeCarbon energy tracking based on ENABLE_CODECARBON flag
+    if not config.ENABLE_CODECARBON:
+        print("[INFO] CodeCarbon disabled (set ENABLE_CODECARBON=true in .env to enable)")
+        tracker = None
+    else:
+        # Use separate output directories based on reasoning mode AND experiment design
+        # to avoid conflicts when running multiple experiments in parallel
+        reasoning_suffix = "thinking" if config.ENABLE_REASONING else "baseline"
+        codecarbon_dir = os.path.join(result_dir, f"codecarbon_{reasoning_suffix}_{design.lower()}")
+        os.makedirs(codecarbon_dir, exist_ok=True)
+
+        tracker = OfflineEmissionsTracker(
+            project_name=f"{exp_name}_session_{energy_data['sessions'] + 1}",
+            output_dir=codecarbon_dir,
+            country_iso_code="CAN",
+            save_to_file=True
+        )
+        tracker.start()
+        print(f"[INFO] CodeCarbon output directory: {codecarbon_dir}")
     
     try:
         vulnerability_detector = create_vulnerability_detector_agent(llm_config, sys_prompt_vulnerability_detector)
-        
+
         for i, sample in enumerate(remaining_samples):
             print(f"Processing sample {i+1}/{len(remaining_samples)} (idx: {sample['idx']})")
-            
-            # Use format to insert function code into prompt template
-            content = task.format(func=sample['func'])
-            res = vulnerability_detector.generate_reply(messages=[{"content": content, "role": "user"}])
-            
+            print(f"[TIP] Press Ctrl+C to stop. You can resume later and skip problematic samples.")
+
             # Initialize result with original metadata
             result = {
                 'idx': sample['idx'],
@@ -290,22 +373,76 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
                 'cve': sample['cve'],
                 'cve_desc': sample['cve_desc']
             }
+
+            # Try to process with timeout handling
+            try:
+                # Use format to insert function code into prompt template
+                content = task.format(func=sample['func'])
+                res = vulnerability_detector.generate_reply(messages=[{"content": content, "role": "user"}])
+            except TimeoutError as e:
+                print(f"[TIMEOUT] Sample {sample['idx']} timed out after 5 minutes - marking as failed and continuing")
+                result['vuln'] = 0  # Default to not vulnerable
+                result['reasoning'] = f"TIMEOUT: Request timed out after 5 minutes. {str(e)}"
+                result['error'] = 'timeout'
+                # Append result and continue to next sample
+                append_result(result, detailed_file, csv_file)
+                existing_results.append(result)
+                continue
+            except Exception as e:
+                print(f"[ERROR] Sample {sample['idx']} failed with error: {str(e)}")
+                result['vuln'] = 0  # Default to not vulnerable
+                result['reasoning'] = f"ERROR: {str(e)}"
+                result['error'] = 'exception'
+                # Append result and continue to next sample
+                append_result(result, detailed_file, csv_file)
+                existing_results.append(result)
+                continue
             
             # Updated response parsing for YES/NO format
             if res is not None and "content" in res:
                 response_text = res["content"].strip()
                 response_lower = response_text.lower()
-                
-                # Parse YES/NO responses (looking for your specific format)
-                if "(1) yes" in response_lower or "yes:" in response_lower or "vulnerability detected" in response_lower:
-                    result['vuln'] = 1
-                    result['reasoning'] = response_text
-                elif "(2) no" in response_lower or "no:" in response_lower or "no security vulnerability" in response_lower:
-                    result['vuln'] = 0
+
+                # Parse YES/NO responses - check multiple formats
+                # Format 1: "Final Answer: YES/NO" (from zero-shot system prompt)
+                # Format 2: "(1) YES" or "(2) NO" (from task prompt)
+                # Format 3: Keywords like "vulnerability detected"
+
+                is_vulnerable = None  # Track if we found a clear answer
+
+                # Check for explicit YES answers
+                if any(pattern in response_lower for pattern in [
+                    'final answer: yes',
+                    'final answer: (1) yes',
+                    '(1) yes',
+                    'answer: yes',
+                    'vulnerability detected'
+                ]):
+                    is_vulnerable = True
+
+                # Check for explicit NO answers
+                elif any(pattern in response_lower for pattern in [
+                    'final answer: no',
+                    'final answer: (2) no',
+                    '(2) no',
+                    'answer: no',
+                    'no security vulnerability'
+                ]):
+                    is_vulnerable = False
+
+                # If we found a clear answer, use it
+                if is_vulnerable is not None:
+                    result['vuln'] = 1 if is_vulnerable else 0
                     result['reasoning'] = response_text
                 else:
-                    # Fallback: look for more general keywords
-                    if any(keyword in response_lower for keyword in ['vulnerable', 'security risk', 'exploit', 'attack']):
+                    # Fallback: look for vulnerability keywords (less reliable)
+                    if any(keyword in response_lower for keyword in [
+                        'is vulnerable',
+                        'contains a vulnerability',
+                        'security vulnerability exists',
+                        'security risk',
+                        'can be exploited'
+                    ]):
                         result['vuln'] = 1
                     else:
                         result['vuln'] = 0  # Default to not vulnerable for unclear responses
@@ -325,32 +462,44 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
             # Optional: Save progress every 10 samples
             if (i + 1) % 10 == 0:
                 print(f"Progress saved: {i + 1} samples processed")
-                
+
+    except KeyboardInterrupt:
+        print(f"\n\n[INTERRUPTED] Experiment stopped by user (Ctrl+C)")
+        print(f"[SAVED] Progress has been saved. {len(existing_results)} samples completed.")
+        print(f"[RESUME] Run the script again and choose option 1 to continue, or option 2 to skip the problematic sample.")
+        # Re-raise to ensure proper cleanup
+        raise
+
     finally:
-        # Stop current tracking session
-        session_emissions = tracker.stop()
+        # Stop current tracking session (if enabled)
         session_end_time = datetime.now().isoformat()
-        
-        # Update energy data with this session
-        energy_data['total_emissions'] += session_emissions
-        energy_data['sessions'] += 1
-        energy_data['session_history'].append({
-            'session': energy_data['sessions'],
-            'start_time': session_start_time,
-            'end_time': session_end_time,
-            'samples_processed': len(remaining_samples),
-            'session_emissions': session_emissions
-        })
-        
-        # Save updated energy data
-        save_energy_data(energy_data, energy_file)
-        
-        print(f"Current session emissions: {session_emissions:.6f} kg CO2")
-        print(f"Total cumulative emissions: {energy_data['total_emissions']:.6f} kg CO2")
+
+        if tracker is not None:
+            session_emissions = tracker.stop()
+
+            # Update energy data with this session
+            energy_data['total_emissions'] += session_emissions
+            energy_data['sessions'] += 1
+            energy_data['session_history'].append({
+                'session': energy_data['sessions'],
+                'start_time': session_start_time,
+                'end_time': session_end_time,
+                'samples_processed': len(remaining_samples),
+                'session_emissions': session_emissions
+            })
+
+            # Save updated energy data
+            save_energy_data(energy_data, energy_file)
+
+            print(f"Current session emissions: {session_emissions:.6f} kg CO2")
+            print(f"Total cumulative emissions: {energy_data['total_emissions']:.6f} kg CO2")
+        else:
+            print("[INFO] Energy tracking skipped (API-based inference)")
     
     print(f"Detailed results saved incrementally to: {detailed_file}")
     print(f"CSV results saved incrementally to: {csv_file}")
-    print(f"Energy tracking saved to: {energy_file}")
+    if config.ENABLE_CODECARBON:
+        print(f"Energy tracking saved to: {energy_file}")
     
     return existing_results, energy_data
 
@@ -390,15 +539,17 @@ def main():
             sys_prompt = sys_prompt_zero_shot_vulnerability_detector
             
         print(f"Running {DESIGN} vulnerability detection...")
-        
+
         # Run vulnerability detection (following original pattern)
         vulnerability_predictions, energy_data = run_inference_with_emissions(
-            code_samples, 
-            llm_config, 
-            sys_prompt, 
-            task, 
-            exp_name, 
-            RESULT_DIR
+            code_samples,
+            llm_config,
+            sys_prompt,
+            task,
+            exp_name,
+            RESULT_DIR,
+            DESIGN,
+            model
         )
         
         # Save templates (following original pattern)
@@ -429,15 +580,22 @@ def main():
             print(f"Prediction distribution: {Counter(predictions)}")
             print(f"Ground truth distribution: {Counter(ground_truth)}")
         
-        # Print final energy consumption summary
-        print(f"\n=== FINAL ENERGY CONSUMPTION SUMMARY ===")
-        print(f"Total emissions across all sessions: {energy_data['total_emissions']:.6f} kg CO2")
-        print(f"Number of sessions: {energy_data['sessions']}")
-        print(f"Total samples processed: {len(vulnerability_predictions)}")
-        print(f"Average emissions per sample: {energy_data['total_emissions']/len(vulnerability_predictions):.8f} kg CO2")
+        # Print final energy consumption summary (if tracking was enabled)
+        if config.ENABLE_CODECARBON:
+            print(f"\n=== FINAL ENERGY CONSUMPTION SUMMARY ===")
+            print(f"Total emissions across all sessions: {energy_data['total_emissions']:.6f} kg CO2")
+            print(f"Number of sessions: {energy_data['sessions']}")
+            print(f"Total samples processed: {len(vulnerability_predictions)}")
+            print(f"Average emissions per sample: {energy_data['total_emissions']/len(vulnerability_predictions):.8f} kg CO2")
+        else:
+            print(f"\n[INFO] Energy tracking was disabled")
         
         print("Vulnerability detection completed successfully!")
-        
+
+    except KeyboardInterrupt:
+        print("\n[EXIT] Experiment interrupted. Progress saved.")
+        sys.exit(0)
+
     finally:
     #     # Stop ollama server if we started it (following original pattern)
     #     if ollama_started and proc:

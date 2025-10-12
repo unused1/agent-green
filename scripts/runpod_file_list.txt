@@ -1,0 +1,19 @@
+# Minimal files needed on RunPod for experiments
+
+# Core experiment scripts
+src/single_agent_vuln.py
+src/config.py
+src/vuln_evaluation.py
+
+# Dataset
+vuln_database/VulTrial_386_samples_balanced.jsonl
+vuln_database/VulTrial_10_samples_test.jsonl
+
+# Configuration
+.env
+
+# Requirements
+requirements.txt
+
+# Execution scripts
+scripts/run_rq1_vuln_runpod.sh

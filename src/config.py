@@ -14,7 +14,7 @@ RESULT_DIR = f'{PROJECT_ROOT}/results'
 PLOT_DIR = f'{PROJECT_ROOT}/plots'
 
 
-VULN_DATASET = f"{PROJECT_ROOT}/vuln_database/VulTrial_386_samples_balanced.jsonl"
+VULN_DATASET = os.getenv('VULN_DATASET', f"{PROJECT_ROOT}/vuln_database/VulTrial_386_samples_balanced.jsonl")
 HUMANEVAL_DATASET = f"{PROJECT_ROOT}/vuln_database/HumanEval.jsonl"
 
 
@@ -38,8 +38,13 @@ BASELINE_ENDPOINT = os.getenv('BASELINE_ENDPOINT', os.getenv('OLLAMA_HOST', 'htt
 REASONING_API_KEY = os.getenv('REASONING_API_KEY', '')
 BASELINE_API_KEY = os.getenv('BASELINE_API_KEY', '')
 
+# RunPod/vLLM Toggle
+USE_RUNPOD = os.getenv('USE_RUNPOD', 'false').lower() == 'true'
+
+# Energy Tracking Toggle
+ENABLE_CODECARBON = os.getenv('ENABLE_CODECARBON', 'false').lower() == 'true'
+
 # Model/LLM settings
-LLM_SERVICE = "ollama"
 TEMPERATURE = 0.0
 
 # Dynamic model selection based on reasoning mode
@@ -56,28 +61,52 @@ else:
 LLM_MODEL = os.getenv('LLM_MODEL', LLM_MODEL)
 OLLAMA_HOST = os.getenv('OLLAMA_HOST', OLLAMA_HOST)
 
+# Determine API type based on USE_RUNPOD flag
+if USE_RUNPOD:
+    LLM_SERVICE = "openai"  # vLLM uses OpenAI-compatible API
+    # For vLLM, ensure endpoint ends with /v1
+    if not OLLAMA_HOST.endswith('/v1'):
+        OLLAMA_HOST = OLLAMA_HOST.rstrip('/') + '/v1'
+else:
+    LLM_SERVICE = "ollama"  # Local Ollama
+
 LLM_CONFIG = {
     "cache_seed": None,
     "config_list": [
         {
             "model": LLM_MODEL,
-            "api_base": OLLAMA_HOST,
+            "base_url": OLLAMA_HOST if USE_RUNPOD else None,  # Use base_url for OpenAI-compatible APIs
+            "api_base": OLLAMA_HOST if not USE_RUNPOD else None,  # Use api_base for Ollama
             "api_type": LLM_SERVICE,
-            "num_ctx": 131072,
+            "num_ctx": 131072 if not USE_RUNPOD else None,  # vLLM handles context automatically
             #"num_ctx": 8192,
             #"num_ctx": 16384,
+            "timeout": 300,  # 5 minutes timeout (log as failed and move to next)
         }
     ],
-    "temperature": TEMPERATURE
+    "temperature": TEMPERATURE,
 }
 
-# Add API key to config if provided (for RunPod/vLLM)
-if API_KEY:
+# Remove num_ctx for vLLM/OpenAI API (not supported)
+if USE_RUNPOD and "num_ctx" in LLM_CONFIG["config_list"][0]:
+    del LLM_CONFIG["config_list"][0]["num_ctx"]
+
+# Remove None parameters to avoid passing them to API
+LLM_CONFIG["config_list"][0] = {k: v for k, v in LLM_CONFIG["config_list"][0].items() if v is not None}
+
+# Add API key to config (required by AutoGen, even for vLLM which doesn't need auth)
+if USE_RUNPOD:
+    # vLLM doesn't require authentication, but AutoGen's OpenAI client needs an api_key
+    LLM_CONFIG["config_list"][0]["api_key"] = API_KEY if API_KEY else "dummy-key"
+elif API_KEY:
     LLM_CONFIG["config_list"][0]["api_key"] = API_KEY
 
+print(f"[CONFIG] Backend: {'RunPod/vLLM' if USE_RUNPOD else 'Local Ollama'}")
 print(f"[CONFIG] Reasoning mode: {'ENABLED' if ENABLE_REASONING else 'DISABLED'}")
 print(f"[CONFIG] Model: {LLM_MODEL}")
 print(f"[CONFIG] Endpoint: {OLLAMA_HOST}")
+print(f"[CONFIG] API Type: {LLM_SERVICE}")
+print(f"[CONFIG] Timeout: {LLM_CONFIG['config_list'][0].get('timeout', 120)} seconds")
 
 
 TASK_PROMPT = """Look at the following log message and print the template corresponding to the log message:\n"""
