@@ -1,5 +1,8 @@
 # Qwen3-4B Setup on Mars Server (SMU SCIS) for RQ1 Experiments
 
+> **⚠️ Note**: This guide uses `huabengtan` as the username, which is the author's assigned SMU account.
+> **Replace all instances of `huabengtan` with your own SMU username** throughout this document.
+
 ## Server Specifications
 - **Server**: Mars (10.193.104.137)
 - **GPUs**: 4 x NVIDIA RTX A5000 (24GB VRAM each, 96GB total)
@@ -679,8 +682,4 @@ docker stop qwen-thinking qwen-baseline
 scp -r huabengtan@10.193.104.137:/mnt/hdd2/huabengtan/agent-green/results ./results_mars
 ```
 
----
 
-**Ready to run your RQ1 experiments on Mars!** 🚀
-
-For questions or issues, refer to the troubleshooting section or check the similar setup at `docs/gemma_mars_setup.md`.

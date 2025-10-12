@@ -1,5 +1,8 @@
 # Mars Docker Workflow - Running Experiments Inside Containers
 
+> **⚠️ Note**: This guide uses `huabengtan` as the username, which is the author's assigned SMU account.
+> **Replace all instances of `huabengtan` with your own SMU username** throughout this document.
+
 ## Problem
 
 When vLLM runs in Docker and experiments run on host:
@@ -233,7 +236,7 @@ scp -r huabengtan@10.193.104.137:/mnt/hdd2/huabengtan/agent-green/results ./resu
 
 ## Alternative: Skip CodeCarbon, Use nvidia-smi
 
-If CodeCarbon still doesn't work in Docker, you can manually track GPU power:
+If CodeCarbon still doesn't work in Docker, can manually track GPU power:
 
 ### Create Monitoring Script
 
