@@ -125,7 +125,45 @@ All classification reports and metrics files based on these results.
 
 The duplicate entries in the dataset do **not** invalidate the experimental results. All experiments correctly processed 384 unique samples, and metrics are accurate. However, reporting should explicitly state the actual sample count (384) for transparency and reproducibility.
 
+## Problematic Sample: 344242
+
+### Discovery
+During the Qwen RQ1 experiments, sample 344242 consistently failed to complete with the thinking model across multiple attempts.
+
+### Sample Details
+- **Index**: 344242
+- **Project**: lua
+- **CVE**: CVE-2022-33099
+- **CWE**: CWE-787
+- **Ground Truth**: 0 (Not Vulnerable)
+- **Function**: `luaG_runerror` (error handling code)
+- **Code Length**: 531 characters
+
+### Failure Pattern
+| Experiment       | Model Type | Attempt | Result                           |
+|------------------|------------|---------|----------------------------------|
+| SA-few           | Thinking   | 1       | Manually skipped (stuck)         |
+| SA-few           | Thinking   | Retry   | Completed after 5.5 minutes      |
+| SA-zero          | Thinking   | 1       | Manually skipped (stuck)         |
+| SA-zero          | Thinking   | Retry   | Stuck for 14+ minutes, killed    |
+| SA-zero          | Baseline   | 1       | ✓ Completed successfully         |
+| SA-few           | Baseline   | 1       | ✓ Completed successfully         |
+
+### Analysis
+- **Baseline model**: Processes this sample without issues
+- **Thinking model**: Consistently gets stuck or takes excessive time (5-14+ minutes)
+- **Root cause**: Likely recursive reasoning about error-handling code
+- **Note**: The function is literally about handling recursive errors, which may trigger problematic reasoning loops in the thinking model
+
+### Impact on Results
+- **Thinking SA-zero**: 383/384 samples (99.74% completion rate)
+- **Thinking SA-few**: 384/384 samples (100% after extended retry)
+- **Baseline models**: 384/384 samples (100%)
+
+### Decision
+Sample 344242 is marked as "skipped" in Thinking SA-zero experiment and accepted as a known limitation of the thinking model when processing recursive error-handling code.
+
 ---
 
-**Last Updated**: 2025-10-11
+**Last Updated**: 2025-10-12
 **Verified By**: Automated analysis during Qwen RQ1 experiments

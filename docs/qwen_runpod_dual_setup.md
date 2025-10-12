@@ -529,7 +529,3 @@ scp -r /Users/shanetan/Documents/Code_Projects/SMU/SCIS_EngD/agent-green/results
 
 **Total Time**: 10 min setup + 0.7-4 hours experiments = **1-4.5 hours**
 **Total Cost**: **$4-9 (H100)** or **$3-6 (A40)**
-
----
-
-*Last Updated: January 2025*

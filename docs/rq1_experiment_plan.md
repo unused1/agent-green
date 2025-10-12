@@ -814,9 +814,4 @@ python src/visualization_rq1.py
 python src/statistical_analysis_rq1.py
 ```
 
----
 
-**Document Version:** 1.0
-**Last Updated:** 2025-01-13
-**Author:** Agent Green Research Team
-**Status:** Draft for Review
