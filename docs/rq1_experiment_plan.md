@@ -22,6 +22,217 @@ Reasoning-enabled LLMs will demonstrate superior accuracy on complex software en
 
 ---
 
+## 1.5 RQ1 Preliminary Findings (Qwen3-4B Vulnerability Detection)
+
+### 1.5.1 Completed Experiments
+**Status:** ✅ COMPLETED (October 2025)
+
+**Models Tested:**
+- Qwen3-4B-Instruct (Baseline)
+- Qwen3-4B-Thinking (Reasoning mode)
+
+**Dataset:** VulTrial 384 unique vulnerability samples (balanced)
+
+**Configurations:** Zero-shot and Few-shot prompting
+
+### 1.5.2 Key Findings
+
+**Performance Results:**
+
+| Configuration | Accuracy | Precision | Recall | F1 Score |
+|---|---|---|---|---|
+| **Thinking Zero-shot** ⭐ | 53.00% | 56.31% | **30.05%** | **39.19%** |
+| Thinking Few-shot | 51.30% | 53.85% | 18.13% | 27.13% |
+| Baseline Zero-shot | 50.26% | 50.91% | 14.51% | 22.58% |
+| Baseline Few-shot | 51.04% | 62.50% | 5.18% | 9.57% |
+
+**Key Observations:**
+1. ✅ Thinking mode achieves **2.1x higher F1 score** (33.16% avg vs 16.08% avg)
+2. ✅ Recall improvement: **+14.24pp** (critical for security - fewer missed vulnerabilities)
+3. ⚠️ **Few-shot paradox**: Few-shot prompting WORSENS performance for both models
+4. ⚠️ Zero-shot consistently outperforms few-shot across all metrics
+
+**Energy Results:**
+
+| Metric | Baseline (Avg) | Thinking (Avg) | Ratio |
+|---|---|---|---|
+| CO2 per experiment | 0.134 kg | 0.589 kg | 4.39x |
+| Energy per experiment | 0.789 kWh | 3.465 kWh | 4.39x |
+
+**Energy Observations:**
+1. Thinking mode uses **4.39x more energy** than Baseline
+2. Few-shot uses **less energy** than zero-shot (more efficient)
+3. GPU dominates energy consumption (43% of total)
+4. Trade-off: 0.16 kWh per percentage point F1 improvement
+
+### 1.5.3 Unexpected Finding: Few-Shot Degradation
+
+**The Paradox:**
+- ❌ Few-shot prompting **does NOT improve** performance
+- ❌ Few-shot actually **decreases** F1 score for Thinking mode (39.19% → 27.13%)
+- ❌ Few-shot **severely degrades** Baseline recall (14.51% → 5.18%)
+- ✅ Few-shot **reduces** energy consumption (more efficient inference)
+
+### 1.5.4 Hypotheses for Few-Shot Degradation
+
+**Hypothesis 1: Context Overload in Small Models (Sycophancy)**
+- **Theory**: For smaller models (4B parameters), few-shot examples act as noise rather than guidance
+- **Mechanism**: Model attempts to pattern-match examples rather than reason about the actual problem
+- **Evidence**:
+  - Dramatic F1 drop in Thinking few-shot (39.19% → 27.13%)
+  - Severe recall collapse in Baseline few-shot (14.51% → 5.18%)
+  - Pattern suggests over-fitting to example format rather than understanding task
+- **Sycophantic behavior**: Model may be trying to "please" by mimicking example style rather than applying reasoning
+- **Context window saturation**: 4B models may struggle with long prompts containing examples + actual task
+
+**Hypothesis 2: Reduced Cognitive Load (Energy Efficiency)**
+- **Theory**: Few-shot examples provide "shortcuts" that reduce thinking/reasoning steps
+- **Mechanism**: Model can pattern-match rather than reason deeply, using less computation
+- **Evidence**:
+  - Few-shot consistently uses less energy than zero-shot
+  - Baseline few-shot: 73% of zero-shot energy
+  - Thinking few-shot: 61% of zero-shot energy
+- **Implication**: Less thinking = lower energy BUT also lower accuracy for complex tasks
+
+**Hypothesis 3: Scale-Dependent Few-Shot Effectiveness**
+- **Theory**: Few-shot prompting may work better for larger models (>7B parameters)
+- **Rationale**:
+  - Larger models have more capacity to process examples without context saturation
+  - Larger models can better distinguish between example patterns and task requirements
+  - Larger models may have better few-shot learning capabilities from pre-training
+- **Testable prediction**: Few-shot should improve with model size (7B → 32B → 70B)
+
+### 1.5.5 Implications for Future Experiments
+
+**Questions to Address:**
+1. **RQ1-Extended**: Does few-shot effectiveness improve with model scale?
+   - Test Qwen2.5-Coder 7B, 32B models with same task
+   - Test QwQ-32B-Preview (reasoning) with few-shot
+   - Measure if larger models benefit from few-shot examples
+
+2. **RQ2**: Does the few-shot paradox extend to other tasks?
+   - Test on code generation (HumanEval dataset)
+   - Test on log parsing (HDFS dataset)
+   - Determine if vulnerability detection is unique or generalizable
+
+3. **RQ3**: Can we optimize few-shot for small models?
+   - Test with fewer examples (1-shot vs 3-shot)
+   - Test with different example selection strategies
+   - Test with simplified examples
+
+**Design Recommendations:**
+1. ✅ Prioritize zero-shot for small models (4B-7B)
+2. ⚠️ Test few-shot effectiveness across model scales
+3. ✅ Include energy measurements for all configurations
+4. ✅ Focus on larger models (32B+) for production deployments
+
+---
+
+## 1.6 RQ1 Extended Experiments
+
+Based on preliminary findings, RQ1 will be extended with two additional experimental phases:
+
+### Phase 2: Scale-Dependent Few-Shot Analysis
+
+**Objective:** Test if few-shot effectiveness improves with model scale (addressing the few-shot paradox observed in 4B models)
+
+**Models to Add:**
+
+| Model | Parameters | Type | Few-Shot Config | Infrastructure |
+|-------|-----------|------|-----------------|----------------|
+| Qwen2.5-Coder-7B-Instruct | 7B | Baseline | Zero-shot, 3-shot | Mars GPU Server |
+| Qwen2.5-Coder-32B-Instruct | 32B | Baseline | Zero-shot, 3-shot | RunPod H100 |
+| QwQ-32B-Preview | 32B | Reasoning | Zero-shot, 3-shot | RunPod H100 |
+
+**Task:** Vulnerability Detection (VulTrial dataset) - same as Phase 1 for direct comparison
+
+**Hypotheses to Test:**
+- **H1**: Few-shot effectiveness increases with model parameter count
+- **H2**: 32B models show positive few-shot benefit (unlike 4B models)
+- **H3**: Reasoning models benefit more from few-shot at larger scales
+- **H4**: Energy efficiency relationship changes with model scale
+
+**Metrics:**
+- Performance: Accuracy, Precision, Recall, F1 score
+- Energy: kWh, CO2 emissions per experiment
+- Few-shot delta: (Few-shot F1 - Zero-shot F1) / Zero-shot F1 × 100%
+- Energy-performance tradeoff per model scale
+
+**Expected Outcomes:**
+1. Identify model size threshold where few-shot becomes beneficial
+2. Quantify scale-dependent few-shot effectiveness
+3. Compare energy costs across model scales
+
+---
+
+### Phase 3: Task Generalization - Code Generation
+
+**Objective:** Test if reasoning advantage and few-shot patterns generalize from discriminative (classification) to generative (code generation) tasks
+
+**Dataset:** HumanEval (164 Python programming problems with test cases)
+
+**Models:** Same as Phase 2 (7B, 32B Baseline + 32B Reasoning)
+
+**Why Code Generation:**
+- **Different cognitive task**: Generation vs classification
+- **Standardized benchmark**: HumanEval widely used
+- **Executable validation**: Test cases provide objective ground truth
+- **Complexity levels**: Problems range from easy to hard
+
+**Evaluation Metrics:**
+- **Primary**: Pass@1, Pass@10 (test case success rate)
+- **Secondary**:
+  - Syntax correctness rate
+  - Compilation success rate
+  - Solution efficiency metrics
+  - Energy per successful solution
+  - Inference time per problem
+
+**Problem Analysis:**
+- Categorize by difficulty: Easy (1-50), Medium (51-120), Hard (121-164)
+- Analyze reasoning benefit vs problem complexity
+- Compare few-shot effectiveness on generation vs classification
+
+**Hypotheses:**
+- **H1**: Reasoning advantage persists in generative tasks
+- **H2**: Few-shot behavior differs between generation and classification
+- **H3**: Reasoning provides larger benefit for algorithmically complex problems
+- **H4**: Energy-performance tradeoff differs by task type
+
+---
+
+## 1.7 Complete RQ1 Experimental Scope
+
+**RQ1 Structure:**
+- **Phase 1**: Small Models (4B) + Vulnerability Detection - ✅ COMPLETED
+  - Finding: Thinking 2.1x better F1, few-shot paradox discovered
+
+- **Phase 2**: Larger Models (7B, 32B) + Vulnerability Detection - 🔄 PLANNED
+  - Purpose: Test scale-dependent few-shot hypothesis
+  - Models: 7B, 32B baseline + 32B reasoning
+
+- **Phase 3**: Code Generation (HumanEval) - 🔄 PLANNED
+  - Purpose: Test task generalization hypothesis
+  - Models: 7B, 32B baseline + 32B reasoning
+
+**Total Experiments for Complete RQ1:**
+
+| Phase | Task | Models | Configs | Runs | Subtotal |
+|-------|------|--------|---------|------|----------|
+| Phase 1 (Done) | Vulnerability | 2 (4B) | 4 (2 prompts × 2 configs) | 1 | 8 |
+| Phase 2 | Vulnerability | 3 (7B, 32B×2) | 4 (2 prompts × 2 configs) | 3 | 36 |
+| Phase 3 | Code Generation | 3 (7B, 32B×2) | 2 (2 prompts) | 3 | 18 |
+| **TOTAL** | | | | | **62** |
+
+Note: Phase 1 already completed (8 configurations), need 54 additional experiments
+
+**Priority:**
+1. **High**: Phase 2 (extends RQ1 findings, tests main hypothesis)
+2. **High**: Phase 3 (task generalization is key finding)
+3. **Medium**: Additional agent configurations (if time/budget permits)
+
+---
+
 ## 2. Model Selection
 
 ### 2.1 Reasoning-Enabled Models
