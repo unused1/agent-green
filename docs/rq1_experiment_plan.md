@@ -138,30 +138,42 @@ Based on preliminary findings, RQ1 will be extended with two additional experime
 
 **Models to Add:**
 
-| Model | Parameters | Type | Few-Shot Config | Infrastructure |
-|-------|-----------|------|-----------------|----------------|
-| Qwen2.5-Coder-7B-Instruct | 7B | Baseline | Zero-shot, 3-shot | Mars GPU Server |
-| Qwen2.5-Coder-32B-Instruct | 32B | Baseline | Zero-shot, 3-shot | RunPod H100 |
-| QwQ-32B-Preview | 32B | Reasoning | Zero-shot, 3-shot | RunPod H100 |
+| Model | Total Params | Active Params | Type | Few-Shot Config | Infrastructure | VRAM Required |
+|-------|-------------|---------------|------|-----------------|----------------|---------------|
+| Qwen3-30B-A3B-Instruct-2507 | 30B | 3B (MoE) | Baseline | Zero-shot, 3-shot | Mars GPU Server (A5000 24GB) or RunPod A6000 | ~30 GB |
+| Qwen3-30B-A3B-Thinking-2507 | 30B | 3B (MoE) | Reasoning | Zero-shot, 3-shot | Mars GPU Server (A5000 24GB) or RunPod A6000 | ~30 GB |
+| Qwen3-235B-A22B-Instruct-2507 | 235B | 22B (MoE) | Baseline | Zero-shot, 3-shot | RunPod H100 (80GB) | ~120-150 GB |
+| Qwen3-235B-A22B-Thinking-2507 | 235B | 22B (MoE) | Reasoning | Zero-shot, 3-shot | RunPod H100 (80GB) | ~120-150 GB |
+
+**Note on Model Architecture:**
+- **Qwen3-30B-A3B**: MoE model with 30B total parameters, only 3B activated per token
+  - More efficient than dense 30B (similar to 3-4B inference cost)
+  - Unsloth optimized version can run on 30GB VRAM
+- **Qwen3-235B-A22B**: Flagship MoE model with 235B total, 22B activated per token
+  - State-of-the-art reasoning capabilities
+  - Requires multi-GPU setup or cloud H100 instance
 
 **Task:** Vulnerability Detection (VulTrial dataset) - same as Phase 1 for direct comparison
 
 **Hypotheses to Test:**
-- **H1**: Few-shot effectiveness increases with model parameter count
-- **H2**: 32B models show positive few-shot benefit (unlike 4B models)
+- **H1**: Few-shot effectiveness increases with model scale (active parameters: 4B → 3B MoE → 22B MoE)
+- **H2**: 30B-A3B models show positive few-shot benefit (unlike 4B dense models)
 - **H3**: Reasoning models benefit more from few-shot at larger scales
-- **H4**: Energy efficiency relationship changes with model scale
+- **H4**: MoE architecture provides better energy efficiency than dense models at scale
+- **H5**: Energy cost per performance gain decreases with model scale (due to MoE efficiency)
 
 **Metrics:**
-- Performance: Accuracy, Precision, Recall, F1 score
+- Performance: Accuracy, Precision, Recall, F1 score (per-class and macro)
 - Energy: kWh, CO2 emissions per experiment
 - Few-shot delta: (Few-shot F1 - Zero-shot F1) / Zero-shot F1 × 100%
 - Energy-performance tradeoff per model scale
+- MoE efficiency: Energy per active parameter vs dense models
 
 **Expected Outcomes:**
-1. Identify model size threshold where few-shot becomes beneficial
-2. Quantify scale-dependent few-shot effectiveness
-3. Compare energy costs across model scales
+1. Identify model scale threshold where few-shot becomes beneficial
+2. Quantify scale-dependent few-shot effectiveness across 4B → 30B-A3B → 235B-A22B
+3. Compare energy costs across model scales and architectures (dense vs MoE)
+4. Determine optimal model scale for production deployment (accuracy vs energy tradeoff)
 
 ---
 
@@ -171,7 +183,7 @@ Based on preliminary findings, RQ1 will be extended with two additional experime
 
 **Dataset:** HumanEval (164 Python programming problems with test cases)
 
-**Models:** Same as Phase 2 (7B, 32B Baseline + 32B Reasoning)
+**Models:** Same as Phase 2 (Qwen3-30B-A3B Instruct/Thinking + Qwen3-235B-A22B Instruct/Thinking)
 
 **Why Code Generation:**
 - **Different cognitive task**: Generation vs classification
@@ -204,27 +216,36 @@ Based on preliminary findings, RQ1 will be extended with two additional experime
 ## 1.7 Complete RQ1 Experimental Scope
 
 **RQ1 Structure:**
-- **Phase 1**: Small Models (4B) + Vulnerability Detection - ✅ COMPLETED
+- **Phase 1**: Small Dense Model (4B) + Vulnerability Detection - ✅ COMPLETED
   - Finding: Thinking 2.1x better F1, few-shot paradox discovered
+  - Models: Qwen3-4B-Instruct-2507, Qwen3-4B-Thinking-2507
 
-- **Phase 2**: Larger Models (7B, 32B) + Vulnerability Detection - 🔄 PLANNED
-  - Purpose: Test scale-dependent few-shot hypothesis
-  - Models: 7B, 32B baseline + 32B reasoning
+- **Phase 2**: Large MoE Models (30B-A3B, 235B-A22B) + Vulnerability Detection - 🔄 PLANNED
+  - Goal: Test scale-dependent few-shot hypothesis
+  - Models: Qwen3-30B-A3B & Qwen3-235B-A22B (both Instruct + Thinking variants)
 
 - **Phase 3**: Code Generation (HumanEval) - 🔄 PLANNED
   - Purpose: Test task generalization hypothesis
-  - Models: 7B, 32B baseline + 32B reasoning
+  - Models: Same as Phase 2 (Qwen3-30B-A3B & Qwen3-235B-A22B Instruct + Thinking)
 
 **Total Experiments for Complete RQ1:**
 
-| Phase | Task | Models | Configs | Runs | Subtotal |
-|-------|------|--------|---------|------|----------|
-| Phase 1 (Done) | Vulnerability | 2 (4B) | 4 (2 prompts × 2 configs) | 1 | 8 |
-| Phase 2 | Vulnerability | 3 (7B, 32B×2) | 4 (2 prompts × 2 configs) | 3 | 36 |
-| Phase 3 | Code Generation | 3 (7B, 32B×2) | 2 (2 prompts) | 3 | 18 |
-| **TOTAL** | | | | | **62** |
+| Phase | Task | Models | Configs | Total Experiments |
+|-------|------|--------|---------|-------------------|
+| Phase 1 (✅ Done) | Vulnerability Detection | 2 (4B Instruct, 4B Thinking) | 2 prompts (zero/few-shot) × 2 models | 4 |
+| Phase 2 (🔄 Planned) | Vulnerability Detection | 4 (30B-A3B & 235B-A22B, both Instruct + Thinking) | 2 prompts × 4 models | 8 |
+| Phase 3 (🔄 Planned) | Code Generation (HumanEval) | 4 (same as Phase 2) | 2 prompts × 4 models | 8 |
+| **TOTAL** | | **10 unique model configs** | | **20 experiments** |
 
-Note: Phase 1 already completed (8 configurations), need 54 additional experiments
+**Breakdown by Model:**
+- Qwen3-4B-Instruct-2507: 2 experiments (zero-shot, few-shot) - ✅ DONE
+- Qwen3-4B-Thinking-2507: 2 experiments (zero-shot, few-shot) - ✅ DONE
+- Qwen3-30B-A3B-Instruct-2507: 4 experiments (2 tasks × 2 prompts) - 🔄 PLANNED
+- Qwen3-30B-A3B-Thinking-2507: 4 experiments (2 tasks × 2 prompts) - 🔄 PLANNED
+- Qwen3-235B-A22B-Instruct-2507: 4 experiments (2 tasks × 2 prompts) - 🔄 PLANNED
+- Qwen3-235B-A22B-Thinking-2507: 4 experiments (2 tasks × 2 prompts) - 🔄 PLANNED
+
+**Note:** Phase 1 completed (4 experiments), need 16 additional experiments for Phases 2 & 3
 
 **Priority:**
 1. **High**: Phase 2 (extends RQ1 findings, tests main hypothesis)
