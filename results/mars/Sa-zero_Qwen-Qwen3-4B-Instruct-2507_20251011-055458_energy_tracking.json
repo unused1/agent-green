@@ -1,0 +1,13 @@
+{
+  "total_emissions": 1.121930895393603e-05,
+  "sessions": 1,
+  "session_history": [
+    {
+      "session": 1,
+      "start_time": "2025-10-11T05:54:58.263781",
+      "end_time": "2025-10-11T05:55:01.680656",
+      "samples_processed": 386,
+      "session_emissions": 1.121930895393603e-05
+    }
+  ]
+}

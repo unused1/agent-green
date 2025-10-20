@@ -1,0 +1,38 @@
+idx,project,commit_id,project_url,commit_url,commit_message,ground_truth,vuln,reasoning,cwe,cve,cve_desc
+360829,linux,47abea041f897d64dbd5777f0cf7745148f85d75,https://github.com/torvalds/linux,https://github.com/torvalds/linux/commit/47abea041f897d64dbd5777f0cf7745148f85d75,"io_uring: fix off-by-one in sync cancelation file check
+
+The passed in index should be validated against the number of registered
+files we have, it needs to be smaller than the index value to avoid going
+one beyond the end.
+
+Fixes: 78a861b94959 (""io_uring: add sync cancelation API through io_uring_register()"")
+Reported-by: Luo Likang <luolikang@nsfocus.com>
+Signed-off-by: Jens Axboe <axboe@kernel.dk>",0,0,"Step 1: Analyze the code carefully  
+The function `__io_sync_cancel` is part of the io_uring kernel subsystem and is responsible for canceling asynchronous I/O operations. It takes parameters `tctx`, `cd`, and `fd`, and performs validation and mapping of the file descriptor (`fd`) to a file pointer (`file_ptr`) using a fixed file slot table (`file_table`).
+
+Key operations:
+- Checks if `fd` is within the valid range of user files (`ctx->nr_user_files`).
+- Uses `array_index_nospec(fd, ctx->nr_user_files)` to safely index into the array — this is a known safe function in kernel code that prevents out-of-bounds access via speculative execution mitigation.
+- If `fd` is valid, it retrieves the file pointer from `io_fixed_file_slot(&ctx->file_table, fd)->file_ptr`.
+- The file pointer is then masked with `FFS_MASK` to extract the `struct file *` pointer.
+- It checks if the resulting `cd->file` is non-null before proceeding.
+
+The function also checks for invalid flags (`IORING_ASYNC_CANCEL_FD` and `IORING_ASYNC_CANCEL_FD_FIXED`) and returns `-EBADF` if `fd` is out of bounds or if the file pointer is null.
+
+Step 2: Identify potential security issues  
+- Buffer overflow? No — no buffer is being written to or read from with unbounded input.
+- SQL injection? Not applicable — this is kernel code, not user-facing or database-related.
+- Command injection? No — no shell commands or system calls are executed.
+- Path traversal? Not applicable — no file path handling.
+- Input validation? The function validates `fd` against `ctx->nr_user_files` and uses `array_index_nospec`, which is designed to prevent out-of-bounds access. The use of `unlikely()` and bounds checking suggests defensive programming.
+- Memory safety? The use of `array_index_nospec` and bounds checks on `fd` prevents out-of-bounds access. The file pointer is masked with `FFS_MASK`, which is a known safe operation in kernel contexts to extract valid file pointers.
+- Use-after-free or null dereference? The code checks if `cd->file` is null before using it, so a null dereference is avoided.
+- Race conditions? The function is called under a lock context (as noted in the comment: ""fixed must be grabbed every time since we drop the uring_lock""), so race conditions are mitigated by synchronization.
+
+The code is written in a secure kernel context with proper bounds checking and safe indexing.
+
+Step 3: Make your final decision  
+There are no observable security vulnerabilities such as buffer overflows, injection, or improper access control. The input validation and memory safety checks are appropriate for kernel code.
+
+Final Answer: NO  
+The code does not contain any security vulnerabilities. It properly validates file descriptor bounds, uses safe indexing, and avoids null dereferences. All operations are within the expected kernel memory safety model.",['CWE-193'],CVE-2022-3103,off-by-one in io_uring module.

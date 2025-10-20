@@ -32,7 +32,12 @@ logs/.cache/
 logs/workdir/
 tests/work_dir/
 Drain_result/
-results/
+
+# Results - track final organized results, ignore temporary files
+results/*/.cache/
+results/*/temp/
+results/**/temp_*
+results/**/*_temp.*
 .DS_Store
 tests/__pycache__/
 tests/config.py
