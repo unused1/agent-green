@@ -1,16 +1,33 @@
 # RQ1 Emissions Data - Exact Records Used in Analysis
 
-**Research Question**: RQ1 - Qwen3-4B Vulnerability Detection (Thinking vs Baseline)
+**Research Question**: RQ1 - Reasoning vs Instruct Models for Vulnerability Detection
 
-**Date**: 2025-10-11
-**Analysis Notebook**: `notebooks/rq1_analysis.ipynb`
+**Phases**:
+- **Phase 1**: Qwen3-4B Models (Dense, Mars Server) - 2025-10-11
+- **Phase 2a**: Qwen3-30B-A3B Models (MoE, RunPod H100) - 2025-10-20
+
+**Analysis Notebooks**:
+- Phase 1: `notebooks/rq1_analysis.ipynb` & `notebooks/rq1_codecarbon_analysis.ipynb`
+- Phase 2a: `notebooks/rq1_phase2a_analysis.ipynb` & `notebooks/rq1_phase2a_codecarbon_analysis.ipynb`
+
 **Findings Document**: `docs/rq1_findings.md`
 
 ---
 
 ## Overview
 
-This document contains the exact emissions records from CodeCarbon v2.7.1 that were used in the RQ1 analysis. Each experiment may have multiple sessions due to interruptions and resumptions (Ctrl+C). Sessions were filtered by matching the experiment timestamp in the `project_name` field to exclude earlier failed/test runs.
+This document contains the exact emissions records from CodeCarbon v2.7.1 that were used in the RQ1 analysis for both Phase 1 (4B dense models) and Phase 2a (30B-A3B MoE models).
+
+**Phase 1 Note**: Each experiment may have multiple sessions due to interruptions and resumptions (Ctrl+C). Sessions were filtered by matching the experiment timestamp in the `project_name` field to exclude earlier failed/test runs.
+
+**Phase 2a Note**: Experiments ran on dedicated RunPod H100 pods with clean experimental isolation. Most experiments have single sessions (Thinking Few-shot has 2 sessions due to one interruption).
+
+---
+
+# PHASE 1: Qwen3-4B Models (Dense Architecture)
+
+**Infrastructure**: Mars Server (AMD EPYC 7643, NVIDIA RTX A5000)
+**Date**: 2025-10-11
 
 ---
 
@@ -108,7 +125,7 @@ timestamp,project_name,run_id,experiment_id,duration,emissions,emissions_rate,cp
 
 ---
 
-## Summary Table
+## Phase 1 Summary Table
 
 | Experiment | File | Lines | Sessions | Total CO2 (kg) | Energy (kWh) | Duration (hrs) |
 |------------|------|-------|----------|----------------|--------------|----------------|
@@ -119,7 +136,7 @@ timestamp,project_name,run_id,experiment_id,duration,emissions,emissions_rate,cp
 
 ---
 
-## Key Metrics Used in Analysis
+## Phase 1 Key Metrics Used in Analysis
 
 ### Average Emissions per Configuration
 
@@ -186,16 +203,162 @@ All emission totals were cross-validated against `*_energy_tracking.json` files:
 
 ---
 
+# PHASE 2a: Qwen3-30B-A3B Models (MoE Architecture)
+
+**Infrastructure**: RunPod H100 SXM 80GB (Intel Xeon Platinum 8468, NVIDIA H100 80GB HBM3)
+**Date**: 2025-10-20
+**CodeCarbon Version**: 3.0.7
+
+---
+
+## 5. Instruct Zero-shot (Qwen3-30B-A3B-Instruct)
+
+**File**: `results/runpod/instruct_zero_20251020_194844/codecarbon_baseline_sa-zero/emissions.csv`
+**Lines Used**: Line 2 only (single session)
+**Sessions**: 1
+**Total Emissions**: 0.059305 kg CO2
+
+```csv
+timestamp,project_name,run_id,experiment_id,duration,emissions,emissions_rate,cpu_power,gpu_power,ram_power,cpu_energy,gpu_energy,ram_energy,energy_consumed,country_name,country_iso_code,region,cloud_provider,cloud_region,os,python_version,codecarbon_version,cpu_count,cpu_model,gpu_count,gpu_model,longitude,latitude,ram_total_size,tracking_mode,on_cloud,pue
+2025-10-20T11:41:30,Sa-zero_Qwen-Qwen3-30B-A3B-Instruct-2507_20251020-104948_session_1,7070ef30-548c-4483-9bcb-45f2c44f0803,5b0fa12a-3dd7-45bb-9766-cc326314d9f1,3101.30662550102,0.05930457511382172,1.912244814046434e-05,77.80004523454546,255.02417440148108,54.0,0.06617944236999,0.2377140648933107,0.04486871825507843,0.348762225518379,Canada,CAN,,,,Linux-6.5.0-27-generic-x86_64-with-glibc2.39,3.12.3,3.0.7,160,Intel(R) Xeon(R) Platinum 8468,1,1 x NVIDIA H100 80GB HBM3,,,1511.8385314941406,machine,N,1.0
+```
+
+**Notes**:
+- Experiment timestamp: `20251020-104948`
+- Single clean session on dedicated pod
+- Duration: 3,101 seconds (~0.86 hours)
+- Energy consumed: 0.349 kWh
+- GPU power: 255W avg (68.2% of total energy)
+
+---
+
+## 6. Instruct Few-shot (Qwen3-30B-A3B-Instruct)
+
+**File**: `results/runpod/instruct_few_20251020_200040/codecarbon_baseline_sa-few/emissions.csv`
+**Lines Used**: Line 2 only (single session)
+**Sessions**: 1
+**Total Emissions**: 0.047297 kg CO2
+
+```csv
+timestamp,project_name,run_id,experiment_id,duration,emissions,emissions_rate,cpu_power,gpu_power,ram_power,cpu_energy,gpu_energy,ram_energy,energy_consumed,country_name,country_iso_code,region,cloud_provider,cloud_region,os,python_version,codecarbon_version,cpu_count,cpu_model,gpu_count,gpu_model,longitude,latitude,ram_total_size,tracking_mode,on_cloud,pue
+2025-10-20T12:28:03,Sa-few_Qwen-Qwen3-30B-A3B-Instruct-2507_20251020-111953_session_1,1e18c2d5-bec2-4dc9-903f-3e1ceeef4fc1,5b0fa12a-3dd7-45bb-9766-cc326314d9f1,2366.4036028310657,0.047296618693817454,1.9986066649082e-05,68.02093613992858,286.91982877053976,67.92,0.04472122444583172,0.18873302669176445,0.044693939042097376,0.2781481901796934,Canada,CAN,,,,Linux-6.5.0-27-generic-x86_64-with-glibc2.39,3.12.3,3.0.7,160,Intel(R) Xeon(R) Platinum 8468,1,1 x NVIDIA H100 80GB HBM3,,,1511.8385314941406,machine,N,1.0
+```
+
+**Notes**:
+- Experiment timestamp: `20251020-111953`
+- Single clean session on dedicated pod
+- Duration: 2,366 seconds (~0.66 hours)
+- Energy consumed: 0.278 kWh
+- GPU power: 287W avg (67.9% of total energy)
+
+---
+
+## 7. Thinking Zero-shot (Qwen3-30B-A3B-Thinking)
+
+**File**: `results/runpod/thinking_zero_20251020_215332/codecarbon_thinking_sa-zero/emissions.csv`
+**Lines Used**: Line 2 only (single session)
+**Sessions**: 1
+**Total Emissions**: 0.223806 kg CO2
+
+```csv
+timestamp,project_name,run_id,experiment_id,duration,emissions,emissions_rate,cpu_power,gpu_power,ram_power,cpu_energy,gpu_energy,ram_energy,energy_consumed,country_name,country_iso_code,region,cloud_provider,cloud_region,os,python_version,codecarbon_version,cpu_count,cpu_model,gpu_count,gpu_model,longitude,latitude,ram_total_size,tracking_mode,on_cloud,pue
+2025-10-20T14:27:55,Sa-zero_Qwen-Qwen3-30B-A3B-Thinking-2507_20251020-104530_session_1,e8e3c24e-1cf6-4d25-8c5c-0b4e8c6a0ebc,5b0fa12a-3dd7-45bb-9766-cc326314d9f1,11082.4509799839,0.22380612039244478,2.0193046344764564e-05,52.02893087076651,267.3028291856832,60.0,0.18042599439881446,0.9275117726181283,0.20823470817208146,1.3161724751890242,Canada,CAN,,,,Linux-6.5.0-27-generic-x86_64-with-glibc2.39,3.12.3,3.0.7,160,Intel(R) Xeon(R) Platinum 8468,1,1 x NVIDIA H100 80GB HBM3,,,1511.8385314941406,machine,N,1.0
+```
+
+**Notes**:
+- Experiment timestamp: `20251020-104530`
+- Single clean session on dedicated pod
+- Duration: 11,082 seconds (~3.08 hours)
+- Energy consumed: 1.316 kWh
+- GPU power: 267W avg (70.5% of total energy)
+
+---
+
+## 8. Thinking Few-shot (Qwen3-30B-A3B-Thinking)
+
+**File**: `results/runpod/thinking_few_20251020_214835/codecarbon_thinking_sa-few/emissions.csv`
+**Lines Used**: Lines 2-3 (2 sessions due to 1 interruption)
+**Sessions**: 2
+**Total Emissions**: 0.193529 kg CO2
+
+```csv
+timestamp,project_name,run_id,experiment_id,duration,emissions,emissions_rate,cpu_power,gpu_power,ram_power,cpu_energy,gpu_energy,ram_energy,energy_consumed,country_name,country_iso_code,region,cloud_provider,cloud_region,os,python_version,codecarbon_version,cpu_count,cpu_model,gpu_count,gpu_model,longitude,latitude,ram_total_size,tracking_mode,on_cloud,pue
+2025-10-20T14:06:24,Sa-few_Qwen-Qwen3-30B-A3B-Thinking-2507_20251020-111009_session_1,f66e0a0c-4063-4b8f-99a7-4c8e72a1bb1d,5b0fa12a-3dd7-45bb-9766-cc326314d9f1,8889.764127765968,0.17962926919962838,2.0206169584458896e-05,65.26530761618131,293.49949698023,63.84,0.16122302181069998,0.7248018653772266,0.15760695929290022,1.0436318464808268,Canada,CAN,,,,Linux-6.5.0-27-generic-x86_64-with-glibc2.39,3.12.3,3.0.7,160,Intel(R) Xeon(R) Platinum 8468,1,1 x NVIDIA H100 80GB HBM3,,,1511.8385314941406,machine,N,1.0
+2025-10-20T16:37:56,Sa-few_Qwen-Qwen3-30B-A3B-Thinking-2507_20251020-140624_session_2,45e0beda-e8c0-44bb-9df5-abcee4e85a4e,5b0fa12a-3dd7-45bb-9766-cc326314d9f1,255.90085086785257,0.013899989244264354,5.43127622844867e-05,63.39622637699994,270.6994653955776,60.479999999999814,0.014516811607239987,0.06566269738199044,0.013892530816469163,0.09407204580569958,Canada,CAN,,,,Linux-6.5.0-27-generic-x86_64-with-glibc2.39,3.12.3,3.0.7,160,Intel(R) Xeon(R) Platinum 8468,1,1 x NVIDIA H100 80GB HBM3,,,1511.8385314941406,machine,N,1.0
+```
+
+**Notes**:
+- Experiment timestamp: `20251020-111009`
+- 2 sessions: resumed after interruption (session 2 timestamp: `20251020-140624`)
+- Total duration: 9,146 seconds (~2.54 hours)
+- Total energy consumed: 1.138 kWh
+- Session 1: 8,890 seconds (97.2% of duration, 96.2% of emissions)
+- Session 2: 256 seconds (2.8% of duration, 3.8% of emissions - resumed to complete)
+
+---
+
+## Phase 2a Summary Table
+
+| Experiment | File | Lines | Sessions | Total CO2 (kg) | Energy (kWh) | Duration (hrs) |
+|------------|------|-------|----------|----------------|--------------|----------------|
+| Instruct Zero-shot | `codecarbon_baseline_sa-zero/emissions.csv` | Line 2 | 1 | 0.059305 | 0.349 | 0.86 |
+| Instruct Few-shot | `codecarbon_baseline_sa-few/emissions.csv` | Line 2 | 1 | 0.047297 | 0.278 | 0.66 |
+| Thinking Zero-shot | `codecarbon_thinking_sa-zero/emissions.csv` | Line 2 | 1 | 0.223806 | 1.316 | 3.08 |
+| Thinking Few-shot | `codecarbon_thinking_sa-few/emissions.csv` | Lines 2-3 | 2 | 0.193529 | 1.138 | 2.54 |
+
+---
+
+## Phase 2a Key Metrics Used in Analysis
+
+### Average Emissions per Configuration
+
+| Configuration | Experiments | Average CO2 (kg) |
+|---------------|-------------|------------------|
+| **Instruct** (avg of zero-shot and few-shot) | 2 | 0.053301 |
+| **Thinking** (avg of zero-shot and few-shot) | 2 | 0.208668 |
+
+**Energy Ratio**: Thinking uses **3.92×** more CO2 than Instruct (0.209 vs 0.053 kg average)
+
+### Per-Sample Emissions
+
+| Experiment | Samples | CO2/sample (g) | Energy/sample (kWh) |
+|------------|---------|----------------|---------------------|
+| Instruct Zero-shot | 386 | 0.154 | 0.000904 |
+| Instruct Few-shot | 386 | 0.123 | 0.000720 |
+| Thinking Zero-shot | 386 | 0.580 | 0.003409 |
+| Thinking Few-shot | 384 | 0.504 | 0.002964 |
+
+### Cross-Validation
+
+| Experiment | energy_tracking.json | emissions.csv | Match |
+|------------|---------------------|---------------|-------|
+| Instruct Zero-shot | 0.059305 kg | 0.059305 kg | ✓ |
+| Instruct Few-shot | 0.047297 kg | 0.047297 kg | ✓ |
+| Thinking Zero-shot | 0.223806 kg | 0.223806 kg | ✓ |
+| Thinking Few-shot | 0.193529 kg | 0.193529 kg | ✓ |
+
+**Difference**: < 0.01% for all experiments (perfect match)
+
+---
+
 ## Related Documents
 
-- **Analysis Notebook**: `notebooks/rq1_analysis.ipynb`
+**Phase 1 Analysis:**
+- Analysis Notebooks: `notebooks/rq1_analysis.ipynb` & `notebooks/rq1_codecarbon_analysis.ipynb`
+- Infrastructure: Mars Server (AMD EPYC 7643, NVIDIA RTX A5000)
+
+**Phase 2a Analysis:**
+- Analysis Notebooks: `notebooks/rq1_phase2a_analysis.ipynb` & `notebooks/rq1_phase2a_codecarbon_analysis.ipynb`
+- Infrastructure: RunPod H100 SXM 80GB (Intel Xeon Platinum 8468, NVIDIA H100 80GB HBM3)
+
+**General Documentation:**
 - **Findings Report**: `docs/rq1_findings.md`
-- **Session Interpretation Guide**: `docs/codecarbon_session_interpretation.md`
 - **Completion Status**: `docs/COMPLETION_STATUS.md`
+- **Session Interpretation Guide**: `docs/codecarbon_session_interpretation.md`
 - **Experiment Plan**: `docs/rq1_experiment_plan.md`
 
 ---
 
-*Last Updated: 2025-10-18*
+*Last Updated: 2025-10-20*
 *Created by: Claude Code*
-*Purpose: Reference document for exact emissions data used in RQ1 analysis*
+*Purpose: Reference document for exact emissions data used in RQ1 Phase 1 and Phase 2a analysis*

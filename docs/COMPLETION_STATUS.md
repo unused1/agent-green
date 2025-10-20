@@ -2,7 +2,7 @@
 
 **Last Updated**: 2025-10-20
 **Phase 1 (4B Models)**: Complete ✅
-**Phase 2a (30B-A3B Models)**: Experiments Complete ✅ | Analysis Pending 🔄
+**Phase 2a (30B-A3B Models)**: Complete ✅
 
 ---
 
@@ -192,9 +192,10 @@ All experiments: ✓ PERFECT MATCH (< 0.001% difference)
 
 ---
 
-## Phase 2a: Qwen3-30B-A3B Models (Experiments Complete ✅)
+## Phase 2a: Qwen3-30B-A3B Models (COMPLETE ✅)
 
 **Date**: October 20, 2025
+**Status**: Experiments Complete ✅ | Analysis Complete ✅
 
 ### 1. Experiment Execution ✅
 - [x] 4 experiments completed successfully (386 samples each)
@@ -204,14 +205,14 @@ All experiments: ✓ PERFECT MATCH (< 0.001% difference)
 - [x] All results downloaded and verified
 
 **Models:**
-- Qwen3-30B-A3B-Instruct-2507 (Baseline MoE: 30B total, 3B active)
+- Qwen3-30B-A3B-Instruct-2507 (Instruct MoE: 30B total, 3B active)
 - Qwen3-30B-A3B-Thinking-2507 (Reasoning MoE: 30B total, 3B active)
 
 **Configurations:**
-- Pod 1: Thinking zero-shot (0.224 kg CO2, 1 session)
-- Pod 2: Instruct zero-shot (0.059 kg CO2, 1 session)
-- Pod 3: Thinking few-shot (0.194 kg CO2, 2 sessions)
-- Pod 4: Instruct few-shot (0.047 kg CO2, 1 session)
+- Pod 1: Thinking zero-shot (0.224 kg CO2, 1.316 kWh, 1 session)
+- Pod 2: Instruct zero-shot (0.059 kg CO2, 0.349 kWh, 1 session)
+- Pod 3: Thinking few-shot (0.194 kg CO2, 1.138 kWh, 2 sessions)
+- Pod 4: Instruct few-shot (0.047 kg CO2, 0.278 kWh, 1 session)
 
 **Infrastructure:**
 - Platform: RunPod H100 SXM 80GB
@@ -228,19 +229,71 @@ results/runpod/
 └── instruct_few_20251020_200040/    (17 files, 1.6M detailed results)
 ```
 
-### 2. Energy Observations (Preliminary)
-- [x] Thinking models use 3-4× more energy than Instruct (0.21 avg vs 0.053 avg kg CO2)
-- [x] Few-shot reduced energy for both models (13-20% reduction)
-- [x] 30B-A3B MoE uses ~60% less energy than 4B dense models (despite larger total parameters)
-- [x] File sizes correlate with energy: Thinking produces 3-4× larger results
+### 2. Performance Metrics ✅
 
-### 3. Pending Analysis 🔄
-- [ ] Classification performance metrics (precision, recall, F1)
-- [ ] Compare 30B-A3B vs 4B to test scale-dependent few-shot hypothesis
-- [ ] Energy-performance tradeoff analysis for MoE models
-- [ ] Decide on Phase 2b (235B-A22B) based on findings
+| Configuration | Accuracy | Precision | Recall | F1-Score |
+|---|---|---|---|---|
+| **Thinking Zero-shot** | **52.59%** | **52.36%** | **57.51%** | **54.81%** ⭐ |
+| Instruct Zero-shot | 54.15% | 54.71% | 48.19% | 51.24% |
+| Thinking Few-shot | 51.82% | 52.35% | 46.11% | 49.04% |
+| Instruct Few-shot | 55.18% | 61.63% | 27.46% | 37.99% |
+
+**Best Configuration**: Thinking Zero-shot (F1: 54.81%, Accuracy: 52.59%)
+
+### 3. Energy Analysis ✅
+
+| Configuration | CO2 (kg) | Energy (kWh) | Duration (hrs) | CO2/sample (g) |
+|---|---|---|---|---|
+| Thinking Zero-shot | 0.224 | 1.316 | 3.08 | 0.580 |
+| Thinking Few-shot | 0.194 | 1.138 | 2.54 | 0.504 |
+| Instruct Zero-shot | 0.059 | 0.349 | 0.86 | 0.154 |
+| Instruct Few-shot | 0.047 | 0.278 | 0.66 | 0.123 |
+
+**Hardware Breakdown (H100 SXM 80GB):**
+- GPU: ~68-70% of total energy (dominant component)
+- CPU: ~13-19% of total energy
+- RAM: ~13-16% of total energy
+
+### 4. Key Findings ✅
+
+**Performance:**
+1. **Thinking Zero-shot wins**: 54.81% F1 (best across all Phase 2a configurations)
+2. **Few-shot paradox persists**: Few-shot hurts both models
+   - Thinking: 54.81% → 49.04% F1 (-5.77pp)
+   - Instruct: 51.24% → 37.99% F1 (-13.25pp)
+3. **30B-A3B improves over 4B**: Thinking Zero 54.81% vs 4B 39.19% (+15.62pp F1)
+
+**Energy:**
+4. **Thinking uses 3.8× more energy** than Instruct (avg: 0.209 kg vs 0.053 kg CO2)
+5. **MoE is highly efficient**: 30B-A3B uses 69% less CO2/sample than 4B dense
+   - 30B-A3B Thinking Zero: 0.580 g/sample
+   - 4B Thinking Zero: 1.910 g/sample
+6. **Few-shot reduces energy** by 13-17% for both models
+
+**Scale-Dependent Hypothesis:**
+7. **REJECTED**: Few-shot still hurts performance with larger models
+8. **Unexpected finding**: MoE architecture is far more energy-efficient than dense models
+
+### 5. Generated Artifacts ✅
+
+**Analysis Outputs (`results/analysis_phase2a/`):**
+- `rq1_phase2a_summary_table.csv` - Performance metrics table
+- `rq1_phase2a_complete_results.xlsx` - Detailed results
+- `confusion_matrices.png` - Confusion matrices for all 4 experiments
+- `phase2a_metrics_comparison.png` - Performance metrics comparison
+- `accuracy_comparison.png` - Accuracy visualization
+- `energy_consumption.png` - Energy consumption comparison
+- `phase2a_energy_by_component.png` - Hardware component breakdown
+- `phase2a_power_consumption.png` - Power usage analysis
+- `phase2a_energy_distribution_pies.png` - Component distribution
+- `phase2a_energy_performance_tradeoff.png` - F1 vs Energy scatter plot
+
+**Documentation:**
+- `notebooks/rq1_phase2a_analysis.ipynb` - Performance analysis (executed)
+- `notebooks/rq1_phase2a_codecarbon_analysis.ipynb` - Energy analysis (executed)
 
 ---
 
-*Phase 1: Analysis complete, ready for research paper*
-*Phase 2a: Experiments complete, analysis pending*
+*Phase 1 (4B Models): Complete ✅*
+*Phase 2a (30B-A3B Models): Complete ✅*
+*Phase 2b (235B-A22B Models): Decision pending based on Phase 2a findings*
