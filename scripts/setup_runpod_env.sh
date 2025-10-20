@@ -31,12 +31,16 @@ echo ""
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip install --quiet autogen-agentchat
+pip install --quiet autogen
 pip install --quiet python-dotenv
 pip install --quiet codecarbon
 pip install --quiet pandas
 pip install --quiet numpy
 pip install --quiet scikit-learn
+
+echo "Installing vLLM and HuggingFace tools (this may take a few minutes)..."
+pip install --quiet vllm
+pip install --quiet hf-transfer
 echo "✓ Dependencies installed"
 echo ""
 
@@ -101,7 +105,9 @@ try:
     import pandas
     import numpy
     import sklearn
-    print("✓ All Python packages imported successfully")
+    import vllm
+    print(f"✓ All Python packages imported successfully")
+    print(f"  vLLM version: {vllm.__version__}")
 except ImportError as e:
     print(f"✗ Import error: {e}")
     sys.exit(1)

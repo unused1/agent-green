@@ -108,8 +108,8 @@ elif [ "$SHOT_TYPE" = "all" ]; then
     fi
 else
     # Run single experiment
-    local reasoning
-    local design
+    reasoning=""
+    design=""
 
     if [ "$MODEL_TYPE" = "reasoning" ]; then
         reasoning="true"

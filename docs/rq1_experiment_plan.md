@@ -140,18 +140,24 @@ Based on preliminary findings, RQ1 will be extended with two additional experime
 
 | Model | Total Params | Active Params | Type | Few-Shot Config | Infrastructure | VRAM Required |
 |-------|-------------|---------------|------|-----------------|----------------|---------------|
-| Qwen3-30B-A3B-Instruct-2507 | 30B | 3B (MoE) | Baseline | Zero-shot, 3-shot | Mars GPU Server (A5000 24GB) or RunPod A6000 | ~30 GB |
-| Qwen3-30B-A3B-Thinking-2507 | 30B | 3B (MoE) | Reasoning | Zero-shot, 3-shot | Mars GPU Server (A5000 24GB) or RunPod A6000 | ~30 GB |
-| Qwen3-235B-A22B-Instruct-2507 | 235B | 22B (MoE) | Baseline | Zero-shot, 3-shot | RunPod H100 (80GB) | ~120-150 GB |
-| Qwen3-235B-A22B-Thinking-2507 | 235B | 22B (MoE) | Reasoning | Zero-shot, 3-shot | RunPod H100 (80GB) | ~120-150 GB |
+| Qwen3-30B-A3B-Instruct-2507 | 30B | 3B (MoE) | Baseline | Zero-shot, 3-shot | RunPod A6000 (Jupyter) | ~30 GB |
+| Qwen3-30B-A3B-Thinking-2507 | 30B | 3B (MoE) | Reasoning | Zero-shot, 3-shot | RunPod A6000 (Jupyter) | ~30 GB |
+| Qwen3-235B-A22B-Instruct-2507 | 235B | 22B (MoE) | Baseline | Zero-shot, 3-shot | RunPod H100 (Jupyter) | ~120-150 GB |
+| Qwen3-235B-A22B-Thinking-2507 | 235B | 22B (MoE) | Reasoning | Zero-shot, 3-shot | RunPod H100 (Jupyter) | ~120-150 GB |
 
 **Note on Model Architecture:**
 - **Qwen3-30B-A3B**: MoE model with 30B total parameters, only 3B activated per token
   - More efficient than dense 30B (similar to 3-4B inference cost)
-  - Unsloth optimized version can run on 30GB VRAM
+  - Runs on single A6000 48GB (no quantization needed)
 - **Qwen3-235B-A22B**: Flagship MoE model with 235B total, 22B activated per token
   - State-of-the-art reasoning capabilities
-  - Requires multi-GPU setup or cloud H100 instance
+  - Requires H100 80GB or multi-GPU setup
+
+**Note on Infrastructure:**
+- **Jupyter Environment**: RunPod Jupyter Notebook template used for convenient file transfer
+  - Baseline measurements confirm <0.5% total energy overhead, <0.1% GPU energy overhead
+  - Consistent setup across all Phase 2 experiments ensures valid comparisons
+  - GPU energy (90-95% of total) remains directly comparable to Phase 1
 
 **Task:** Vulnerability Detection (VulTrial dataset) - same as Phase 1 for direct comparison
 
@@ -220,9 +226,15 @@ Based on preliminary findings, RQ1 will be extended with two additional experime
   - Finding: Thinking 2.1x better F1, few-shot paradox discovered
   - Models: Qwen3-4B-Instruct-2507, Qwen3-4B-Thinking-2507
 
-- **Phase 2**: Large MoE Models (30B-A3B, 235B-A22B) + Vulnerability Detection - 🔄 PLANNED
-  - Goal: Test scale-dependent few-shot hypothesis
-  - Models: Qwen3-30B-A3B & Qwen3-235B-A22B (both Instruct + Thinking variants)
+- **Phase 2a**: Qwen3-30B-A3B + Vulnerability Detection - ✅ COMPLETED (October 2025)
+  - Goal: Test scale-dependent few-shot hypothesis with 30B MoE models
+  - Models: Qwen3-30B-A3B-Instruct-2507, Qwen3-30B-A3B-Thinking-2507
+  - Status: All 4 experiments complete (zero-shot & few-shot for both models)
+
+- **Phase 2b**: Qwen3-235B-A22B + Vulnerability Detection - 🔄 PENDING
+  - Goal: Extend scale testing to flagship MoE model
+  - Models: Qwen3-235B-A22B-Instruct-2507, Qwen3-235B-A22B-Thinking-2507
+  - Decision: Pending Phase 2a analysis results
 
 - **Phase 3**: Code Generation (HumanEval) - 🔄 PLANNED
   - Purpose: Test task generalization hypothesis

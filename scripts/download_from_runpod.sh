@@ -38,7 +38,8 @@ echo ""
 
 # Create local results directory with timestamp
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-LOCAL_RESULTS_DIR="$PROJECT_ROOT/results_runpod_${MODEL_TYPE}_${TIMESTAMP}"
+mkdir -p "$PROJECT_ROOT/results/runpod"
+LOCAL_RESULTS_DIR="$PROJECT_ROOT/results/runpod/${MODEL_TYPE}_${TIMESTAMP}"
 mkdir -p "$LOCAL_RESULTS_DIR"
 
 echo "Downloading results..."

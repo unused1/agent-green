@@ -69,12 +69,12 @@ For RQ1 Phase 2, we need to run Qwen3-30B-A3B models which require ~30GB VRAM. M
 
 **Infrastructure Options:**
 
-| GPU Model | VRAM | RunPod Cost/hr | Fits 30B-A3B? | Fits 235B-A22B? |
-|-----------|------|----------------|---------------|-----------------|
-| **A6000** | 48GB | ~$0.79 | ✅ Yes | ❌ No |
-| **A100 40GB** | 40GB | ~$1.39 | ✅ Yes | ❌ No |
-| **A100 80GB** | 80GB | ~$1.89 | ✅ Yes | ⚠️ Tight (need 120-150GB) |
-| **H100 80GB** | 80GB | ~$2.99-3.50 | ✅ Yes | ✅ Yes (with optimization) |
+| GPU Model | VRAM | RunPod Cost/hr | Fits 30B-A3B? | Fits 235B-A22B? | Notes |
+|-----------|------|----------------|---------------|-----------------|-------|
+| **A6000** | 48GB | ~$0.79 | ❌ No (needs ~60GB) | ❌ No | - |
+| **A100 40GB** | 40GB | ~$1.39 | ❌ No (needs ~60GB) | ❌ No | - |
+| **A100 80GB** | 80GB | ~$1.39 | ✅ Yes | ⚠️ Tight (need 120-150GB) | Cheaper option |
+| **H100 80GB** | 80GB | ~$2.49 | ✅ Yes ⭐ | ✅ Yes (with optimization) | **Recommended**: Better network → reliable downloads |
 
 **Pros:**
 - ✅ **Maintains single-GPU architecture** from Phase 1
@@ -98,10 +98,22 @@ For RQ1 Phase 2, we need to run Qwen3-30B-A3B models which require ~30GB VRAM. M
 
 **For Qwen3-30B-A3B models:**
 - **Platform**: RunPod
-- **GPU**: A6000 48GB or A100 40GB
-- **Cost**: ~$0.79-1.39/hour
+- **Template**: Jupyter Notebook + PyTorch
+- **GPU**: H100 SXM 80GB recommended (~$2.49/hr) or A100 SXM 80GB (~$1.39/hr)
+  - A6000 48GB and A100 40GB are insufficient
+  - **H100 advantage**: Better network connectivity → vLLM auto-download (Method 1) works reliably without XET CDN errors
+  - Tested successfully: H100 pods had no download issues with HuggingFace models
+- **Volume Disk**: 100GB minimum (persistent storage for /workspace)
+  - 50GB Volume Disk insufficient for model download + experiments
+  - Use Volume Disk (not Container Disk) as it persists when pod is stopped
+- **Cost**: H100 ~$2.49/hour (recommended) or A100 ~$1.39/hour
 - **Configuration**: Single GPU, same vLLM settings as Phase 1
-- **Estimated cost**: 4 experiments × 2 hours × $1.39 = ~$11.12
+- **File Transfer**: Direct SSH with scp (automated scripts) + Jupyter UI backup
+- **Model Download**: Method 1 (vLLM auto-download) worked successfully on H100
+- **Overhead**: Jupyter adds <0.5% total energy, <0.1% GPU energy (negligible)
+- **Memory requirement**: ~60GB GPU VRAM with vLLM overhead (model + KV cache + buffers)
+- **Disk requirement**: ~50GB Volume Disk for model files + temp space + results
+- **Estimated cost**: 2 pods × 2 hours × $2.49 = ~$9.96 for Phase 2a (H100)
 
 **For Qwen3-235B-A22B models:**
 - **Platform**: RunPod
@@ -125,10 +137,12 @@ When documenting in the paper, we will state:
 > performance-energy comparisons across model scales, all experiments were conducted
 > on single-GPU configurations. While Mars server (NVIDIA RTX A5000 24GB) was
 > sufficient for 4B models (Phase 1), larger models required cloud instances with
-> greater VRAM capacity. Qwen3-30B-A3B experiments used RunPod A6000 (48GB) instances,
-> maintaining the single-GPU architecture to avoid introducing tensor parallelism
-> as a confounding variable. This ensured that observed differences in energy
-> consumption and performance could be attributed solely to model scale and
+> greater VRAM capacity. Qwen3-30B-A3B experiments used RunPod A6000 (48GB) instances
+> with Jupyter Notebook environment for convenient file management. Baseline measurements
+> confirmed that Jupyter adds minimal overhead (<0.5% total system energy, <0.1% GPU
+> energy). The single-GPU architecture was maintained to avoid introducing tensor
+> parallelism as a confounding variable. This ensured that observed differences in
+> energy consumption and performance could be attributed solely to model scale and
 > architecture (dense vs MoE), not to deployment configuration.
 
 ---

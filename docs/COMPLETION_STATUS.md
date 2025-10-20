@@ -1,11 +1,12 @@
 # RQ1 Analysis - Completion Status
 
-**Date**: 2025-10-12  
-**Status**: Energy analysis complete, performance analysis pending
+**Last Updated**: 2025-10-20
+**Phase 1 (4B Models)**: Complete ✅
+**Phase 2a (30B-A3B Models)**: Experiments Complete ✅ | Analysis Pending 🔄
 
 ---
 
-## ✅ Completed
+## Phase 1: Qwen3-4B Models (COMPLETE ✅)
 
 ### 1. Data Collection & Validation
 - [x] 4 experiments completed successfully (384 samples each, except 383 for Thinking Zero-shot)
@@ -189,5 +190,57 @@ All experiments: ✓ PERFECT MATCH (< 0.001% difference)
 
 ---
 
-*Last Updated: 2025-10-12 (FINAL)*
-*Status: Analysis complete, ready for research paper*
+---
+
+## Phase 2a: Qwen3-30B-A3B Models (Experiments Complete ✅)
+
+**Date**: October 20, 2025
+
+### 1. Experiment Execution ✅
+- [x] 4 experiments completed successfully (386 samples each)
+- [x] RunPod H100 SXM 80GB infrastructure (4 pods in parallel)
+- [x] Clean experimental isolation (fresh vLLM per experiment)
+- [x] CodeCarbon energy tracking for all experiments
+- [x] All results downloaded and verified
+
+**Models:**
+- Qwen3-30B-A3B-Instruct-2507 (Baseline MoE: 30B total, 3B active)
+- Qwen3-30B-A3B-Thinking-2507 (Reasoning MoE: 30B total, 3B active)
+
+**Configurations:**
+- Pod 1: Thinking zero-shot (0.224 kg CO2, 1 session)
+- Pod 2: Instruct zero-shot (0.059 kg CO2, 1 session)
+- Pod 3: Thinking few-shot (0.194 kg CO2, 2 sessions)
+- Pod 4: Instruct few-shot (0.047 kg CO2, 1 session)
+
+**Infrastructure:**
+- Platform: RunPod H100 SXM 80GB
+- Cost: ~$9.96 total (4 pods × ~1 hr @ $2.49/hr)
+- vLLM config: max-model-len 65536, dtype auto, gpu-memory-utilization 0.90
+- Storage: 100GB Volume Disk per pod
+
+**Downloaded Results:**
+```
+results/runpod/
+├── thinking_zero_20251020_215332/   (17 files, 6.5M detailed results)
+├── instruct_zero_20251020_194844/   (17 files, 1.9M detailed results)
+├── thinking_few_20251020_214835/    (17 files, 5.9M detailed results)
+└── instruct_few_20251020_200040/    (17 files, 1.6M detailed results)
+```
+
+### 2. Energy Observations (Preliminary)
+- [x] Thinking models use 3-4× more energy than Instruct (0.21 avg vs 0.053 avg kg CO2)
+- [x] Few-shot reduced energy for both models (13-20% reduction)
+- [x] 30B-A3B MoE uses ~60% less energy than 4B dense models (despite larger total parameters)
+- [x] File sizes correlate with energy: Thinking produces 3-4× larger results
+
+### 3. Pending Analysis 🔄
+- [ ] Classification performance metrics (precision, recall, F1)
+- [ ] Compare 30B-A3B vs 4B to test scale-dependent few-shot hypothesis
+- [ ] Energy-performance tradeoff analysis for MoE models
+- [ ] Decide on Phase 2b (235B-A22B) based on findings
+
+---
+
+*Phase 1: Analysis complete, ready for research paper*
+*Phase 2a: Experiments complete, analysis pending*

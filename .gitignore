@@ -3,6 +3,7 @@
 .env.local
 .env.mars
 .env.runpod
+.env.runpod.phase2
 
 config/config.ini
 config/.codecarbon.config

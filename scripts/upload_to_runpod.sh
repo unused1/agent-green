@@ -58,14 +58,25 @@ cp "$PROJECT_ROOT/src/vuln_evaluation.py" "$TEMP_DIR/agent-green/src/"
 
 # Scripts
 cp "$PROJECT_ROOT/scripts/run_rq1_vuln_runpod.sh" "$TEMP_DIR/agent-green/scripts/"
-chmod +x "$TEMP_DIR/agent-green/scripts/run_rq1_vuln_runpod.sh"
+cp "$PROJECT_ROOT/scripts/setup_runpod_env.sh" "$TEMP_DIR/agent-green/scripts/"
+cp "$PROJECT_ROOT/scripts/package_results.sh" "$TEMP_DIR/agent-green/scripts/"
+chmod +x "$TEMP_DIR/agent-green/scripts/"*.sh
 
 # Datasets
 cp "$PROJECT_ROOT/vuln_database/VulTrial_386_samples_balanced.jsonl" "$TEMP_DIR/agent-green/vuln_database/"
 cp "$PROJECT_ROOT/vuln_database/VulTrial_10_samples_test.jsonl" "$TEMP_DIR/agent-green/vuln_database/"
 
 # Environment configuration (RunPod version)
-cp "$PROJECT_ROOT/.env.runpod" "$TEMP_DIR/agent-green/.env"
+# For Phase 2 (30B-A3B models), use .env.runpod.phase2 if it exists
+if [ -f "$PROJECT_ROOT/.env.runpod.phase2" ]; then
+    echo "Using Phase 2 configuration (.env.runpod.phase2)"
+    cp "$PROJECT_ROOT/.env.runpod.phase2" "$TEMP_DIR/agent-green/.env"
+elif [ -f "$PROJECT_ROOT/.env.runpod" ]; then
+    echo "Using default RunPod configuration (.env.runpod)"
+    cp "$PROJECT_ROOT/.env.runpod" "$TEMP_DIR/agent-green/.env"
+else
+    echo "Warning: No .env.runpod or .env.runpod.phase2 found"
+fi
 
 # Requirements
 if [ -f "$PROJECT_ROOT/requirements.txt" ]; then
