@@ -1,13 +1,16 @@
 # RQ1 Analysis Summary
 
-**Date**: 2025-10-12  
-**Status**: Analysis framework complete, ready for execution
+**Date**: 2025-10-12 (Phase 1) | 2025-10-20 (Phase 2a)
+**Status**: ✅ Phase 1 Complete | ✅ Phase 2a Complete
 
 ---
 
 ## Overview
 
-This document summarizes the complete analysis setup for RQ1 (Thinking vs Baseline models for vulnerability detection).
+This document summarizes the complete analysis setup for RQ1 (Thinking vs Instruct models for vulnerability detection) across two experimental phases:
+
+- **Phase 1**: Qwen3-4B models (dense architecture) on Mars Server
+- **Phase 2a**: Qwen3-30B-A3B models (MoE architecture) on RunPod H100
 
 ---
 
@@ -268,6 +271,87 @@ Proper attribution:
 
 ---
 
-**Status**: ✓ Framework complete, ready to run notebooks and populate findings
+## Phase 2a: Simplified Analysis (RunPod H100)
 
-**Next**: Execute both notebooks and complete rq1_findings.md
+### Key Differences from Phase 1
+
+**Infrastructure**:
+- Platform: RunPod H100 SXM 80GB (vs Mars RTX A5000)
+- Dedicated pods per experiment (clean isolation)
+- CodeCarbon 3.0.7 (vs 2.7.1 in Phase 1)
+
+**Data Quality**:
+- **Simplified**: Most experiments have single sessions (no complex filtering needed)
+- Only Thinking Few-shot has 2 sessions (one interruption/resume)
+- No test runs in emissions.csv (dedicated pods = clean data)
+
+**Analysis Approach**:
+```python
+# Phase 2a: Simple - no timestamp filtering needed
+cc_df = pd.read_csv('emissions.csv')
+# Use all rows directly (clean data from dedicated pod)
+```
+
+### Phase 2a Results Summary
+
+**Performance**:
+- Best F1: 54.81% (Thinking Zero-shot) - **+15.62pp over Phase 1**
+- Scale improves performance: 30B-A3B >> 4B
+- Few-shot paradox confirmed: Still hurts performance at larger scale
+- Hypothesis REJECTED: Scale does not make few-shot better
+
+**Energy Efficiency**:
+- **MoE Breakthrough**: 30B-A3B uses 69% LESS CO2/sample than 4B dense
+- Despite 7.5× more total parameters, only 3B active = massive efficiency gain
+- H100 more GPU-intensive: 69% GPU energy (vs 43% on RTX A5000)
+- Thinking still uses 3.9× more energy than Instruct (consistent pattern)
+
+**Key Discovery**:
+MoE architecture enables **sustainable scaling**: Better performance AND lower energy than dense models.
+
+---
+
+## Updated Key Takeaways
+
+1. **Phase 1**: CodeCarbon emissions.csv requires filtering by experiment timestamp
+2. **Phase 2a**: Clean dedicated pods = no filtering needed (simpler analysis)
+3. **Both phases**: energy_tracking.json and emissions.csv must cross-validate
+4. **Cross-phase**: MoE architecture is dramatically more energy-efficient than dense
+5. **For papers**: Report both phases, emphasize MoE efficiency breakthrough
+
+---
+
+## Updated Submission Checklist
+
+**Phase 1 (4B Dense)**:
+- [x] `docs/rq1_findings.md` - Complete with all metrics
+- [x] `results/analysis/*.png` - All visualizations generated
+- [x] `results/analysis/*.xlsx` - Complete metrics tables
+- [x] Cross-validation < 0.01% difference ✓
+- [x] Hardware component analysis complete ✓
+
+**Phase 2a (30B-A3B MoE)**:
+- [x] `docs/rq1_findings.md` - Phase 2a section added
+- [x] `results/analysis_phase2a/*.png` - All visualizations with trend lines
+- [x] `results/analysis_phase2a/*.csv` - Complete metrics tables
+- [x] Cross-validation < 0.01% difference ✓
+- [x] H100 hardware analysis complete ✓
+
+**Cross-Phase Analysis**:
+- [x] Scale-dependent hypothesis tested and rejected
+- [x] MoE efficiency breakthrough documented
+- [x] Energy-performance tradeoffs compared
+- [x] Practical deployment recommendations provided
+
+---
+
+**Status**: ✅ COMPLETE - Both Phase 1 and Phase 2a analysis finished
+
+**Last Updated**: 2025-10-20
+
+**Research Outcomes**:
+1. ✅ Phase 1 (4B) establishes baseline patterns
+2. ✅ Phase 2a (30B-A3B) tests scale-dependent hypothesis
+3. ✅ MoE efficiency discovered (69% energy savings)
+4. ✅ Few-shot paradox persists across scales
+5. ✅ Ready for research paper submission
