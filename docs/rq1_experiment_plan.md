@@ -266,6 +266,188 @@ Based on preliminary findings, RQ1 will be extended with two additional experime
 
 ---
 
+## 1.8 Few-Shot Prompt Validation and Re-run Plan
+
+### 1.8.1 Current Status (October 2025)
+
+**Phase 1 and Phase 2a Results:**
+- ✅ All experiments completed with current few-shot prompts
+- ✅ Consistent finding: Few-shot degrades performance across all scales
+- ⚠️ **Current limitation**: Few-shot examples may not be optimal
+
+**Current Few-Shot Examples:**
+- Source: Random vulnerability examples or LLM-generated samples
+- Quality: Not validated against real-world CVE severity
+- Selection criteria: General coverage, not focused on critical vulnerabilities
+
+### 1.8.2 Prompt Update Plan
+
+**Proposed Change:**
+Replace current few-shot examples with **top most dangerous CWE/CVE** examples to test if example quality/relevance affects results.
+
+**Rationale:**
+- **Hypothesis to test**: Does few-shot example quality matter for performance?
+- **Current suspicion**: Example quality may not change degradation pattern
+- **Theoretical basis**: Li et al. (2025) suggests CoT paradox is structural, not content-dependent
+
+**Example Selection Strategy:**
+- Select from **MITRE CWE Top 25 Most Dangerous Software Weaknesses**
+- Focus on high-impact CVEs (CVSS score ≥ 8.0)
+- Include representative examples from:
+  - CWE-787: Out-of-bounds Write
+  - CWE-79: Cross-site Scripting
+  - CWE-89: SQL Injection
+  - CWE-416: Use After Free
+  - CWE-78: OS Command Injection
+
+**Expected Changes:**
+```python
+# Current: Random/LLM-generated examples
+SYS_MSG_VULNERABILITY_DETECTOR_FEW_SHOT = """
+Example 1: [Generic buffer overflow example]
+Example 2: [Generic off-by-one example]
+"""
+
+# Updated: Top CWE-based examples
+SYS_MSG_VULNERABILITY_DETECTOR_FEW_SHOT = """
+Example 1: CWE-787 (Out-of-bounds Write) - Real CVE
+Example 2: CWE-89 (SQL Injection) - Real CVE
+"""
+```
+
+### 1.8.3 Re-run Scope
+
+**Experiments to Re-run:**
+Once updated prompts are received from peer researcher, re-run **few-shot configurations only**:
+
+| Phase | Model | Configuration | Status |
+|-------|-------|--------------|--------|
+| Phase 1 | Qwen3-4B-Instruct | Few-shot | 🔄 To re-run |
+| Phase 1 | Qwen3-4B-Thinking | Few-shot | 🔄 To re-run |
+| Phase 2a | Qwen3-30B-A3B-Instruct | Few-shot | 🔄 To re-run |
+| Phase 2a | Qwen3-30B-A3B-Thinking | Few-shot | 🔄 To re-run |
+
+**Total re-runs:** 4 experiments
+
+**Zero-shot configurations:** ✅ No re-run needed (not affected by prompt change)
+
+### 1.8.4 Hypotheses for Prompt Quality Impact
+
+**Hypothesis 1: Minimal Impact (Expected)**
+- **Prediction**: Updated high-quality CWE examples will NOT significantly change results
+- **Rationale**:
+  - Instruction-following degradation is structural (Li et al., 2025)
+  - CoT paradox affects attention distribution, not example quality
+  - Our Phase 1 & 2a results show consistent degradation regardless of example content
+- **Evidence to look for**: F1 score changes < 2-3 percentage points
+
+**Hypothesis 2: Moderate Improvement (Alternative)**
+- **Prediction**: High-quality examples might reduce degradation slightly
+- **Rationale**:
+  - Better examples = less confusion/noise
+  - Models might pattern-match more effectively to real CVE patterns
+  - Could improve precision even if recall still suffers
+- **Evidence to look for**: F1 score improves 3-5 percentage points, but still underperforms zero-shot
+
+**Hypothesis 3: Significant Impact (Unlikely)**
+- **Prediction**: High-quality CWE examples reverse few-shot degradation
+- **Rationale**:
+  - Current degradation entirely due to poor example selection
+  - Real-world CVE patterns unlock model's few-shot capabilities
+- **Evidence to look for**: F1 score matches or exceeds zero-shot
+- **Note**: Would contradict Li et al. (2025) and our cross-scale findings
+
+### 1.8.5 Validation Methodology
+
+**Comparison Approach:**
+
+1. **Direct Comparison:**
+   - Old few-shot F1 vs New few-shot F1 (same model, same dataset)
+   - Measure delta: ΔF1 = F1_new - F1_old
+
+2. **Zero-shot Benchmark:**
+   - New few-shot F1 vs Zero-shot F1 (unchanged)
+   - Check if new few-shot still underperforms zero-shot
+
+3. **Cross-scale Validation:**
+   - Compare prompt quality effect at 4B vs 30B-A3B
+   - Test if larger models benefit more from better examples
+
+**Success Criteria:**
+
+| Outcome | ΔF1 | Interpretation | Next Action |
+|---------|-----|----------------|-------------|
+| **No change** | < 2pp | Example quality irrelevant, CoT paradox structural | Publish findings, cite Li et al. (2025) |
+| **Small improvement** | 2-5pp | Quality helps slightly but few-shot still suboptimal | Note improvement, recommend zero-shot |
+| **Moderate improvement** | 5-10pp | Quality matters, revisit prompt engineering | Test more example selection strategies |
+| **Large improvement** | > 10pp | Original examples were poor, few-shot viable | Revise conclusions, publish prompt engineering insights |
+
+### 1.8.6 Timeline
+
+**Status:** 🕐 **Waiting for upstream prompt updates**
+
+| Date | Milestone | Status |
+|------|-----------|--------|
+| October 26, 2025 | Received notification of upstream prompt work | ✅ Complete |
+| **TBD (Tonight)** | **Peer researcher completes prompt updates** | ⏳ **Pending** |
+| TBD | Pull upstream changes with new prompts | 🔄 Planned |
+| TBD | Re-run 4 few-shot experiments (Phase 1 & 2a) | 🔄 Planned |
+| TBD | Comparative analysis (old vs new prompts) | 🔄 Planned |
+| TBD | Update findings documentation if needed | 🔄 Planned |
+
+**Estimated Re-run Time:**
+- 4B Instruct Few-shot: ~0.5 hours
+- 4B Thinking Few-shot: ~2 hours
+- 30B-A3B Instruct Few-shot: ~0.7 hours
+- 30B-A3B Thinking Few-shot: ~2.5 hours
+- **Total:** ~5.7 hours of experiment time
+
+**Infrastructure:**
+- Mars Server for 4B models (existing setup)
+- RunPod H100 for 30B-A3B models (~$15 cost estimate)
+
+### 1.8.7 Documentation Updates Required
+
+**If results change significantly (ΔF1 > 5pp):**
+
+1. Update `docs/rq1_findings.md`:
+   - Add "Prompt Quality Analysis" section
+   - Document old vs new few-shot results
+   - Revise hypothesis about few-shot degradation
+
+2. Update `docs/rq1_theoretical_framework.md`:
+   - Add findings to Section 3 (Experimental Validation)
+   - Discuss implications for Li et al. (2025) CoT paradox theory
+
+3. Update `docs/COMPLETION_STATUS.md`:
+   - Note prompt validation completion
+   - Update key findings if needed
+
+4. Create `docs/rq1_prompt_validation_report.md`:
+   - Detailed comparison of old vs new prompts
+   - Statistical analysis of quality impact
+   - Recommendations for prompt engineering
+
+**If results remain similar (ΔF1 < 2pp):**
+- Add brief note to `docs/rq1_findings.md` confirming prompt quality has minimal impact
+- Strengthens conclusion that zero-shot is optimal for vulnerability detection
+
+### 1.8.8 Research Contribution
+
+**Value of This Validation:**
+
+1. **Strengthens findings**: Rules out prompt quality as confounding variable
+2. **Methodological rigor**: Shows results are robust across different few-shot strategies
+3. **Practical guidance**: Tests industry-relevant example selection (top CWEs)
+4. **Theory validation**: Empirically tests if CoT paradox is content-independent
+
+**Potential Publication Sections:**
+- **Methods**: "We validated our findings with two few-shot prompt variants..."
+- **Results**: "Prompt quality had minimal impact (ΔF1 < 2pp), confirming..."
+- **Discussion**: "The structural nature of the CoT paradox is evidenced by..."
+
+---
+
 ## 2. Model Selection
 
 ### 2.1 Reasoning-Enabled Models
