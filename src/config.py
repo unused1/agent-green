@@ -334,7 +334,7 @@ Analysis: deleteUser removes elements without deleting underlying objects. Destr
 # =======================================================================
 VULNERABILITY_TASK_PROMPT = """Please analyze the following code:
 ```
-{code}
+{func}
 ```
 Please indicate your result:
 (1) YES: Vulnerability detected.
@@ -429,7 +429,7 @@ DUAL_AGENT_TASK_CODE_SUBMISSION = """The following code is written by you (Code 
 Please explain or justify its behavior as if you implemented it:
 
 ```
-{code}
+{func}
 ```
 Describe its intent and any design choices made. Be honest about potential risky parts if any exist."""
 
@@ -438,7 +438,7 @@ Please decide whether the following code contains a vulnerability.
 
 Original Code:
 ```
-{code}
+{func}
 ```
 Author’s Explanation:
 {author_response}
@@ -510,14 +510,14 @@ SYS_MSG_REVIEW_BOARD_ZERO_SHOT = """You are the Review Board. Produce final JSON
 # --- Multi-Agent Task Templates ---
 MULTI_AGENT_TASK_SECURITY_RESEARCHER = """Analyze the following code for vulnerabilities:
 ```
-{code}
+{func}
 ```"""
 
 MULTI_AGENT_TASK_CODE_AUTHOR = """The Security Researcher found:
 {researcher_findings}
 Code:
 ```
-{code}
+{func}
 ```
 Please respond to each finding."""
 
@@ -532,7 +532,7 @@ Moderator Summary:
 {moderator_summary}
 Original Code:
 ```
-{code}
+{func}
 ```
 Security Researcher Analysis:
 {researcher_findings}

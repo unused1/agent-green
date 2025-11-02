@@ -40,7 +40,7 @@ else:
 print(f"Running with design: {DESIGN}")
 
 
-model = llm_config["config_list"][0]["model"].replace(":", "-")
+model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 project_name = DESIGN.capitalize()
 exp_name = f"{project_name}_{model}_{timestamp}"
@@ -157,7 +157,7 @@ def save_templates(vulnerability_predictions, llm_config, design, result_dir):
     predictions = [r['vuln'] for r in vulnerability_predictions]
     
     # Save predictions in simple format (similar to original save_templates)
-    model = llm_config["config_list"][0]["model"].replace(":", "-")
+    model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     
     predictions_file = os.path.join(result_dir, f"{design}_{model}_{timestamp}_predictions.json")
