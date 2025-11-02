@@ -239,12 +239,94 @@ Should return direct answer without reasoning chain.
 
 ## Running Parallel Experiments
 
-### Method 1: Using Run Script (Sequential but Fast)
+### Method 1: SSH Directly to Pods (RECOMMENDED for Manual Setup)
+
+**When running experiments directly on RunPod pods** (not from local machine), use this approach:
+
+#### Pod 1 (Instruct Model) - SSH and Run:
+```bash
+# SSH into Pod 1
+ssh root@<POD1_IP> -p <POD1_PORT> -i ~/.ssh/runpod_ed25519
+
+# Start vLLM with Instruct model
+nohup python3 -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-30B-A3B-Instruct-2507 \
+  --served-model-name "Qwen/Qwen3-30B-A3B-Instruct-2507" \
+  --host 0.0.0.0 \
+  --port 11434 \
+  --max-model-len 65536 \
+  --dtype auto \
+  --gpu-memory-utilization 0.9 \
+  > /workspace/vllm_instruct.log 2>&1 &
+
+# Wait for server startup, then verify
+curl http://localhost:11434/v1/models
+
+# CRITICAL: Install dependencies and set environment variables
+pip3 install ollama fix-busted-json
+
+cd /workspace
+export ENABLE_REASONING=false
+export USE_RUNPOD=true
+export BASELINE_MODEL="Qwen/Qwen3-30B-A3B-Instruct-2507"
+export OLLAMA_HOST="http://localhost:11434"
+
+# Run experiment
+python3 src/single_agent_vuln.py SA-few
+```
+
+#### Pod 2 (Thinking Model) - SSH and Run:
+```bash
+# SSH into Pod 2
+ssh root@<POD2_IP> -p <POD2_PORT> -i ~/.ssh/runpod_ed25519
+
+# Start vLLM with Thinking model
+nohup python3 -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-30B-A3B-Thinking-2507 \
+  --served-model-name "Qwen/Qwen3-30B-A3B-Thinking-2507" \
+  --host 0.0.0.0 \
+  --port 11434 \
+  --max-model-len 65536 \
+  --dtype auto \
+  --gpu-memory-utilization 0.9 \
+  > /workspace/vllm_thinking.log 2>&1 &
+
+# Wait for server startup, then verify
+curl http://localhost:11434/v1/models
+
+# CRITICAL: Install dependencies and set environment variables
+pip3 install ollama fix-busted-json
+
+cd /workspace
+export ENABLE_REASONING=true
+export USE_RUNPOD=true
+export REASONING_MODEL="Qwen/Qwen3-30B-A3B-Thinking-2507"
+export OLLAMA_HOST="http://localhost:11434"
+
+# Run experiment
+python3 src/single_agent_vuln.py SA-few
+```
+
+**Critical Environment Variables Explained**:
+- `USE_RUNPOD=true` - Switches AutoGen to OpenAI-compatible API (required for vLLM)
+- `BASELINE_MODEL` / `REASONING_MODEL` - Overrides default `qwen3:4b` (prevents 404 errors)
+- `OLLAMA_HOST` - Points to vLLM server on port 11434
+- `--served-model-name` - Ensures vLLM serves model with HuggingFace name (not local path)
+
+**Without these**: Script requests `qwen3:4b` → vLLM returns 404 → all samples fail.
+
+**Time**: Both pods run in parallel, ~45-90 min on H100
+
+### Method 2: Using Run Script from Local Machine (Requires .env setup)
 
 The existing script will automatically use the correct pod based on `ENABLE_REASONING`:
 
 ```bash
 cd /Users/shanetan/Documents/Code_Projects/SMU/SCIS_EngD/agent-green
+
+# Update .env with both pod endpoints first
+# REASONING_ENDPOINT=https://<POD1_ID>-8000.proxy.runpod.net/v1
+# BASELINE_ENDPOINT=https://<POD2_ID>-8000.proxy.runpod.net/v1
 
 # Run all 4 experiments
 bash scripts/run_rq1_vuln.sh
@@ -257,36 +339,6 @@ bash scripts/run_rq1_vuln.sh
 4. Baseline + Few-shot → Uses Pod 2 (standard)
 
 **Time**: 0.7-1.5 hours on H100, 2-4 hours on A40
-
-### Method 2: True Parallel Execution (Advanced)
-
-Run experiments in separate terminals simultaneously:
-
-**Terminal 1 - Reasoning Experiments:**
-```bash
-cd /Users/shanetan/Documents/Code_Projects/SMU/SCIS_EngD/agent-green
-
-# Experiment 1: Reasoning + Zero-shot
-export ENABLE_REASONING=true
-python src/single_agent_vuln.py SA-zero &
-
-# Experiment 3: Reasoning + Few-shot (run after Exp 1 completes)
-# python src/single_agent_vuln.py SA-few
-```
-
-**Terminal 2 - Baseline Experiments:**
-```bash
-cd /Users/shanetan/Documents/Code_Projects/SMU/SCIS_EngD/agent-green
-
-# Experiment 2: Baseline + Zero-shot
-export ENABLE_REASONING=false
-python src/single_agent_vuln.py SA-zero &
-
-# Experiment 4: Baseline + Few-shot (run after Exp 2 completes)
-# python src/single_agent_vuln.py SA-few
-```
-
-**Time savings**: Cut experiment time in half (~30-45 min on H100)
 
 ### Monitor Progress
 

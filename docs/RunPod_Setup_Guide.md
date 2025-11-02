@@ -59,33 +59,48 @@ huggingface-cli download Qwen/Qwen2.5-Coder-7B-Instruct --local-dir /workspace/m
 
 ### 2.3 Start vLLM Server
 
-#### For Baseline Model (Non-Reasoning)
+#### For 30B Baseline Model (Instruct - Non-Reasoning)
 ```bash
-python -m vllm.entrypoints.openai.api_server \
-  --model /workspace/models/Qwen2.5-Coder-7B-Instruct \
+# CRITICAL: Use --served-model-name to match config expectations
+nohup python3 -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-30B-A3B-Instruct-2507 \
+  --served-model-name "Qwen/Qwen3-30B-A3B-Instruct-2507" \
   --host 0.0.0.0 \
-  --port 8000 \
+  --port 11434 \
   --dtype auto \
-  --max-model-len 8192 \
-  --gpu-memory-utilization 0.9
+  --max-model-len 65536 \
+  --gpu-memory-utilization 0.9 \
+  > /workspace/vllm_instruct.log 2>&1 &
+
+# Monitor startup
+tail -f /workspace/vllm_instruct.log
 ```
 
-#### For Reasoning Model (if using QwQ-32B)
+#### For 30B Reasoning Model (Thinking)
 ```bash
-python -m vllm.entrypoints.openai.api_server \
-  --model /workspace/models/QwQ-32B-Preview \
+nohup python3 -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-30B-A3B-Thinking-2507 \
+  --served-model-name "Qwen/Qwen3-30B-A3B-Thinking-2507" \
   --host 0.0.0.0 \
-  --port 8000 \
+  --port 11434 \
   --dtype auto \
-  --max-model-len 32768 \
-  --gpu-memory-utilization 0.95
+  --max-model-len 65536 \
+  --gpu-memory-utilization 0.9 \
+  > /workspace/vllm_thinking.log 2>&1 &
+
+tail -f /workspace/vllm_thinking.log
 ```
 
-**Tip**: Run vLLM in background with `nohup` or `tmux`:
+**Important Notes**:
+- Port 11434 matches Ollama's default for config compatibility
+- `--served-model-name` ensures vLLM serves the model with the correct HuggingFace name
+- Without this flag, vLLM uses the local path which causes 404 errors
+- 65536 context length recommended for H100 (handles verbose thinking traces)
+
+**Verify Server is Running**:
 ```bash
-tmux new -s vllm
-# Run vLLM command above
-# Press Ctrl+B, then D to detach
+curl http://localhost:11434/v1/models
+# Should show "id": "Qwen/Qwen3-30B-A3B-Instruct-2507" (exact match)
 ```
 
 ## Step 3: Configure Local Environment
@@ -141,19 +156,68 @@ I'll create an updated config in the next step.
 
 ## Step 5: Run Experiments on RunPod
 
-### 5.1 Using the RunPod Script
+### 5.1 Running Experiments Inside Pods (CRITICAL Environment Variables)
+
+**When running experiments directly on RunPod pods**, you MUST set these environment variables:
+
+#### For 30B Instruct Model (Baseline):
 ```bash
-# Use the RunPod-specific script (to be created)
+cd /workspace
+
+# Install required dependencies if missing
+pip3 install ollama fix-busted-json
+
+# Set environment variables
+export ENABLE_REASONING=false
+export USE_RUNPOD=true
+export BASELINE_MODEL="Qwen/Qwen3-30B-A3B-Instruct-2507"
+export OLLAMA_HOST="http://localhost:11434"
+
+# Run experiment
+python3 src/single_agent_vuln.py SA-few
+```
+
+#### For 30B Thinking Model (Reasoning):
+```bash
+cd /workspace
+
+# Install required dependencies if missing
+pip3 install ollama fix-busted-json
+
+# Set environment variables
+export ENABLE_REASONING=true
+export USE_RUNPOD=true
+export REASONING_MODEL="Qwen/Qwen3-30B-A3B-Thinking-2507"
+export OLLAMA_HOST="http://localhost:11434"
+
+# Run experiment
+python3 src/single_agent_vuln.py SA-few
+```
+
+**Why these variables are critical**:
+- `USE_RUNPOD=true` - Switches AutoGen to OpenAI-compatible API mode (required for vLLM)
+- `BASELINE_MODEL` / `REASONING_MODEL` - Overrides default `qwen3:4b` → prevents 404 errors
+- `OLLAMA_HOST` - Points to vLLM server at port 11434
+- `ENABLE_REASONING` - Controls which model/prompt to use
+
+**Without these variables**: Script will request `qwen3:4b` which vLLM isn't serving → all samples fail with 404 errors.
+
+### 5.2 Using the RunPod Script (from local machine)
+```bash
+# Use the RunPod-specific script (requires .env configuration)
 bash scripts/run_rq1_vuln_runpod.sh
 ```
 
-### 5.2 Monitor Progress
+### 5.3 Monitor Progress
 ```bash
 # Watch logs in real-time
 tail -f results/*_detailed_results.jsonl
 
 # Check energy tracking
 cat results/*_energy_tracking.json
+
+# Count completed samples
+wc -l results/*_detailed_results.jsonl
 ```
 
 ## Step 6: Cost Estimation

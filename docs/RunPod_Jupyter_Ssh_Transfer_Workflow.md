@@ -117,20 +117,24 @@ Try this first - vLLM automatically downloads the model:
 mkdir -p /workspace/agent-green/models
 
 # Start vLLM - it will auto-download the model
+# IMPORTANT: Use --served-model-name to match config expectations
 python -m vllm.entrypoints.openai.api_server \
   --model Qwen/Qwen3-30B-A3B-Thinking-2507 \
+  --served-model-name "Qwen/Qwen3-30B-A3B-Thinking-2507" \
   --download-dir /workspace/agent-green/models \
   --max-model-len 65536 \
   --dtype auto \
   --gpu-memory-utilization 0.90 \
   --host 0.0.0.0 \
-  --port 8000 &
+  --port 11434 &
 
-# Wait for "Uvicorn running on http://0.0.0.0:8000"
+# Wait for "Uvicorn running on http://0.0.0.0:11434"
 # First download takes ~5-10 min (~20GB model)
 ```
 
 **If you see XET CDN errors** (Status Code: 500 from cas-server.xethub.hf.co), proceed to Method 2.
+
+**Note**: Using port 11434 (Ollama's default) and --served-model-name ensures compatibility with our config.
 
 ---
 
@@ -148,17 +152,20 @@ export HF_HUB_DISABLE_XET=1
 
 # Pre-download using huggingface-cli
 huggingface-cli download Qwen/Qwen3-30B-A3B-Thinking-2507 \
-  --cache-dir /workspace/agent-green/models
+  --local-dir /workspace/agent-green/models/Qwen3-30B-A3B-Thinking-2507
 
-# Then start vLLM pointing to downloaded model
-python -m vllm.entrypoints.openai.api_server \
-  --model Qwen/Qwen3-30B-A3B-Thinking-2507 \
-  --download-dir /workspace/agent-green/models \
+# Then start vLLM pointing to local downloaded model
+nohup python3 -m vllm.entrypoints.openai.api_server \
+  --model /workspace/agent-green/models/Qwen3-30B-A3B-Thinking-2507 \
+  --served-model-name "Qwen/Qwen3-30B-A3B-Thinking-2507" \
   --max-model-len 65536 \
   --dtype auto \
   --gpu-memory-utilization 0.90 \
   --host 0.0.0.0 \
-  --port 8000 &
+  --port 11434 \
+  > /workspace/vllm_thinking.log 2>&1 &
+
+tail -f /workspace/vllm_thinking.log
 ```
 
 **If this still fails**, proceed to Method 3.
@@ -185,13 +192,17 @@ GIT_LFS_SKIP_SMUDGE=0 git clone https://huggingface.co/Qwen/Qwen3-30B-A3B-Thinki
 # cd Qwen3-30B-A3B-Thinking-2507 && git lfs pull
 
 # Start vLLM pointing to local clone
-python -m vllm.entrypoints.openai.api_server \
+nohup python3 -m vllm.entrypoints.openai.api_server \
   --model /workspace/agent-green/models/Qwen3-30B-A3B-Thinking-2507 \
+  --served-model-name "Qwen/Qwen3-30B-A3B-Thinking-2507" \
   --max-model-len 65536 \
   --dtype auto \
   --gpu-memory-utilization 0.90 \
   --host 0.0.0.0 \
-  --port 8000 &
+  --port 11434 \
+  > /workspace/vllm_thinking.log 2>&1 &
+
+tail -f /workspace/vllm_thinking.log
 ```
 
 ---
@@ -199,31 +210,87 @@ python -m vllm.entrypoints.openai.api_server \
 **Verify vLLM is Running**:
 
 ```bash
-curl http://localhost:8000/v1/models
+curl http://localhost:11434/v1/models
 # Should return JSON with model info
+# Verify "id": "Qwen/Qwen3-30B-A3B-Thinking-2507" matches exactly
+```
+
+---
+
+### Step 4a: CRITICAL - Running Experiments Inside Pods (NEW)
+
+**When running experiments directly on RunPod pods** (not from local machine), you must set these environment variables:
+
+#### For 30B Instruct Model (Baseline):
+```bash
+cd /workspace
+
+export ENABLE_REASONING=false
+export USE_RUNPOD=true
+export BASELINE_MODEL="Qwen/Qwen3-30B-A3B-Instruct-2507"
+export OLLAMA_HOST="http://localhost:11434"
+
+python3 src/single_agent_vuln.py SA-few
+```
+
+#### For 30B Thinking Model (Reasoning):
+```bash
+cd /workspace
+
+export ENABLE_REASONING=true
+export USE_RUNPOD=true
+export REASONING_MODEL="Qwen/Qwen3-30B-A3B-Thinking-2507"
+export OLLAMA_HOST="http://localhost:11434"
+
+python3 src/single_agent_vuln.py SA-few
+```
+
+**Why these variables are critical**:
+- `USE_RUNPOD=true` - Switches AutoGen to use OpenAI-compatible API (vLLM uses this)
+- `BASELINE_MODEL` / `REASONING_MODEL` - Overrides default `qwen3:4b` model names
+- `OLLAMA_HOST` - Points to vLLM server (port 11434 matches Ollama default)
+- Without these, the script will request `qwen3:4b` which vLLM isn't serving → 404 errors
+
+**Dependencies**: Install required Python packages if missing:
+```bash
+pip3 install ollama fix-busted-json
 ```
 
 ---
 
 ### Step 5: Repeat for Instruct Model (on second pod)
 
-Deploy a second A100 80GB pod (100GB Volume Disk) and repeat Steps 2-4 with the Instruct model.
+Deploy a second A100 80GB pod (100GB Volume Disk) and repeat Steps 2-4a with the Instruct model.
 
 Use the same sequential approach - try Method 1, fall back to Method 2 or 3 if needed:
 
 ```bash
 # Method 1 (try first)
-python -m vllm.entrypoints.openai.api_server \
+python3 -m vllm.entrypoints.openai.api_server \
   --model Qwen/Qwen3-30B-A3B-Instruct-2507 \
+  --served-model-name "Qwen/Qwen3-30B-A3B-Instruct-2507" \
   --download-dir /workspace/agent-green/models \
   --max-model-len 65536 \
   --dtype auto \
   --gpu-memory-utilization 0.90 \
   --host 0.0.0.0 \
-  --port 8000 &
+  --port 11434 &
 
-# If XET CDN errors, try Method 2 (huggingface-cli)
-# If still failing, use Method 3 (git-lfs clone)
+# Method 2 (if XET CDN errors)
+huggingface-cli download Qwen/Qwen3-30B-A3B-Instruct-2507 \
+  --local-dir /workspace/agent-green/models/Qwen3-30B-A3B-Instruct-2507
+
+nohup python3 -m vllm.entrypoints.openai.api_server \
+  --model /workspace/agent-green/models/Qwen3-30B-A3B-Instruct-2507 \
+  --served-model-name "Qwen/Qwen3-30B-A3B-Instruct-2507" \
+  --max-model-len 65536 \
+  --dtype auto \
+  --gpu-memory-utilization 0.90 \
+  --host 0.0.0.0 \
+  --port 11434 \
+  > /workspace/vllm_instruct.log 2>&1 &
+
+# Method 3 (git-lfs clone - most reliable)
 ```
 
 ---
