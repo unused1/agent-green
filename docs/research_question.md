@@ -1,1 +1,5 @@
 RQ1 — Effectiveness of reasoning: Do reasoning-enabled LLMs out-perform non-reasoning baselines on log parsing, log analysis, vulnerability detection, technical debt detection, and code generation?
+RQ2 — Agentic moderation: How do multi-agent setups (planner–executor, proposer–reviewer) compare to single-agent execution in accuracy and ro-bustness under matched toolchains and budgets, and do these effects differ
+between reasoning and non-reasoning models??
+RQ3 — Explanation prompting: How do prompting styles (no-explanation, explain-after, explain-before, evidence-bound) impact explanation usefulness and faithfulness, and do these effects differ between reasoning and non-reasoning models?
+RQ4 — Cost and efficiency: What latency/token overheads accompany reasoning, agentic orchestration, and explanation prompting, and what are the resulting quality–cost trade-offs?
