@@ -544,3 +544,128 @@ Code Author Response:
 
 
 
+
+# ========================================================================================
+# CODE GENERATION PROMPTS
+# ========================================================================================
+# Source: Integrated from upstream (merveast/agent-green)
+# Date: 2025-11-06
+# Canonical examples from HumanEval dataset (has_close_elements, separate_paren_groups, truncate_number)
+
+# =======================================================================
+# EXAMPLES (Used in few-shot prompts)
+# =======================================================================
+
+EXAMPLE_1_HAS_CLOSE_ELEMENTS = """Problem:
+```python
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    ''' Check if in given list of numbers, are any two numbers closer to each other than
+    given threshold.
+    >>> has_close_elements([1.0, 2.0, 3.0], 0.5)
+    False
+    >>> has_close_elements([1.0, 2.8, 3.0, 4.0, 5.0, 2.0], 0.3)
+    True
+    '''
+```
+Implementation: Let\'s think step-by-step. I need to compare every pair of numbers in the list and check if their absolute difference is less than the threshold.
+```python
+def has_close_elements(numbers: List[float], threshold: float) -> bool:
+    for i in range(len(numbers)):
+        for j in range(i + 1, len(numbers)):
+            if abs(numbers[i] - numbers[j]) < threshold:
+                return True
+    return False
+```
+"""
+
+EXAMPLE_2_SEPARATE_PAREN_GROUPS = """Problem:
+```python
+def separate_paren_groups(paren_string: str) -> List[str]:
+    ''' Input to this function is a string containing multiple groups of nested parentheses. Your goal is to
+    separate those groups into separate strings and return the list of those.
+    Separate groups are balanced (each open brace is properly closed) and not nested within each other.
+    Ignore any spaces in the input string.
+    >>> separate_paren_groups('( ) (( )) (( )( ))')
+    ['()', '(())', '(()())']
+    '''
+```
+Implementation: Let\'s think step-by-step. I need to track the depth of parentheses and collect characters for each group. When depth returns to 0, I have a complete group.
+```python
+def separate_paren_groups(paren_string: str) -> List[str]:
+    result = []
+    current_string = []
+    current_depth = 0
+
+    for c in paren_string:
+        if c == '(':
+            current_depth += 1
+            current_string.append(c)
+        elif c == ')':
+            current_depth -= 1
+            current_string.append(c)
+
+            if current_depth == 0:
+                result.append(''.join(current_string))
+                current_string = []
+
+    return result
+```
+"""
+
+EXAMPLE_3_TRUNCATE_NUMBER = """Problem:
+```python
+def truncate_number(number: float) -> float:
+    ''' Given a positive floating point number, it can be decomposed into
+    an integer part (largest integer smaller than given number) and decimals
+    (leftover part always smaller than 1).
+
+    Return the decimal part of the number.
+    >>> truncate_number(3.5)
+    0.5
+    '''
+```
+Implementation: Let\'s think step-by-step. I need to extract just the decimal part of a number. The modulo operator with 1.0 will give me the fractional part.
+```python
+def truncate_number(number: float) -> float:
+    return number % 1.0
+```
+"""
+
+FEW_SHOT_EXAMPLES = f"""Example 1:
+{EXAMPLE_1_HAS_CLOSE_ELEMENTS}
+
+Example 2:
+{EXAMPLE_2_SEPARATE_PAREN_GROUPS}
+
+Example 3:
+{EXAMPLE_3_TRUNCATE_NUMBER}
+"""
+
+
+# =======================================================================
+# SINGLE-AGENT PROMPTS
+# =======================================================================
+
+SYS_MSG_CODE_GENERATOR_ZERO_SHOT = """You are an expert Python programmer that is good at implementing functions based on their specifications."""
+
+SYS_MSG_CODE_GENERATOR_FEW_SHOT = f"""You are an expert Python programmer skilled in implementing functions based on their specifications.
+
+Use these canonical examples as reference:
+
+{FEW_SHOT_EXAMPLES}
+
+Now, implement the given function accurately and efficiently.
+"""
+
+CODE_GENERATION_TASK_PROMPT = """Please analyze the following programming problem and implement the required function:
+
+{prompt}
+
+Please provide your complete function implementation. Make sure to:
+- Follow the exact function signature
+- Implement the logic described in the docstring
+- Handle all specified requirements and edge cases
+- Return the correct data type
+
+Let\'s think step-by-step.
+"""
