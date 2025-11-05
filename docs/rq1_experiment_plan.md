@@ -1,7 +1,9 @@
 # RQ1 Experiment Plan: Effectiveness of Reasoning-Enabled LLMs
 
 ## Research Question
-**RQ1:** Do reasoning-enabled LLMs out-perform non-reasoning baselines on log parsing, log analysis, vulnerability detection, technical debt detection, and code generation?
+**RQ1:** Do reasoning-enabled LLMs out-perform non-reasoning baselines on vulnerability detection and code generation?
+
+**Note**: The original plan included log parsing, log analysis, and technical debt detection, but the actual implementation focused on vulnerability detection (completed) and code generation (planned).
 
 ---
 
@@ -13,12 +15,16 @@ Compare the performance of reasoning-enabled LLMs against non-reasoning baseline
 ### 1.2 Hypothesis
 Reasoning-enabled LLMs will demonstrate superior accuracy on complex software engineering tasks at the cost of increased energy consumption and inference time compared to non-reasoning baselines.
 
-### 1.3 Infrastructure Approach
-- **Platform:** RunPod with vLLM for high-performance inference
-- **GPU:** H100 80GB or A100 80GB for optimal performance
-- **Reasoning Model:** QwQ-32B-Preview (Qwen reasoning model)
-- **Baseline Models:** Qwen2.5-Coder-7B-Instruct, Qwen2.5-Coder-32B-Instruct
+### 1.3 Infrastructure Approach (Actual Implementation)
+- **Phase 1 Platform:** Mars Server (local) with RTX A5000 GPU
+- **Phase 2a Platform:** RunPod with H100 80GB SXM
+- **Models Used:**
+  - Qwen3-4B-Instruct (baseline)
+  - Qwen3-4B-Thinking (reasoning)
+  - Qwen3-30B-A3B-Instruct (30B MoE baseline)
+  - Qwen3-30B-A3B-Thinking (30B MoE reasoning)
 - **Deployment:** vLLM with OpenAI-compatible API
+- **Context Length:** 65536 tokens (64K) consistently across all experiments
 
 ---
 
@@ -106,9 +112,9 @@ Reasoning-enabled LLMs will demonstrate superior accuracy on complex software en
 
 **Questions to Address:**
 1. **RQ1-Extended**: Does few-shot effectiveness improve with model scale?
-   - Test Qwen2.5-Coder 7B, 32B models with same task
-   - Test QwQ-32B-Preview (reasoning) with few-shot
-   - Measure if larger models benefit from few-shot examples
+   - ✅ Tested Qwen3-30B-A3B models (Phase 2a complete)
+   - ✅ Measured few-shot effectiveness across 4B and 30B scales
+   - ✅ Finding: Few-shot paradox persisted across scales (before CWE prompt fix)
 
 2. **RQ2**: Does the few-shot paradox extend to other tasks?
    - Test on code generation (HumanEval dataset)
@@ -546,9 +552,9 @@ Once updated prompts are received from peer researcher, re-run **few-shot config
 
 **Notebooks:**
 - `notebooks/rq1_prompt_comparison_analysis.ipynb` - Performance comparison
-- `notebooks/rq1_prompt_comparison_codecarbon_analysis.ipynb` - Energy analysis
+- `notebooks/rq1_prompt_comparison_codecarbon_analysis.ipynb` - Energy and token analysis
 
-**Visualizations (8 charts):**
+**Visualizations (11 charts):**
 1. `f1_comparison_old_vs_new.png` - Side-by-side F1 scores
 2. `delta_f1_scores.png` - F1 improvements (+6.9% to +31.7%)
 3. `energy_comparison.png` - CO2 and energy comparison
@@ -556,7 +562,10 @@ Once updated prompts are received from peer researcher, re-run **few-shot config
 5. `codecarbon_power_consumption.png` - Power consumption analysis
 6. `codecarbon_energy_distribution_pies.png` - Component pie charts
 7. `codecarbon_model_size_comparison.png` - 4B vs 30B comparison
-8. **`comprehensive_energy_performance_tradeoff.png`** - All 12 experiments scatter plot
+8. **`comprehensive_energy_performance_tradeoff.png`** - F1 vs Energy (all 12 experiments)
+9. **`token_usage_comparison.png`** - Token usage bar charts (old vs new prompts)
+10. **`token_vs_energy_scatter.png`** - Token length vs Energy consumption (all 12 experiments)
+11. **`token_vs_f1_scatter.png`** - Token length vs F1 score (all 12 experiments)
 
 **Data Exports:**
 - `prompt_comparison_full.csv` - Complete metrics (old vs new)
@@ -564,7 +573,9 @@ Once updated prompts are received from peer researcher, re-run **few-shot config
 - `prompt_comparison_analysis.xlsx` - Excel workbook
 - `codecarbon_hardware_summary.csv` - Energy component breakdown
 - `codecarbon_validation.csv` - Cross-validation results
-- `codecarbon_prompt_comparison_detailed.xlsx` - Complete hardware data
+- `codecarbon_prompt_comparison_detailed.xlsx` - Complete hardware data with token sheets
+- **`token_usage_analysis.csv`** - Complete token statistics for all experiments
+- **`token_energy_efficiency.csv`** - Tokens per kWh and energy per 1K tokens
 
 **Location:** `results/analysis_prompt_comparison/`
 
@@ -669,7 +680,19 @@ Once updated prompts are received from peer researcher, re-run **few-shot config
 
 ---
 
-## 2. Model Selection
+## NOTE: Sections 2-12 - Original Broader Plan (Not Executed)
+
+The sections below (2-12) describe an original broader experimental plan that included multiple tasks (log parsing, log analysis, vulnerability detection, technical debt, code generation) across different model families (QwQ-32B, Qwen2.5-Coder, DeepSeek-Coder).
+
+**What was actually executed:**
+- **Section 1.5-1.8** documents the completed work: vulnerability detection experiments with Qwen3 models (4B and 30B-A3B)
+- **Phase 3** (Code Generation) is the next planned phase using the same Qwen3 models
+
+The original plan sections are preserved for historical reference but do not reflect the actual implementation.
+
+---
+
+## 2. Model Selection (Original Plan - Not Executed)
 
 ### 2.1 Reasoning-Enabled Models
 | Model | Parameters | Context | Reasoning Capability | VRAM Required |
@@ -1380,85 +1403,149 @@ requirements.txt                     # Add OpenAI library
 
 ---
 
-## 13. Next Steps
+## 13. Current Status and Next Steps
 
-### Immediate Actions (Before Experiments)
-1. ✅ Review and approve this experiment plan
-2. ⬜ Set up RunPod account and create pods
-3. ⬜ Deploy QwQ-32B and Qwen2.5-Coder models on vLLM
-4. ⬜ Update code for vLLM compatibility
-5. ⬜ Test single experiment end-to-end
-6. ⬜ Prepare missing datasets (log analysis, tech debt)
+### Completed Work (November 2025)
 
-### Implementation Priority
-1. **High Priority:** Modify existing scripts for vLLM
-2. **High Priority:** Create batch execution framework
-3. **Medium Priority:** Implement log analysis task
-4. **Medium Priority:** Implement technical debt task
-5. **Low Priority:** Advanced visualizations
+**Phase 1 - Qwen3-4B Vulnerability Detection** ✅
+- Platform: Mars Server (RTX A5000)
+- Models: Qwen3-4B-Instruct, Qwen3-4B-Thinking
+- Configurations: Zero-shot and Few-shot
+- Results: Documented in Section 1.5
 
-### Validation Steps
-1. Run 1 experiment per task manually
-2. Verify result file formats
-3. Check energy tracking accuracy
-4. Validate evaluation metrics
-5. Test batch execution on 10 samples
+**Phase 2a - Qwen3-30B-A3B Vulnerability Detection** ✅
+- Platform: RunPod (H100 80GB)
+- Models: Qwen3-30B-A3B-Instruct, Qwen3-30B-A3B-Thinking
+- Configurations: Zero-shot and Few-shot
+- Results: Documented in Section 1.7
+
+**Prompt Comparison Re-Run** ✅
+- Re-ran 4 few-shot experiments with CWE-based prompts
+- Major finding: Few-shot paradox resolved (+6.9% to +31.7% F1 improvement)
+- Results: Documented in Sections 1.8.6-1.8.14
+
+**Token Usage Analysis** ✅
+- Analyzed output token lengths across all 12 experiments
+- Context length verified: 65536 tokens (64K)
+- Results: Documented in `docs/ANALYSIS_SUMMARY.md`
+
+**Comprehensive Analysis** ✅
+- 11 visualizations generated
+- Energy-performance tradeoffs analyzed
+- Token-energy-performance correlations established
+- Location: `results/analysis_prompt_comparison/`
+
+### Next Phase: Code Generation (Phase 3)
+
+**Objective**: Test if reasoning advantage and few-shot patterns generalize from vulnerability detection (classification) to code generation (generative task)
+
+**Current Status**: Planning stage
+
+**Immediate Next Steps**:
+1. ⬜ Review upstream code generation prompts from peer researcher
+2. ⬜ Merge/integrate code generation prompt updates
+3. ⬜ Design Phase 3a: Initial validation (5-10 samples, basic prompts)
+4. ⬜ Design Phase 3b: Full experiment with CWE-style canonical examples
+5. ⬜ Prepare HumanEval dataset for experiments
+6. ⬜ Update evaluation scripts for code generation metrics
+
+**Phase 3 Plan**:
+- **Dataset**: HumanEval (164 Python programming problems)
+- **Models**: Same as Phase 2a (Qwen3-30B-A3B Instruct/Thinking)
+- **Configurations**: Zero-shot and Few-shot with canonical examples
+- **Metrics**: Pass@1, Pass@10, syntax correctness, energy consumption
+- **Expected Timeline**: 2-3 weeks after prompt finalization
+
+### Deferred/Out of Scope
+- Log parsing experiments
+- Log analysis task
+- Technical debt detection
+- Multi-model comparisons (QwQ-32B, Qwen2.5-Coder, DeepSeek-Coder)
+- Multi-agent configurations beyond single agent
 
 ---
 
 ## 14. References
 
-### Documentation
-- QwQ-32B-Preview: https://huggingface.co/Qwen/QwQ-32B-Preview
-- Qwen2.5-Coder: https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct
+### Models Used
+- Qwen3-4B-Instruct: https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507
+- Qwen3-4B-Thinking: https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507
+- Qwen3-30B-A3B-Instruct: https://huggingface.co/Qwen/Qwen3-30B-A3B-Instruct-2507
+- Qwen3-30B-A3B-Thinking: https://huggingface.co/Qwen/Qwen3-30B-A3B-Thinking-2507
+
+### Infrastructure & Tools
 - vLLM Documentation: https://docs.vllm.ai/
 - RunPod Documentation: https://docs.runpod.io/
-- AG2 Framework: https://github.com/ag2ai/ag2
 - CodeCarbon: https://codecarbon.io/
+- AG2 Framework: https://github.com/ag2ai/ag2
 
 ### Datasets
-- HDFS Logs: https://github.com/logpai/loghub
 - VulTrial: https://github.com/VulTrial/VulTrial
 - HumanEval: https://github.com/openai/human-eval
 
+### Research References
+- Li et al. (2025): Chain-of-Thought Paradox (instruction-following degradation)
+- MITRE CWE Top 25: https://cwe.mitre.org/top25/
+
 ---
 
-## Appendix A: Sample Commands
+## Appendix A: Sample Commands (Actual Implementation)
 
-### Deploy Models on RunPod
+### Deploy Models on Mars Server (Phase 1)
 ```bash
-# Terminal 1: QwQ-32B (Reasoning)
-vllm serve Qwen/QwQ-32B-Preview \
+# Terminal 1: Qwen3-4B-Instruct (Baseline)
+vllm serve Qwen/Qwen3-4B-Instruct-2507 \
+  --host 0.0.0.0 --port 8001 \
+  --dtype auto --gpu-memory-utilization 0.90 \
+  --max-model-len 65536 --trust-remote-code
+
+# Terminal 2: Qwen3-4B-Thinking (Reasoning)
+vllm serve Qwen/Qwen3-4B-Thinking-2507 \
+  --host 0.0.0.0 --port 8002 \
+  --dtype auto --gpu-memory-utilization 0.90 \
+  --max-model-len 65536 --trust-remote-code
+```
+
+### Deploy Models on RunPod (Phase 2a)
+```bash
+# Terminal 1: Qwen3-30B-A3B-Instruct (Baseline)
+vllm serve Qwen/Qwen3-30B-A3B-Instruct-2507 \
   --host 0.0.0.0 --port 8000 \
   --dtype auto --gpu-memory-utilization 0.95 \
-  --max-model-len 8192 --trust-remote-code
+  --max-model-len 65536 --trust-remote-code
 
-# Terminal 2: Qwen2.5-32B (Baseline)
-vllm serve Qwen/Qwen2.5-Coder-32B-Instruct \
-  --host 0.0.0.0 --port 8001 \
+# Terminal 2: Qwen3-30B-A3B-Thinking (Reasoning)
+vllm serve Qwen/Qwen3-30B-A3B-Thinking-2507 \
+  --host 0.0.0.0 --port 8000 \
   --dtype auto --gpu-memory-utilization 0.95 \
-  --max-model-len 8192 --trust-remote-code
+  --max-model-len 65536 --trust-remote-code
 ```
 
-### Run Experiments
+### Run Vulnerability Detection Experiments
 ```bash
-# Single experiment
-ENABLE_REASONING=true python src/no_agent_vuln_detection.py
+# Single agent vulnerability detection
+python src/single_agent_vuln.py \
+  --model-name "Qwen/Qwen3-30B-A3B-Thinking-2507" \
+  --design few \
+  --reasoning-mode thinking
 
-# Batch experiments
-./scripts/run_all_rq1.sh
+# View detailed results
+cat results/*/Sa-few_*_detailed_results.jsonl | jq
+
+# Check energy tracking
+cat results/*/Sa-few_*_energy_tracking.json
 ```
 
-### Check Results
+### Analysis Commands
 ```bash
-# View results
-cat results/rq1_consolidated_results.csv
+# Run performance analysis
+jupyter notebook notebooks/rq1_prompt_comparison_analysis.ipynb
 
-# Generate plots
-python src/visualization_rq1.py
+# Run energy and token analysis
+jupyter notebook notebooks/rq1_prompt_comparison_codecarbon_analysis.ipynb
 
-# Statistical analysis
-python src/statistical_analysis_rq1.py
+# View generated visualizations
+ls -lh results/analysis_prompt_comparison/*.png
 ```
 
 
