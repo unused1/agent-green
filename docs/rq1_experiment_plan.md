@@ -680,6 +680,208 @@ Once updated prompts are received from peer researcher, re-run **few-shot config
 
 ---
 
+## 1.9 Output Relevance and Quality Analysis (Planned)
+
+### 1.9.1 Motivation
+
+Building on the token usage analysis completed in Section 1.8.12, this section proposes a deeper investigation into **output quality and relevance** relative to energy consumption.
+
+**Key Research Question:**
+- Thinking models produce 3-4x more tokens than Instruct models
+- These longer outputs consume 3.9-4.4x more energy
+- **But are these extra tokens USEFUL?**
+
+**Dimensions to Analyze:**
+1. **Relevance**: Does the reasoning/output address the task at hand?
+2. **Quality**: Is the reasoning sound, coherent, and helpful?
+3. **Efficiency**: Is the energy cost justified by output quality?
+
+### 1.9.2 Proposed Methodology
+
+#### For Vulnerability Detection (Phase 1 & 2a)
+
+**Data Source**: `reasoning` field in `*_detailed_results.jsonl` files
+
+**Relevance Scoring** (Quantitative):
+- **Score 0 (Off-topic)**: No mention of vulnerability, code, or security
+- **Score 1 (Generic)**: Mentions "code" or "function" but no specific analysis
+- **Score 2 (Partially Relevant)**: Discusses code structure but misses key vulnerability aspects
+- **Score 3 (Relevant)**: Directly addresses vulnerability detection with code-specific analysis
+- **Score 4 (Highly Relevant)**: Comprehensive analysis of code behavior, edge cases, and security implications
+
+**Quality Indicators** (Qualitative → Quantitative):
+- **Coherence**: Logical flow, no contradictions (Yes/No → 1/0)
+- **Technical Accuracy**: Correct understanding of code constructs (Yes/No → 1/0)
+- **Depth**: Goes beyond surface-level observations (Shallow/Medium/Deep → 0/1/2)
+- **Actionability**: Provides specific reasoning that aids decision (Yes/No → 1/0)
+
+**Quality Score**: Sum of indicators (Range: 0-5)
+
+**Efficiency Metric**:
+```
+Quality-Energy Ratio = (Relevance Score × Quality Score) / Energy Consumed (kWh)
+```
+
+#### For Code Generation (Phase 3)
+
+**Data Source**: Model outputs with `<think>` tags (Thinking models)
+
+**Relevance Scoring**:
+- **Score 0**: Thinking unrelated to problem requirements
+- **Score 1**: Generic programming talk, no problem-specific reasoning
+- **Score 2**: Mentions problem but doesn't work through logic
+- **Score 3**: Step-by-step reasoning aligned with problem
+- **Score 4**: Comprehensive problem decomposition with edge cases
+
+**Quality Indicators**:
+- **Correctness of reasoning**: Does thinking lead to correct solution?
+- **Algorithm clarity**: Is the approach well-explained?
+- **Edge case consideration**: Does thinking address corner cases?
+- **Code-reasoning alignment**: Does final code match the reasoning?
+
+**Pass@1 Correlation**:
+```
+Correlation(Relevance Score, Pass@1 Success)
+Correlation(Quality Score, Pass@1 Success)
+```
+
+### 1.9.3 Implementation Plan
+
+**Step 1: Manual Annotation (Pilot Study)**
+- Randomly sample 30 outputs per configuration (10 per category: low/med/high F1 or Pass@1)
+- Two annotators independently score relevance and quality
+- Calculate inter-annotator agreement (Cohen's Kappa)
+- Resolve disagreements through discussion
+
+**Step 2: LLM-Assisted Scoring (Full Scale)**
+- Use annotation guidelines to create LLM scoring prompt
+- Validate LLM scores against human annotations (correlation > 0.8)
+- Apply LLM scoring to all outputs
+- Manual review of edge cases (very high/low scores)
+
+**Step 3: Analysis**
+
+**Quantitative Analysis**:
+```python
+# Correlation analyses
+corr_relevance_f1 = correlation(relevance_scores, f1_scores)
+corr_quality_f1 = correlation(quality_scores, f1_scores)
+corr_relevance_energy = correlation(relevance_scores, energy_per_sample)
+corr_quality_energy = correlation(quality_scores, energy_per_sample)
+
+# Efficiency comparison
+instruct_efficiency = mean(instruct_quality_energy_ratio)
+thinking_efficiency = mean(thinking_quality_energy_ratio)
+efficiency_gain = (thinking_efficiency / instruct_efficiency - 1) * 100
+```
+
+**Comparative Tables**:
+
+| Model | Avg Relevance | Avg Quality | Energy (kWh) | Quality-Energy Ratio | F1 Score |
+|-------|---------------|-------------|--------------|----------------------|----------|
+| 4B Instruct Zero | ? | ? | 0.789 | ? | 22.58% |
+| 4B Thinking Zero | ? | ? | 3.465 | ? | 39.19% |
+| ... | ... | ... | ... | ... | ... |
+
+**Qualitative Analysis**:
+- Categorize common patterns in high-quality reasoning
+- Identify failure modes (high tokens, low relevance)
+- Extract examples of "wasted" reasoning vs "effective" reasoning
+
+### 1.9.4 Expected Findings
+
+**Hypothesis 1: Positive Quality-Performance Correlation**
+- Higher relevance/quality scores → better F1/Pass@1
+- Validates that longer outputs aren't just verbosity
+
+**Hypothesis 2: Thinking Models Have Higher Quality**
+- Even when normalized by length, Thinking outputs more relevant
+- Justifies 3-4x energy cost with quality, not just quantity
+
+**Hypothesis 3: Model-Dependent Efficiency**
+- 30B models: Higher quality per token than 4B
+- MoE efficiency extends to output quality, not just energy per token
+
+**Hypothesis 4: Prompt Quality Affects Output Quality**
+- CWE prompts → higher relevance scores (focused reasoning)
+- Old prompts → lower relevance scores (unfocused verbosity)
+
+### 1.9.5 Research Contributions
+
+**Novel Contributions**:
+1. **Beyond token counting**: First study to assess reasoning quality in energy-aware LLM research
+2. **Quality-energy tradeoff**: Introduce quality-adjusted energy efficiency metrics
+3. **Relevance vs verbosity**: Distinguish useful reasoning from wasted tokens
+4. **Cross-task validation**: Compare quality patterns in classification vs generation
+
+**Practical Impact**:
+- Guide model selection: Choose models with high quality-energy ratio
+- Inform prompt design: Optimize for relevant outputs, not just performance
+- Energy attribution: Understand WHERE energy goes (useful reasoning vs noise)
+
+### 1.9.6 Integration with Existing Analysis
+
+**Token Analysis (Section 1.8.12) + Quality Analysis (Section 1.9)**:
+
+```
+Token Length Analysis:
+├── Quantitative: How many tokens? (Already done ✅)
+├── Energy correlation: More tokens → more energy (Already done ✅)
+└── Performance correlation: More tokens → better F1 (Already done ✅, R²=0.305)
+
+Quality Analysis (New):
+├── Qualitative: What's in those tokens?
+├── Relevance scoring: Are tokens on-topic?
+├── Quality assessment: Are tokens high-quality?
+└── Efficiency: Quality gain per unit energy
+```
+
+**Combined Metric**:
+```
+Quality-Adjusted Energy Efficiency = (F1 Score × Quality Score) / Energy (kWh)
+```
+
+This gives a holistic view: **Performance + Quality per Energy Unit**
+
+### 1.9.7 Timeline and Resources
+
+**Pilot Study** (Week 1):
+- Manual annotation of 120 samples (30 × 4 configs)
+- Inter-annotator agreement calculation
+- Guidelines refinement
+
+**LLM-Assisted Scoring** (Week 2):
+- Prompt engineering for LLM scorer
+- Validation against human annotations
+- Full-scale scoring of ~1,500+ samples
+
+**Analysis and Visualization** (Week 3):
+- Statistical analysis (correlations, comparisons)
+- Qualitative analysis (pattern identification)
+- Visualization (quality distributions, efficiency charts)
+
+**Documentation** (Week 4):
+- Update ANALYSIS_SUMMARY.md with findings
+- Create quality analysis notebook
+- Prepare publication figures
+
+**Estimated Effort**: 4 weeks part-time (can overlap with Phase 3 experiments)
+
+### 1.9.8 Status
+
+**Current Status**: 🔄 **PLANNED - Not yet implemented**
+
+**Dependencies**:
+- ✅ Token analysis complete (Section 1.8.12)
+- ✅ All vulnerability detection data available
+- ⬜ Phase 3 code generation data (will be available after experiments)
+- ⬜ Annotation guidelines to be developed
+- ⬜ LLM scoring infrastructure to be built
+
+**Next Action**: Develop annotation guidelines and pilot manual annotation after Phase 3a validation
+
+---
+
 ## NOTE: Sections 2-12 - Original Broader Plan (Not Executed)
 
 The sections below (2-12) describe an original broader experimental plan that included multiple tasks (log parsing, log analysis, vulnerability detection, technical debt, code generation) across different model families (QwQ-32B, Qwen2.5-Coder, DeepSeek-Coder).
