@@ -81,7 +81,7 @@ LLM_CONFIG = {
             "num_ctx": 131072 if not USE_RUNPOD else None,  # vLLM handles context automatically
             #"num_ctx": 8192,
             #"num_ctx": 16384,
-            "timeout": 300,  # 5 minutes timeout (log as failed and move to next)
+            "timeout": 600,  # 10 minutes timeout (log as failed and move to next)
         }
     ],
     "temperature": TEMPERATURE,

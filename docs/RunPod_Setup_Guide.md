@@ -43,63 +43,77 @@ This guide walks you through setting up RunPod with vLLM to run your vulnerabili
 ssh root@ssh.runpod.io -p <YOUR_PORT> -i ~/.ssh/id_ed25519
 ```
 
-### 2.2 Download Qwen Models
+### 2.2 Install Required Packages
 ```bash
-# Install Hugging Face CLI if not available
-pip install huggingface-hub
+# Install hf_transfer for fast model downloads
+pip install hf_transfer --break-system-packages
 
-# Download Qwen2.5-Coder-7B-Instruct (baseline model)
-huggingface-cli download Qwen/Qwen2.5-Coder-7B-Instruct --local-dir /workspace/models/Qwen2.5-Coder-7B-Instruct
-
-# Download QwQ-32B-Preview (reasoning model) - OPTIONAL for larger experiments
-# huggingface-cli download Qwen/QwQ-32B-Preview --local-dir /workspace/models/QwQ-32B-Preview
+# Install experiment dependencies
+pip install vllm autogen python-dotenv codecarbon pandas numpy evaluate --break-system-packages
 ```
 
-**Note**: For this experiment, we'll use **Qwen2.5-Coder-7B-Instruct** instead of qwen3:4b-thinking (which is Ollama-specific). The 7B model provides better performance on RunPod.
+**Note**: vLLM will automatically download models from HuggingFace when you start the server. No need to pre-download.
 
 ### 2.3 Start vLLM Server
 
 #### For 30B Baseline Model (Instruct - Non-Reasoning)
 ```bash
-# CRITICAL: Use --served-model-name to match config expectations
+# Create project structure
+cd /workspace
+mkdir -p agent-green/src agent-green/vuln_database agent-green/results
+
+# Start vLLM server
+cd /workspace/agent-green
 nohup python3 -m vllm.entrypoints.openai.api_server \
   --model Qwen/Qwen3-30B-A3B-Instruct-2507 \
   --served-model-name "Qwen/Qwen3-30B-A3B-Instruct-2507" \
   --host 0.0.0.0 \
-  --port 11434 \
+  --port 8000 \
   --dtype auto \
   --max-model-len 65536 \
   --gpu-memory-utilization 0.9 \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
   > /workspace/vllm_instruct.log 2>&1 &
 
-# Monitor startup
+# Monitor startup (wait for "Application startup complete")
 tail -f /workspace/vllm_instruct.log
 ```
 
 #### For 30B Reasoning Model (Thinking)
 ```bash
+# Create project structure
+cd /workspace
+mkdir -p agent-green/src agent-green/vuln_database agent-green/results
+
+# Start vLLM server
+cd /workspace/agent-green
 nohup python3 -m vllm.entrypoints.openai.api_server \
   --model Qwen/Qwen3-30B-A3B-Thinking-2507 \
   --served-model-name "Qwen/Qwen3-30B-A3B-Thinking-2507" \
   --host 0.0.0.0 \
-  --port 11434 \
+  --port 8000 \
   --dtype auto \
   --max-model-len 65536 \
   --gpu-memory-utilization 0.9 \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
   > /workspace/vllm_thinking.log 2>&1 &
 
+# Monitor startup (wait for "Application startup complete")
 tail -f /workspace/vllm_thinking.log
 ```
 
 **Important Notes**:
-- Port 11434 matches Ollama's default for config compatibility
+- Port 8000 is standard vLLM API port
 - `--served-model-name` ensures vLLM serves the model with the correct HuggingFace name
-- Without this flag, vLLM uses the local path which causes 404 errors
-- 65536 context length recommended for H100 (handles verbose thinking traces)
+- `--max-model-len 65536` handles long thinking traces (H100 80GB can support this)
+- `--gpu-memory-utilization 0.9` uses 90% of GPU VRAM for optimal performance
+- Model downloads automatically from HuggingFace (~5-10 minutes first time)
 
 **Verify Server is Running**:
 ```bash
-curl http://localhost:11434/v1/models
+curl http://localhost:8000/v1/models
 # Should show "id": "Qwen/Qwen3-30B-A3B-Instruct-2507" (exact match)
 ```
 
