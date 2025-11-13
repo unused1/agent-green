@@ -8,9 +8,15 @@
 
 ## Key Design Decisions
 
+✅ **Full Scope Approved**: All 32 experiments (16 dual-agent + 16 multi-agent)
+✅ **Execution Strategy**: Start with dual-agent first, then multi-agent
 ✅ **Hardware**: All experiments on RunPod H100 SXM 80GB (for fair comparison)
 ✅ **Baseline**: RQ1 single-agent experiments already complete (4B + 30B on H100)
-✅ **New Experiments**: 32 (16 dual-agent + 16 multi-agent)
+✅ **Model Coverage**:
+   - Qwen3-4B-Instruct + Qwen3-4B-Thinking
+   - Qwen3-30B-A3B-Instruct + Qwen3-30B-A3B-Thinking
+✅ **Prompting**: Zero-shot + Few-shot for all configurations
+✅ **Tasks**: Vulnerability Detection + Code Generation
 ✅ **Estimated Cost**: ~$150 (with spot instances: ~$100-120)
 ✅ **Timeline**: 6 weeks
 
@@ -162,6 +168,20 @@
 
 **RQ1 Baseline (Already Complete)**: 8 single-agent configs × 2 tasks = 16 experiments ✅
 **RQ2 New Experiments**: 16 configs × 2 tasks = 32 experiments ❌
+
+### Experiment Breakdown by Phase
+
+| Phase | Agent Config | Tasks | Experiments | Status |
+|---|---|---|---|---|
+| **RQ1 (Baseline)** | Single-agent | Vuln + Code | 16 | ✅ Complete |
+| **RQ2 Phase 1** | Dual-agent | Vuln + Code | 16 | ⭐ Start Here |
+| **RQ2 Phase 2** | Multi-agent | Vuln + Code | 16 | ⭐ After Phase 1 |
+
+**Execution Strategy:**
+1. Complete all 16 dual-agent experiments first
+2. Analyze dual-agent results
+3. Proceed with 16 multi-agent experiments
+4. Comprehensive comparison analysis
 
 **Notes:**
 - Phase 2c: 4B models vulnerability detection on H100 (prompt comparison)
