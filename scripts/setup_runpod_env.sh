@@ -34,6 +34,12 @@ echo "Updating config.py for vLLM..."
 sed -i "s|PROJECT_ROOT = '/home/user/Desktop/agent-green'|PROJECT_ROOT = '$PROJECT_ROOT'|g" src/config.py
 sed -i 's/LLM_SERVICE = "ollama"/LLM_SERVICE = "openai"/g' src/config.py
 sed -i 's|http://localhost:11434|http://localhost:8000/v1|g' src/config.py
+sed -i 's/"api_base":/"base_url":/g' src/config.py
+sed -i '/\"num_ctx\":/d' src/config.py
+sed -i '/# *\"num_ctx\":/d' src/config.py
+# Convert Ollama model names to HuggingFace format for vLLM
+sed -i 's/LLM_MODEL = "qwen3:4b-instruct"/LLM_MODEL = "Qwen\/Qwen3-4B-Instruct-2507"/g' src/config.py
+sed -i 's/LLM_MODEL = "qwen3:4b-thinking"/LLM_MODEL = "Qwen\/Qwen3-4B-Thinking-2507"/g' src/config.py
 echo "✓ config.py updated for vLLM"
 echo ""
 

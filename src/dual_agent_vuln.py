@@ -296,7 +296,7 @@ def main():
     prompt_type = args.prompt_type
     DESIGN = f"DA-vuln-two-{prompt_type}"
 
-    model = llm_config["config_list"][0]["model"].replace(":", "-")
+    model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     exp_name = f"{DESIGN}_{model}_vuln_{timestamp}"
 
