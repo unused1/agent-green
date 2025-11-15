@@ -51,10 +51,9 @@ mkdir -p "$TEMP_DIR/agent-green/results"
 # Copy necessary files
 echo "Copying files..."
 
-# Python source files
-cp "$PROJECT_ROOT/src/single_agent_vuln.py" "$TEMP_DIR/agent-green/src/"
-cp "$PROJECT_ROOT/src/config.py" "$TEMP_DIR/agent-green/src/"
-cp "$PROJECT_ROOT/src/vuln_evaluation.py" "$TEMP_DIR/agent-green/src/"
+# Python source files - copy ALL .py files for RQ2 (dual-agent, multi-agent, utilities)
+echo "  Copying Python source files..."
+cp "$PROJECT_ROOT/src/"*.py "$TEMP_DIR/agent-green/src/"
 
 # Scripts
 cp "$PROJECT_ROOT/scripts/run_rq1_vuln_runpod.sh" "$TEMP_DIR/agent-green/scripts/"
@@ -62,9 +61,14 @@ cp "$PROJECT_ROOT/scripts/setup_runpod_env.sh" "$TEMP_DIR/agent-green/scripts/"
 cp "$PROJECT_ROOT/scripts/package_results.sh" "$TEMP_DIR/agent-green/scripts/"
 chmod +x "$TEMP_DIR/agent-green/scripts/"*.sh
 
-# Datasets
+# Datasets - both vulnerability detection and code generation
+echo "  Copying datasets..."
 cp "$PROJECT_ROOT/vuln_database/VulTrial_386_samples_balanced.jsonl" "$TEMP_DIR/agent-green/vuln_database/"
 cp "$PROJECT_ROOT/vuln_database/VulTrial_10_samples_test.jsonl" "$TEMP_DIR/agent-green/vuln_database/"
+cp "$PROJECT_ROOT/vuln_database/HumanEval.jsonl" "$TEMP_DIR/agent-green/vuln_database/"
+if [ -f "$PROJECT_ROOT/vuln_database/HumanEval_10_samples.jsonl" ]; then
+    cp "$PROJECT_ROOT/vuln_database/HumanEval_10_samples.jsonl" "$TEMP_DIR/agent-green/vuln_database/"
+fi
 
 # Environment configuration (RunPod version)
 # For Phase 2 (30B-A3B models), use .env.runpod.phase2 if it exists

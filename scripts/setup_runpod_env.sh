@@ -29,18 +29,26 @@ sed -i "s|PROJECT_ROOT=.*|PROJECT_ROOT=$PROJECT_ROOT|g" .env
 echo "✓ .env updated"
 echo ""
 
+# Update config.py to use vLLM OpenAI-compatible API
+echo "Updating config.py for vLLM..."
+sed -i "s|PROJECT_ROOT = '/home/user/Desktop/agent-green'|PROJECT_ROOT = '$PROJECT_ROOT'|g" src/config.py
+sed -i 's/LLM_SERVICE = "ollama"/LLM_SERVICE = "openai"/g' src/config.py
+sed -i 's|http://localhost:11434|http://localhost:8000/v1|g' src/config.py
+echo "✓ config.py updated for vLLM"
+echo ""
+
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip install --quiet autogen
-pip install --quiet python-dotenv
-pip install --quiet codecarbon
-pip install --quiet pandas
-pip install --quiet numpy
-pip install --quiet scikit-learn
+pip install --quiet --break-system-packages autogen
+pip install --quiet --break-system-packages python-dotenv
+pip install --quiet --break-system-packages codecarbon
+pip install --quiet --break-system-packages pandas
+pip install --quiet --break-system-packages numpy
+pip install --quiet --break-system-packages scikit-learn
 
 echo "Installing vLLM and HuggingFace tools (this may take a few minutes)..."
-pip install --quiet vllm
-pip install --quiet hf-transfer
+pip install --quiet --break-system-packages vllm
+pip install --quiet --break-system-packages hf-transfer
 echo "✓ Dependencies installed"
 echo ""
 
