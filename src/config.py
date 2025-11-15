@@ -1041,6 +1041,14 @@ Respond clearly in JSON format:
   "analysis": "concise reasoning or justification"
 }}"""
 
+# Wrapper to add emphasis on vulnerability detection (used in dual_agent_vuln.py)
+DUAL_AGENT_ANALYST_EMPHASIS_WRAPPER = """You are the Security Analyst reviewing the Code Author's explanation.
+When in doubt, err on the side of caution and consider code vulnerable.
+Security vulnerabilities can be subtle, so even minor issues should be flagged.
+The absence of security measures is often itself a vulnerability.
+
+{analyst_task}"""
+
 # Additional vulnerability detection task templates (for 4-turn workflow)
 DUAL_AGENT_TASK_SECURITY_FEEDBACK = """You are the Security Analyst. Analyze the following code for vulnerabilities:
 
@@ -1155,6 +1163,21 @@ Security Researcher Analysis:
 Code Author Response:
 {author_response}"""
 
+# Three-agent variant (no moderator) - used in multi_agent_vuln_detection_three_agents.py
+THREE_AGENT_TASK_REVIEW_BOARD = """Review the following vulnerability assessment and make final decisions:
+
+Original Code:
+```
+{code}
+```
+
+Security Researcher Analysis:
+{researcher_findings}
+
+Code Author Response:
+{author_response}
+
+Please provide your final verdict on the vulnerabilities identified."""
 
 
 # =======================================================================

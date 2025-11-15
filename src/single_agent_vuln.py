@@ -7,6 +7,7 @@ from autogen import AssistantAgent
 from codecarbon import OfflineEmissionsTracker
 #from codecarbon import EmissionsTracker
 from vuln_evaluation import evaluate_and_save_vulnerability
+from resume_utils import ExperimentResume
 import sys
 
 # --- Configuration ---
@@ -133,62 +134,7 @@ def load_vulnerability_dataset(file_path):
     return samples
 
 # --- Initialize Results Files ---
-def find_most_recent_results(result_dir, design, model):
-    """Find the most recent result files for this design/model combination"""
-    import glob
-    pattern = f"{design.capitalize()}_{model}_*_detailed_results.jsonl"
-    matching_files = glob.glob(os.path.join(result_dir, pattern))
-
-    if matching_files:
-        # Sort by modification time, get most recent
-        most_recent = max(matching_files, key=os.path.getmtime)
-        # Extract the base name (without _detailed_results.jsonl)
-        base_name = os.path.basename(most_recent).replace('_detailed_results.jsonl', '')
-        print(f"[RESUME] Found existing results: {most_recent}")
-        print(f"[RESUME] Will continue from where it left off")
-        return base_name
-    return None
-
-def initialize_results_files(exp_name, result_dir, design, model):
-    """Initialize result files for incremental saving, or resume existing"""
-
-    skip_next_sample = False
-
-    # Check if we should resume from an existing run
-    existing_base = find_most_recent_results(result_dir, design, model)
-    if existing_base:
-        # Prompt user to decide whether to resume
-        print(f"\n[FOUND] Existing experiment: {existing_base}")
-        print("Options:")
-        print("  1. Resume from last completed sample (continue normally)")
-        print("  2. Skip the next sample and mark as failed (if it's problematic)")
-        print("  3. Start a fresh new experiment")
-
-        response = input("\nEnter choice (1/2/3): ").strip()
-
-        if response == '1':
-            exp_name = existing_base
-            print(f"[RESUME] Continuing with experiment: {exp_name}")
-        elif response == '2':
-            exp_name = existing_base
-            skip_next_sample = True
-            print(f"[RESUME] Will skip the next problematic sample and mark as FAILED")
-        else:
-            print(f"[NEW] Starting fresh experiment: {exp_name}")
-
-    # Initialize detailed results JSON file
-    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
-
-    # Initialize CSV file with headers (only if new file)
-    csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
-    if not os.path.exists(csv_file):
-        with open(csv_file, 'w') as f:
-            f.write("idx,project,commit_id,project_url,commit_url,commit_message,ground_truth,vuln,reasoning,cwe,cve,cve_desc,error\n")
-
-    # Initialize energy tracking file
-    energy_file = os.path.join(result_dir, f"{exp_name}_energy_tracking.json")
-
-    return detailed_file, csv_file, energy_file, skip_next_sample
+# NOTE: Resume functionality now handled by ExperimentResume class from resume_utils
 
 # --- Save Templates (following original pattern) ---
 def save_templates(vulnerability_predictions, llm_config, design, result_dir):
@@ -213,24 +159,7 @@ def save_templates(vulnerability_predictions, llm_config, design, result_dir):
     print(f"Predictions saved to: {predictions_file}")
     return predictions
 
-def load_existing_energy(energy_file):
-    """Load existing energy consumption data"""
-    if os.path.exists(energy_file):
-        with open(energy_file, 'r') as f:
-            energy_data = json.load(f)
-        print(f"Loaded existing energy data: {energy_data['total_emissions']:.6f} kg CO2 from {energy_data['sessions']} sessions")
-        return energy_data
-    else:
-        return {
-            "total_emissions": 0.0,
-            "sessions": 0,
-            "session_history": []
-        }
-
-def save_energy_data(energy_data, energy_file):
-    """Save updated energy consumption data"""
-    with open(energy_file, 'w') as f:
-        json.dump(energy_data, f, indent=2)
+# NOTE: Energy tracking now handled by ExperimentResume class from resume_utils
 
 def append_result(result, detailed_file, csv_file):
     """Append a single result to both JSON and CSV files"""
@@ -267,54 +196,43 @@ def append_result(result, detailed_file, csv_file):
         ]
         f.write(','.join(row) + '\n')
 
-def load_existing_results(detailed_file):
-    """Load existing results if the script was interrupted"""
-    results = []
-    if os.path.exists(detailed_file):
-        print(f"Found existing results file: {detailed_file}")
-        with open(detailed_file, 'r') as f:
-            for line in f:
-                if line.strip():
-                    results.append(json.loads(line.strip()))
-        print(f"Loaded {len(results)} existing results")
-    return results
+# NOTE: Loading results now handled by ExperimentResume class from resume_utils
 
 # --- With CodeCarbon Emissions Tracking (following original pattern) ---
 def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerability_detector, task, exp_name, result_dir, design, model):
     """Run vulnerability detection with emissions tracking and incremental saving"""
 
-    # Initialize result files (will resume from existing if found)
-    detailed_file, csv_file, energy_file, skip_next_sample = initialize_results_files(exp_name, result_dir, design, model)
+    # Initialize resume helper
+    resume = ExperimentResume(result_dir, design, model, exp_name)
+    exp_name, detailed_file, energy_file, skip_next_sample = resume.initialize()
+
+    # Setup CSV file (single-agent specific)
+    csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
+    if not os.path.exists(csv_file):
+        with open(csv_file, 'w') as f:
+            f.write("idx,project,commit_id,project_url,commit_url,commit_message,ground_truth,vuln,reasoning,cwe,cve,cve_desc,error\n")
 
     # Load existing results and energy data if any (for resuming interrupted runs)
-    existing_results = load_existing_results(detailed_file)
-    energy_data = load_existing_energy(energy_file)
-    processed_indices = {r['idx'] for r in existing_results}
+    existing_results = resume.load_results(detailed_file)
+    energy_data = resume.load_energy(energy_file)
 
     # Filter out already processed samples
-    remaining_samples = [s for s in code_samples if s['idx'] not in processed_indices]
+    remaining_samples = resume.filter_remaining_samples(code_samples, existing_results, id_field='idx')
 
     # If user chose to skip the next sample, mark it as failed and remove from queue
     if skip_next_sample and remaining_samples:
         skip_sample = remaining_samples[0]
         print(f"[SKIP] Marking sample {skip_sample['idx']} as FAILED and skipping")
 
-        # Create failed result
-        failed_result = {
-            'idx': skip_sample['idx'],
-            'project': skip_sample['project'],
-            'commit_id': skip_sample['commit_id'],
-            'project_url': skip_sample['project_url'],
-            'commit_url': skip_sample['commit_url'],
-            'commit_message': skip_sample['commit_message'],
-            'ground_truth': skip_sample['target'],
-            'cwe': skip_sample['cwe'],
-            'cve': skip_sample['cve'],
-            'cve_desc': skip_sample['cve_desc'],
+        # Create failed result using resume utility
+        failed_result = resume.create_skip_result(skip_sample, id_field='idx')
+
+        # Add vulnerability-specific fields
+        failed_result.update({
             'vuln': 0,
             'reasoning': 'SKIPPED: Sample manually skipped by user (likely problematic/stuck)',
             'error': 'skipped'
-        }
+        })
 
         # Save the skipped sample
         append_result(failed_result, detailed_file, csv_file)
@@ -477,19 +395,8 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
         if tracker is not None:
             session_emissions = tracker.stop()
 
-            # Update energy data with this session
-            energy_data['total_emissions'] += session_emissions
-            energy_data['sessions'] += 1
-            energy_data['session_history'].append({
-                'session': energy_data['sessions'],
-                'start_time': session_start_time,
-                'end_time': session_end_time,
-                'samples_processed': len(remaining_samples),
-                'session_emissions': session_emissions
-            })
-
-            # Save updated energy data
-            save_energy_data(energy_data, energy_file)
+            # Update energy tracking using resume utility
+            resume.save_energy(energy_data, energy_file, session_emissions, len(remaining_samples))
 
             print(f"Current session emissions: {session_emissions:.6f} kg CO2")
             print(f"Total cumulative emissions: {energy_data['total_emissions']:.6f} kg CO2")

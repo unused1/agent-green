@@ -1,28 +1,67 @@
 import os
 import json
 import config
+import argparse
 from datetime import datetime
 from codecarbon import OfflineEmissionsTracker
 from vuln_evaluation import evaluate_and_save_vulnerability, normalize_vulnerability_basic
 from agent_utils_vuln import create_agent
+from resume_utils import ExperimentResume
 from autogen.agentchat.conversable_agent import ConversableAgent
 from pathlib import Path
 
-# --- Configuration ---
+# ---------------------------
+# Parse Command Line Args
+# ---------------------------
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Multi-Agent Vulnerability Detection (3 Agents)")
+    parser.add_argument(
+        "--prompt_type",
+        type=str,
+        choices=["zero_shot", "few_shot"],
+        default="zero_shot",
+        help="Prompt type: zero_shot, few_shot (default: zero_shot)"
+    )
+    return parser.parse_args()
+
+args = parse_arguments()
+
+# ---------------------------
+# Configuration
+# ---------------------------
 llm_config = config.LLM_CONFIG
 DATASET_FILE = config.VULN_DATASET
 RESULT_DIR = config.RESULT_DIR
 os.makedirs(RESULT_DIR, exist_ok=True)
 
-DESIGN = "MA-vuln-three"  # Three Agent design
-model = llm_config["config_list"][0]["model"].replace(":", "-")
+# Design configuration
+DESIGN = f"MA-vuln-three-{args.prompt_type}"
+model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 exp_name = f"{DESIGN}_{model}_{timestamp}"
 
+print(f"Experiment: {exp_name}")
+print(f"Dataset: {DATASET_FILE}")
+print(f"Prompt Type: {args.prompt_type}")
+print(f"Results will be saved to: {RESULT_DIR}")
+
+# ---------------------------
+# System Prompts Selection
+# ---------------------------
+if args.prompt_type == "zero_shot":
+    researcher_prompt = config.SYS_MSG_SECURITY_RESEARCHER_ZERO_SHOT
+    author_prompt = config.SYS_MSG_CODE_AUTHOR_ZERO_SHOT
+    review_board_prompt = config.SYS_MSG_REVIEW_BOARD_ZERO_SHOT
+else:  # few_shot
+    researcher_prompt = config.SYS_MSG_SECURITY_RESEARCHER_FEW_SHOT
+    author_prompt = config.SYS_MSG_CODE_AUTHOR_FEW_SHOT
+    review_board_prompt = config.SYS_MSG_REVIEW_BOARD_FEW_SHOT
 
 # --- Agent Creation ---
-def create_vulnerability_agents(llm_config):
+def create_vulnerability_agents(llm_config, prompts):
     """Create the three vulnerability detection agents (removed moderator)"""
+    researcher_prompt, author_prompt, review_board_prompt = prompts
+
     user_proxy = create_agent(
         "conversable",
         "user_proxy_agent",
@@ -35,7 +74,7 @@ def create_vulnerability_agents(llm_config):
         "assistant",
         "security_researcher_agent",
         llm_config,
-        sys_prompt=config.SYS_MSG_SECURITY_RESEARCHER,
+        sys_prompt=researcher_prompt,
         description="Identify potential security vulnerabilities in code."
     )
 
@@ -43,7 +82,7 @@ def create_vulnerability_agents(llm_config):
         "assistant",
         "code_author_agent",
         llm_config,
-        sys_prompt=config.SYS_MSG_CODE_AUTHOR,
+        sys_prompt=author_prompt,
         description="Defend code against vulnerability claims or propose mitigations."
     )
 
@@ -51,7 +90,7 @@ def create_vulnerability_agents(llm_config):
         "assistant",
         "review_board_agent",
         llm_config,
-        sys_prompt=config.SYS_MSG_REVIEW_BOARD,
+        sys_prompt=review_board_prompt,
         description="Make final decisions on vulnerability validity and severity."
     )
 
@@ -87,16 +126,7 @@ def load_vulnerability_dataset(file_path):
 
 
 # --- Result Helpers ---
-def initialize_results_files(exp_name, result_dir):
-    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
-    csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
-    energy_file = os.path.join(result_dir, f"{exp_name}_energy_tracking.json")
-
-    with open(csv_file, 'w') as f:
-        f.write("idx,project,commit_id,project_url,commit_url,commit_message,"
-                "ground_truth,vuln,reasoning,cwe,cve,cve_desc\n")
-
-    return detailed_file, csv_file, energy_file
+# NOTE: Resume functionality now handled by ExperimentResume class from resume_utils
 
 
 def append_result(result, detailed_file, csv_file):
@@ -148,40 +178,55 @@ def extract_vulnerability_decision(review_board_response):
 
 
 # --- Three Agent Task Messages (Modified to skip moderator) ---
-THREE_AGENT_TASK_REVIEW_BOARD = """Review the following vulnerability assessment and make final decisions:
-
-Original Code:
-```
-{code}
-```
-
-Security Researcher Analysis:
-{researcher_findings}
-
-Code Author Response:
-{author_response}
-
-Please provide your final verdict on the vulnerabilities identified."""
+# NOTE: THREE_AGENT_TASK_REVIEW_BOARD moved to config.py
 
 
 # --- Inference with Emissions ---
-def run_inference_with_emissions(samples, llm_config, exp_name, result_dir):
-    detailed_file, csv_file, energy_file = initialize_results_files(exp_name, result_dir)
+def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, design, model, prompts):
+    # Initialize resume helper
+    resume = ExperimentResume(result_dir, design, model, exp_name)
+    exp_name, detailed_file, energy_file, skip_next_sample = resume.initialize()
+
+    # Setup CSV file (vuln-specific)
+    csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
+    if not os.path.exists(csv_file):
+        with open(csv_file, 'w') as f:
+            f.write("idx,project,commit_id,project_url,commit_url,commit_message,"
+                    "ground_truth,vuln,reasoning,cwe,cve,cve_desc\n")
+
+    # Load existing results and energy data
+    existing_results = resume.load_results(detailed_file)
+    energy_data = resume.load_energy(energy_file)
+
+    # Filter remaining samples
+    remaining_samples = resume.filter_remaining_samples(samples, existing_results, id_field='idx')
+
+    # Handle skip next sample option
+    if skip_next_sample and remaining_samples:
+        skip_sample = remaining_samples[0]
+        failed_result = resume.create_skip_result(skip_sample, id_field='idx')
+        failed_result.update({
+            'vuln': -1,
+            'reasoning': 'SKIPPED - Sample marked as problematic by user'
+        })
+        append_result(failed_result, detailed_file, csv_file)
+        existing_results.append(failed_result)
+        remaining_samples = remaining_samples[1:]
+
     tracker = OfflineEmissionsTracker(
         project_name=exp_name,
         output_dir=result_dir,
         save_to_file=True,
         country_iso_code="CAN"
     )
-
     tracker.start()
 
-    user_proxy, security_researcher, code_author, review_board = create_vulnerability_agents(llm_config)
-    results = []
+    user_proxy, security_researcher, code_author, review_board = create_vulnerability_agents(llm_config, prompts)
+    results = existing_results.copy()
 
     try:
-        for i, sample in enumerate(samples):
-            print(f"\n--- Processing sample {i+1}/{len(samples)} (idx: {sample['idx']}) ---")
+        for i, sample in enumerate(remaining_samples):
+            print(f"\n--- Processing sample {i+1}/{len(remaining_samples)} (idx: {sample['idx']}) ---")
 
             # Step 1: Security Researcher
             researcher = user_proxy.initiate_chat(
@@ -205,7 +250,7 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir):
             # Step 3: Review Board (directly using researcher and author outputs, no moderator)
             board = user_proxy.initiate_chat(
                 recipient=review_board,
-                message=THREE_AGENT_TASK_REVIEW_BOARD.format(
+                message=config.THREE_AGENT_TASK_REVIEW_BOARD.format(
                     code=sample['func'],
                     researcher_findings=researcher,
                     author_response=author
@@ -249,17 +294,37 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir):
         emissions = tracker.stop()
         print(f"\nEmissions this run: {emissions:.6f} kg CO2")
 
-    return results
+        # Update energy tracking
+        resume.save_energy(energy_data, energy_file, emissions, len(remaining_samples))
+
+        print(f"Total emissions (all sessions): {energy_data['total_emissions']:.6f} kg CO2")
+
+    return results, exp_name
 
 
 # --- Main Execution ---
 def main():
-    print("Loading dataset...")
+    print("\n" + "="*60)
+    print(f"MULTI-AGENT VULNERABILITY DETECTION (3 AGENTS) - {args.prompt_type.upper()}")
+    print("="*60)
+
+    print("\nLoading dataset...")
     samples = load_vulnerability_dataset(DATASET_FILE)
     print(f"Loaded {len(samples)} samples")
 
-    print(f"Running {DESIGN} three-agent vulnerability detection...")
-    results = run_inference_with_emissions(samples, llm_config, exp_name, RESULT_DIR)
+    # Package prompts for passing to inference function
+    prompts = (researcher_prompt, author_prompt, review_board_prompt)
+
+    print(f"\nRunning {DESIGN} three-agent vulnerability detection...")
+    results, final_exp_name = run_inference_with_emissions(
+        samples,
+        llm_config,
+        exp_name,
+        RESULT_DIR,
+        DESIGN,
+        model,
+        prompts
+    )
 
     predictions = [r['vuln'] for r in results]
     ground_truth = [r['ground_truth'] for r in results]
@@ -269,7 +334,7 @@ def main():
             normalize_vulnerability_basic,
             predictions,
             DATASET_FILE,
-            exp_name
+            final_exp_name
         )
         print("Evaluation Results:", eval_results)
     except Exception as e:
@@ -277,6 +342,7 @@ def main():
 
     print("\n=== FINAL SUMMARY ===")
     print(f"Samples processed: {len(results)}")
+    print(f"Experiment name: {final_exp_name}")
     print("Three-agent vulnerability detection completed!")
 
 

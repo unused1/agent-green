@@ -13,6 +13,7 @@ from ollama_utils import start_ollama_server,stop_ollama_server
 import config
 from vuln_evaluation import evaluate_and_save_vulnerability, normalize_vulnerability_basic
 from agent_utils_vuln import create_agent
+from resume_utils import ExperimentResume
 
 
 # ================================================================
@@ -27,95 +28,6 @@ os.makedirs(RESULT_DIR, exist_ok=True)
 # ================================================================
 # Helper functions
 # ================================================================
-def find_most_recent_results(result_dir, design, model):
-    """Find the most recent result files for this design/model combination"""
-    import glob
-    pattern = f"{design}_{model}_*_detailed_results.jsonl"
-    matching_files = glob.glob(os.path.join(result_dir, pattern))
-
-    if matching_files:
-        most_recent = max(matching_files, key=os.path.getmtime)
-        base_name = os.path.basename(most_recent).replace('_detailed_results.jsonl', '')
-        print(f"[RESUME] Found existing results: {most_recent}")
-        return base_name
-    return None
-
-
-def initialize_results_files(exp_name, result_dir, header_fields, design=None, model=None):
-    """Initialize result files for incremental saving, or resume existing"""
-    skip_next_sample = False
-
-    # Check if we should resume from an existing run
-    if design and model:
-        existing_base = find_most_recent_results(result_dir, design, model)
-        if existing_base:
-            print(f"\n[FOUND] Existing experiment: {existing_base}")
-            print("Options:")
-            print("  1. Resume from last completed sample (continue normally)")
-            print("  2. Skip the next sample and mark as failed (if it's problematic)")
-            print("  3. Start a fresh new experiment")
-
-            response = input("\nEnter choice (1/2/3): ").strip()
-
-            if response == '1':
-                exp_name = existing_base
-                print(f"[RESUME] Continuing with experiment: {exp_name}")
-            elif response == '2':
-                exp_name = existing_base
-                skip_next_sample = True
-                print(f"[RESUME] Will skip the next problematic sample and mark as FAILED")
-            else:
-                print(f"[NEW] Starting fresh experiment: {exp_name}")
-
-    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
-    csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
-    energy_file = os.path.join(result_dir, f"{exp_name}_energy_tracking.json")
-
-    # Only write CSV header if starting fresh
-    if not os.path.exists(csv_file):
-        with open(csv_file, "w") as f:
-            f.write(",".join(header_fields) + "\n")
-
-    return detailed_file, csv_file, energy_file, skip_next_sample, exp_name
-
-
-def load_existing_results(detailed_file):
-    """Load existing results if the script was interrupted"""
-    results = []
-    if os.path.exists(detailed_file):
-        print(f"Found existing results file: {detailed_file}")
-        with open(detailed_file, 'r') as f:
-            for line in f:
-                if line.strip():
-                    try:
-                        results.append(json.loads(line.strip()))
-                    except json.JSONDecodeError:
-                        continue
-        print(f"Loaded {len(results)} existing results")
-    return results
-
-
-def load_existing_energy(energy_file):
-    """Load existing energy consumption data"""
-    if os.path.exists(energy_file):
-        with open(energy_file, 'r') as f:
-            energy_data = json.load(f)
-        print(f"Loaded existing energy data: {energy_data['total_emissions']:.6f} kg CO2 from {energy_data['sessions']} sessions")
-        return energy_data
-    else:
-        return {
-            "total_emissions": 0.0,
-            "sessions": 0,
-            "session_history": []
-        }
-
-
-def save_energy_data(energy_data, energy_file):
-    """Save updated energy consumption data"""
-    with open(energy_file, 'w') as f:
-        json.dump(energy_data, f, indent=2)
-
-
 def append_result(result, detailed_file, csv_file, header_fields):
     with open(detailed_file, "a") as f:
         f.write(json.dumps(result, ensure_ascii=False) + "\n")
@@ -261,37 +173,32 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, prom
     dataset_keys = list(samples[0].keys()) if samples else []
     header_fields = dataset_keys + ["vuln", "reasoning", "timestamp"]
 
-    # Initialize result files (will resume from existing if found)
-    detailed_file, csv_file, energy_file, skip_next_sample, exp_name = initialize_results_files(
-        exp_name, result_dir, header_fields, design, model
-    )
+    # Initialize resume helper
+    resume = ExperimentResume(result_dir, design, model, exp_name)
+    exp_name, detailed_file, energy_file, skip_next_sample = resume.initialize()
+
+    # Setup CSV file
+    csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
+    if not os.path.exists(csv_file):
+        with open(csv_file, "w") as f:
+            f.write(",".join(header_fields) + "\n")
 
     # Load existing results and energy data
-    existing_results = load_existing_results(detailed_file)
-    energy_data = load_existing_energy(energy_file)
-    processed_indices = {r.get('idx', r.get('id', -1)) for r in existing_results}
+    existing_results = resume.load_results(detailed_file)
+    energy_data = resume.load_energy(energy_file)
 
     # Filter out already processed samples
-    remaining_samples = [s for s in samples if s.get('idx', s.get('id', -1)) not in processed_indices]
+    remaining_samples = resume.filter_remaining_samples(samples, existing_results, id_field='idx')
 
     # Handle skip next sample option
     if skip_next_sample and remaining_samples:
         skip_sample = remaining_samples[0]
         print(f"[SKIP] Marking sample {skip_sample.get('idx', 'unknown')} as FAILED and skipping")
 
-        failed_result = dict(skip_sample)
-        failed_result.update({
-            "vuln": -1,
-            "reasoning": "SKIPPED - Sample marked as problematic by user",
-            "timestamp": datetime.now().isoformat(),
-            "error": "USER_SKIP"
-        })
+        failed_result = resume.create_skip_result(skip_sample, id_field='idx')
         append_result(failed_result, detailed_file, csv_file, header_fields)
         existing_results.append(failed_result)
         remaining_samples = remaining_samples[1:]
-
-    print(f"\nProcessing {len(remaining_samples)} remaining samples (out of {len(samples)} total)")
-    print(f"Already completed: {len(processed_indices)} samples\n")
 
     tracker = OfflineEmissionsTracker(
         project_name=exp_name, output_dir=result_dir, save_to_file=True, country_iso_code="CAN"
@@ -318,16 +225,13 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, prom
                 print(f"  ✓ Author submission: {len(author_submission)} chars")
 
                 #Security Analyst Stage
-                analyst_task = config.DUAL_AGENT_TASK_FINAL_DECISION.format(
+                base_task = config.DUAL_AGENT_TASK_FINAL_DECISION.format(
                     code=s["func"], author_response=author_submission
                 )
                 # Add an emphasis note to increase vulnerability detection
-                analyst_task = f"""You are the Security Analyst reviewing the Code Author's explanation.
-When in doubt, err on the side of caution and consider code vulnerable.
-Security vulnerabilities can be subtle, so even minor issues should be flagged.
-The absence of security measures is often itself a vulnerability.
-
-{analyst_task}"""
+                analyst_task = config.DUAL_AGENT_ANALYST_EMPHASIS_WRAPPER.format(
+                    analyst_task=base_task
+                )
                 
                 analyst_feedback = security_analyst.generate_reply(messages=[{
                     "role": "user",
@@ -374,16 +278,8 @@ The absence of security measures is often itself a vulnerability.
         print(f"\nEmissions this run: {emissions:.6f} kg CO₂")
 
         # Update energy tracking
-        energy_data['total_emissions'] += emissions
-        energy_data['sessions'] += 1
-        energy_data['session_history'].append({
-            'timestamp': datetime.now().isoformat(),
-            'emissions_kg_co2': emissions,
-            'samples_processed': len(remaining_samples)
-        })
-        save_energy_data(energy_data, energy_file)
+        resume.save_energy(energy_data, energy_file, emissions, len(remaining_samples))
 
-        print(f"Total emissions (all sessions): {energy_data['total_emissions']:.6f} kg CO₂")
         print(f"Errors encountered: {errors}")
 
     return results

@@ -9,6 +9,7 @@ from autogen import AssistantAgent
 from codecarbon import OfflineEmissionsTracker
 from ollama_utils import start_ollama_server,stop_ollama_server
 import subprocess
+from resume_utils import ExperimentResume
 
 # ---------------------------
 # Parse Command Line Args
@@ -149,113 +150,30 @@ def read_dataset(path):
     return data
 
 # ---------------------------
-# Resume/Restart Helper Functions
-# ---------------------------
-def find_most_recent_results(result_dir, design, model):
-    """Find the most recent result files for this design/model combination"""
-    import glob
-    pattern = f"{design}_{model}_*_detailed_results.jsonl"
-    matching_files = glob.glob(os.path.join(result_dir, pattern))
-
-    if matching_files:
-        most_recent = max(matching_files, key=os.path.getmtime)
-        base_name = os.path.basename(most_recent).replace('_detailed_results.jsonl', '')
-        print(f"[RESUME] Found existing results: {most_recent}")
-        return base_name
-    return None
-
-
-def load_existing_results(detailed_file):
-    """Load existing results if the script was interrupted"""
-    results = []
-    if os.path.exists(detailed_file):
-        print(f"Found existing results file: {detailed_file}")
-        with open(detailed_file, 'r') as f:
-            for line in f:
-                if line.strip():
-                    try:
-                        results.append(json.loads(line.strip()))
-                    except json.JSONDecodeError:
-                        continue
-        print(f"Loaded {len(results)} existing results")
-    return results
-
-
-def load_existing_energy(energy_file):
-    """Load existing energy consumption data"""
-    if os.path.exists(energy_file):
-        with open(energy_file, 'r') as f:
-            energy_data = json.load(f)
-        print(f"Loaded existing energy data: {energy_data['total_emissions']:.6f} kg CO2 from {energy_data['sessions']} sessions")
-        return energy_data
-    else:
-        return {
-            "total_emissions": 0.0,
-            "sessions": 0,
-            "session_history": []
-        }
-
-
-def save_energy_data(energy_data, energy_file):
-    """Save updated energy consumption data"""
-    with open(energy_file, 'w') as f:
-        json.dump(energy_data, f, indent=2)
-
-# ---------------------------
 # Inference Loop
 # ---------------------------
 def run_dual_agent_inference(samples, llm_config, exp_name, result_dir, prompt_type, design=None, model=None):
-    # Check for resume
-    skip_next_sample = False
-    if design and model:
-        existing_base = find_most_recent_results(result_dir, design, model)
-        if existing_base:
-            print(f"\n[FOUND] Existing experiment: {existing_base}")
-            print("Options:")
-            print("  1. Resume from last completed sample")
-            print("  2. Skip the next sample and mark as failed")
-            print("  3. Start a fresh new experiment")
+    # Initialize resume helper
+    resume = ExperimentResume(result_dir, design, model, exp_name)
+    exp_name, detailed_file, energy_file, skip_next_sample = resume.initialize()
 
-            response = input("\nEnter choice (1/2/3): ").strip()
-
-            if response == '1':
-                exp_name = existing_base
-                print(f"[RESUME] Continuing with experiment: {exp_name}")
-            elif response == '2':
-                exp_name = existing_base
-                skip_next_sample = True
-                print(f"[RESUME] Will skip the next problematic sample")
-            else:
-                print(f"[NEW] Starting fresh experiment: {exp_name}")
-
-    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
     summary_file = os.path.join(result_dir, f"{exp_name}_summary.json")
-    energy_file = os.path.join(result_dir, f"{exp_name}_energy_tracking.json")
 
     # Load existing results and energy
-    existing_results = load_existing_results(detailed_file)
-    energy_data = load_existing_energy(energy_file)
-    processed_task_ids = {r.get('task_id', '') for r in existing_results}
+    existing_results = resume.load_results(detailed_file)
+    energy_data = resume.load_energy(energy_file)
 
     # Filter remaining samples
-    remaining_samples = [s for s in samples if s.get('task_id', '') not in processed_task_ids]
+    remaining_samples = resume.filter_remaining_samples(samples, existing_results, id_field='task_id')
 
     # Handle skip next
     if skip_next_sample and remaining_samples:
         skip_sample = remaining_samples[0]
-        failed_result = {
-            'task_id': skip_sample.get('task_id', 'unknown'),
-            'prompt': skip_sample.get('prompt', ''),
-            'generated_solution': '',
-            'metadata': {'error': 'USER_SKIP', 'timestamp': datetime.now().isoformat()}
-        }
+        failed_result = resume.create_skip_result(skip_sample, id_field='task_id')
         with open(detailed_file, 'a', encoding='utf-8') as f:
             f.write(json.dumps(failed_result) + '\n')
         existing_results.append(failed_result)
         remaining_samples = remaining_samples[1:]
-
-    print(f"\nProcessing {len(remaining_samples)} remaining samples (out of {len(samples)} total)")
-    print(f"Already completed: {len(processed_task_ids)} samples\n")
 
     tracker = OfflineEmissionsTracker(
         project_name=exp_name,
@@ -355,14 +273,7 @@ def run_dual_agent_inference(samples, llm_config, exp_name, result_dir, prompt_t
         print(f"\nEmissions this run: {emissions:.6f} kg CO2")
 
         # Update energy tracking
-        energy_data['total_emissions'] += emissions
-        energy_data['sessions'] += 1
-        energy_data['session_history'].append({
-            'timestamp': datetime.now().isoformat(),
-            'emissions_kg_co2': emissions,
-            'samples_processed': len(remaining_samples)
-        })
-        save_energy_data(energy_data, energy_file)
+        resume.save_energy(energy_data, energy_file, emissions, len(remaining_samples))
 
         stats['emissions_kg_co2'] = emissions
         stats['total_emissions'] = energy_data['total_emissions']

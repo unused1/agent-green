@@ -2,28 +2,63 @@ import os
 import json
 import time
 import config
+import argparse
 from datetime import datetime
 from autogen import AssistantAgent
 from codecarbon import OfflineEmissionsTracker
+from resume_utils import ExperimentResume
 import sys
 import subprocess
 
 
-# --- Configuration ---
+# ---------------------------
+# Parse Command Line Args
+# ---------------------------
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Multi-Agent Code Generation")
+    parser.add_argument(
+        "--prompt_type",
+        type=str,
+        choices=["zero_shot", "few_shot"],
+        default="zero_shot",
+        help="Prompt type: zero_shot, few_shot (default: zero_shot)"
+    )
+    return parser.parse_args()
+
+args = parse_arguments()
+
+# ---------------------------
+# Configuration
+# ---------------------------
 llm_config = config.LLM_CONFIG
 DATASET_FILE = config.HUMANEVAL_DATASET
 RESULT_DIR = config.RESULT_DIR
 os.makedirs(RESULT_DIR, exist_ok=True)
 
-DESIGN = "MA-optimized"
-model = llm_config["config_list"][0]["model"].replace(":", "-")
+# Design configuration
+DESIGN = f"MA-code-{args.prompt_type}"
+model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 exp_name = f"{DESIGN}_{model}_{timestamp}"
 
 print(f"Experiment: {exp_name}")
 print(f"Dataset: {DATASET_FILE}")
+print(f"Prompt Type: {args.prompt_type}")
 print(f"Results will be saved to: {RESULT_DIR}")
 
+# ---------------------------
+# System Prompts Selection
+# ---------------------------
+if args.prompt_type == "zero_shot":
+    analyst_prompt = config.SYS_MSG_REQUIREMENTS_ANALYST_ZERO_SHOT
+    programmer_prompt = config.SYS_MSG_PROGRAMMER_MA_ZERO_SHOT
+    moderator_prompt = config.SYS_MSG_MODERATOR_CODE_ZERO_SHOT
+    review_board_prompt = config.SYS_MSG_REVIEW_BOARD_CODE_ZERO_SHOT
+else:  # few_shot
+    analyst_prompt = config.SYS_MSG_REQUIREMENTS_ANALYST
+    programmer_prompt = config.SYS_MSG_PROGRAMMER_MA
+    moderator_prompt = config.SYS_MSG_MODERATOR_CODE
+    review_board_prompt = config.SYS_MSG_REVIEW_BOARD_CODE
 
 # --- Agent Creation ---
 def create_requirements_analyst(llm_config, sys_prompt):
@@ -135,14 +170,32 @@ def extract_code_from_response(response_text):
     return response_text.strip()
 
 # --- With CodeCarbon Emissions Tracking ---
-def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir):
-    """Run multi-agent code generation with proper skip optimization"""
-    
-    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
+def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir, design, model, prompts):
+    """Run multi-agent code generation with proper skip optimization and resume support"""
+
+    analyst_prompt, programmer_prompt, moderator_prompt, review_board_prompt = prompts
+
+    # Initialize resume helper
+    resume = ExperimentResume(result_dir, design, model, exp_name)
+    exp_name, detailed_file, energy_file, skip_next_sample = resume.initialize()
+
     summary_file = os.path.join(result_dir, f"{exp_name}_summary.json")
-    
-    if os.path.exists(detailed_file):
-        os.remove(detailed_file)
+
+    # Load existing results and energy data
+    existing_results = resume.load_results(detailed_file)
+    energy_data = resume.load_energy(energy_file)
+
+    # Filter remaining samples
+    remaining_samples = resume.filter_remaining_samples(code_samples, existing_results, id_field='task_id')
+
+    # Handle skip next sample option
+    if skip_next_sample and remaining_samples:
+        skip_sample = remaining_samples[0]
+        failed_result = resume.create_skip_result(skip_sample, id_field='task_id')
+        with open(detailed_file, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(failed_result) + '\n')
+        existing_results.append(failed_result)
+        remaining_samples = remaining_samples[1:]
     
     tracker = OfflineEmissionsTracker(
         project_name=exp_name,
@@ -151,25 +204,26 @@ def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir)
         save_to_file=True
     )
     tracker.start()
-    
+
+    # Initialize stats (accounting for existing results)
     stats = {
         'total_samples': len(code_samples),
-        'successful_extractions': 0,
-        'failed_extractions': 0,
-        'skipped_review': 0,
-        'full_pipeline': 0
+        'successful_extractions': len([r for r in existing_results if r.get('generated_solution', '') and 'def' in r.get('generated_solution', '')]),
+        'failed_extractions': len([r for r in existing_results if not r.get('generated_solution', '') or 'def' not in r.get('generated_solution', '')]),
+        'skipped_review': len([r for r in existing_results if r.get('metadata', {}).get('review_skipped', False)]),
+        'full_pipeline': len([r for r in existing_results if not r.get('metadata', {}).get('review_skipped', False)])
     }
     
     try:
-        analyst = create_requirements_analyst(llm_config, config.SYS_MSG_REQUIREMENTS_ANALYST)
-        programmer = create_programmer_agent(llm_config, config.SYS_MSG_PROGRAMMER_MA)
-        moderator = create_moderator_agent(llm_config, config.SYS_MSG_MODERATOR_CODE)
-        review_board = create_review_board_agent(llm_config, config.SYS_MSG_REVIEW_BOARD_CODE)
-        
-        for i, sample in enumerate(code_samples):
+        analyst = create_requirements_analyst(llm_config, analyst_prompt)
+        programmer = create_programmer_agent(llm_config, programmer_prompt)
+        moderator = create_moderator_agent(llm_config, moderator_prompt)
+        review_board = create_review_board_agent(llm_config, review_board_prompt)
+
+        for i, sample in enumerate(remaining_samples):
             task_id = sample.get('task_id', f'sample_{i}')
             print(f"\n{'='*60}")
-            print(f"Processing {i+1}/{len(code_samples)}: {task_id}")
+            print(f"Processing {i+1}/{len(remaining_samples)}: {task_id}")
             print(f"{'='*60}")
             
             problem_prompt = sample.get('prompt', '')
@@ -260,28 +314,39 @@ def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir)
             
             with open(detailed_file, 'a', encoding='utf-8') as f:
                 f.write(json.dumps(result) + '\n')
-            
+
+            # Progress checkpoint
             if (i + 1) % 10 == 0:
-                print(f"\n✓ Progress: {i + 1}/{len(code_samples)} | Success: {stats['successful_extractions']}/{i+1} ({stats['successful_extractions']/(i+1)*100:.1f}%)")
+                processed = len(existing_results) + i + 1
+                print(f"\n✓ Progress checkpoint: {i + 1}/{len(remaining_samples)} samples completed")
+                print(f"  Total processed (including previous sessions): {processed}/{len(code_samples)}")
+                print(f"  Success rate: {stats['successful_extractions']}/{processed} ({stats['successful_extractions']/processed*100:.1f}%)")
                 print(f"  Skipped: {stats['skipped_review']} | Full pipeline: {stats['full_pipeline']}")
     
     finally:
         emissions = tracker.stop()
+        print(f"\nEmissions this run: {emissions:.6f} kg CO2")
+
+        # Update energy tracking
+        resume.save_energy(energy_data, energy_file, emissions, len(remaining_samples))
+
         stats['emissions_kg_co2'] = emissions
-        
+        stats['total_emissions'] = energy_data['total_emissions']
+
         print(f"\n{'='*60}")
         print("MULTI-AGENT GENERATION COMPLETED")
         print(f"{'='*60}")
-        print(f"Total: {stats['total_samples']}")
-        print(f"Success: {stats['successful_extractions']} ({stats['successful_extractions']/stats['total_samples']*100:.1f}%)")
+        print(f"Total samples: {stats['total_samples']}")
+        print(f"Successful extractions: {stats['successful_extractions']} ({stats['successful_extractions']/stats['total_samples']*100:.1f}%)")
         print(f"Skipped Turn 4: {stats['skipped_review']}")
         print(f"Full pipeline: {stats['full_pipeline']}")
-        print(f"Emissions: {emissions:.6f} kg CO2")
-        
+        print(f"Emissions this session: {emissions:.6f} kg CO2")
+        print(f"Total emissions (all sessions): {energy_data['total_emissions']:.6f} kg CO2")
+
         with open(summary_file, 'w', encoding='utf-8') as f:
             json.dump(stats, f, indent=2)
-    
-    return detailed_file
+
+    return detailed_file, exp_name
 
 # --- Main Execution ---
 def main():
@@ -290,16 +355,23 @@ def main():
     print("="*60)
     
     code_samples = read_code_generation_data(DATASET_FILE)
-    
+
+    # Package prompts for passing to inference function
+    prompts = (analyst_prompt, programmer_prompt, moderator_prompt, review_board_prompt)
+
     print(f"\nRunning {DESIGN} multi-agent code generation...")
-    detailed_file = run_inference_with_emissions(
+    detailed_file, final_exp_name = run_inference_with_emissions(
         code_samples,
         llm_config,
         exp_name,
-        RESULT_DIR
+        RESULT_DIR,
+        DESIGN,
+        model,
+        prompts
     )
-    
+
     print(f"\nResults saved to: {detailed_file}")
+    print(f"Experiment name: {final_exp_name}")
     
     print("\n" + "="*60)
     print("STARTING EVALUATION")

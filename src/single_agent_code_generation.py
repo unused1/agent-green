@@ -5,6 +5,7 @@ import config
 from datetime import datetime
 from autogen import AssistantAgent
 from codecarbon import OfflineEmissionsTracker
+from resume_utils import ExperimentResume
 import sys
 import subprocess
 
@@ -30,25 +31,12 @@ else:
     sys.exit(1)
 
 model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
-project_name = DESIGN.capitalize()
+timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+exp_name = f"{DESIGN}_{model}_{timestamp}"
 
-# Search for existing results file for this design+model combination (resume capability)
-import glob
-existing_files = glob.glob(os.path.join(RESULT_DIR, f"{project_name}_{model}_*_detailed_results.jsonl"))
-
-if existing_files:
-    # Resume from existing file (use the most recent one if multiple exist)
-    existing_files.sort(reverse=True)  # Most recent first
-    existing_file = existing_files[0]
-    # Extract the timestamp from the existing filename
-    exp_name = os.path.basename(existing_file).replace("_detailed_results.jsonl", "")
-    print(f"Found existing experiment file: {existing_file}")
-    print(f"Resuming experiment: {exp_name}")
-else:
-    # Create new experiment with current timestamp
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    exp_name = f"{project_name}_{model}_{timestamp}"
-    print(f"Starting new experiment: {exp_name}")
+print(f"Experiment: {exp_name}")
+print(f"Dataset: {DATASET_FILE}")
+print(f"Results will be saved to: {RESULT_DIR}")
 
 # --- Agent Creation ---
 def create_code_generator_agent(llm_config, sys_prompt):
@@ -127,28 +115,28 @@ def extract_code_from_response(response_text):
     return response_text.strip()
 
 # --- With CodeCarbon Emissions Tracking ---
-def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp_name, result_dir):
+def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp_name, result_dir, design, model):
     """Run code generation with emissions tracking and incremental saving"""
 
-    # Create the output file path
-    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
+    # Initialize resume helper
+    resume = ExperimentResume(result_dir, design, model, exp_name)
+    exp_name, detailed_file, energy_file, skip_next_sample = resume.initialize()
 
-    # Load already completed task_ids (for resume capability)
-    completed_task_ids = set()
-    if os.path.exists(detailed_file):
-        print(f"Found existing results file, loading completed tasks...")
-        with open(detailed_file, 'r') as f:
-            for line in f:
-                if line.strip():
-                    try:
-                        result = json.loads(line)
-                        task_id = result.get('task_id', '')
-                        # Only add non-empty task_ids to avoid treating all empty task_ids as the same
-                        if task_id:
-                            completed_task_ids.add(task_id)
-                    except json.JSONDecodeError:
-                        pass
-        print(f"Found {len(completed_task_ids)} already completed tasks. Resuming from where we left off...")
+    # Load existing results and energy data
+    existing_results = resume.load_results(detailed_file)
+    energy_data = resume.load_energy(energy_file)
+
+    # Filter remaining samples
+    remaining_samples = resume.filter_remaining_samples(code_samples, existing_results, id_field='task_id')
+
+    # Handle skip next sample option
+    if skip_next_sample and remaining_samples:
+        skip_sample = remaining_samples[0]
+        failed_result = resume.create_skip_result(skip_sample, id_field='task_id')
+        with open(detailed_file, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(failed_result) + '\n')
+        existing_results.append(failed_result)
+        remaining_samples = remaining_samples[1:]
 
     # Create codecarbon subdirectory for this experiment (following vulnerability detection pattern)
     model_type = "thinking" if config.ENABLE_REASONING else "baseline"
@@ -167,14 +155,9 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp
     try:
         code_generator = create_code_generator_agent(llm_config, sys_prompt)
 
-        for i, sample in enumerate(code_samples):
-            task_id = sample.get('task_id', '')
-
-            # Skip if already completed
-            if task_id in completed_task_ids:
-                print(f"Skipping sample {i+1}/{len(code_samples)} (task_id: {task_id}) - already completed")
-                continue
-            print(f"Processing sample {i+1}/{len(code_samples)} (task_id: {sample.get('task_id', i)})")
+        for i, sample in enumerate(remaining_samples):
+            task_id = sample.get('task_id', f'sample_{i}')
+            print(f"Processing sample {i+1}/{len(remaining_samples)} (task_id: {task_id})")
             
             # Format task with prompt
             problem_prompt = sample.get('prompt', sample.get('description', ''))
@@ -218,13 +201,18 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp
 
             # Progress indicator
             if (i + 1) % 10 == 0:
-                print(f"Progress saved: {i + 1}/{len(code_samples)} samples completed")
-                
+                print(f"Progress saved: {i + 1}/{len(remaining_samples)} samples completed")
+
     finally:
         emissions = tracker.stop()
-        print(f"Emissions: {emissions} kg CO2")
-    
-    return detailed_file
+        print(f"\nEmissions this run: {emissions:.6f} kg CO2")
+
+        # Update energy tracking
+        resume.save_energy(energy_data, energy_file, emissions, len(remaining_samples))
+
+        print(f"Total emissions (all sessions): {energy_data['total_emissions']:.6f} kg CO2")
+
+    return detailed_file, exp_name
 
 # --- Main Execution ---
 time.sleep(1)  # Brief initialization pause
@@ -238,17 +226,19 @@ else:
     print("Using zero-shot system prompt")
 
 print(f"Running {DESIGN} code generation...")
-detailed_file = run_inference_with_emissions(
-    code_samples, 
-    llm_config, 
-    sys_prompt, 
-    task, 
-    exp_name, 
-    RESULT_DIR
+detailed_file, final_exp_name = run_inference_with_emissions(
+    code_samples,
+    llm_config,
+    sys_prompt,
+    task,
+    exp_name,
+    RESULT_DIR,
+    DESIGN,
+    model
 )
 
-print(f"\nCode generation completed for experiment: {exp_name}")
-print(f"Total samples processed: {len(code_samples)}")
+print(f"\nCode generation completed for experiment: {final_exp_name}")
+print(f"Total samples in dataset: {len(code_samples)}")
 print(f"Results saved to: {detailed_file}")
 
 # --- Call Evaluation Script ---
