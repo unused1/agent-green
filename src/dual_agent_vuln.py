@@ -79,17 +79,99 @@ def load_vulnerability_dataset(file_path):
 
 
 # --- Result Helpers ---
-def initialize_results_files(exp_name, result_dir):
+def find_most_recent_results(result_dir, design, model):
+    """Find the most recent result files for this design/model combination"""
+    import glob
+    pattern = f"{design}_{model}_*_detailed_results.jsonl"
+    matching_files = glob.glob(os.path.join(result_dir, pattern))
+
+    if matching_files:
+        # Sort by modification time, get most recent
+        most_recent = max(matching_files, key=os.path.getmtime)
+        # Extract the base name (without _detailed_results.jsonl)
+        base_name = os.path.basename(most_recent).replace('_detailed_results.jsonl', '')
+        print(f"[RESUME] Found existing results: {most_recent}")
+        print(f"[RESUME] Will continue from where it left off")
+        return base_name
+    return None
+
+
+def initialize_results_files(exp_name, result_dir, design, model):
+    """Initialize result files for incremental saving, or resume existing"""
+
+    skip_next_sample = False
+
+    # Check if we should resume from an existing run
+    existing_base = find_most_recent_results(result_dir, design, model)
+    if existing_base:
+        # Prompt user to decide whether to resume
+        print(f"\n[FOUND] Existing experiment: {existing_base}")
+        print("Options:")
+        print("  1. Resume from last completed sample (continue normally)")
+        print("  2. Skip the next sample and mark as failed (if it's problematic)")
+        print("  3. Start a fresh new experiment")
+
+        response = input("\nEnter choice (1/2/3): ").strip()
+
+        if response == '1':
+            exp_name = existing_base
+            print(f"[RESUME] Continuing with experiment: {exp_name}")
+        elif response == '2':
+            exp_name = existing_base
+            skip_next_sample = True
+            print(f"[RESUME] Will skip the next problematic sample and mark as FAILED")
+        else:
+            print(f"[NEW] Starting fresh experiment: {exp_name}")
+
+    # Initialize detailed results JSON file
     detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
+
+    # Initialize CSV file with headers (only if new file)
     csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
+    if not os.path.exists(csv_file):
+        with open(csv_file, 'w') as f:
+            f.write("idx,project,commit_id,project_url,commit_url,commit_message,"
+                    "ground_truth,vuln,reasoning,cwe,cve,cve_desc,iteration_1_feedback,"
+                    "iteration_2_decision,error\n")
+
+    # Initialize energy tracking file
     energy_file = os.path.join(result_dir, f"{exp_name}_energy_tracking.json")
 
-    with open(csv_file, 'w') as f:
-        f.write("idx,project,commit_id,project_url,commit_url,commit_message,"
-                "ground_truth,vuln,reasoning,cwe,cve,cve_desc,iteration_1_feedback,"
-                "iteration_2_decision\n")
+    return detailed_file, csv_file, energy_file, skip_next_sample
 
-    return detailed_file, csv_file, energy_file
+
+def load_existing_results(detailed_file):
+    """Load existing results if the script was interrupted"""
+    results = []
+    if os.path.exists(detailed_file):
+        print(f"Found existing results file: {detailed_file}")
+        with open(detailed_file, 'r') as f:
+            for line in f:
+                if line.strip():
+                    results.append(json.loads(line.strip()))
+        print(f"Loaded {len(results)} existing results")
+    return results
+
+
+def load_existing_energy(energy_file):
+    """Load existing energy consumption data"""
+    if os.path.exists(energy_file):
+        with open(energy_file, 'r') as f:
+            energy_data = json.load(f)
+        print(f"Loaded existing energy data: {energy_data['total_emissions']:.6f} kg CO2 from {energy_data['sessions']} sessions")
+        return energy_data
+    else:
+        return {
+            "total_emissions": 0.0,
+            "sessions": 0,
+            "session_history": []
+        }
+
+
+def save_energy_data(energy_data, energy_file):
+    """Save updated energy consumption data"""
+    with open(energy_file, 'w') as f:
+        json.dump(energy_data, f, indent=2)
 
 
 def append_result(result, detailed_file, csv_file):
@@ -120,7 +202,8 @@ def append_result(result, detailed_file, csv_file):
             escape(result['cve']),
             escape(result['cve_desc']),
             escape(result.get('iteration_1_feedback', '')),
-            escape(result.get('iteration_2_decision', ''))
+            escape(result.get('iteration_2_decision', '')),
+            escape(result.get('error', ''))
         ]
         f.write(','.join(row) + '\n')
 
@@ -161,8 +244,56 @@ def extract_vulnerability_decision(analyst_response):
 
 
 # --- Dual Agent Inference ---
-def run_dual_agent_inference_with_emissions(samples, llm_config, exp_name, result_dir):
-    detailed_file, csv_file, energy_file = initialize_results_files(exp_name, result_dir)
+def run_dual_agent_inference_with_emissions(samples, llm_config, exp_name, result_dir, design, model):
+    # Initialize result files (will resume from existing if found)
+    detailed_file, csv_file, energy_file, skip_next_sample = initialize_results_files(exp_name, result_dir, design, model)
+
+    # Load existing results and energy data if any (for resuming interrupted runs)
+    existing_results = load_existing_results(detailed_file)
+    energy_data = load_existing_energy(energy_file)
+    processed_indices = {r['idx'] for r in existing_results}
+
+    # Filter out already processed samples
+    remaining_samples = [s for s in samples if s['idx'] not in processed_indices]
+
+    # If user chose to skip the next sample, mark it as failed and remove from queue
+    if skip_next_sample and remaining_samples:
+        skip_sample = remaining_samples[0]
+        print(f"[SKIP] Marking sample {skip_sample['idx']} as FAILED and skipping")
+
+        # Create failed result
+        failed_result = {
+            'idx': skip_sample['idx'],
+            'project': skip_sample['project'],
+            'commit_id': skip_sample['commit_id'],
+            'project_url': skip_sample['project_url'],
+            'commit_url': skip_sample['commit_url'],
+            'commit_message': skip_sample['commit_message'],
+            'func': skip_sample['func'],
+            'ground_truth': skip_sample['target'],
+            'vuln': -1,  # Mark as skipped
+            'reasoning': 'SKIPPED - Sample marked as problematic by user',
+            'cwe': skip_sample.get('cwe'),
+            'cve': skip_sample.get('cve'),
+            'cve_desc': skip_sample.get('cve_desc'),
+            'iteration_1_feedback': '',
+            'iteration_2_decision': '',
+            'error': 'USER_SKIP'
+        }
+
+        # Save the failed result
+        append_result(failed_result, detailed_file, csv_file)
+        existing_results.append(failed_result)
+
+        # Remove from remaining samples
+        remaining_samples = remaining_samples[1:]
+
+    print(f"\n{'='*80}")
+    print(f"Processing {len(remaining_samples)} remaining samples (out of {len(samples)} total)")
+    print(f"Already completed: {len(processed_indices)} samples")
+    print(f"{'='*80}\n")
+
+    # Start CodeCarbon tracker
     tracker = OfflineEmissionsTracker(
         project_name=exp_name,
         output_dir=result_dir,
@@ -173,93 +304,119 @@ def run_dual_agent_inference_with_emissions(samples, llm_config, exp_name, resul
     tracker.start()
 
     user_proxy, code_author, security_analyst = create_vulnerability_agents(llm_config)
-    results = []
+    results = existing_results.copy()  # Start with existing results
 
     try:
-        for i, sample in enumerate(samples):
-            print(f"\n--- Processing sample {i+1}/{len(samples)} (idx: {sample['idx']}) ---")
+        for i, sample in enumerate(remaining_samples):
+            print(f"\n--- Processing sample {i+1}/{len(remaining_samples)} (idx: {sample['idx']}) ---")
 
-            # ITERATION 1: Initial submission and feedback
-            print("Iteration 1: Code submission and initial analysis...")
-            
-            # Code author submits the code
-            submission = user_proxy.initiate_chat(
-                recipient=code_author,
-                message=config.DUAL_AGENT_TASK_CODE_SUBMISSION.format(code=sample['func']),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
+            try:
+                # ITERATION 1: Initial submission and feedback
+                print("Iteration 1: Code submission and initial analysis...")
 
-            # Security analyst provides feedback
-            feedback = user_proxy.initiate_chat(
-                recipient=security_analyst,
-                message=config.DUAL_AGENT_TASK_SECURITY_FEEDBACK.format(
-                    code=sample['func'],
-                    submission=submission
-                ),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
+                # Code author submits the code
+                submission = user_proxy.initiate_chat(
+                    recipient=code_author,
+                    message=config.DUAL_AGENT_TASK_CODE_SUBMISSION.format(code=sample['func']),
+                    max_turns=1,
+                    summary_method="last_msg"
+                ).summary.strip()
 
-            # ITERATION 2: Revision and final decision
-            print("Iteration 2: Code revision and final assessment...")
-            
-            # Code author revises based on feedback
-            revision = user_proxy.initiate_chat(
-                recipient=code_author,
-                message=config.DUAL_AGENT_TASK_CODE_REVISION.format(
-                    original_code=sample['func'],
-                    feedback=feedback
-                ),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
+                # Security analyst provides feedback
+                feedback = user_proxy.initiate_chat(
+                    recipient=security_analyst,
+                    message=config.DUAL_AGENT_TASK_SECURITY_FEEDBACK.format(
+                        code=sample['func'],
+                        submission=submission
+                    ),
+                    max_turns=1,
+                    summary_method="last_msg"
+                ).summary.strip()
 
-            # Security analyst makes final decision
-            final_decision = user_proxy.initiate_chat(
-                recipient=security_analyst,
-                message=config.DUAL_AGENT_TASK_FINAL_DECISION.format(
-                    original_code=sample['func'],
-                    revised_analysis=revision,
-                    previous_feedback=feedback
-                ),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
+                # ITERATION 2: Revision and final decision
+                print("Iteration 2: Code revision and final assessment...")
 
-            # Extract final vulnerability decision
-            vuln_decision, reasoning = extract_vulnerability_decision(final_decision)
+                # Code author revises based on feedback
+                revision = user_proxy.initiate_chat(
+                    recipient=code_author,
+                    message=config.DUAL_AGENT_TASK_CODE_REVISION.format(
+                        original_code=sample['func'],
+                        feedback=feedback
+                    ),
+                    max_turns=1,
+                    summary_method="last_msg"
+                ).summary.strip()
 
-            result = {
-                'idx': sample['idx'],
-                'project': sample['project'],
-                'commit_id': sample['commit_id'],
-                'project_url': sample['project_url'],
-                'commit_url': sample['commit_url'],
-                'commit_message': sample['commit_message'],
-                'ground_truth': sample['target'],
-                'vuln': vuln_decision,
-                'reasoning': reasoning,
-                'dual_agent_conversation': {
-                    'iteration_1_submission': submission,
+                # Security analyst makes final decision
+                final_decision = user_proxy.initiate_chat(
+                    recipient=security_analyst,
+                    message=config.DUAL_AGENT_TASK_FINAL_DECISION.format(
+                        original_code=sample['func'],
+                        revised_analysis=revision,
+                        previous_feedback=feedback
+                    ),
+                    max_turns=1,
+                    summary_method="last_msg"
+                ).summary.strip()
+
+                # Extract final vulnerability decision
+                vuln_decision, reasoning = extract_vulnerability_decision(final_decision)
+
+                result = {
+                    'idx': sample['idx'],
+                    'project': sample['project'],
+                    'commit_id': sample['commit_id'],
+                    'project_url': sample['project_url'],
+                    'commit_url': sample['commit_url'],
+                    'commit_message': sample['commit_message'],
+                    'ground_truth': sample['target'],
+                    'vuln': vuln_decision,
+                    'reasoning': reasoning,
+                    'dual_agent_conversation': {
+                        'iteration_1_submission': submission,
+                        'iteration_1_feedback': feedback,
+                        'iteration_2_revision': revision,
+                        'iteration_2_final_decision': final_decision
+                    },
                     'iteration_1_feedback': feedback,
-                    'iteration_2_revision': revision,
-                    'iteration_2_final_decision': final_decision
-                },
-                'iteration_1_feedback': feedback,
-                'iteration_2_decision': final_decision,
-                'cwe': sample['cwe'],
-                'cve': sample['cve'],
-                'cve_desc': sample['cve_desc'],
-                'session': 1,
-                'timestamp': datetime.now().isoformat()
-            }
+                    'iteration_2_decision': final_decision,
+                    'cwe': sample['cwe'],
+                    'cve': sample['cve'],
+                    'cve_desc': sample['cve_desc'],
+                    'session': 1,
+                    'timestamp': datetime.now().isoformat(),
+                    'error': ''
+                }
 
-            append_result(result, detailed_file, csv_file)
-            results.append(result)
+                append_result(result, detailed_file, csv_file)
+                results.append(result)
 
-            if (i + 1) % 5 == 0:
-                print(f"Progress saved: {i+1} samples")
+                if (i + 1) % 5 == 0:
+                    print(f"Progress saved: {i+1} samples")
+
+            except Exception as e:
+                print(f"ERROR processing sample {sample['idx']}: {e}")
+                # Save failed result
+                failed_result = {
+                    'idx': sample['idx'],
+                    'project': sample['project'],
+                    'commit_id': sample['commit_id'],
+                    'project_url': sample['project_url'],
+                    'commit_url': sample['commit_url'],
+                    'commit_message': sample['commit_message'],
+                    'ground_truth': sample['target'],
+                    'vuln': -1,
+                    'reasoning': f'ERROR: {str(e)}',
+                    'cwe': sample['cwe'],
+                    'cve': sample['cve'],
+                    'cve_desc': sample['cve_desc'],
+                    'iteration_1_feedback': '',
+                    'iteration_2_decision': '',
+                    'error': str(e)
+                }
+                append_result(failed_result, detailed_file, csv_file)
+                results.append(failed_result)
+                continue
 
     finally:
         emissions = tracker.stop()
@@ -275,7 +432,7 @@ def main():
     print(f"Loaded {len(samples)} samples")
 
     print(f"Running {DESIGN} dual-agent vulnerability detection...")
-    results = run_dual_agent_inference_with_emissions(samples, llm_config, exp_name, RESULT_DIR)
+    results = run_dual_agent_inference_with_emissions(samples, llm_config, exp_name, RESULT_DIR, DESIGN, model)
 
     predictions = [r['vuln'] for r in results]
     ground_truth = [r['ground_truth'] for r in results]
