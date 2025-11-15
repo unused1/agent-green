@@ -370,10 +370,10 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
                 result['vuln'] = 0  # Default to not vulnerable
                 result['reasoning'] = "No response from agent"
                 print(f"[Warning] Skipped sample {i} — no response or invalid format.")
-            
+
             # Append result immediately to files
             append_result(result, detailed_file, csv_file)
-            
+
             # Also add to existing results for final evaluation
             existing_results.append(result)
             
@@ -402,12 +402,12 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
             print(f"Total cumulative emissions: {energy_data['total_emissions']:.6f} kg CO2")
         else:
             print("[INFO] Energy tracking skipped (API-based inference)")
-    
+
     print(f"Detailed results saved incrementally to: {detailed_file}")
     print(f"CSV results saved incrementally to: {csv_file}")
     if config.ENABLE_CODECARBON:
         print(f"Energy tracking saved to: {energy_file}")
-    
+
     return existing_results, energy_data
 
 # --- Code Reading (following original pattern) ---

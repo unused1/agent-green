@@ -216,7 +216,7 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, prom
                 #Code Author Stage
                 author_task = config.DUAL_AGENT_TASK_CODE_SUBMISSION.format(code=s["func"])
                 author_submission = code_author.generate_reply(messages=[{
-                    "role": "user", 
+                    "role": "user",
                     "content": author_task
                 }])
                 if isinstance(author_submission, dict):
@@ -232,7 +232,7 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, prom
                 analyst_task = config.DUAL_AGENT_ANALYST_EMPHASIS_WRAPPER.format(
                     analyst_task=base_task
                 )
-                
+
                 analyst_feedback = security_analyst.generate_reply(messages=[{
                     "role": "user",
                     "content": analyst_task
@@ -244,7 +244,7 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, prom
 
                 # Extract decision
                 vuln, reasoning = extract_vulnerability_decision(analyst_feedback)
-                
+
                 result = dict(s)
                 result.update({
                     "vuln": vuln,

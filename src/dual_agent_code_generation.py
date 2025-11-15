@@ -205,13 +205,13 @@ def run_dual_agent_inference(samples, llm_config, exp_name, result_dir, prompt_t
             
             # === TURN 1: Programmer ===
             print("Turn 1: Programmer implementing solution...")
-            
+
             # Select appropriate task prompt
             if args.prompt_type == 'zero_shot':
                 programmer_task = config.DUAL_AGENT_TASK_CODE_GENERATION.format(prompt=prompt)
             else:  # few_shot
                 programmer_task = config.DUAL_AGENT_TASK_CODE_GENERATION.format(prompt=prompt)
-                
+
             res1 = programmer.generate_reply(messages=[{"content": programmer_task, "role": "user"}])
             programmer_response = res1.get("content", "") if res1 else ""
             code_output = extract_code_from_response(programmer_response)
@@ -219,12 +219,12 @@ def run_dual_agent_inference(samples, llm_config, exp_name, result_dir, prompt_t
             
             # === TURN 2: Refiner ===
             print("Turn 2: Refiner refining solution...")
-            
+
             reviewer_task = config.DUAL_AGENT_TASK_CODE_REVIEW.format(
                 prompt=prompt,
                 generated_code=code_output
             )
-                
+
             res2 = refiner.generate_reply(messages=[{"content": reviewer_task, "role": "user"}])
             reviewer_response = res2.get("content", "") if res2 else ""
             reviewer_code = extract_code_from_response(reviewer_response)
@@ -259,7 +259,7 @@ def run_dual_agent_inference(samples, llm_config, exp_name, result_dir, prompt_t
                     'prompt_type': prompt_type
                 }
             }
-            
+
             with open(detailed_file, 'a', encoding='utf-8') as f:
                 f.write(json.dumps(result) + '\n')
             

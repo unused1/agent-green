@@ -6,6 +6,7 @@
 .env.runpod.phase2
 .env.mars.codegen
 .env.runpod.codegen
+.env.runpod.vuln
 
 config/config.ini
 config/.codecarbon.config
