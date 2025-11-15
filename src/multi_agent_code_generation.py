@@ -7,7 +7,6 @@ from datetime import datetime
 from autogen import AssistantAgent
 from codecarbon import OfflineEmissionsTracker
 from resume_utils import ExperimentResume
-import sys
 import subprocess
 
 
