@@ -458,7 +458,67 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 03:10 | 🚀 All 8 pods deployed - 7 active (Pod 3 stopped) |
 | Nov 16 03:15 | Pod 8 DA-vuln-few started (30B Thinking model) 🏃 |
 | Nov 16 03:20 | Pod 5 DA-code-zero completed ✅ (30B Instruct model) |
+| Nov 16 04:00 | Pod 5 MA-vuln-zero started 🏃 |
+| Nov 16 04:00 | Pod 7 DA-vuln-few started 🏃 |
+| Nov 16 06:00 | Pod 5 MA-vuln-zero completed ✅ |
+| Nov 16 06:05 | Pod 5 MA-code-zero started 🏃 |
+| Nov 16 06:30 | Pod 7 DA-vuln-few completed ✅ |
+| Nov 16 06:35 | Pod 7 DA-code-few started 🏃 |
+| Nov 16 06:50 | Pod 5 MA-code-zero completed ✅ - Pod 5 ALL 4/4 DONE 🎉 |
+| Nov 16 06:55 | Pod 5 results downloaded (21MB, 28 files) and verified ✅ |
+| Nov 16 07:00 | Pod 5 stopped - Ready to terminate |
+| Nov 16 07:10 | ⚠️ Pod 4 hit context overflow on sample 8/386 (idx: 344242) - Endless "luaC_checkGC(L);" |
+| Nov 16 07:15 | Pod 4 resumed with skip option 2 |
+| Nov 16 07:30 | Pod 7 DA-code-few completed ✅ |
+| Nov 16 07:35 | Pod 7 MA-vuln-few started 🏃 |
+| Nov 16 08:00 | ⚠️ Pod 4 hit context overflow on sample 7/378 (idx: 450812) - Verbose glob analysis |
+| Nov 16 08:05 | Pod 4 resumed with skip option 2 |
+| Nov 16 09:30 | Pod 7 MA-vuln-few completed ✅ |
+| Nov 16 09:35 | Pod 7 MA-code-few started 🏃 |
+| Nov 16 10:00 | Pod 7 MA-code-few completed ✅ - Pod 7 ALL 4/4 DONE 🎉 |
+| Nov 16 10:05 | 🔍 **CRITICAL DISCOVERY**: Checked vLLM processes - 30B models running with 32,768 context instead of 65,536! |
+| Nov 16 10:10 | Analysis: Pod 7 had 6 failures in DA-vuln-few due to context limit; Pod 5 had 0 (zero-shot uses fewer tokens) |
+| Nov 16 10:15 | Decision: Accept limitations for Pods 5 & 7, reconfigure Pods 6 & 8 before next experiments |
+| Nov 16 10:20 | Pod 7 results downloaded (28 files) and verified ✅ |
+| Nov 16 10:25 | Pod 7 stopped - Ready to terminate |
+| Nov 16 10:30 | ⚠️ Pod 4 hit context overflow on sample 1/370 (idx: 259619) - STRCAT buffer overflow (66,426 tokens) |
+| Nov 16 10:35 | Pod 4 resumed with skip option 2 |
+| Nov 16 11:00 | ⚠️ Pod 2 hit context overflow on sample 59/386 (idx: 252437) - Endless "000..." (65,544 tokens) |
+| Nov 16 11:05 | Pod 2 resumed with skip option 2 |
+| Nov 16 12:00 | Pod 8 DA-vuln-few completed ✅ |
+| Nov 16 12:05 | 🔧 Pod 8 vLLM reconfiguration started: --max-model-len 65536 --gpu-memory-utilization 0.85 |
+| Nov 16 12:10 | ❌ Pod 8 vLLM failed to start: KV cache needs 6.00 GiB, only 4.68 GiB available |
+| Nov 16 12:15 | 🔧 Pod 8 vLLM reconfigured with --gpu-memory-utilization 0.9 - SUCCESS ✅ |
+| Nov 16 12:20 | Pod 8 DA-code-few started 🏃 |
+| Nov 16 13:00 | Pod 6 DA-vuln-zero completed ✅ |
+| Nov 16 13:05 | 🔧 Pod 6 vLLM reconfigured: --max-model-len 65536 --gpu-memory-utilization 0.9 ✅ |
+| Nov 16 13:10 | Pod 6 DA-code-zero started 🏃 |
+| Nov 16 14:00 | ⚠️ Pod 2 hit context overflow on sample 33/325 (idx: 427707) - SIZE_MAX arithmetic wrapping |
+| Nov 16 14:05 | Pod 2 resumed with skip option 2 |
+| Nov 16 14:30 | Pod 2 MA-vuln-zero completed ✅ |
+| Nov 16 14:35 | Pod 2 MA-code-zero started 🏃 |
+| Nov 16 14:40 | Git commit: Pod 5 & 7 results, vLLM misconfiguration documentation (57 files, 236K+ insertions) |
+| Nov 16 15:00 | Pod 8 DA-code-few completed ✅ (Pass@1: 0.6890) |
+| Nov 16 15:05 | Pod 6 DA-code-zero completed with 1 context overflow error (65,594 tokens) |
+| Nov 16 15:10 | Pod 6 evaluation failed: "cannot access local variable 'results_file'" |
+| Nov 16 15:30 | 🐛 Fixed dual_agent_code_generation.py evaluation error (initialize results_file = None) |
+| Nov 16 15:35 | 📝 Added logging improvements to multi-agent scripts (print sample/idx at each phase) |
+| Nov 16 15:40 | Git commit: Logging improvements and evaluation fix |
+| Nov 16 15:45 | 📤 Uploaded improved scripts to all 4 active pods (2, 4, 6, 8) |
+| Nov 16 15:50 | Pod 6 manual evaluation completed ✅ |
+| Nov 16 15:55 | Pod 8 MA-vuln-few started 🏃 (with new logging!) |
+| Nov 16 16:00 | Pod 6 MA-vuln-zero started 🏃 (with new logging!) |
+| Nov 16 16:10 | ⚠️ Pod 2 hit context overflow on sample 36/292 (idx: 391628) - Repetitive vulnerability enumeration |
+| Nov 16 16:15 | Pod 2 resumed with skip option 2 |
+| Nov 16 16:20 | ⚠️ Pod 4 hit context overflow on sample 131/365 (idx: 439266) - Repetitive vulnerability searching |
+| Nov 16 16:25 | Pod 4 resumed with skip option 2 |
+| Nov 16 16:30 | ⚠️ Pod 2 hit context overflow on sample 8/234 (idx: 351182) - Endless "000..." in int64_t demo |
+| Nov 16 16:35 | Pod 2 resumed with skip option 2 |
+| Nov 16 16:40 | ⚠️ Pod 4 hit context overflow on sample 3/234 (idx: 328807) - Repetitive "no vulnerabilities" loop |
+| Nov 16 16:45 | Pod 4 resumed with skip option 2 |
+| Nov 16 16:50 | Git commit: 2 new context overflow samples, updated tracking |
+| Nov 16 16:55 | **Current Status**: 23/32 experiments complete (71.875%) - 4 pods actively running |
 
 ---
 
-**Last Updated**: 2025-11-16
+**Last Updated**: 2025-11-16 16:55
