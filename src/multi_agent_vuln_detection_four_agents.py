@@ -236,9 +236,11 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, desi
 
     try:
         for i, sample in enumerate(remaining_samples):
-            print(f"\n--- Processing sample {i+1}/{len(remaining_samples)} (idx: {sample['idx']}) ---")
+            sample_info = f"Sample {i+1}/{len(remaining_samples)}, idx: {sample['idx']}"
+            print(f"\n--- Processing {sample_info} ---")
 
             # Step 1: Security Researcher
+            print(f"\n[{sample_info}] Phase 1/4: Security Researcher analyzing...")
             researcher = user_proxy.initiate_chat(
                 recipient=security_researcher,
                 message=config.MULTI_AGENT_TASK_SECURITY_RESEARCHER.format(code=sample['func']),
@@ -247,6 +249,7 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, desi
             ).summary.strip()
 
             # Step 2: Code Author
+            print(f"\n[{sample_info}] Phase 2/4: Code Author responding...")
             author = user_proxy.initiate_chat(
                 recipient=code_author,
                 message=config.MULTI_AGENT_TASK_CODE_AUTHOR.format(
@@ -258,6 +261,7 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, desi
             ).summary.strip()
 
             # Step 3: Moderator
+            print(f"\n[{sample_info}] Phase 3/4: Moderator summarizing...")
             moderator_resp = user_proxy.initiate_chat(
                 recipient=moderator,
                 message=config.MULTI_AGENT_TASK_MODERATOR.format(
@@ -269,6 +273,7 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, desi
             ).summary.strip()
 
             # Step 4: Review Board
+            print(f"\n[{sample_info}] Phase 4/4: Review Board deciding...")
             board = user_proxy.initiate_chat(
                 recipient=review_board,
                 message=config.MULTI_AGENT_TASK_REVIEW_BOARD.format(

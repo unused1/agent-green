@@ -305,6 +305,7 @@ def main():
     proc = start_ollama_server()
     time.sleep(5)
 
+    results_file = None  # Initialize to None in case of early error
     try:
         # --- Run code generation ---
         samples = read_dataset(DATASET_FILE)
@@ -329,6 +330,10 @@ def main():
         stop_ollama_server(proc)
 
     # --- Run evaluation ---
+    if results_file is None:
+        print("\n⚠️ Skipping evaluation: No results file generated due to error")
+        return
+
     print("\n" + "="*80)
     print("STARTING EVALUATION")
     print("="*80)

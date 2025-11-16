@@ -228,21 +228,22 @@ def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir,
 
         for i, sample in enumerate(remaining_samples):
             task_id = sample.get('task_id', f'sample_{i}')
+            sample_info = f"Sample {i+1}/{len(remaining_samples)}, task_id: {task_id}"
             print(f"\n{'='*60}")
-            print(f"Processing {i+1}/{len(remaining_samples)}: {task_id}")
+            print(f"Processing {sample_info}")
             print(f"{'='*60}")
-            
+
             problem_prompt = sample.get('prompt', '')
-            
+
             # === TURN 1: Requirements Analyst ===
-            print("Turn 1: Requirements Analyst analyzing...")
+            print(f"\n[{sample_info}] Turn 1/4: Requirements Analyst analyzing...")
             analyst_task = analyst_task_template.format(prompt=problem_prompt)
             res1 = analyst.generate_reply(messages=[{"content": analyst_task, "role": "user"}])
             analyst_findings = res1.get("content", "") if res1 else ""
             print(f"  Analyst findings: {len(analyst_findings)} chars")
-            
+
             # === TURN 2: Programmer Implementation ===
-            print("Turn 2: Programmer implementing...")
+            print(f"\n[{sample_info}] Turn 2/4: Programmer implementing...")
             programmer_task = programmer_task_template.format(
                 analyst_findings=analyst_findings,
                 prompt=problem_prompt
@@ -251,9 +252,9 @@ def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir,
             programmer_response = res2.get("content", "") if res2 else ""
             initial_code = extract_code_from_response(programmer_response)
             print(f"  Programmer response: {len(programmer_response)} chars")
-            
+
             # === TURN 3: Moderator Review ===
-            print("Turn 3: Moderator reviewing...")
+            print(f"\n[{sample_info}] Turn 3/4: Moderator reviewing...")
             moderator_task = config.MULTI_AGENT_TASK_MODERATOR_CODE.format(
                 analyst_findings=analyst_findings,
                 programmer_response=programmer_response,
@@ -262,22 +263,22 @@ def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir,
             res3 = moderator.generate_reply(messages=[{"content": moderator_task, "role": "user"}])
             moderator_summary = res3.get("content", "") if res3 else ""
             print(f"  Moderator summary: {len(moderator_summary)} chars")
-            
+
             # === SKIP LOGIC: Check if revision is needed ===
             moderator_upper = moderator_summary.upper()
-            code_approved = ("CODE LOOKS CORRECT" in moderator_upper or 
+            code_approved = ("CODE LOOKS CORRECT" in moderator_upper or
                            "CORRECT" in moderator_upper or
                            len(moderator_summary.strip()) < 20)
-            
+
             if code_approved:
                 # Skip Turn 4 - use initial code
-                print("  ✓ Code approved by moderator - skipping Turn 4")
+                print(f"  ✓ Code approved by moderator - skipping Turn 4")
                 final_code = initial_code
                 review_assessment = "APPROVED - Skipped review"
                 stats['skipped_review'] += 1
             else:
                 # === TURN 4: Review Board Revision ===
-                print("Turn 4: Review Board revising...")
+                print(f"\n[{sample_info}] Turn 4/4: Review Board revising...")
                 review_task = config.MULTI_AGENT_TASK_REVIEW_BOARD_CODE.format(
                     moderator_summary=moderator_summary,
                     prompt=problem_prompt,
