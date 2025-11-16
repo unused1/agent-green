@@ -404,14 +404,15 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Pod 4, Sample 36 (idx: 195026): Repetitive "no vulnerability" loop with endless commit ID 0s (Phase 4: Review Board)
   - Pod 4, Sample 1 (idx: 201382): Repetitive vulnerability searching (Phase 4: get_line, gerb_fgetint, read_double checks)
   - Pod 6, Sample 76 (idx: 443152): Repetitive clear_inode analysis (Phase 2: Code Author, i_data.nrpages repetition)
+  - Pod 6, Sample 103 (idx: 349528): Repetitive code inspection (Phase 2: Code Author, skb->nfct = NULL repetition)
   - Pod 8, Sample 40 (idx: 447053): Repetitive overflow calculation (TIFF count * size modulo arithmetic)
   - Pod 8, Sample 31 (idx: 389760): Endless "000..." in atoi overflow (same code as Pod 1 Sample 68) **[DUPLICATE]**
-- **Impact on Results**: 19 unique problematic samples identified (~4.9% failure rate), 20 total occurrences across pods
+- **Impact on Results**: 20 unique problematic samples identified (~5.2% failure rate), 21 total occurrences across pods
 - **Common Pattern**: Either repetitive string generation (attack examples) or excessively verbose multi-agent analysis that exceeds context window
-- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing **critically high failure rate** with **9 context overflows** (2.3% of all samples on Pod 4 alone!), followed by Pod 2 (6), Pod 1 (3), Pod 8 (2), and Pod 6 (1)
+- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing **critically high failure rate** with **9 context overflows** (2.3% of all samples on Pod 4 alone!), followed by Pod 2 (6), Pod 1 (3), Pod 6 (2), and Pod 8 (2)
 - **Logging Improvement**: ✅ Completed - Scripts uploaded to all 4 active pods, verified present on all systems
 - **Phase Analysis**: Context overflows occur at different phases:
-  - Phase 2/4 (Code Author): Pod 2 (idx: 217551), Pod 6 (idx: 443152) - Author gets stuck enumerating vulnerabilities
+  - Phase 2/4 (Code Author): Pod 2 (idx: 217551), Pod 6 (idx: 443152, 349528) - Author gets stuck enumerating vulnerabilities or repeating code inspection
   - Phase 4/4 (Review Board): Pod 2 (idx: 440872), Pod 4 (idx: 210692, 195026, 201382), Pod 8 (idx: 389760) - Final review gets stuck in loops
   - Various phases: Other samples overflow during Security Researcher or Moderator phases
 - **Notable Findings**:
@@ -543,7 +544,26 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 16:45 | Pod 4 resumed with skip option 2 |
 | Nov 16 16:50 | Git commit: 2 new context overflow samples, updated tracking |
 | Nov 16 16:55 | **Current Status**: 23/32 experiments complete (71.875%) - 4 pods actively running |
+| Nov 16 17:00 | ⚠️ Pod 8 hit context overflow on sample 40/386 (idx: 447053) - Repetitive TIFF overflow calculation |
+| Nov 16 17:05 | Pod 8 resumed with skip option 2 |
+| Nov 16 17:30 | ⚠️ Pod 8 hit context overflow on sample 31/344 (idx: 389760) - Endless "000..." (duplicate of Pod 1) |
+| Nov 16 17:35 | Pod 8 resumed with skip option 2 |
+| Nov 16 18:00 | ⚠️ Pod 4 hit context overflow on sample 42/231 (idx: 210692) - Phase 4 Review Board, enumeration 155-160+ |
+| Nov 16 18:05 | Pod 4 resumed with skip option 2 |
+| Nov 16 18:20 | ⚠️ Pod 2 hit context overflow on sample 6/225 (idx: 440872) - Phase 4 Review Board, "no vulnerabilities" loop |
+| Nov 16 18:25 | Pod 2 resumed with skip option 2 |
+| Nov 16 18:40 | ⚠️ Pod 6 hit context overflow on sample 76/386 (idx: 443152) - Phase 2 Code Author, i_data.nrpages repetition |
+| Nov 16 18:45 | Pod 6 resumed with skip option 2 |
+| Nov 16 18:50 | ⚠️ Pod 4 hit context overflow on sample 36/189 (idx: 195026) - Phase 4 Review Board, commit ID 0s |
+| Nov 16 18:55 | Pod 4 resumed with skip option 2 |
+| Nov 16 19:00 | ⚠️ Pod 2 hit context overflow on sample 51/218 (idx: 217551) - Phase 2 Code Author, strcpy/snprintf enumeration |
+| Nov 16 19:05 | Pod 2 resumed with skip option 2 |
+| Nov 16 19:20 | ⚠️ Pod 4 hit context overflow on sample 1/153 (idx: 201382) - Phase 4 Review Board, repetitive searching |
+| Nov 16 19:25 | Pod 4 resumed with skip option 2 |
+| Nov 16 20:30 | 📦 Backup download of active pods 2, 4, 6, 8 results (11 files, ~93 MB) |
+| Nov 16 20:37 | ⚠️ Pod 6 hit context overflow on sample 103/309 (idx: 349528) - Phase 2 Code Author, skb->nfct repetition |
+| Nov 16 20:37 | Pod 6 resumed with skip option 2 |
 
 ---
 
-**Last Updated**: 2025-11-16 16:55
+**Last Updated**: 2025-11-16 20:37
