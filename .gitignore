@@ -47,3 +47,5 @@ tests/config.py
 output/
 plots/
 tests/
+# RunPod results folders (large data files)
+results/runpod_rq2_pod*/
