@@ -135,7 +135,13 @@ python src/multi_agent_code_generation.py --prompt_type few_shot
 | 3 | MA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 16:00 | ~8h | 385/386 samples (5 skipped due to context overflow) |
 | 4 | MA-code-zero | Code Gen | 164 | ✅ Complete | Nov 17 00:02 | ~45min | 30B Thinking, Zero-Shot ✨ |
 
-**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results ready for download, pod can be stopped
+**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results downloaded, pod stopped (ready to terminate)
+
+**Results**: ✅ Downloaded to `results/runpod_rq2_pod6/` (27 files, ~57 MB)
+- DA-vuln-zero: 387 samples
+- DA-code-zero: 146 samples (18 skipped due to context overflow)
+- MA-vuln-zero: 385 samples (1 skipped)
+- MA-code-zero: 164 samples
 
 **Commands for Pod 6:**
 ```bash
@@ -173,7 +179,13 @@ python src/multi_agent_code_generation.py --prompt_type zero_shot
 | 3 | MA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 15:55 | ~7.5h | 384/386 samples (6 skipped due to context overflow) |
 | 4 | MA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 23:35 | ~45min | 30B Thinking, Few-Shot ✨ |
 
-**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results ready for download, pod can be stopped
+**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results downloaded, pod stopped (ready to terminate)
+
+**Results**: ✅ Downloaded to `results/runpod_rq2_pod8/` (28 files, ~51 MB)
+- DA-vuln-few: 387 samples
+- DA-code-few: 164 samples
+- MA-vuln-few: 384 samples (2 skipped)
+- MA-code-few: 164 samples
 
 **Commands for Pod 8:**
 ```bash
@@ -629,7 +641,10 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 17 00:47 | 🎉 **Pod 6 ALL 4/4 EXPERIMENTS COMPLETE** - Ready to download results and stop |
 | Nov 17 00:47 | 🎊 🎊 🎊 **ALL 32/32 EXPERIMENTS COMPLETE (100%)** 🎊 🎊 🎊 |
 | Nov 17 00:47 | **ALL 8 PODS FINISHED** - Ready to download final results from Pods 6 & 8 |
+| Nov 17 01:00 | Pod 6 results downloaded (27 files, ~57 MB) and verified ✅ |
+| Nov 17 01:03 | Pod 8 results downloaded (28 files, ~51 MB) and verified ✅ |
+| Nov 17 01:03 | **ALL RESULTS DOWNLOADED** - Pods 6 & 8 ready to terminate |
 
 ---
 
-**Last Updated**: 2025-11-17 00:47
+**Last Updated**: 2025-11-17 01:03
