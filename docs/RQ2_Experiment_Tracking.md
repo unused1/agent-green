@@ -84,8 +84,8 @@ python src/multi_agent_code_generation.py --prompt_type few_shot
 |---|------------|------|---------|--------|------------|----------|-------|
 | 1 | DA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~1.5h | ENABLE_REASONING=true |
 | 2 | DA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 | ~30min | ENABLE_REASONING=true, 4B Thinking |
-| 3 | MA-vuln-few | Vuln Detection | 386 | 🏃 Running | Nov 16 | ~1.5h est | Context overflow on sample 8 (idx: 344242) - skipping |
-| 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~30min est | After exp 3 |
+| 3 | MA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~14h | 385/386 samples (9 skipped due to context overflow) |
+| 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~30min est | Ready to start |
 
 **Commands for Pod 4:**
 ```bash
@@ -566,7 +566,9 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 20:37 | Pod 6 resumed with skip option 2 |
 | Nov 16 20:44 | ⚠️ Pod 8 hit context overflow on sample 154/313 (idx: 215038) - Phase 4 Review Board, "strerror without bounds" repetition |
 | Nov 16 20:44 | Pod 8 resumed with skip option 2 |
+| Nov 16 20:50 | Pod 4 MA-vuln-few completed ✅ (385/386 samples, 9 skipped due to context overflow) |
+| Nov 16 20:50 | **Current Status**: 24/32 experiments complete (75.0%) - 3 pods actively running |
 
 ---
 
-**Last Updated**: 2025-11-16 20:44
+**Last Updated**: 2025-11-16 20:50
