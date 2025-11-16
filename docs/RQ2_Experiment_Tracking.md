@@ -29,18 +29,11 @@
 | 1 | DA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~1.5h | ENABLE_REASONING=false |
 | 2 | DA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~30min | 163/164 successful (99.4%) |
 | 3 | MA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~1.5h | 3 samples skipped (context overflow) |
-| 4 | MA-code-zero | Code Gen | 164 | ⏳ Pending | - | - | Ready to start |
+| 4 | MA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~30min | 4B Instruct, Zero-Shot ✨ |
 
-**Commands for Pod 1:**
-```bash
-ssh root@157.66.254.40 -p 14555 -i ~/.ssh/runpod_ed25519
-cd /workspace/agent-green
-export ENABLE_REASONING=false
-export OPENAI_API_KEY='dummy-key-for-vllm'
+**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results downloaded, pod stopped (ready to terminate)
 
-# Ready to start experiment 4/4:
-python src/multi_agent_code_generation.py --prompt_type zero_shot
-```
+**Results**: ✅ Downloaded to `results/runpod_rq2_pod1_results.zip` (3.7MB, 25 files)
 
 ### Pod 2 (4B-Thinking, Zero-Shot) - 205.196.17.138:12500
 
@@ -162,8 +155,8 @@ python src/multi_agent_code_generation.py --prompt_type zero_shot
 
 | # | Experiment | Type | Samples | Status | Start Time | Duration | Notes |
 |---|------------|------|---------|--------|------------|----------|-------|
-| 1 | DA-vuln-few | Vuln Detection | 386 | ⏳ Ready to start | Nov 16 | ~2-3h est | ENABLE_REASONING=false, 30B Instruct |
-| 2 | DA-code-few | Code Gen | 164 | ⏳ Pending | - | ~45min est | After exp 1 |
+| 1 | DA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=false, 30B Instruct |
+| 2 | DA-code-few | Code Gen | 164 | 🏃 Running | Nov 16 | ~45min est | ENABLE_REASONING=false, 30B Instruct |
 | 3 | MA-vuln-few | Vuln Detection | 386 | ⏳ Pending | - | ~2-3h est | After exp 2 |
 | 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~45min est | After exp 3 |
 
@@ -174,11 +167,10 @@ cd /workspace/agent-green
 export ENABLE_REASONING=false
 export OPENAI_API_KEY='dummy-key-for-vllm'
 
-# Ready to start first experiment:
-python src/dual_agent_vuln.py --prompt_type few_shot
+# Currently running experiment 2/4:
+python src/dual_agent_code_generation.py --prompt_type few_shot
 
 # Next commands (run after previous completes):
-python src/dual_agent_code_generation.py --prompt_type few_shot
 python src/multi_agent_vuln_detection_four_agents.py --prompt_type few_shot
 python src/multi_agent_code_generation.py --prompt_type few_shot
 ```
