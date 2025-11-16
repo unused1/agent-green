@@ -613,7 +613,10 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 23:35 | **Current Status**: 28/32 experiments complete (87.5%) - 2 pods actively running (Pods 6, 8) |
 | Nov 16 23:52 | Pod 2 results downloaded (35 files, ~69 MB) and verified ✅ |
 | Nov 16 23:52 | Pod 2 stopped - Ready to terminate |
+| Nov 16 23:55 | Pod 2 terminated ✅ |
+| Nov 16 23:55 | **Pods Terminated**: 6/8 (Pods 1, 2, 3, 4, 5, 7) |
+| Nov 16 23:55 | **Active Pods**: 2/8 (Pods 6, 8) running final experiments |
 
 ---
 
-**Last Updated**: 2025-11-16 23:52
+**Last Updated**: 2025-11-16 23:55
