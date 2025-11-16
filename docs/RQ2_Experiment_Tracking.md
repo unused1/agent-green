@@ -132,8 +132,8 @@ python src/multi_agent_code_generation.py --prompt_type few_shot
 |---|------------|------|---------|--------|------------|----------|-------|
 | 1 | DA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=true, 30B Thinking, 32768 context |
 | 2 | DA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | 1 context overflow (65594 tokens), evaluation completed |
-| 3 | MA-vuln-zero | Vuln Detection | 386 | 🏃 Running | Nov 16 | ~2-3h est | ENABLE_REASONING=true, 30B Thinking |
-| 4 | MA-code-zero | Code Gen | 164 | ⏳ Pending | - | ~45min est | After exp 3 |
+| 3 | MA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 16:00 | ~8h | 385/386 samples (5 skipped due to context overflow) |
+| 4 | MA-code-zero | Code Gen | 164 | ⏳ Pending | - | ~45min est | Final experiment for Pod 6 |
 
 **Commands for Pod 6:**
 ```bash
@@ -341,11 +341,11 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 
 ### Session Notes:
 - All 8 pods deployed and experiments running
-- **Progress**: 29/32 experiments complete (90.625%)
+- **Progress**: 30/32 experiments complete (93.75%)
 - **Completed Pods** (6/8): Pods 1, 2, 3, 4, 5, 7 - All terminated
 - **Active Pods** (2/8):
-  - **Pod 6**: 2/4 complete - Running MA-vuln-zero (experiment 3/4, started 16:00)
-  - **Pod 8**: 3/4 complete - Running MA-code-few (experiment 4/4, started 23:35)
+  - **Pod 6**: 3/4 complete - Ready to start MA-code-zero (final experiment)
+  - **Pod 8**: 3/4 complete - Running MA-code-few (final experiment, started 23:35)
 - All vLLM compatibility fixes applied (api_base→base_url, model name sanitization with "/" handling)
 - Using max-model-len 65536 for all models (after fixing 30B misconfiguration)
 - **Context Overflow Rate**: ~6.7% (26 unique problematic samples, 28 total occurrences)
@@ -616,7 +616,9 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 23:55 | Pod 2 terminated ✅ |
 | Nov 16 23:55 | **Pods Terminated**: 6/8 (Pods 1, 2, 3, 4, 5, 7) |
 | Nov 16 23:55 | **Active Pods**: 2/8 (Pods 6, 8) - 3 experiments remaining |
+| Nov 17 00:00 | Pod 6 MA-vuln-zero completed ✅ (385/386 samples, 5 skipped due to context overflow) |
+| Nov 17 00:00 | **Current Status**: 30/32 experiments complete (93.75%) - Only 2 experiments remaining! |
 
 ---
 
-**Last Updated**: 2025-11-16 23:58
+**Last Updated**: 2025-11-17 00:00
