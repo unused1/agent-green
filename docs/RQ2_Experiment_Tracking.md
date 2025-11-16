@@ -123,8 +123,8 @@ python src/multi_agent_code_generation.py --prompt_type few_shot
 | # | Experiment | Type | Samples | Status | Start Time | Duration | Notes |
 |---|------------|------|---------|--------|------------|----------|-------|
 | 1 | DA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=true, 30B Thinking, 32768 context |
-| 2 | DA-code-zero | Code Gen | 164 | ⚠️ Needs Fix | Nov 16 | ~45min | 1 context overflow (65594 tokens), evaluation failed |
-| 3 | MA-vuln-zero | Vuln Detection | 386 | ⏳ Pending | - | ~2-3h est | After exp 2 fixed |
+| 2 | DA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | 1 context overflow (65594 tokens), evaluation completed |
+| 3 | MA-vuln-zero | Vuln Detection | 386 | 🏃 Running | Nov 16 | ~2-3h est | ENABLE_REASONING=true, 30B Thinking |
 | 4 | MA-code-zero | Code Gen | 164 | ⏳ Pending | - | ~45min est | After exp 3 |
 
 **Commands for Pod 6:**
@@ -134,13 +134,10 @@ cd /workspace/agent-green
 export ENABLE_REASONING=true
 export OPENAI_API_KEY='dummy-key-for-vllm'
 
-# ⚠️ DA-code-zero completed with 1 context overflow error
-# Need to manually run evaluation on the results file
-# Find the results file with: ls -lt results/DA-code-zero*detailed_results.jsonl | head -1
-# Then run: python src/evaluate_code_generation.py <results_file>
-
-# Next commands (after fixing exp 2):
+# Currently running experiment 3/4:
 python src/multi_agent_vuln_detection_four_agents.py --prompt_type zero_shot
+
+# Next command (run after previous completes):
 python src/multi_agent_code_generation.py --prompt_type zero_shot
 ```
 
@@ -163,7 +160,7 @@ python src/multi_agent_code_generation.py --prompt_type zero_shot
 |---|------------|------|---------|--------|------------|----------|-------|
 | 1 | DA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=true, 30B Thinking, 32768 context |
 | 2 | DA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | Pass@1: 0.6890 |
-| 3 | MA-vuln-few | Vuln Detection | 386 | ⏳ Pending | - | ~2-3h est | Ready to start |
+| 3 | MA-vuln-few | Vuln Detection | 386 | 🏃 Running | Nov 16 | ~2-3h est | ENABLE_REASONING=true, 30B Thinking |
 | 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~45min est | After exp 3 |
 
 **Commands for Pod 8:**
@@ -175,7 +172,7 @@ export OPENAI_API_KEY='dummy-key-for-vllm'
 
 # ✅ vLLM reconfigured: --max-model-len 65536, --gpu-memory-utilization 0.9
 
-# Ready to start experiment 3/4:
+# Currently running experiment 3/4:
 python src/multi_agent_vuln_detection_four_agents.py --prompt_type few_shot
 
 # Next command (run after previous completes):
@@ -254,10 +251,12 @@ Enter choice (1/2/3): 2
 - Pod 2: Sample 59/386 (idx: 252437) - Endless "000..." in attack example (vector size overflow, 65,544 tokens)
 - Pod 2: Sample 33/325 (idx: 427707) - Repetitive arithmetic overflow calculation (SIZE_MAX wrapping)
 - Pod 2: Sample 36/292 (idx: 391628) - Repetitive vulnerability enumeration (BMP file handling)
+- Pod 2: Sample 8/234 (idx: 351182) - Endless "000..." in index overflow demonstration (int64_t bounds)
 - Pod 4: Sample 8/386 (idx: 344242) - Endless "luaC_checkGC(L);" output (Lua memory management)
 - Pod 4: Sample 7/378 (idx: 450812) - Overly verbose analysis of glob function (brace expansion vulnerability)
 - Pod 4: Sample 1/370 (idx: 259619) - Repetitive STRCAT buffer overflow analysis (66,426 tokens)
 - Pod 4: Sample 131/365 (idx: 439266) - Repetitive vulnerability searching (BMP file size validation)
+- Pod 4: Sample 3/234 (idx: 328807) - Repetitive "no vulnerabilities" loop (y_array null pointer analysis)
 
 ---
 
@@ -377,7 +376,7 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Max output length limits per agent response
   - Conversation truncation for multi-agent chats
   - Timeout mechanisms for individual samples
-- **Frequency**: Occurs on ~2.6% of samples (10/386 observed across pods)
+- **Frequency**: Occurs on ~3.1% of samples (12/386 observed across pods)
 - **Pattern**: Agents generate overly verbose output, either through repetition or exhaustive analysis
   - Pod 1, Sample 68 (idx: 389760): Endless "999..." (integer overflow in `r_num_math`)
   - Pod 1, Sample 85 (idx: 413623): Endless "000..." (integer overflow attack example)
@@ -385,14 +384,16 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Pod 2, Sample 59 (idx: 252437): Endless "000..." (vector size overflow, 65,544 tokens)
   - Pod 2, Sample 33 (idx: 427707): Repetitive arithmetic overflow calculation (SIZE_MAX wrapping)
   - Pod 2, Sample 36 (idx: 391628): Repetitive vulnerability enumeration (BMP file handling)
+  - Pod 2, Sample 8 (idx: 351182): Endless "000..." in index overflow demonstration (int64_t bounds)
   - Pod 4, Sample 8 (idx: 344242): Endless "luaC_checkGC(L);" (Lua memory management)
   - Pod 4, Sample 7 (idx: 450812): Overly verbose analysis (66,177 tokens for glob function analysis)
   - Pod 4, Sample 1 (idx: 259619): Repetitive STRCAT buffer overflow analysis (66,426 tokens)
   - Pod 4, Sample 131 (idx: 439266): Repetitive vulnerability searching (BMP file size validation)
-- **Impact on Results**: 10 unique samples identified that need to be skipped across different pods (~2.6% failure rate)
+  - Pod 4, Sample 3 (idx: 328807): Repetitive "no vulnerabilities" loop (y_array null pointer analysis)
+- **Impact on Results**: 12 unique samples identified that need to be skipped across different pods (~3.1% failure rate)
 - **Common Pattern**: Either repetitive string generation (attack examples) or excessively verbose multi-agent analysis that exceeds context window
-- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing highest failure rate with 4 context overflows vs 3 for both Pod 1 and Pod 2
-- **Logging Improvement Needed**: Scripts should print sample number and idx at each agent phase, not just at sample start, for easier debugging when context overflow occurs
+- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing highest failure rate with 6 context overflows vs 4 for Pod 2 and 3 for Pod 1
+- **Logging Improvement**: ✅ Completed - Scripts now print sample number and idx at each agent phase for easier debugging
 
 ### Completed Tasks:
 - ✅ Upload script fixed to include all 22 Python files
