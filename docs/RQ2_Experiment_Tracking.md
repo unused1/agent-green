@@ -258,6 +258,7 @@ Enter choice (1/2/3): 2
 - Pod 4: Sample 1/370 (idx: 259619) - Repetitive STRCAT buffer overflow analysis (66,426 tokens)
 - Pod 4: Sample 131/365 (idx: 439266) - Repetitive vulnerability searching (BMP file size validation)
 - Pod 4: Sample 3/234 (idx: 328807) - Repetitive "no vulnerabilities" loop (y_array null pointer analysis)
+- Pod 4: Sample 42/231 (idx: 210692) - Repetitive vulnerability enumeration (BMP bytes_per_line overflow, 155-160+)
 - Pod 8: Sample 40/386 (idx: 447053) - Repetitive overflow calculation (TIFF count * size arithmetic)
 
 ---
@@ -378,7 +379,7 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Max output length limits per agent response
   - Conversation truncation for multi-agent chats
   - Timeout mechanisms for individual samples
-- **Frequency**: Occurs on ~3.6% of samples (14/386 observed across pods)
+- **Frequency**: Occurs on ~3.9% of samples (15/386 observed across pods)
 - **Pattern**: Agents generate overly verbose output, either through repetition or exhaustive analysis
   - Pod 1, Sample 68 (idx: 389760): Endless "999..." (integer overflow in `r_num_math`)
   - Pod 1, Sample 85 (idx: 413623): Endless "000..." (integer overflow attack example)
@@ -393,11 +394,13 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Pod 4, Sample 1 (idx: 259619): Repetitive STRCAT buffer overflow analysis (66,426 tokens)
   - Pod 4, Sample 131 (idx: 439266): Repetitive vulnerability searching (BMP file size validation)
   - Pod 4, Sample 3 (idx: 328807): Repetitive "no vulnerabilities" loop (y_array null pointer analysis)
+  - Pod 4, Sample 42 (idx: 210692): Repetitive vulnerability enumeration (BMP bytes_per_line, Vulnerability 155-160+)
   - Pod 8, Sample 40 (idx: 447053): Repetitive overflow calculation (TIFF count * size modulo arithmetic)
-- **Impact on Results**: 14 unique samples identified that need to be skipped across different pods (~3.6% failure rate)
+- **Impact on Results**: 15 unique samples identified that need to be skipped across different pods (~3.9% failure rate)
 - **Common Pattern**: Either repetitive string generation (attack examples) or excessively verbose multi-agent analysis that exceeds context window
-- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing highest failure rate with 6 context overflows, followed by Pod 2 (5), Pod 1 (3), and Pod 8 (1)
+- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing highest failure rate with 7 context overflows, followed by Pod 2 (5), Pod 1 (3), and Pod 8 (1)
 - **Logging Improvement**: ✅ Completed - Scripts uploaded to all 4 active pods, verified present on all systems
+- **Notable**: Sample 42/231 (idx: 210692) on Pod 4 hit overflow at Phase 4/4 (Review Board), showing overflow can occur at final phase
 
 ### Completed Tasks:
 - ✅ Upload script fixed to include all 22 Python files
