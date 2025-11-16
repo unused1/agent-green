@@ -405,21 +405,23 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Pod 4, Sample 1 (idx: 201382): Repetitive vulnerability searching (Phase 4: get_line, gerb_fgetint, read_double checks)
   - Pod 6, Sample 76 (idx: 443152): Repetitive clear_inode analysis (Phase 2: Code Author, i_data.nrpages repetition)
   - Pod 6, Sample 103 (idx: 349528): Repetitive code inspection (Phase 2: Code Author, skb->nfct = NULL repetition)
+  - Pod 6, Sample 17 (idx: 210692): Repetitive division calculation (Phase 2: Code Author, endless "000..." in BMP overflow, same code as Pod 4 Sample 42) **[DUPLICATE]**
   - Pod 8, Sample 40 (idx: 447053): Repetitive overflow calculation (TIFF count * size modulo arithmetic)
   - Pod 8, Sample 31 (idx: 389760): Endless "000..." in atoi overflow (same code as Pod 1 Sample 68) **[DUPLICATE]**
   - Pod 8, Sample 154 (idx: 215038): Repetitive function checking (Phase 4: Review Board, "strerror without bounds" repetition)
-- **Impact on Results**: 21 unique problematic samples identified (~5.4% failure rate), 22 total occurrences across pods
+- **Impact on Results**: 21 unique problematic samples identified (~5.4% failure rate), 23 total occurrences across pods
 - **Common Pattern**: Either repetitive string generation (attack examples) or excessively verbose multi-agent analysis that exceeds context window
-- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing **critically high failure rate** with **9 context overflows** (2.3% of all samples on Pod 4 alone!), followed by Pod 2 (6), Pod 8 (3), Pod 1 (3), and Pod 6 (2)
+- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing **critically high failure rate** with **9 context overflows** (2.3% of all samples on Pod 4 alone!), followed by Pod 2 (6), Pod 6 (3), Pod 8 (3), and Pod 1 (3)
 - **Logging Improvement**: ✅ Completed - Scripts uploaded to all 4 active pods, verified present on all systems
 - **Phase Analysis**: Context overflows occur at different phases:
-  - Phase 2/4 (Code Author): Pod 2 (idx: 217551), Pod 6 (idx: 443152, 349528) - Author gets stuck enumerating vulnerabilities or repeating code inspection
+  - Phase 2/4 (Code Author): Pod 2 (idx: 217551), Pod 6 (idx: 443152, 349528, 210692) - Author gets stuck enumerating vulnerabilities or repeating code inspection/calculations
   - Phase 4/4 (Review Board): Pod 2 (idx: 440872), Pod 4 (idx: 210692, 195026, 201382), Pod 8 (idx: 389760, 215038) - Final review gets stuck in loops
   - Various phases: Other samples overflow during Security Researcher or Moderator phases
 - **Notable Findings**:
-  - **idx 389760 causes overflow on both Pod 1 (4B-Instruct, Zero-Shot) and Pod 8 (30B-Thinking, Few-Shot)** - same vulnerable code, different models/prompts, both fail with endless number generation
-  - This suggests certain code samples are inherently problematic across different model configurations
-  - **Phase 2 (Code Author) emerging as problematic phase**: 2 overflows where author tries to enumerate all possible vulnerabilities
+  - **idx 389760 causes overflow on both Pod 1 (4B-Instruct, Zero-Shot) and Pod 8 (30B-Thinking, Few-Shot)** - same vulnerable code (atoi integer overflow), different models/prompts, both fail with endless number generation
+  - **idx 210692 causes overflow on both Pod 4 (4B-Thinking, Few-Shot) at Phase 4 and Pod 6 (30B-Thinking, Zero-Shot) at Phase 2** - same vulnerable code (BMP bytes_per_line overflow), different pods/phases, both fail with repetitive calculations
+  - **2 samples (389760, 210692) fail across multiple pods** - This suggests certain code samples are inherently problematic across different model configurations and phases
+  - **Phase 2 (Code Author) emerging as problematic phase**: 4 overflows where author gets stuck in repetitive analysis or calculations
   - **Pod 4 (4B-Thinking, Few-Shot) has 9 failures** - the combination of Thinking model + Few-shot prompting creates significantly higher context overflow risk
 
 ### Completed Tasks:
@@ -568,7 +570,10 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 20:44 | Pod 8 resumed with skip option 2 |
 | Nov 16 20:50 | Pod 4 MA-vuln-few completed ✅ (385/386 samples, 9 skipped due to context overflow) |
 | Nov 16 20:50 | **Current Status**: 24/32 experiments complete (75.0%) - 3 pods actively running |
+| Nov 16 20:55 | Pod 4 MA-code-few started 🏃 (final experiment for Pod 4) |
+| Nov 16 21:04 | ⚠️ Pod 6 hit context overflow on sample 17/206 (idx: 210692) - Phase 2 Code Author, endless "000..." in BMP calculation (DUPLICATE of Pod 4) |
+| Nov 16 21:04 | Pod 6 resumed with skip option 2 |
 
 ---
 
-**Last Updated**: 2025-11-16 20:50
+**Last Updated**: 2025-11-16 21:04
