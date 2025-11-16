@@ -44,7 +44,9 @@
 | 3 | MA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~16h | 384/386 samples (6 skipped due to context overflow) |
 | 4 | MA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 21:35 | ~2h | 4B Thinking, Zero-Shot ✨ |
 
-**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results ready for download, pod can be stopped
+**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results downloaded, pod stopped (ready to terminate)
+
+**Results**: ✅ Downloaded to `results/runpod_rq2_pod2/` (35 files, ~69 MB)
 
 **Commands for Pod 2:**
 ```bash
@@ -609,7 +611,9 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 23:35 | 🎉 **Pod 2 ALL 4/4 EXPERIMENTS COMPLETE** - Ready to download results and stop |
 | Nov 16 23:35 | Pod 8 MA-code-few started 🏃 (final experiment for Pod 8) |
 | Nov 16 23:35 | **Current Status**: 28/32 experiments complete (87.5%) - 2 pods actively running (Pods 6, 8) |
+| Nov 16 23:52 | Pod 2 results downloaded (35 files, ~69 MB) and verified ✅ |
+| Nov 16 23:52 | Pod 2 stopped - Ready to terminate |
 
 ---
 
-**Last Updated**: 2025-11-16 23:35
+**Last Updated**: 2025-11-16 23:52
