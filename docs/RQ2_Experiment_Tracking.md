@@ -85,7 +85,9 @@ python src/multi_agent_code_generation.py --prompt_type few_shot
 | 1 | DA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~1.5h | ENABLE_REASONING=true |
 | 2 | DA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 | ~30min | ENABLE_REASONING=true, 4B Thinking |
 | 3 | MA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~14h | 385/386 samples (9 skipped due to context overflow) |
-| 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~30min est | Ready to start |
+| 4 | MA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 20:55 | ~2h | 163/164 successful (99.4%), Pass@1: 0.9451 ✨ |
+
+**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results ready for download, pod can be stopped
 
 **Commands for Pod 4:**
 ```bash
@@ -588,7 +590,10 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 22:34 | Pod 6 resumed with skip option 2 |
 | Nov 16 23:00 | ⚠️ Pod 8 hit context overflow on sample 47/96 (idx: 211915) - Phase 4 Review Board, `jas_image_setcmpttype` validation repetition |
 | Nov 16 23:00 | Pod 8 resumed with skip option 2 |
+| Nov 16 23:04 | Pod 4 MA-code-few completed ✅ (163/164 successful, Pass@1: 0.9451) |
+| Nov 16 23:04 | 🎉 **Pod 4 ALL 4/4 EXPERIMENTS COMPLETE** - Ready to download results and stop |
+| Nov 16 23:04 | **Current Status**: 26/32 experiments complete (81.25%) - 3 pods actively running |
 
 ---
 
-**Last Updated**: 2025-11-16 23:00
+**Last Updated**: 2025-11-16 23:04
