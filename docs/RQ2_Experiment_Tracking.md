@@ -341,11 +341,11 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 
 ### Session Notes:
 - All 8 pods deployed and experiments running
-- **Progress**: 28/32 experiments complete (87.5%)
-- **Completed Pods** (6/8): Pods 1, 2, 3, 4, 5, 7 - Results ready for download
+- **Progress**: 29/32 experiments complete (90.625%)
+- **Completed Pods** (6/8): Pods 1, 2, 3, 4, 5, 7 - All terminated
 - **Active Pods** (2/8):
-  - **Pod 6**: Running MA-vuln-zero (experiment 3/4, started 16:00)
-  - **Pod 8**: Running MA-code-few (final experiment, started 23:35)
+  - **Pod 6**: 2/4 complete - Running MA-vuln-zero (experiment 3/4, started 16:00)
+  - **Pod 8**: 3/4 complete - Running MA-code-few (experiment 4/4, started 23:35)
 - All vLLM compatibility fixes applied (api_base→base_url, model name sanitization with "/" handling)
 - Using max-model-len 65536 for all models (after fixing 30B misconfiguration)
 - **Context Overflow Rate**: ~6.7% (26 unique problematic samples, 28 total occurrences)
@@ -606,17 +606,17 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 23:27 | ⚠️ Pod 6 hit context overflow on sample 34/104 (idx: 198662) - Phase 2 Code Author, endless "999..." in line number overflow |
 | Nov 16 23:27 | Pod 6 resumed with skip option 2 |
 | Nov 16 23:30 | Pod 8 MA-vuln-few completed ✅ (384/386 samples, 6 skipped due to context overflow) |
-| Nov 16 23:30 | **Current Status**: 27/32 experiments complete (84.375%) - 3 pods actively running |
+| Nov 16 23:30 | **Current Status**: 28/32 experiments complete (87.5%) - 3 pods actively running |
 | Nov 16 23:35 | Pod 2 MA-code-zero completed ✅ (4B Thinking, Zero-Shot) |
 | Nov 16 23:35 | 🎉 **Pod 2 ALL 4/4 EXPERIMENTS COMPLETE** - Ready to download results and stop |
 | Nov 16 23:35 | Pod 8 MA-code-few started 🏃 (final experiment for Pod 8) |
-| Nov 16 23:35 | **Current Status**: 28/32 experiments complete (87.5%) - 2 pods actively running (Pods 6, 8) |
+| Nov 16 23:35 | **Current Status**: 29/32 experiments complete (90.625%) - 2 pods actively running (Pods 6, 8) |
 | Nov 16 23:52 | Pod 2 results downloaded (35 files, ~69 MB) and verified ✅ |
 | Nov 16 23:52 | Pod 2 stopped - Ready to terminate |
 | Nov 16 23:55 | Pod 2 terminated ✅ |
 | Nov 16 23:55 | **Pods Terminated**: 6/8 (Pods 1, 2, 3, 4, 5, 7) |
-| Nov 16 23:55 | **Active Pods**: 2/8 (Pods 6, 8) running final experiments |
+| Nov 16 23:55 | **Active Pods**: 2/8 (Pods 6, 8) - 3 experiments remaining |
 
 ---
 
-**Last Updated**: 2025-11-16 23:55
+**Last Updated**: 2025-11-16 23:58
