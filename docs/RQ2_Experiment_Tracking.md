@@ -87,7 +87,9 @@ python src/multi_agent_code_generation.py --prompt_type few_shot
 | 3 | MA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~14h | 385/386 samples (9 skipped due to context overflow) |
 | 4 | MA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 20:55 | ~2h | 163/164 successful (99.4%), Pass@1: 0.9451 ✨ |
 
-**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results ready for download, pod can be stopped
+**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results downloaded, pod stopped (ready to terminate)
+
+**Results**: ✅ Downloaded to `results/runpod_rq2_pod4/` (4 files, ~39 MB)
 
 **Commands for Pod 4:**
 ```bash
@@ -593,7 +595,10 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 23:04 | Pod 4 MA-code-few completed ✅ (163/164 successful, Pass@1: 0.9451) |
 | Nov 16 23:04 | 🎉 **Pod 4 ALL 4/4 EXPERIMENTS COMPLETE** - Ready to download results and stop |
 | Nov 16 23:04 | **Current Status**: 26/32 experiments complete (81.25%) - 3 pods actively running |
+| Nov 16 23:10 | Pod 4 results downloaded (4 files, ~39 MB) and verified ✅ |
+| Nov 16 23:13 | Pod 4 stopped - Ready to terminate |
+| Nov 16 23:13 | **Current Status**: 26/32 experiments complete (81.25%) - 5 pods complete, 3 pods running |
 
 ---
 
-**Last Updated**: 2025-11-16 23:04
+**Last Updated**: 2025-11-16 23:13
