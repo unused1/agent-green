@@ -164,8 +164,8 @@ python src/multi_agent_code_generation.py --prompt_type zero_shot
 |---|------------|------|---------|--------|------------|----------|-------|
 | 1 | DA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=true, 30B Thinking, 32768 context |
 | 2 | DA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | Pass@1: 0.6890 |
-| 3 | MA-vuln-few | Vuln Detection | 386 | 🏃 Running | Nov 16 | ~2-3h est | ENABLE_REASONING=true, 30B Thinking |
-| 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~45min est | After exp 3 |
+| 3 | MA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 15:55 | ~7.5h | 384/386 samples (6 skipped due to context overflow) |
+| 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~45min est | Final experiment for Pod 8 |
 
 **Commands for Pod 8:**
 ```bash
@@ -336,15 +336,16 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 ## Notes & Issues
 
 ### Session Notes:
-- All 4 pods deployed and running experiments in parallel
-- **Pod 1**: Running MA-vuln-zero (resumed from sample 3/386)
-- **Pod 2**: Running DA-vuln-zero
-- **Pod 3**: Running MA-vuln-few (just started)
-- **Pod 4**: Running DA-vuln-few
+- All 8 pods deployed and experiments running
+- **Progress**: 27/32 experiments complete (84.375%)
+- **Completed Pods** (5/8): Pods 1, 3, 4, 5, 7 - Results downloaded, stopped, ready to terminate
+- **Active Pods** (3/8):
+  - **Pod 2**: Running MA-code-zero (final experiment, started 21:35)
+  - **Pod 6**: Running MA-vuln-zero (experiment 3/4, started 16:00)
+  - **Pod 8**: Ready to start MA-code-few (final experiment)
 - All vLLM compatibility fixes applied (api_base→base_url, model name sanitization with "/" handling)
-- Using max-model-len 65536 for all models
-- **Progress**: 6/16 experiments complete (37.5%) on 4B models
-- **Pod 5**: 30B-A3B-Instruct model downloading/starting
+- Using max-model-len 65536 for all models (after fixing 30B misconfiguration)
+- **Context Overflow Rate**: ~6.7% (26 unique problematic samples, 28 total occurrences)
 
 ### Known Issues:
 
@@ -601,7 +602,9 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 23:13 | **Current Status**: 26/32 experiments complete (81.25%) - 5 pods complete, 3 pods running |
 | Nov 16 23:27 | ⚠️ Pod 6 hit context overflow on sample 34/104 (idx: 198662) - Phase 2 Code Author, endless "999..." in line number overflow |
 | Nov 16 23:27 | Pod 6 resumed with skip option 2 |
+| Nov 16 23:30 | Pod 8 MA-vuln-few completed ✅ (384/386 samples, 6 skipped due to context overflow) |
+| Nov 16 23:30 | **Current Status**: 27/32 experiments complete (84.375%) - 3 pods actively running |
 
 ---
 
-**Last Updated**: 2025-11-16 23:27
+**Last Updated**: 2025-11-16 23:30
