@@ -261,6 +261,7 @@ Enter choice (1/2/3): 2
 - Pod 4: Sample 3/234 (idx: 328807) - Repetitive "no vulnerabilities" loop (y_array null pointer analysis)
 - Pod 4: Sample 42/231 (idx: 210692) - Repetitive vulnerability enumeration (BMP bytes_per_line overflow, 155-160+)
 - Pod 4: Sample 36/189 (idx: 195026) - Repetitive "no vulnerability" loop with endless commit ID 0s
+- Pod 4: Sample 1/153 (idx: 201382) - Repetitive vulnerability searching (get_line buffer overflow, gerb_fgetint, read_double)
 - Pod 6: Sample 76/386 (idx: 443152) - Repetitive clear_inode analysis (i_data.nrpages repetition)
 - Pod 8: Sample 40/386 (idx: 447053) - Repetitive overflow calculation (TIFF count * size arithmetic)
 - Pod 8: Sample 31/344 (idx: 389760) - Endless "000..." in atoi overflow demonstration (same as Pod 1)
@@ -383,7 +384,7 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Max output length limits per agent response
   - Conversation truncation for multi-agent chats
   - Timeout mechanisms for individual samples
-- **Frequency**: Occurs on ~4.7% of samples (18 unique samples identified, 19 total occurrences across pods)
+- **Frequency**: Occurs on ~4.9% of samples (19 unique samples identified, 20 total occurrences across pods)
 - **Pattern**: Agents generate overly verbose output, either through repetition or exhaustive analysis
   - Pod 1, Sample 68 (idx: 389760): Endless "999..." (integer overflow in `r_num_math`) **[REPEATED ON POD 8]**
   - Pod 1, Sample 85 (idx: 413623): Endless "000..." (integer overflow attack example)
@@ -401,21 +402,23 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Pod 4, Sample 3 (idx: 328807): Repetitive "no vulnerabilities" loop (y_array null pointer analysis)
   - Pod 4, Sample 42 (idx: 210692): Repetitive vulnerability enumeration (BMP bytes_per_line, Vulnerability 155-160+)
   - Pod 4, Sample 36 (idx: 195026): Repetitive "no vulnerability" loop with endless commit ID 0s (Phase 4: Review Board)
+  - Pod 4, Sample 1 (idx: 201382): Repetitive vulnerability searching (Phase 4: get_line, gerb_fgetint, read_double checks)
   - Pod 6, Sample 76 (idx: 443152): Repetitive clear_inode analysis (Phase 2: Code Author, i_data.nrpages repetition)
   - Pod 8, Sample 40 (idx: 447053): Repetitive overflow calculation (TIFF count * size modulo arithmetic)
   - Pod 8, Sample 31 (idx: 389760): Endless "000..." in atoi overflow (same code as Pod 1 Sample 68) **[DUPLICATE]**
-- **Impact on Results**: 18 unique problematic samples identified (~4.7% failure rate), 19 total occurrences across pods
+- **Impact on Results**: 19 unique problematic samples identified (~4.9% failure rate), 20 total occurrences across pods
 - **Common Pattern**: Either repetitive string generation (attack examples) or excessively verbose multi-agent analysis that exceeds context window
-- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing highest failure rate with 8 context overflows, followed by Pod 2 (6), Pod 1 (3), Pod 8 (2), and Pod 6 (1)
+- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing **critically high failure rate** with **9 context overflows** (2.3% of all samples on Pod 4 alone!), followed by Pod 2 (6), Pod 1 (3), Pod 8 (2), and Pod 6 (1)
 - **Logging Improvement**: ✅ Completed - Scripts uploaded to all 4 active pods, verified present on all systems
 - **Phase Analysis**: Context overflows occur at different phases:
   - Phase 2/4 (Code Author): Pod 2 (idx: 217551), Pod 6 (idx: 443152) - Author gets stuck enumerating vulnerabilities
-  - Phase 4/4 (Review Board): Pod 2 (idx: 440872), Pod 4 (idx: 210692, 195026), Pod 8 (idx: 389760) - Final review gets stuck in loops
+  - Phase 4/4 (Review Board): Pod 2 (idx: 440872), Pod 4 (idx: 210692, 195026, 201382), Pod 8 (idx: 389760) - Final review gets stuck in loops
   - Various phases: Other samples overflow during Security Researcher or Moderator phases
 - **Notable Findings**:
   - **idx 389760 causes overflow on both Pod 1 (4B-Instruct, Zero-Shot) and Pod 8 (30B-Thinking, Few-Shot)** - same vulnerable code, different models/prompts, both fail with endless number generation
   - This suggests certain code samples are inherently problematic across different model configurations
-  - **Phase 2 (Code Author) emerging as problematic phase**: 2 new overflows at this phase where author tries to enumerate all possible vulnerabilities
+  - **Phase 2 (Code Author) emerging as problematic phase**: 2 overflows where author tries to enumerate all possible vulnerabilities
+  - **Pod 4 (4B-Thinking, Few-Shot) has 9 failures** - the combination of Thinking model + Few-shot prompting creates significantly higher context overflow risk
 
 ### Completed Tasks:
 - ✅ Upload script fixed to include all 22 Python files
