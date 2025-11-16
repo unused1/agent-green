@@ -40,9 +40,9 @@
 | # | Experiment | Type | Samples | Status | Start Time | Duration | Notes |
 |---|------------|------|---------|--------|------------|----------|-------|
 | 1 | DA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~1.5h | ENABLE_REASONING=true, 4B Thinking |
-| 2 | DA-code-zero | Code Gen | 164 | 🏃 Running | Nov 16 | ~30min est | ENABLE_REASONING=true, 4B Thinking |
-| 3 | MA-vuln-zero | Vuln Detection | 386 | ⏳ Pending | - | - | After exp 2 |
-| 4 | MA-code-zero | Code Gen | 164 | ⏳ Pending | - | - | After exp 3 |
+| 2 | DA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~30min | ENABLE_REASONING=true, 4B Thinking |
+| 3 | MA-vuln-zero | Vuln Detection | 386 | 🏃 Running | Nov 16 | ~1.5h est | ENABLE_REASONING=true, 4B Thinking |
+| 4 | MA-code-zero | Code Gen | 164 | ⏳ Pending | - | ~30min est | After exp 3 |
 
 **Commands for Pod 2:**
 ```bash
@@ -51,11 +51,10 @@ cd /workspace/agent-green
 export ENABLE_REASONING=true
 export OPENAI_API_KEY='dummy-key-for-vllm'
 
-# Currently running experiment 2/4:
-python src/dual_agent_code_generation.py --prompt_type zero_shot
-
-# Next commands (run after previous completes):
+# Currently running experiment 3/4:
 python src/multi_agent_vuln_detection_four_agents.py --prompt_type zero_shot
+
+# Next command (run after previous completes):
 python src/multi_agent_code_generation.py --prompt_type zero_shot
 ```
 
@@ -84,9 +83,9 @@ python src/multi_agent_code_generation.py --prompt_type few_shot
 | # | Experiment | Type | Samples | Status | Start Time | Duration | Notes |
 |---|------------|------|---------|--------|------------|----------|-------|
 | 1 | DA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~1.5h | ENABLE_REASONING=true |
-| 2 | DA-code-few | Code Gen | 164 | 🏃 Running | Nov 16 | ~30min est | ENABLE_REASONING=true, 4B Thinking |
-| 3 | MA-vuln-few | Vuln Detection | 386 | ⏳ Pending | - | - | After exp 2 |
-| 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | - | After exp 3 |
+| 2 | DA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 | ~30min | ENABLE_REASONING=true, 4B Thinking |
+| 3 | MA-vuln-few | Vuln Detection | 386 | 🏃 Running | Nov 16 | ~1.5h est | Context overflow on sample 8 (idx: 344242) - skipping |
+| 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~30min est | After exp 3 |
 
 **Commands for Pod 4:**
 ```bash
@@ -95,11 +94,10 @@ cd /workspace/agent-green
 export ENABLE_REASONING=true
 export OPENAI_API_KEY='dummy-key-for-vllm'
 
-# Currently running experiment 2/4:
-python src/dual_agent_code_generation.py --prompt_type few_shot
-
-# Next commands (run after previous completes):
+# Currently running experiment 3/4:
 python src/multi_agent_vuln_detection_four_agents.py --prompt_type few_shot
+
+# Next command (run after previous completes):
 python src/multi_agent_code_generation.py --prompt_type few_shot
 ```
 
@@ -109,22 +107,16 @@ python src/multi_agent_code_generation.py --prompt_type few_shot
 |---|------------|------|---------|--------|------------|----------|-------|
 | 1 | DA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=false, 30B model |
 | 2 | DA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | 30B Instruct model |
-| 3 | MA-vuln-zero | Vuln Detection | 386 | ⏳ Ready to start | Nov 16 | ~2-3h est | Next to run |
-| 4 | MA-code-zero | Code Gen | 164 | ⏳ Pending | - | ~45min est | After exp 3 |
+| 3 | MA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=false, 30B Instruct |
+| 4 | MA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | 30B Instruct, Zero-Shot ✨ |
 
-**Commands for Pod 5:**
-```bash
-ssh root@205.196.17.139 -p 9294 -i ~/.ssh/runpod_ed25519
-cd /workspace/agent-green
-export ENABLE_REASONING=false
-export OPENAI_API_KEY='dummy-key-for-vllm'
+**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results downloaded, pod stopped (ready to terminate)
 
-# Ready to start experiment 3/4:
-python src/multi_agent_vuln_detection_four_agents.py --prompt_type zero_shot
-
-# Next command (run after previous completes):
-python src/multi_agent_code_generation.py --prompt_type zero_shot
-```
+**Results**: ✅ Downloaded to `results/runpod_rq2_pod5/` (21MB, 28 files)
+- DA-vuln-zero: 387 samples
+- DA-code-zero: 164 samples
+- MA-vuln-zero: 386 samples
+- MA-code-zero: 164 samples
 
 ### Pod 6 (30B-A3B-Thinking, Zero-Shot) - 63.141.33.85:22145
 
@@ -145,7 +137,20 @@ export OPENAI_API_KEY='dummy-key-for-vllm'
 # Currently running:
 python src/dual_agent_vuln.py --prompt_type zero_shot
 
-# Next commands (run after previous completes):
+# ⚠️ IMPORTANT: After DA-vuln-zero completes, reconfigure vLLM with correct context length:
+# 1. Kill current vLLM process
+# 2. Restart with --max-model-len 65536:
+python -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-30B-A3B-Thinking-2507 \
+  --served-model-name Qwen/Qwen3-30B-A3B-Thinking-2507 \
+  --download-dir /workspace/agent-green/models \
+  --max-model-len 65536 \
+  --dtype auto \
+  --gpu-memory-utilization 0.85 \
+  --host 0.0.0.0 \
+  --port 8000 &
+
+# Wait for vLLM to be ready, then continue experiments:
 python src/dual_agent_code_generation.py --prompt_type zero_shot
 python src/multi_agent_vuln_detection_four_agents.py --prompt_type zero_shot
 python src/multi_agent_code_generation.py --prompt_type zero_shot
@@ -156,23 +161,16 @@ python src/multi_agent_code_generation.py --prompt_type zero_shot
 | # | Experiment | Type | Samples | Status | Start Time | Duration | Notes |
 |---|------------|------|---------|--------|------------|----------|-------|
 | 1 | DA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=false, 30B Instruct |
-| 2 | DA-code-few | Code Gen | 164 | 🏃 Running | Nov 16 | ~45min est | ENABLE_REASONING=false, 30B Instruct |
-| 3 | MA-vuln-few | Vuln Detection | 386 | ⏳ Pending | - | ~2-3h est | After exp 2 |
-| 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~45min est | After exp 3 |
+| 2 | DA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | ENABLE_REASONING=false, 30B Instruct |
+| 3 | MA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=false, 30B Instruct |
+| 4 | MA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | 30B Instruct, Few-Shot ✨ |
 
-**Commands for Pod 7:**
+**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Ready to download results and stop pod
+
+**Download Results:**
 ```bash
-ssh root@205.196.17.131 -p 10944 -i ~/.ssh/runpod_ed25519
-cd /workspace/agent-green
-export ENABLE_REASONING=false
-export OPENAI_API_KEY='dummy-key-for-vllm'
-
-# Currently running experiment 2/4:
-python src/dual_agent_code_generation.py --prompt_type few_shot
-
-# Next commands (run after previous completes):
-python src/multi_agent_vuln_detection_four_agents.py --prompt_type few_shot
-python src/multi_agent_code_generation.py --prompt_type few_shot
+cd /Users/shanetan/Documents/Code_Projects/SMU/SCIS_EngD/agent-green
+scp -P 10944 -i ~/.ssh/runpod_ed25519 -r root@205.196.17.131:/workspace/agent-green/results ./results/runpod_rq2_pod7
 ```
 
 ### Pod 8 (30B-A3B-Thinking, Few-Shot) - 213.181.122.251:15454
@@ -191,10 +189,23 @@ cd /workspace/agent-green
 export ENABLE_REASONING=true
 export OPENAI_API_KEY='dummy-key-for-vllm'
 
-# Ready to start first experiment:
+# Currently running:
 python src/dual_agent_vuln.py --prompt_type few_shot
 
-# Next commands (run after previous completes):
+# ⚠️ IMPORTANT: After DA-vuln-few completes, reconfigure vLLM with correct context length:
+# 1. Kill current vLLM process
+# 2. Restart with --max-model-len 65536:
+python -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-30B-A3B-Thinking-2507 \
+  --served-model-name Qwen/Qwen3-30B-A3B-Thinking-2507 \
+  --download-dir /workspace/agent-green/models \
+  --max-model-len 65536 \
+  --dtype auto \
+  --gpu-memory-utilization 0.85 \
+  --host 0.0.0.0 \
+  --port 8000 &
+
+# Wait for vLLM to be ready, then continue experiments:
 python src/dual_agent_code_generation.py --prompt_type few_shot
 python src/multi_agent_vuln_detection_four_agents.py --prompt_type few_shot
 python src/multi_agent_code_generation.py --prompt_type few_shot
@@ -269,6 +280,10 @@ Enter choice (1/2/3): 2
 - Pod 1: Sample 68/383 (idx: 389760) - Integer overflow with endless "999..." output
 - Pod 1: Sample 85/312 (idx: 413623) - Integer overflow with endless "000..." output
 - Pod 1: Sample 161/227 (idx: 197973) - Integer overflow with endless "999..." output (LISTEN_FDS parsing)
+- Pod 2: Sample 59/386 (idx: 252437) - Endless "000..." in attack example (vector size overflow, 65,544 tokens)
+- Pod 4: Sample 8/386 (idx: 344242) - Endless "luaC_checkGC(L);" output (Lua memory management)
+- Pod 4: Sample 7/378 (idx: 450812) - Overly verbose analysis of glob function (brace expansion vulnerability)
+- Pod 4: Sample 1/370 (idx: 259619) - Repetitive STRCAT buffer overflow analysis (66,426 tokens)
 
 ---
 
@@ -352,7 +367,22 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 - ⚠️ Setup script sets Instruct model by default - need to manually switch to Thinking model for Thinking pods
 - **Fix**: Update config.py to uncomment/comment the correct LLM_MODEL line for each pod
 
-#### 2. Multi-Agent Context Overflow (Critical)
+#### 2. vLLM Context Length Misconfiguration (Critical - Experimental Validity)
+- ⚠️ **Issue**: 30B models (Pods 5-8) were configured with `--max-model-len 32768` instead of 65536
+- **Impact**:
+  - **Pod 5** (30B-Instruct, Zero-Shot): 0 failures (zero-shot requires fewer tokens)
+  - **Pod 7** (30B-Instruct, Few-Shot): **6 failures** in DA-vuln-few due to 32,768 token limit
+  - **Pod 6** (30B-Thinking, Zero-Shot): Still running with 32,768 (DA-vuln-zero)
+  - **Pod 8** (30B-Thinking, Few-Shot): Still running with 32,768 (DA-vuln-few) - **high risk**
+- **Inconsistency**: 4B models (Pods 1-4) had 65,536 tokens vs 30B models had 32,768 tokens
+- **Root Cause**: Configuration error during setup; should have been consistent across all pods
+- **Resolution Plan**:
+  - Accept limitations for completed experiments (Pods 5, 7)
+  - **For Pods 6 & 8**: After current experiment completes, restart vLLM with `--max-model-len 65536` before next experiment
+  - Document as experimental limitation in research paper
+- **Experimental Impact**: Few-shot experiments on 30B models are compromised due to insufficient context for examples
+
+#### 3. Multi-Agent Context Overflow (Critical)
 - ⚠️ **Issue**: Multi-agent experiments can hit context length limits on certain samples
 - **Observed on**: Pod 1, MA-vuln-zero, Sample 68/383 (idx: 389760)
 - **Symptoms**:
@@ -373,13 +403,18 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Max output length limits per agent response
   - Conversation truncation for multi-agent chats
   - Timeout mechanisms for individual samples
-- **Frequency**: Occurs on ~0.78% of samples (3/386) with integer overflow vulnerabilities
-- **Pattern**: Security researcher agent generates attack examples with extremely long numeric strings
-  - Sample 68 (idx: 389760): Endless "999..." (integer overflow in `r_num_math`)
-  - Sample 85 (idx: 413623): Endless "000..." (integer overflow attack example)
-  - Sample 161 (idx: 197973): Endless "999..." (LISTEN_FDS parsing via `strtoll()`)
-- **Impact on Results**: 3 samples out of 386 need to be skipped (~0.78% failure rate)
-- **Common Pattern**: All involve `strtoll()`, `strtoull()`, or similar string-to-number parsing without validation
+- **Frequency**: Occurs on ~1.8% of samples (7/386 observed across pods)
+- **Pattern**: Agents generate overly verbose output, either through repetition or exhaustive analysis
+  - Pod 1, Sample 68 (idx: 389760): Endless "999..." (integer overflow in `r_num_math`)
+  - Pod 1, Sample 85 (idx: 413623): Endless "000..." (integer overflow attack example)
+  - Pod 1, Sample 161 (idx: 197973): Endless "999..." (LISTEN_FDS parsing via `strtoll()`)
+  - Pod 2, Sample 59 (idx: 252437): Endless "000..." (vector size overflow, 65,544 tokens)
+  - Pod 4, Sample 8 (idx: 344242): Endless "luaC_checkGC(L);" (Lua memory management)
+  - Pod 4, Sample 7 (idx: 450812): Overly verbose analysis (66,177 tokens for glob function analysis)
+  - Pod 4, Sample 1 (idx: 259619): Repetitive STRCAT buffer overflow analysis (66,426 tokens)
+- **Impact on Results**: 7 unique samples identified that need to be skipped across different pods (~1.8% failure rate)
+- **Common Pattern**: Either repetitive string generation (attack examples) or excessively verbose multi-agent analysis that exceeds context window
+- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing highest failure rate with 3 context overflows vs 3 for Pod 1 and 1 for Pod 2
 
 ### Completed Tasks:
 - ✅ Upload script fixed to include all 22 Python files
