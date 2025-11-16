@@ -42,7 +42,7 @@
 | 1 | DA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~1.5h | ENABLE_REASONING=true, 4B Thinking |
 | 2 | DA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~30min | ENABLE_REASONING=true, 4B Thinking |
 | 3 | MA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~16h | 384/386 samples (6 skipped due to context overflow) |
-| 4 | MA-code-zero | Code Gen | 164 | ⏳ Pending | - | ~30min est | Ready to start |
+| 4 | MA-code-zero | Code Gen | 164 | 🏃 Running | Nov 16 21:35 | ~30min est | Final experiment for Pod 2 |
 
 **Commands for Pod 2:**
 ```bash
@@ -578,7 +578,8 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 21:14 | Pod 8 resumed with skip option 2 |
 | Nov 16 21:34 | Pod 2 MA-vuln-zero completed ✅ (384/386 samples, 6 skipped due to context overflow) |
 | Nov 16 21:34 | **Current Status**: 25/32 experiments complete (78.125%) - 3 pods actively running |
+| Nov 16 21:35 | Pod 2 MA-code-zero started 🏃 (final experiment for Pod 2) |
 
 ---
 
-**Last Updated**: 2025-11-16 21:34
+**Last Updated**: 2025-11-16 21:35
