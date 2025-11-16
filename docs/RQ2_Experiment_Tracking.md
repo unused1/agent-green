@@ -252,6 +252,7 @@ Enter choice (1/2/3): 2
 - Pod 2: Sample 33/325 (idx: 427707) - Repetitive arithmetic overflow calculation (SIZE_MAX wrapping)
 - Pod 2: Sample 36/292 (idx: 391628) - Repetitive vulnerability enumeration (BMP file handling)
 - Pod 2: Sample 8/234 (idx: 351182) - Endless "000..." in index overflow demonstration (int64_t bounds)
+- Pod 2: Sample 6/225 (idx: 440872) - Repetitive "no obvious vulnerabilities" loop (ccline.cmdbuff analysis)
 - Pod 4: Sample 8/386 (idx: 344242) - Endless "luaC_checkGC(L);" output (Lua memory management)
 - Pod 4: Sample 7/378 (idx: 450812) - Overly verbose analysis of glob function (brace expansion vulnerability)
 - Pod 4: Sample 1/370 (idx: 259619) - Repetitive STRCAT buffer overflow analysis (66,426 tokens)
@@ -376,7 +377,7 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Max output length limits per agent response
   - Conversation truncation for multi-agent chats
   - Timeout mechanisms for individual samples
-- **Frequency**: Occurs on ~3.1% of samples (12/386 observed across pods)
+- **Frequency**: Occurs on ~3.4% of samples (13/386 observed across pods)
 - **Pattern**: Agents generate overly verbose output, either through repetition or exhaustive analysis
   - Pod 1, Sample 68 (idx: 389760): Endless "999..." (integer overflow in `r_num_math`)
   - Pod 1, Sample 85 (idx: 413623): Endless "000..." (integer overflow attack example)
@@ -385,14 +386,15 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
   - Pod 2, Sample 33 (idx: 427707): Repetitive arithmetic overflow calculation (SIZE_MAX wrapping)
   - Pod 2, Sample 36 (idx: 391628): Repetitive vulnerability enumeration (BMP file handling)
   - Pod 2, Sample 8 (idx: 351182): Endless "000..." in index overflow demonstration (int64_t bounds)
+  - Pod 2, Sample 6 (idx: 440872): Repetitive "no obvious vulnerabilities" loop (ccline.cmdbuff analysis)
   - Pod 4, Sample 8 (idx: 344242): Endless "luaC_checkGC(L);" (Lua memory management)
   - Pod 4, Sample 7 (idx: 450812): Overly verbose analysis (66,177 tokens for glob function analysis)
   - Pod 4, Sample 1 (idx: 259619): Repetitive STRCAT buffer overflow analysis (66,426 tokens)
   - Pod 4, Sample 131 (idx: 439266): Repetitive vulnerability searching (BMP file size validation)
   - Pod 4, Sample 3 (idx: 328807): Repetitive "no vulnerabilities" loop (y_array null pointer analysis)
-- **Impact on Results**: 12 unique samples identified that need to be skipped across different pods (~3.1% failure rate)
+- **Impact on Results**: 13 unique samples identified that need to be skipped across different pods (~3.4% failure rate)
 - **Common Pattern**: Either repetitive string generation (attack examples) or excessively verbose multi-agent analysis that exceeds context window
-- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing highest failure rate with 6 context overflows vs 4 for Pod 2 and 3 for Pod 1
+- **Pod-specific**: Pod 4 (4B-Thinking, Few-Shot) showing highest failure rate with 6 context overflows vs 5 for Pod 2 and 3 for Pod 1
 - **Logging Improvement**: ✅ Completed - Scripts now print sample number and idx at each agent phase for easier debugging
 
 ### Completed Tasks:
