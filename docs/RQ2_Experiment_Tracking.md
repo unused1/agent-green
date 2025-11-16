@@ -42,7 +42,9 @@
 | 1 | DA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~1.5h | ENABLE_REASONING=true, 4B Thinking |
 | 2 | DA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~30min | ENABLE_REASONING=true, 4B Thinking |
 | 3 | MA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~16h | 384/386 samples (6 skipped due to context overflow) |
-| 4 | MA-code-zero | Code Gen | 164 | 🏃 Running | Nov 16 21:35 | ~30min est | Final experiment for Pod 2 |
+| 4 | MA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 21:35 | ~2h | 4B Thinking, Zero-Shot ✨ |
+
+**Status**: 🎉 **ALL 4/4 EXPERIMENTS COMPLETE** - Results ready for download, pod can be stopped
 
 **Commands for Pod 2:**
 ```bash
@@ -165,7 +167,7 @@ python src/multi_agent_code_generation.py --prompt_type zero_shot
 | 1 | DA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=true, 30B Thinking, 32768 context |
 | 2 | DA-code-few | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | Pass@1: 0.6890 |
 | 3 | MA-vuln-few | Vuln Detection | 386 | ✅ Complete | Nov 16 15:55 | ~7.5h | 384/386 samples (6 skipped due to context overflow) |
-| 4 | MA-code-few | Code Gen | 164 | ⏳ Pending | - | ~45min est | Final experiment for Pod 8 |
+| 4 | MA-code-few | Code Gen | 164 | 🏃 Running | Nov 16 23:35 | ~45min est | Final experiment for Pod 8 |
 
 **Commands for Pod 8:**
 ```bash
@@ -337,12 +339,11 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 
 ### Session Notes:
 - All 8 pods deployed and experiments running
-- **Progress**: 27/32 experiments complete (84.375%)
-- **Completed Pods** (5/8): Pods 1, 3, 4, 5, 7 - Results downloaded, stopped, ready to terminate
-- **Active Pods** (3/8):
-  - **Pod 2**: Running MA-code-zero (final experiment, started 21:35)
+- **Progress**: 28/32 experiments complete (87.5%)
+- **Completed Pods** (6/8): Pods 1, 2, 3, 4, 5, 7 - Results ready for download
+- **Active Pods** (2/8):
   - **Pod 6**: Running MA-vuln-zero (experiment 3/4, started 16:00)
-  - **Pod 8**: Ready to start MA-code-few (final experiment)
+  - **Pod 8**: Running MA-code-few (final experiment, started 23:35)
 - All vLLM compatibility fixes applied (api_base→base_url, model name sanitization with "/" handling)
 - Using max-model-len 65536 for all models (after fixing 30B misconfiguration)
 - **Context Overflow Rate**: ~6.7% (26 unique problematic samples, 28 total occurrences)
@@ -604,7 +605,11 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 23:27 | Pod 6 resumed with skip option 2 |
 | Nov 16 23:30 | Pod 8 MA-vuln-few completed ✅ (384/386 samples, 6 skipped due to context overflow) |
 | Nov 16 23:30 | **Current Status**: 27/32 experiments complete (84.375%) - 3 pods actively running |
+| Nov 16 23:35 | Pod 2 MA-code-zero completed ✅ (4B Thinking, Zero-Shot) |
+| Nov 16 23:35 | 🎉 **Pod 2 ALL 4/4 EXPERIMENTS COMPLETE** - Ready to download results and stop |
+| Nov 16 23:35 | Pod 8 MA-code-few started 🏃 (final experiment for Pod 8) |
+| Nov 16 23:35 | **Current Status**: 28/32 experiments complete (87.5%) - 2 pods actively running (Pods 6, 8) |
 
 ---
 
-**Last Updated**: 2025-11-16 23:30
+**Last Updated**: 2025-11-16 23:35
