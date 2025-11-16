@@ -212,8 +212,12 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, desi
         skip_sample = remaining_samples[0]
         failed_result = resume.create_skip_result(skip_sample, id_field='idx')
         failed_result.update({
+            'ground_truth': skip_sample['target'],  # Map target → ground_truth for CSV
             'vuln': -1,
-            'reasoning': 'SKIPPED - Sample marked as problematic by user'
+            'reasoning': 'SKIPPED - Sample marked as problematic by user',
+            'cwe': skip_sample.get('cwe', []),
+            'cve': skip_sample.get('cve', ''),
+            'cve_desc': skip_sample.get('cve_desc', '')
         })
         append_result(failed_result, detailed_file, csv_file)
         existing_results.append(failed_result)
@@ -345,8 +349,8 @@ def main():
         prompts
     )
 
-    predictions = [r['vuln'] for r in results]
-    ground_truth = [r['ground_truth'] for r in results]
+    predictions = [r.get('vuln', -1) for r in results]
+    ground_truth = [r.get('ground_truth', r.get('target', 0)) for r in results]
 
     try:
         eval_results = evaluate_and_save_vulnerability(

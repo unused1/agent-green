@@ -10,7 +10,10 @@ def normalize_vulnerability_basic(prediction):
     """Basic normalization for vulnerability predictions"""
     if prediction is None:
         return 1  # Default to vulnerable if unclear
-    return int(prediction)
+    pred_int = int(prediction)
+    if pred_int == -1:
+        return 1  # Treat skipped/failed samples as vulnerable (conservative)
+    return pred_int
 
 def normalize_vulnerability_conservative(prediction):
     """Conservative normalization - defaults to vulnerable"""

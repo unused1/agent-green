@@ -51,6 +51,7 @@ pip install --quiet --break-system-packages codecarbon
 pip install --quiet --break-system-packages pandas
 pip install --quiet --break-system-packages numpy
 pip install --quiet --break-system-packages scikit-learn
+pip install --quiet --break-system-packages evaluate
 
 echo "Installing vLLM and HuggingFace tools (this may take a few minutes)..."
 pip install --quiet --break-system-packages vllm

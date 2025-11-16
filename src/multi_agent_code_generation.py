@@ -53,11 +53,17 @@ if args.prompt_type == "zero_shot":
     programmer_prompt = config.SYS_MSG_PROGRAMMER_MA_ZERO_SHOT
     moderator_prompt = config.SYS_MSG_MODERATOR_CODE_ZERO_SHOT
     review_board_prompt = config.SYS_MSG_REVIEW_BOARD_CODE_ZERO_SHOT
+    # Task prompts for zero_shot
+    analyst_task_template = config.MULTI_AGENT_TASK_REQUIREMENTS_ANALYST_ZERO_SHOT
+    programmer_task_template = config.MULTI_AGENT_TASK_PROGRAMMER_ZERO_SHOT
 else:  # few_shot
     analyst_prompt = config.SYS_MSG_REQUIREMENTS_ANALYST
     programmer_prompt = config.SYS_MSG_PROGRAMMER_MA
     moderator_prompt = config.SYS_MSG_MODERATOR_CODE
     review_board_prompt = config.SYS_MSG_REVIEW_BOARD_CODE
+    # Task prompts for few_shot
+    analyst_task_template = config.MULTI_AGENT_TASK_ANALYST
+    programmer_task_template = config.MULTI_AGENT_TASK_PROGRAMMER
 
 # --- Agent Creation ---
 def create_requirements_analyst(llm_config, sys_prompt):
@@ -169,10 +175,11 @@ def extract_code_from_response(response_text):
     return response_text.strip()
 
 # --- With CodeCarbon Emissions Tracking ---
-def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir, design, model, prompts):
+def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir, design, model, prompts, task_templates):
     """Run multi-agent code generation with proper skip optimization and resume support"""
 
     analyst_prompt, programmer_prompt, moderator_prompt, review_board_prompt = prompts
+    analyst_task_template, programmer_task_template = task_templates
 
     # Initialize resume helper
     resume = ExperimentResume(result_dir, design, model, exp_name)
@@ -229,14 +236,14 @@ def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir,
             
             # === TURN 1: Requirements Analyst ===
             print("Turn 1: Requirements Analyst analyzing...")
-            analyst_task = config.MULTI_AGENT_TASK_REQUIREMENTS_ANALYST.format(prompt=problem_prompt)
+            analyst_task = analyst_task_template.format(prompt=problem_prompt)
             res1 = analyst.generate_reply(messages=[{"content": analyst_task, "role": "user"}])
             analyst_findings = res1.get("content", "") if res1 else ""
             print(f"  Analyst findings: {len(analyst_findings)} chars")
             
             # === TURN 2: Programmer Implementation ===
             print("Turn 2: Programmer implementing...")
-            programmer_task = config.MULTI_AGENT_TASK_PROGRAMMER.format(
+            programmer_task = programmer_task_template.format(
                 analyst_findings=analyst_findings,
                 prompt=problem_prompt
             )
@@ -355,8 +362,9 @@ def main():
     
     code_samples = read_code_generation_data(DATASET_FILE)
 
-    # Package prompts for passing to inference function
+    # Package prompts and task templates for passing to inference function
     prompts = (analyst_prompt, programmer_prompt, moderator_prompt, review_board_prompt)
+    task_templates = (analyst_task_template, programmer_task_template)
 
     print(f"\nRunning {DESIGN} multi-agent code generation...")
     detailed_file, final_exp_name = run_inference_with_emissions(
@@ -366,7 +374,8 @@ def main():
         RESULT_DIR,
         DESIGN,
         model,
-        prompts
+        prompts,
+        task_templates
     )
 
     print(f"\nResults saved to: {detailed_file}")
@@ -378,7 +387,7 @@ def main():
     
     try:
         eval_result = subprocess.run(
-            ["python", "evaluate_code_generation.py", detailed_file],
+            ["python", "src/evaluate_code_generation.py", detailed_file],
             capture_output=True,
             text=True,
             timeout=600
@@ -399,7 +408,7 @@ def main():
     except Exception as e:
         print(f"Failed to run evaluation: {e}")
         print(f"You can manually evaluate by running:")
-        print(f"python evaluate_code_generation.py {detailed_file}")
+        print(f"python src/evaluate_code_generation.py {detailed_file}")
 
 
 if __name__ == "__main__":

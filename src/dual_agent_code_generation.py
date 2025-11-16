@@ -37,7 +37,7 @@ os.makedirs(RESULT_DIR, exist_ok=True)
 
 # Design configuration
 DESIGN = f"DA-code-{args.prompt_type}"
-model = llm_config["config_list"][0]["model"].replace(":", "-")
+model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 exp_name = f"{DESIGN}_{model}_{timestamp}"
 
