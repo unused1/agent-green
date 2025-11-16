@@ -133,7 +133,7 @@ python src/multi_agent_code_generation.py --prompt_type few_shot
 | 1 | DA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 | ~2-3h | ENABLE_REASONING=true, 30B Thinking, 32768 context |
 | 2 | DA-code-zero | Code Gen | 164 | ✅ Complete | Nov 16 | ~45min | 1 context overflow (65594 tokens), evaluation completed |
 | 3 | MA-vuln-zero | Vuln Detection | 386 | ✅ Complete | Nov 16 16:00 | ~8h | 385/386 samples (5 skipped due to context overflow) |
-| 4 | MA-code-zero | Code Gen | 164 | ⏳ Pending | - | ~45min est | Final experiment for Pod 6 |
+| 4 | MA-code-zero | Code Gen | 164 | 🏃 Running | Nov 17 00:02 | ~45min est | Final experiment for Pod 6 |
 
 **Commands for Pod 6:**
 ```bash
@@ -343,8 +343,8 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 - All 8 pods deployed and experiments running
 - **Progress**: 30/32 experiments complete (93.75%)
 - **Completed Pods** (6/8): Pods 1, 2, 3, 4, 5, 7 - All terminated
-- **Active Pods** (2/8):
-  - **Pod 6**: 3/4 complete - Ready to start MA-code-zero (final experiment)
+- **Active Pods** (2/8) - BOTH RUNNING FINAL EXPERIMENTS:
+  - **Pod 6**: 3/4 complete - Running MA-code-zero (final experiment, started 00:02)
   - **Pod 8**: 3/4 complete - Running MA-code-few (final experiment, started 23:35)
 - All vLLM compatibility fixes applied (api_base→base_url, model name sanitization with "/" handling)
 - Using max-model-len 65536 for all models (after fixing 30B misconfiguration)
@@ -618,7 +618,9 @@ scp -P 15454 -i ~/.ssh/runpod_ed25519 -r root@213.181.122.251:/workspace/agent-g
 | Nov 16 23:55 | **Active Pods**: 2/8 (Pods 6, 8) - 3 experiments remaining |
 | Nov 17 00:00 | Pod 6 MA-vuln-zero completed ✅ (385/386 samples, 5 skipped due to context overflow) |
 | Nov 17 00:00 | **Current Status**: 30/32 experiments complete (93.75%) - Only 2 experiments remaining! |
+| Nov 17 00:02 | Pod 6 MA-code-zero started 🏃 (final experiment for Pod 6) |
+| Nov 17 00:02 | 🎯 **BOTH FINAL EXPERIMENTS NOW RUNNING** - Pod 6 (MA-code-zero) and Pod 8 (MA-code-few) |
 
 ---
 
-**Last Updated**: 2025-11-17 00:00
+**Last Updated**: 2025-11-17 00:02
