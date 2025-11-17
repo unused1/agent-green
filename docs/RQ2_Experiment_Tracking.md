@@ -7,16 +7,18 @@
 
 ## Pod Configuration
 
-| Pod | IP | SSH Port | Model | Size | vLLM Status | Experiments to Run |
-|-----|-----|----------|-------|------|-------------|-------------------|
-| **1** | 157.66.254.40 | 14555 | Qwen3-4B-Instruct | 4B | ✅ Running | DA-vuln-zero, DA-code-zero, MA-vuln-zero, MA-code-zero |
-| **2** | 205.196.17.138 | 12500 | Qwen3-4B-Thinking | 4B | ✅ Running | DA-vuln-zero, DA-code-zero, MA-vuln-zero, MA-code-zero |
-| **3** | 205.196.17.99 | 9700 | Qwen3-4B-Instruct | 4B | ✅ Running | DA-vuln-few, DA-code-few, MA-vuln-few, MA-code-few |
-| **4** | 205.196.17.123 | 11670 | Qwen3-4B-Thinking | 4B | ✅ Running | DA-vuln-few, DA-code-few, MA-vuln-few, MA-code-few |
-| **5** | 205.196.17.139 | 9294 | Qwen3-30B-A3B-Instruct | 30B | ✅ Running | DA-vuln-zero, DA-code-zero, MA-vuln-zero, MA-code-zero |
-| **6** | 63.141.33.85 | 22145 | Qwen3-30B-A3B-Thinking | 30B | ✅ Running | DA-vuln-zero, DA-code-zero, MA-vuln-zero, MA-code-zero |
-| **7** | 205.196.17.131 | 10944 | Qwen3-30B-A3B-Instruct | 30B | ✅ Running | DA-vuln-few, DA-code-few, MA-vuln-few, MA-code-few |
-| **8** | 213.181.122.251 | 15454 | Qwen3-30B-A3B-Thinking | 30B | ✅ Running | DA-vuln-few, DA-code-few, MA-vuln-few, MA-code-few |
+| Pod | IP | SSH Port | Model | Size | Status | Experiments Completed |
+|-----|-----|----------|-------|------|--------|----------------------|
+| **1** | 157.66.254.40 | 14555 | Qwen3-4B-Instruct | 4B | ⏹️ Terminated | 4/4 ✅ DA-vuln-zero, DA-code-zero, MA-vuln-zero, MA-code-zero |
+| **2** | 205.196.17.138 | 12500 | Qwen3-4B-Thinking | 4B | ⏹️ Terminated | 4/4 ✅ DA-vuln-zero, DA-code-zero, MA-vuln-zero, MA-code-zero |
+| **3** | 205.196.17.99 | 9700 | Qwen3-4B-Instruct | 4B | ⏹️ Terminated | 4/4 ✅ DA-vuln-few, DA-code-few, MA-vuln-few, MA-code-few |
+| **4** | 205.196.17.123 | 11670 | Qwen3-4B-Thinking | 4B | ⏹️ Terminated | 4/4 ✅ DA-vuln-few, DA-code-few, MA-vuln-few, MA-code-few |
+| **5** | 205.196.17.139 | 9294 | Qwen3-30B-A3B-Instruct | 30B | ⏹️ Terminated | 4/4 ✅ DA-vuln-zero, DA-code-zero, MA-vuln-zero, MA-code-zero |
+| **6** | 63.141.33.85 | 22145 | Qwen3-30B-A3B-Thinking | 30B | ⏹️ Terminated | 4/4 ✅ DA-vuln-zero, DA-code-zero, MA-vuln-zero, MA-code-zero |
+| **7** | 205.196.17.131 | 10944 | Qwen3-30B-A3B-Instruct | 30B | ⏹️ Terminated | 4/4 ✅ DA-vuln-few, DA-code-few, MA-vuln-few, MA-code-few |
+| **8** | 213.181.122.251 | 15454 | Qwen3-30B-A3B-Thinking | 30B | ⏹️ Terminated | 4/4 ✅ DA-vuln-few, DA-code-few, MA-vuln-few, MA-code-few |
+
+**All 8 pods terminated - Experimental run complete (Nov 17, 2025)**
 
 ---
 
