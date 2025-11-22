@@ -13,33 +13,56 @@ import sys
 # --- Configuration ---
 llm_config = config.LLM_CONFIG
 
-# Task prompt for vulnerability detection (using your simplified prompts)
-task = config.VULNERABILITY_TASK_PROMPT
-
-# System prompts for vulnerability detection (using your simplified prompts)
-sys_prompt_few_shot_vulnerability_detector = config.SYS_MSG_VULNERABILITY_DETECTOR_FEW_SHOT
-sys_prompt_zero_shot_vulnerability_detector = config.SYS_MSG_VULNERABILITY_DETECTOR_ZERO_SHOT
+# Select prompts based on design mode (baseline or RQ3 explain-before)
+# Will be set after command-line parsing
 
 # Directories (following original pattern)
 DATASET_FILE = config.VULN_DATASET
 RESULT_DIR = config.RESULT_DIR
 os.makedirs(RESULT_DIR, exist_ok=True)
 
-# change this for different designs: "SA-few" or "SA-zero"
-#DESIGN = "SA-zero" #"SA-few"  # Change to "SA-zero" to test zero-shot approach
-
+# Parse command line arguments
 if len(sys.argv) > 1:
     DESIGN = sys.argv[1]
-    if DESIGN not in ["SA-zero", "SA-few"]:
-        print(f"Error: Invalid design '{DESIGN}'. Must be 'SA-zero' or 'SA-few'")
+    # Support both baseline and RQ3 explain-before modes
+    valid_designs = ["SA-zero", "SA-few", "SA-zero-explain", "SA-few-explain"]
+    if DESIGN not in valid_designs:
+        print(f"Error: Invalid design '{DESIGN}'. Must be one of: {', '.join(valid_designs)}")
         sys.exit(1)
 else:
     print("Usage: python script.py <design>")
-    print("design: SA-zero or SA-few")
+    print("Designs:")
+    print("  SA-zero          : Single-agent zero-shot (baseline)")
+    print("  SA-few           : Single-agent few-shot (baseline)")
+    print("  SA-zero-explain  : Single-agent zero-shot with explain-before (RQ3)")
+    print("  SA-few-explain   : Single-agent few-shot with explain-before (RQ3)")
     sys.exit(1)
 
-print(f"Running with design: {DESIGN}")
+# Determine if this is an explanation mode run
+EXPLANATION_MODE = DESIGN.endswith("-explain")
+BASE_DESIGN = DESIGN.replace("-explain", "") if EXPLANATION_MODE else DESIGN
 
+print(f"Running with design: {DESIGN}")
+if EXPLANATION_MODE:
+    print(f"[RQ3] Explanation mode enabled - using explain-before prompting")
+
+# Select appropriate prompts based on mode
+if EXPLANATION_MODE:
+    # RQ3: Use explain-before prompts
+    if BASE_DESIGN == "SA-zero":
+        sys_prompt = config.SYS_MSG_VULNERABILITY_DETECTOR_EXPLAIN_BEFORE_ZERO_SHOT
+        task = config.VULNERABILITY_TASK_PROMPT_EXPLAIN_BEFORE
+    else:  # SA-few
+        sys_prompt = config.SYS_MSG_VULNERABILITY_DETECTOR_EXPLAIN_BEFORE_FEW_SHOT
+        task = config.VULNERABILITY_TASK_PROMPT_EXPLAIN_BEFORE
+else:
+    # Baseline: Use standard prompts
+    if BASE_DESIGN == "SA-zero":
+        sys_prompt = config.SYS_MSG_VULNERABILITY_DETECTOR_ZERO_SHOT
+        task = config.VULNERABILITY_TASK_PROMPT
+    else:  # SA-few
+        sys_prompt = config.SYS_MSG_VULNERABILITY_DETECTOR_FEW_SHOT
+        task = config.VULNERABILITY_TASK_PROMPT
 
 model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -189,6 +212,7 @@ def append_result(result, detailed_file, csv_file):
             escape_csv_field(result['ground_truth']),
             escape_csv_field(result['vuln']),
             escape_csv_field(result['reasoning']),
+            escape_csv_field(result.get('explanation_length', 0)),  # RQ3 field
             escape_csv_field(result['cwe']),
             escape_csv_field(result['cve']),
             escape_csv_field(result['cve_desc']),
@@ -198,8 +222,119 @@ def append_result(result, detailed_file, csv_file):
 
 # NOTE: Loading results now handled by ExperimentResume class from resume_utils
 
+# --- RQ3: Explanation Extraction ---
+def extract_explanation_and_decision(response_text, explanation_mode=False):
+    """
+    Extract explanation (REASONING) and decision (DECISION) from response.
+
+    For RQ3 explain-before mode:
+        Expected format: "REASONING: ... DECISION: YES/NO"
+
+    For baseline mode:
+        Uses existing YES/NO detection logic
+
+    Returns:
+        tuple: (decision, reasoning, explanation_length)
+            decision: 1 (vulnerable) or 0 (not vulnerable)
+            reasoning: str containing the full reasoning
+            explanation_length: int, number of chars in reasoning section
+    """
+    response_text = response_text.strip()
+    response_lower = response_text.lower()
+
+    if explanation_mode:
+        # RQ3 mode: Extract structured REASONING and DECISION
+        reasoning = ""
+        decision_text = ""
+
+        # Try to extract REASONING section
+        if "reasoning:" in response_lower:
+            # Find the REASONING section
+            reasoning_start = response_lower.find("reasoning:")
+            reasoning_end = response_lower.find("decision:", reasoning_start)
+
+            if reasoning_end > reasoning_start:
+                reasoning = response_text[reasoning_start + len("reasoning:"):reasoning_end].strip()
+            else:
+                # DECISION not found, take rest of text as reasoning
+                reasoning = response_text[reasoning_start + len("reasoning:"):].strip()
+
+        # Try to extract DECISION section
+        if "decision:" in response_lower:
+            decision_start = response_lower.find("decision:")
+            decision_text = response_text[decision_start + len("decision:"):].strip()
+
+        # Parse decision (YES/NO)
+        is_vulnerable = None
+        if "yes" in decision_text.lower():
+            is_vulnerable = True
+        elif "no" in decision_text.lower():
+            is_vulnerable = False
+
+        # If we couldn't extract structured format, use full response as reasoning
+        if not reasoning:
+            reasoning = response_text
+
+        # If still no clear decision, try fallback keyword detection
+        if is_vulnerable is None:
+            if any(keyword in response_lower for keyword in [
+                'yes', 'vulnerable', 'security issue', 'security vulnerability'
+            ]):
+                is_vulnerable = True
+            else:
+                is_vulnerable = False
+
+        decision = 1 if is_vulnerable else 0
+        explanation_length = len(reasoning)
+
+        return decision, reasoning, explanation_length
+
+    else:
+        # Baseline mode: Use existing YES/NO detection
+        is_vulnerable = None
+
+        # Check for explicit YES answers
+        if any(pattern in response_lower for pattern in [
+            'final answer: yes',
+            'final answer: (1) yes',
+            '(1) yes',
+            'answer: yes',
+            'vulnerability detected'
+        ]):
+            is_vulnerable = True
+
+        # Check for explicit NO answers
+        elif any(pattern in response_lower for pattern in [
+            'final answer: no',
+            'final answer: (2) no',
+            '(2) no',
+            'answer: no',
+            'no security vulnerability'
+        ]):
+            is_vulnerable = False
+
+        # Fallback: look for vulnerability keywords
+        if is_vulnerable is None:
+            if any(keyword in response_lower for keyword in [
+                'is vulnerable',
+                'contains a vulnerability',
+                'security vulnerability exists',
+                'security risk',
+                'can be exploited'
+            ]):
+                is_vulnerable = True
+            else:
+                is_vulnerable = False
+
+        decision = 1 if is_vulnerable else 0
+        reasoning = response_text  # Full response is the reasoning for baseline
+        explanation_length = 0  # No separate explanation in baseline mode
+
+        return decision, reasoning, explanation_length
+
+
 # --- With CodeCarbon Emissions Tracking (following original pattern) ---
-def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerability_detector, task, exp_name, result_dir, design, model):
+def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerability_detector, task, exp_name, result_dir, design, model, explanation_mode=False):
     """Run vulnerability detection with emissions tracking and incremental saving"""
 
     # Initialize resume helper
@@ -210,7 +345,8 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
     csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
     if not os.path.exists(csv_file):
         with open(csv_file, 'w') as f:
-            f.write("idx,project,commit_id,project_url,commit_url,commit_message,ground_truth,vuln,reasoning,cwe,cve,cve_desc,error\n")
+            # Add explanation_length field for RQ3 analysis
+            f.write("idx,project,commit_id,project_url,commit_url,commit_message,ground_truth,vuln,reasoning,explanation_length,cwe,cve,cve_desc,error\n")
 
     # Load existing results and energy data if any (for resuming interrupted runs)
     existing_results = resume.load_results(detailed_file)
@@ -295,7 +431,8 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
             # Try to process with timeout handling
             try:
                 # Use format to insert function code into prompt template
-                content = task.format(func=sample['func'])
+                # Template uses {code} parameter
+                content = task.format(code=sample['func'])
                 res = vulnerability_detector.generate_reply(messages=[{"content": content, "role": "user"}])
             except TimeoutError as e:
                 print(f"[TIMEOUT] Sample {sample['idx']} timed out after 5 minutes - marking as failed and continuing")
@@ -316,59 +453,27 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
                 existing_results.append(result)
                 continue
             
-            # Updated response parsing for YES/NO format
+            # Extract decision and explanation using unified function
             if res is not None and "content" in res:
                 response_text = res["content"].strip()
-                response_lower = response_text.lower()
 
-                # Parse YES/NO responses - check multiple formats
-                # Format 1: "Final Answer: YES/NO" (from zero-shot system prompt)
-                # Format 2: "(1) YES" or "(2) NO" (from task prompt)
-                # Format 3: Keywords like "vulnerability detected"
+                # Use explanation extraction function (handles both modes)
+                decision, reasoning, explanation_length = extract_explanation_and_decision(
+                    response_text,
+                    explanation_mode=explanation_mode
+                )
 
-                is_vulnerable = None  # Track if we found a clear answer
+                result['vuln'] = decision
+                result['reasoning'] = reasoning
+                result['explanation_length'] = explanation_length
 
-                # Check for explicit YES answers
-                if any(pattern in response_lower for pattern in [
-                    'final answer: yes',
-                    'final answer: (1) yes',
-                    '(1) yes',
-                    'answer: yes',
-                    'vulnerability detected'
-                ]):
-                    is_vulnerable = True
-
-                # Check for explicit NO answers
-                elif any(pattern in response_lower for pattern in [
-                    'final answer: no',
-                    'final answer: (2) no',
-                    '(2) no',
-                    'answer: no',
-                    'no security vulnerability'
-                ]):
-                    is_vulnerable = False
-
-                # If we found a clear answer, use it
-                if is_vulnerable is not None:
-                    result['vuln'] = 1 if is_vulnerable else 0
-                    result['reasoning'] = response_text
-                else:
-                    # Fallback: look for vulnerability keywords (less reliable)
-                    if any(keyword in response_lower for keyword in [
-                        'is vulnerable',
-                        'contains a vulnerability',
-                        'security vulnerability exists',
-                        'security risk',
-                        'can be exploited'
-                    ]):
-                        result['vuln'] = 1
-                    else:
-                        result['vuln'] = 0  # Default to not vulnerable for unclear responses
-                    result['reasoning'] = response_text
-                    print(f"[Warning] Unclear response format for sample {i}: {response_text[:100]}...")
+                # Log if RQ3 mode and structured format not found
+                if explanation_mode and explanation_length == 0:
+                    print(f"[Warning] Sample {i}: REASONING/DECISION format not found, using fallback")
             else:
                 result['vuln'] = 0  # Default to not vulnerable
                 result['reasoning'] = "No response from agent"
+                result['explanation_length'] = 0
                 print(f"[Warning] Skipped sample {i} — no response or invalid format.")
 
             # Append result immediately to files
@@ -439,24 +544,22 @@ def main():
     #    ollama_started = False
     
     try:
-        # Select system prompt based on design (following original pattern)
-        if DESIGN == "SA-few":
-            sys_prompt = sys_prompt_few_shot_vulnerability_detector
-        else:  # SA-zero
-            sys_prompt = sys_prompt_zero_shot_vulnerability_detector
-            
+        # sys_prompt and task already selected based on EXPLANATION_MODE earlier
         print(f"Running {DESIGN} vulnerability detection...")
+        if EXPLANATION_MODE:
+            print(f"[RQ3] Using explain-before prompts")
 
         # Run vulnerability detection (following original pattern)
         vulnerability_predictions, energy_data = run_inference_with_emissions(
             code_samples,
             llm_config,
-            sys_prompt,
-            task,
+            sys_prompt,  # Already selected based on EXPLANATION_MODE and BASE_DESIGN
+            task,        # Already selected based on EXPLANATION_MODE
             exp_name,
             RESULT_DIR,
             DESIGN,
-            model
+            model,
+            explanation_mode=EXPLANATION_MODE  # Pass RQ3 flag
         )
         
         # Save templates (following original pattern)

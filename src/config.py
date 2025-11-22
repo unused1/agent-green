@@ -1580,7 +1580,7 @@ DECISION: YES or NO"""
 
 VULNERABILITY_TASK_PROMPT_EXPLAIN_BEFORE = """Please analyze the following code for vulnerabilities:
 ```
-{{code}}
+{code}
 ```
 
 Before making your decision, please:
@@ -1625,7 +1625,7 @@ CODE: [Your complete Python implementation with all necessary imports]"""
 
 CODE_GENERATION_TASK_PROMPT_EXPLAIN_BEFORE = """Please analyze and implement the following function:
 
-{{prompt}}
+{prompt}
 
 Before writing the code, please:
 1. Identify the key requirements
