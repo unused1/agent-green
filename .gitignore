@@ -47,5 +47,16 @@ tests/config.py
 output/
 plots/
 tests/
-# RunPod results folders (large data files)
+
+# Raw experiment results (large data files - exclude from git)
+results/runpod/
+results/runpod_rerun/
+results/runpod_codegen/
+results/mars/
+results/mars_rerun/
+results/mars_codegen/
 results/runpod_rq2_pod*/
+
+# Keep processed analysis results (negation patterns)
+!results/analysis/
+!results/analysis_*/
