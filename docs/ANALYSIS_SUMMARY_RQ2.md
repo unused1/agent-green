@@ -556,19 +556,13 @@ class UserManager {
 
 ## Next Steps
 
-### Immediate (This Week)
-1. ✅ Complete RQ1 vs RQ2 comparative analysis
-2. 🔄 Execute comparison visualization notebook
-3. ⏳ Document context overflow patterns
-4. ⏳ Draft findings section for thesis Chapter 4
-
 ### Short-Term (Next 2 Weeks)
-1. RQ3: Cross-dataset generalization testing
+1. RQ3 experiment planning and execution
 2. Statistical significance testing across all findings
 3. Related work comparison (benchmark against SOTA)
 4. Begin thesis writing (Results & Discussion chapters)
 
-### Long-Term (Thesis Completion)
+### Long-Term
 1. Comprehensive literature review update
 2. Threat to validity analysis
 3. Future work recommendations
