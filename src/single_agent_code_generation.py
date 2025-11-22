@@ -11,9 +11,6 @@ import subprocess
 
 # --- Configuration ---
 llm_config = config.LLM_CONFIG
-task = config.CODE_GENERATION_TASK_PROMPT
-sys_prompt_few_shot = config.SYS_MSG_CODE_GENERATOR_FEW_SHOT
-sys_prompt_zero_shot = config.SYS_MSG_CODE_GENERATOR_ZERO_SHOT
 
 DATASET_FILE = config.HUMANEVAL_DATASET
 RESULT_DIR = config.RESULT_DIR
@@ -22,13 +19,45 @@ os.makedirs(RESULT_DIR, exist_ok=True)
 # Parse command line arguments
 if len(sys.argv) > 1:
     DESIGN = sys.argv[1]
-    if DESIGN not in ["SA-zero", "SA-few"]:
-        print(f"Error: Invalid design '{DESIGN}'. Must be 'SA-zero' or 'SA-few'")
+    # Support both baseline and RQ3 explain-before modes
+    valid_designs = ["SA-zero", "SA-few", "SA-zero-explain", "SA-few-explain"]
+    if DESIGN not in valid_designs:
+        print(f"Error: Invalid design '{DESIGN}'. Must be one of: {', '.join(valid_designs)}")
         sys.exit(1)
 else:
     print("Usage: python single_agent_code_generation.py <design>")
-    print("design: SA-zero or SA-few")
+    print("Designs:")
+    print("  SA-zero          : Single-agent zero-shot (baseline)")
+    print("  SA-few           : Single-agent few-shot (baseline)")
+    print("  SA-zero-explain  : Single-agent zero-shot with explain-before (RQ3)")
+    print("  SA-few-explain   : Single-agent few-shot with explain-before (RQ3)")
     sys.exit(1)
+
+# Determine if this is an explanation mode run
+EXPLANATION_MODE = DESIGN.endswith("-explain")
+BASE_DESIGN = DESIGN.replace("-explain", "") if EXPLANATION_MODE else DESIGN
+
+print(f"Running with design: {DESIGN}")
+if EXPLANATION_MODE:
+    print(f"[RQ3] Explanation mode enabled - using explain-before prompting")
+
+# Select appropriate prompts based on mode
+if EXPLANATION_MODE:
+    # RQ3: Use explain-before prompts
+    if BASE_DESIGN == "SA-zero":
+        sys_prompt = config.SYS_MSG_CODE_GENERATOR_EXPLAIN_BEFORE_ZERO_SHOT
+        task = config.CODE_GENERATION_TASK_PROMPT_EXPLAIN_BEFORE
+    else:  # SA-few
+        sys_prompt = config.SYS_MSG_CODE_GENERATOR_EXPLAIN_BEFORE_FEW_SHOT
+        task = config.CODE_GENERATION_TASK_PROMPT_EXPLAIN_BEFORE
+else:
+    # Baseline: Use standard prompts
+    if BASE_DESIGN == "SA-zero":
+        sys_prompt = config.SYS_MSG_CODE_GENERATOR_ZERO_SHOT
+        task = config.CODE_GENERATION_TASK_PROMPT
+    else:  # SA-few
+        sys_prompt = config.SYS_MSG_CODE_GENERATOR_FEW_SHOT
+        task = config.CODE_GENERATION_TASK_PROMPT
 
 model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -114,8 +143,70 @@ def extract_code_from_response(response_text):
     
     return response_text.strip()
 
+def extract_code_and_explanation(response_text, explanation_mode=False):
+    """
+    Extract explanation (REASONING) and code (CODE) from response.
+
+    For RQ3 explain-before mode:
+        Expected format: "REASONING: [plan] CODE: [implementation]"
+
+    For baseline mode:
+        Uses existing code extraction logic
+
+    Returns:
+        tuple: (code, reasoning, explanation_length)
+    """
+    if not response_text:
+        return "", "", 0
+
+    response_text = response_text.strip()
+    response_lower = response_text.lower()
+
+    if explanation_mode:
+        # RQ3 mode: Extract structured REASONING and CODE
+        reasoning = ""
+        code_text = ""
+
+        # Try to extract REASONING section
+        if "reasoning:" in response_lower:
+            reasoning_start = response_lower.find("reasoning:")
+            reasoning_end = response_lower.find("code:", reasoning_start)
+
+            if reasoning_end > reasoning_start:
+                reasoning = response_text[reasoning_start + len("reasoning:"):reasoning_end].strip()
+            else:
+                # No CODE section found, treat rest as reasoning
+                reasoning = response_text[reasoning_start + len("reasoning:"):].strip()
+
+        # Try to extract CODE section
+        if "code:" in response_lower:
+            code_start = response_lower.find("code:")
+            code_text = response_text[code_start + len("code:"):].strip()
+
+        # Extract actual code from CODE section using existing logic
+        if code_text:
+            generated_code = extract_code_from_response(code_text)
+        else:
+            # Fallback: try to extract code from entire response
+            generated_code = extract_code_from_response(response_text)
+
+        # If no reasoning was extracted, use full response as reasoning
+        if not reasoning:
+            reasoning = response_text
+
+        explanation_length = len(reasoning)
+
+        return generated_code, reasoning, explanation_length
+    else:
+        # Baseline mode: existing code extraction logic
+        generated_code = extract_code_from_response(response_text)
+        reasoning = response_text
+        explanation_length = 0
+
+        return generated_code, reasoning, explanation_length
+
 # --- With CodeCarbon Emissions Tracking ---
-def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp_name, result_dir, design, model):
+def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp_name, result_dir, design, model, explanation_mode=False):
     """Run code generation with emissions tracking and incremental saving"""
 
     # Initialize resume helper
@@ -169,7 +260,9 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp
                 'prompt': problem_prompt,
                 'entry_point': sample.get('entry_point', ''),
                 'canonical_solution': sample.get('canonical_solution', ''),
-                'test': sample.get('test', '')
+                'test': sample.get('test', ''),
+                'reasoning': '',
+                'explanation_length': 0
             }
 
             try:
@@ -177,8 +270,16 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp
 
                 if res is not None and "content" in res:
                     response_text = res["content"].strip()
-                    generated_code = extract_code_from_response(response_text)
+
+                    # Use explanation extraction function (handles both modes)
+                    generated_code, reasoning, explanation_length = extract_code_and_explanation(
+                        response_text,
+                        explanation_mode=explanation_mode
+                    )
+
                     result['generated_solution'] = generated_code
+                    result['reasoning'] = reasoning
+                    result['explanation_length'] = explanation_length
                 else:
                     result['generated_solution'] = ""
                     result['error'] = "no_response"
@@ -217,14 +318,6 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt, task, exp
 # --- Main Execution ---
 time.sleep(1)  # Brief initialization pause
 
-# Select system prompt based on design
-if DESIGN == "SA-few":
-    sys_prompt = sys_prompt_few_shot
-    print("Using few-shot system prompt")
-else:
-    sys_prompt = sys_prompt_zero_shot
-    print("Using zero-shot system prompt")
-
 print(f"Running {DESIGN} code generation...")
 detailed_file, final_exp_name = run_inference_with_emissions(
     code_samples,
@@ -234,7 +327,8 @@ detailed_file, final_exp_name = run_inference_with_emissions(
     exp_name,
     RESULT_DIR,
     DESIGN,
-    model
+    model,
+    explanation_mode=EXPLANATION_MODE
 )
 
 print(f"\nCode generation completed for experiment: {final_exp_name}")
