@@ -1539,4 +1539,107 @@ Ensure all imports and requirements are included.
 Provide the FINAL IMPLEMENTATION."""
 
 
+# =======================================================================
+# RQ3: EXPLANATION PROMPTING (Explain-Before Strategy)
+# =======================================================================
+
+# --- Vulnerability Detection: Explain-Before Prompts ---
+
+SYS_MSG_VULNERABILITY_DETECTOR_EXPLAIN_BEFORE_ZERO_SHOT = """You are a security expert skilled in static program analysis.
+Before making your decision, you MUST:
+1. Identify potential vulnerability patterns in the code
+2. Analyze each pattern systematically
+3. Consider the security implications
+4. Make a final decision based on your analysis
+
+Always structure your response as:
+REASONING: [Your step-by-step analysis]
+DECISION: YES or NO"""
+
+SYS_MSG_VULNERABILITY_DETECTOR_EXPLAIN_BEFORE_FEW_SHOT = f"""You are a security expert skilled in static analysis.
+Use these canonical examples as your guide:
+
+Example 1 (C vulnerable):
+{EXAMPLE_C_VULN}
+REASONING: strcpy() is used without bounds checking, which can lead to buffer overflow when source exceeds destination buffer size.
+DECISION: YES
+
+Example 2 (C safe):
+{EXAMPLE_C_SAFE}
+REASONING: strncpy() is used with proper size limit, preventing buffer overflow. The buffer is also null-terminated safely.
+DECISION: NO
+
+Example 3 (C++ vulnerable):
+{EXAMPLE_CPP_VULN}
+REASONING: Objects allocated with new in the constructor are not freed in the destructor, leading to memory leaks when Vector goes out of scope.
+DECISION: YES
+
+Now analyze the following code. Structure your response as:
+REASONING: [Your step-by-step analysis]
+DECISION: YES or NO"""
+
+VULNERABILITY_TASK_PROMPT_EXPLAIN_BEFORE = """Please analyze the following code for vulnerabilities:
+```
+{{code}}
+```
+
+Before making your decision, please:
+1. Identify what security patterns you should look for
+2. Analyze the code systematically for these patterns
+3. Consider the security implications of what you find
+4. Make your final decision
+
+Structure your response as:
+REASONING: [Your detailed step-by-step analysis]
+DECISION: YES or NO
+
+Let's think step-by-step."""
+
+# --- Code Generation: Explain-Before Prompts ---
+
+SYS_MSG_CODE_GENERATOR_EXPLAIN_BEFORE_ZERO_SHOT = """You are an expert Python programmer.
+Before implementing the solution, you MUST:
+1. Analyze the problem requirements
+2. Identify key challenges and edge cases
+3. Plan your approach
+4. Implement the solution
+
+Always structure your response as:
+REASONING: [Your step-by-step plan]
+CODE: [Your complete Python implementation]"""
+
+SYS_MSG_CODE_GENERATOR_EXPLAIN_BEFORE_FEW_SHOT = f"""You are an expert Python programmer skilled in implementing functions based on their specifications.
+
+Use these canonical examples as reference:
+{FEW_SHOT_EXAMPLES}
+
+Before writing code, you MUST:
+1. Analyze requirements and identify edge cases
+2. Plan your implementation approach
+3. Consider necessary imports and data structures
+4. Implement the complete solution
+
+Structure your response as:
+REASONING: [Your step-by-step plan]
+CODE: [Your complete Python implementation with all necessary imports]"""
+
+CODE_GENERATION_TASK_PROMPT_EXPLAIN_BEFORE = """Please analyze and implement the following function:
+
+{{prompt}}
+
+Before writing the code, please:
+1. Identify the key requirements
+2. Consider edge cases that need to be handled
+3. Plan your implementation approach
+4. Think about necessary imports and data structures
+
+Structure your response as:
+REASONING: [Your step-by-step analysis and plan]
+CODE: [Your complete function implementation]
+
+Let's think step-by-step."""
+
+# Alias for backward compatibility
+CODE_GENERATION_TASK_PROMPT = SINGLE_AGENT_TASK_CODE_GENERATION
+
 
