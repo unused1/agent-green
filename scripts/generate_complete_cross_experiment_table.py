@@ -13,15 +13,22 @@ rq2_vuln = '/Users/shanetan/Documents/Code_Projects/SMU/SCIS_EngD/agent-green/re
 rq2_code = '/Users/shanetan/Documents/Code_Projects/SMU/SCIS_EngD/agent-green/results/analysis/rq2/rq2_code_generation_analysis.xlsx'
 
 # Token counts calculated from JSONL files (RQ1 code generation)
+# Key: (platform, model_size, model_type, prompting) -> avg_tokens
 RQ1_CODE_TOKENS = {
-    ('30B', 'Instruct', 'Zero-shot'): 230,
-    ('30B', 'Instruct', 'Few-shot'): 231,
-    ('30B', 'Thinking', 'Zero-shot'): 347,
-    ('30B', 'Thinking', 'Few-shot'): 198,
-    ('4B', 'Instruct', 'Zero-shot'): 202,
-    ('4B', 'Instruct', 'Few-shot'): 182,
-    ('4B', 'Thinking', 'Zero-shot'): 196,
-    ('4B', 'Thinking', 'Few-shot'): 193,
+    # H100 experiments
+    ('H100', '30B', 'Instruct', 'Zero-shot'): 230,
+    ('H100', '30B', 'Instruct', 'Few-shot'): 231,
+    ('H100', '30B', 'Thinking', 'Zero-shot'): 347,
+    ('H100', '30B', 'Thinking', 'Few-shot'): 198,
+    ('H100', '4B', 'Instruct', 'Zero-shot'): 202,
+    ('H100', '4B', 'Instruct', 'Few-shot'): 182,
+    ('H100', '4B', 'Thinking', 'Zero-shot'): 196,
+    ('H100', '4B', 'Thinking', 'Few-shot'): 193,
+    # RTX A5000 experiments (Mars)
+    ('RTX A5000', '4B', 'Instruct', 'Zero-shot'): 198,
+    ('RTX A5000', '4B', 'Instruct', 'Few-shot'): 178,
+    ('RTX A5000', '4B', 'Thinking', 'Zero-shot'): 68,
+    ('RTX A5000', '4B', 'Thinking', 'Few-shot'): 67,
 }
 
 # Read all data
@@ -51,7 +58,7 @@ for _, row in df_rq1_vuln.iterrows():
 # ============ RQ1 CODE GENERATION ============
 for _, row in df_rq1_code.iterrows():
     platform = 'RTX A5000' if 'Mars' in row['hardware'] else 'H100'
-    token_key = (row['model_size'], row['model_type'], row['prompting'])
+    token_key = (platform, row['model_size'], row['model_type'], row['prompting'])
     avg_tokens = RQ1_CODE_TOKENS.get(token_key, 'Unknown')
 
     table_data.append({

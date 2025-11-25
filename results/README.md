@@ -160,6 +160,50 @@ results/
 
 ---
 
+### **Phase 4: RQ2 Multi-Agent Experiments (Nov 15-17, 2025)**
+
+**Purpose**: Compare Dual-Agent and Multi-Agent architectures against Single-Agent baseline (RQ2)
+
+**Hardware**: RunPod (NVIDIA H100 80GB HBM3)
+
+**Directories**: `results/runpod_rq2_pod1` through `results/runpod_rq2_pod8`
+
+**Experiments**: 32 total experiments (16 vulnerability detection + 16 code generation)
+
+| Pod | Model | Type | Prompting | Experiments | Status |
+|-----|-------|------|-----------|-------------|--------|
+| **pod1** | 4B | Instruct | Zero-shot | DA-vuln, DA-code, MA-vuln, MA-code | ✅ |
+| **pod2** | 4B | Thinking | Zero-shot | DA-vuln, DA-code, MA-vuln, MA-code | ✅ |
+| **pod3** | 4B | Instruct | Few-shot | DA-vuln, DA-code, MA-vuln, MA-code | ✅ |
+| **pod4** | 4B | Thinking | Few-shot | DA-vuln, DA-code, MA-vuln, MA-code | ✅ |
+| **pod5** | 30B | Instruct | Zero-shot | DA-vuln, DA-code, MA-vuln, MA-code | ✅ |
+| **pod6** | 30B | Thinking | Zero-shot | DA-vuln, DA-code, MA-vuln, MA-code | ✅ |
+| **pod7** | 30B | Instruct | Few-shot | DA-vuln, DA-code, MA-vuln, MA-code | ✅ |
+| **pod8** | 30B | Thinking | Few-shot | DA-vuln, DA-code, MA-vuln, MA-code | ✅ |
+
+**Key Findings**:
+- **Dual-Agent (DA)**: Two agents in adversarial debate (vulnerability detection) or code review (code generation)
+- **Multi-Agent (MA)**: Four agents in structured deliberation phases
+- All experiments use CWE-enhanced prompts for vulnerability detection
+- Energy and emissions tracked via CodeCarbon emissions.csv in each pod directory
+
+**File Naming Convention**:
+```
+DA-{task}-{agents}-{prompting}_shot_Qwen-{model}_*
+MA-{task}-{phases}-{prompting}_shot_Qwen-{model}_*
+
+Examples:
+- DA-vuln-two-zero_shot_Qwen-Qwen3-4B-Instruct-2507_vuln_*
+- MA-code-four-few_shot_Qwen-Qwen3-30B-A3B-Thinking-2507_*
+```
+
+**Notes**:
+- Some pods have nested `results/` subdirectory (e.g., pod1)
+- Pod1 contains one interrupted experiment (235757) that was completed in a second session (235404)
+- Emissions.csv in each pod may contain multiple experiment sessions
+
+---
+
 ## Data Organization
 
 ### File Naming Convention
@@ -332,10 +376,19 @@ Analysis performed in `/notebooks/`:
    - Some early experiments may not have codecarbon subdirectories
    - Check for `emissions.csv` in parent directory as fallback
 
+4. **RQ2 Pod1 Interrupted Experiment (Nov 15, 2025)**:
+   - Experiment: `DA-vuln-two-zero_shot_Qwen-Qwen3-4B-Instruct-2507_vuln_20251115-235757`
+   - Issue: First attempt interrupted after 5.5 seconds (F1=33.33%, incomplete)
+   - Resolution: Successfully completed in second session (235404) with F1=47.81%
+   - Status: Interrupted experiment (235757) excluded from analysis; only successful run (235404) included
+
 ---
 
-**Last Updated**: 2025-11-08
-**Total Experiments**: 32 (16 vulnerability detection + 16 code generation)
-**Total Samples Processed**: 17,600 (32 experiments × 550 avg samples)
+**Last Updated**: 2025-11-24
+**Total Experiments**: 64 (32 RQ1 Single-Agent + 32 RQ2 Dual/Multi-Agent)
+  - **RQ1**: 16 vulnerability detection + 16 code generation (Single-Agent)
+  - **RQ2**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)
+**Total Samples Processed**: ~35,200 (64 experiments × ~550 avg samples)
 **Hardware Used**: Mars RTX A5000 + RunPod H100
 **Models Evaluated**: 4 (Qwen3 4B/30B × Instruct/Thinking)
+**Agent Architectures**: 3 (Single-Agent, Dual-Agent, Multi-Agent)
