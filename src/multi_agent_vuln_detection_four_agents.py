@@ -1,7 +1,15 @@
 import os
 import json
-import config
 import argparse
+
+# Dynamic config selection based on MODEL_FAMILY environment variable
+# Usage: MODEL_FAMILY=deepseek python src/multi_agent_vuln_detection_four_agents.py --prompt_type few_shot
+if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+    import config_deepseek as config
+    print("[Config] Using DeepSeek configuration")
+else:
+    import config
+    print("[Config] Using Qwen3 configuration")
 from datetime import datetime
 from codecarbon import OfflineEmissionsTracker
 from vuln_evaluation import evaluate_and_save_vulnerability, normalize_vulnerability_basic

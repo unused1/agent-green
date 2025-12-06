@@ -1,8 +1,13 @@
 import os
 import json
 import time
-import config
 from datetime import datetime
+
+# Dynamic config selection based on MODEL_FAMILY environment variable
+if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+    import config_deepseek as config
+else:
+    import config
 from autogen import AssistantAgent, ConversableAgent
 from codecarbon import OfflineEmissionsTracker
 from vuln_evaluation import evaluate_and_save_vulnerability, normalize_vulnerability_basic

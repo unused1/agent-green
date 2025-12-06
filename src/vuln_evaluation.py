@@ -1,8 +1,13 @@
 import csv
 import json
 import pandas as pd
-import config
 import os
+
+# Dynamic config selection based on MODEL_FAMILY environment variable
+if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+    import config_deepseek as config
+else:
+    import config
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
 
 # Normalization Functions (moved from config.py)

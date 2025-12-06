@@ -2,8 +2,13 @@ import csv
 import Levenshtein
 from difflib import SequenceMatcher
 import pandas as pd
-import config
 import os
+
+# Dynamic config selection based on MODEL_FAMILY environment variable
+if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+    import config_deepseek as config
+else:
+    import config
 
 def load_ground_truth(file_path):
     ground_truth = {}

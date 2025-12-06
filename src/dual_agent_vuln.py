@@ -10,7 +10,15 @@ from codecarbon import OfflineEmissionsTracker
 from sklearn.metrics import classification_report, confusion_matrix
 import time
 from ollama_utils import start_ollama_server,stop_ollama_server
-import config
+
+# Dynamic config selection based on MODEL_FAMILY environment variable
+# Usage: MODEL_FAMILY=deepseek python src/dual_agent_vuln.py --prompt_type few_shot
+if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+    import config_deepseek as config
+    print("[Config] Using DeepSeek configuration")
+else:
+    import config
+    print("[Config] Using Qwen3 configuration")
 from vuln_evaluation import evaluate_and_save_vulnerability, normalize_vulnerability_basic
 from agent_utils_vuln import create_agent
 from resume_utils import ExperimentResume

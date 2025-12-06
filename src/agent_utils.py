@@ -1,6 +1,11 @@
 import os
-import config
 from pathlib import Path
+
+# Dynamic config selection based on MODEL_FAMILY environment variable
+if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+    import config_deepseek as config
+else:
+    import config
 from autogen import AssistantAgent, ConversableAgent, GroupChat, GroupChatManager, LocalCommandLineCodeExecutor, register_function
 
 # --- Generic Agent Creation ---

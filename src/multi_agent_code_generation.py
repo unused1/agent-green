@@ -1,8 +1,16 @@
 import os
 import json
 import time
-import config
 import argparse
+
+# Dynamic config selection based on MODEL_FAMILY environment variable
+# Usage: MODEL_FAMILY=deepseek python src/multi_agent_code_generation.py --prompt_type few_shot
+if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+    import config_deepseek as config
+    print("[Config] Using DeepSeek configuration")
+else:
+    import config
+    print("[Config] Using Qwen3 configuration")
 from datetime import datetime
 from autogen import AssistantAgent
 from codecarbon import OfflineEmissionsTracker
