@@ -2,8 +2,8 @@
 
 **Purpose**: Replicate RQ1 and RQ2 experiments using alternative model architectures to validate generalizability of findings beyond Qwen3
 **Date**: November 26, 2025
-**Last Updated**: December 7, 2025
-**Status**: ✅ READY - Llama-Nemotron validated (Dec 7, 2025). Thinking toggle confirmed working.
+**Last Updated**: December 8, 2025
+**Status**: 🔄 RUNNING - Pilot experiments in progress (Dec 7-8, 2025). First experiment (SA-zero-thinking) completed.
 
 ---
 
@@ -86,7 +86,7 @@ DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode
 | Phase 1b | **Nemotron Code Preparation** | ✅ Complete | 100% |
 | Phase 2a | DeepSeek Validation | ❌ **FAILED** | See Blocker |
 | Phase 2b | **Nemotron Validation** | ✅ **PASSED** | 100% |
-| Phase 3 | RQ1 Experiments (16 SA) | ⏳ Pending | 0% |
+| Phase 3 | RQ1 Experiments (16 SA) | 🔄 In Progress | 6% (1/16) |
 | Phase 4 | RQ2 Experiments (32 DA/MA) | ⏳ Pending | 0% |
 | Phase 5 | Analysis & Comparison | ⏳ Pending | 0% |
 
@@ -219,70 +219,123 @@ python3 -m vllm.entrypoints.openai.api_server \
 python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 ```
 
-### Experiment Progress (48 Total)
+---
+
+## Experiment Execution Log
+
+### Pilot Run: Nemotron-Nano-8B (Dec 7, 2025)
+
+**Purpose**: Validate experiment pipeline before scaling to parallel pods
+
+#### NM-8B-SA-zero-thinking (✅ Completed)
+
+| Field | Value |
+|-------|-------|
+| **Start Time** | Dec 7, 2025 15:50 UTC |
+| **End Time** | Dec 7, 2025 16:32 UTC |
+| **Duration** | ~42 minutes |
+| **Samples** | 386/386 |
+| **Model** | `nvidia/Llama-3.1-Nemotron-Nano-8B-v1` |
+| **Hardware** | 1× H100 SXM 80GB (RunPod) |
+| **vLLM Version** | 0.12.0 |
+
+**Results**:
+| Metric | Value |
+|--------|-------|
+| Accuracy | 47.2% |
+| Precision | 0.40 |
+| Recall | 0.12 |
+| F1 Score | 0.18 |
+| Energy (CO2) | 0.119 kg |
+
+**Failed Samples** (2/386 = 0.5%):
+| Sample # | idx | Ground Truth | Prediction | Reason |
+|----------|-----|--------------|------------|--------|
+| 201 | 196587 | 1 (Vulnerable) | 0 (default) | AutoGen max auto-reply limit reached |
+| 302 | 204019 | 1 (Vulnerable) | 0 (default) | AutoGen max auto-reply limit reached |
+
+**Notes**:
+- Both failed samples were recorded with `reasoning="No response from agent"`
+- Failures counted as false negatives (predicted safe, actually vulnerable)
+- 0.5% failure rate is acceptable for pipeline validation
+
+**Results Location**: `results/rq2_cross_architecture/nemotron_8b_vuln_SA-zero_thinking/`
+
+#### NM-8B-SA-zero-instruct (🔄 In Progress)
+
+| Field | Value |
+|-------|-------|
+| **Start Time** | Dec 7, 2025 16:52 UTC |
+| **Status** | Running |
+| **Model** | `nvidia/Llama-3.1-Nemotron-Nano-8B-v1` |
+| **Mode** | Instruct (ENABLE_REASONING=false) |
+
+---
+
+### Experiment Progress (48 Total - Nemotron)
 
 #### RQ1 Single-Agent (16 experiments)
 
 | ID | Task | Model | Mode | Prompting | Status |
 |----|------|-------|------|-----------|--------|
-| DS-1 | Vuln | 70B | Instruct | Few-shot | ⏳ |
-| DS-2 | Vuln | 70B | Instruct | Zero-shot | ⏳ |
-| DS-3 | Vuln | 70B | Thinking | Few-shot | ⏳ |
-| DS-4 | Vuln | 70B | Thinking | Zero-shot | ⏳ |
-| DS-5 | Vuln | 8B | Instruct | Few-shot | ⏳ |
-| DS-6 | Vuln | 8B | Instruct | Zero-shot | ⏳ |
-| DS-7 | Vuln | 8B | Thinking | Few-shot | ⏳ |
-| DS-8 | Vuln | 8B | Thinking | Zero-shot | ⏳ |
-| DS-9 | Code | 70B | Instruct | Few-shot | ⏳ |
-| DS-10 | Code | 70B | Instruct | Zero-shot | ⏳ |
-| DS-11 | Code | 70B | Thinking | Few-shot | ⏳ |
-| DS-12 | Code | 70B | Thinking | Zero-shot | ⏳ |
-| DS-13 | Code | 8B | Instruct | Few-shot | ⏳ |
-| DS-14 | Code | 8B | Instruct | Zero-shot | ⏳ |
-| DS-15 | Code | 8B | Thinking | Few-shot | ⏳ |
-| DS-16 | Code | 8B | Thinking | Zero-shot | ⏳ |
+| NM-1 | Vuln | 49B | Instruct | Few-shot | ⏳ |
+| NM-2 | Vuln | 49B | Instruct | Zero-shot | ⏳ |
+| NM-3 | Vuln | 49B | Thinking | Few-shot | ⏳ |
+| NM-4 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
+| NM-5 | Vuln | 8B | Instruct | Few-shot | ⏳ |
+| NM-6 | Vuln | 8B | Instruct | Zero-shot | 🔄 Running |
+| NM-7 | Vuln | 8B | Thinking | Few-shot | ⏳ |
+| NM-8 | Vuln | 8B | Thinking | Zero-shot | ✅ Done |
+| NM-9 | Code | 49B | Instruct | Few-shot | ⏳ |
+| NM-10 | Code | 49B | Instruct | Zero-shot | ⏳ |
+| NM-11 | Code | 49B | Thinking | Few-shot | ⏳ |
+| NM-12 | Code | 49B | Thinking | Zero-shot | ⏳ |
+| NM-13 | Code | 8B | Instruct | Few-shot | ⏳ |
+| NM-14 | Code | 8B | Instruct | Zero-shot | ⏳ |
+| NM-15 | Code | 8B | Thinking | Few-shot | ⏳ |
+| NM-16 | Code | 8B | Thinking | Zero-shot | ⏳ |
 
 #### RQ2 Dual-Agent (16 experiments)
 
 | ID | Task | Model | Mode | Prompting | Status |
 |----|------|-------|------|-----------|--------|
-| DS-17 | Vuln | 70B | Instruct | Few-shot | ⏳ |
-| DS-18 | Vuln | 70B | Instruct | Zero-shot | ⏳ |
-| DS-19 | Vuln | 70B | Thinking | Few-shot | ⏳ |
-| DS-20 | Vuln | 70B | Thinking | Zero-shot | ⏳ |
-| DS-21 | Vuln | 8B | Instruct | Few-shot | ⏳ |
-| DS-22 | Vuln | 8B | Instruct | Zero-shot | ⏳ |
-| DS-23 | Vuln | 8B | Thinking | Few-shot | ⏳ |
-| DS-24 | Vuln | 8B | Thinking | Zero-shot | ⏳ |
-| DS-33 | Code | 70B | Instruct | Few-shot | ⏳ |
-| DS-34 | Code | 70B | Instruct | Zero-shot | ⏳ |
-| DS-35 | Code | 70B | Thinking | Few-shot | ⏳ |
-| DS-36 | Code | 70B | Thinking | Zero-shot | ⏳ |
-| DS-37 | Code | 8B | Instruct | Few-shot | ⏳ |
-| DS-38 | Code | 8B | Instruct | Zero-shot | ⏳ |
-| DS-39 | Code | 8B | Thinking | Few-shot | ⏳ |
-| DS-40 | Code | 8B | Thinking | Zero-shot | ⏳ |
+| NM-17 | Vuln | 49B | Instruct | Few-shot | ⏳ |
+| NM-18 | Vuln | 49B | Instruct | Zero-shot | ⏳ |
+| NM-19 | Vuln | 49B | Thinking | Few-shot | ⏳ |
+| NM-20 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
+| NM-21 | Vuln | 8B | Instruct | Few-shot | ⏳ |
+| NM-22 | Vuln | 8B | Instruct | Zero-shot | ⏳ |
+| NM-23 | Vuln | 8B | Thinking | Few-shot | ⏳ |
+| NM-24 | Vuln | 8B | Thinking | Zero-shot | ⏳ |
+| NM-33 | Code | 49B | Instruct | Few-shot | ⏳ |
+| NM-34 | Code | 49B | Instruct | Zero-shot | ⏳ |
+| NM-35 | Code | 49B | Thinking | Few-shot | ⏳ |
+| NM-36 | Code | 49B | Thinking | Zero-shot | ⏳ |
+| NM-37 | Code | 8B | Instruct | Few-shot | ⏳ |
+| NM-38 | Code | 8B | Instruct | Zero-shot | ⏳ |
+| NM-39 | Code | 8B | Thinking | Few-shot | ⏳ |
+| NM-40 | Code | 8B | Thinking | Zero-shot | ⏳ |
 
 #### RQ2 Multi-Agent (16 experiments)
 
 | ID | Task | Model | Mode | Prompting | Status |
 |----|------|-------|------|-----------|--------|
-| DS-25 | Vuln | 70B | Instruct | Few-shot | ⏳ |
-| DS-26 | Vuln | 70B | Instruct | Zero-shot | ⏳ |
-| DS-27 | Vuln | 70B | Thinking | Few-shot | ⏳ |
-| DS-28 | Vuln | 70B | Thinking | Zero-shot | ⏳ |
-| DS-29 | Vuln | 8B | Instruct | Few-shot | ⏳ |
-| DS-30 | Vuln | 8B | Instruct | Zero-shot | ⏳ |
-| DS-31 | Vuln | 8B | Thinking | Few-shot | ⏳ |
-| DS-32 | Vuln | 8B | Thinking | Zero-shot | ⏳ |
-| DS-41 | Code | 70B | Instruct | Few-shot | ⏳ |
-| DS-42 | Code | 70B | Instruct | Zero-shot | ⏳ |
-| DS-43 | Code | 70B | Thinking | Few-shot | ⏳ |
-| DS-44 | Code | 70B | Thinking | Zero-shot | ⏳ |
-| DS-45 | Code | 8B | Instruct | Few-shot | ⏳ |
-| DS-46 | Code | 8B | Instruct | Zero-shot | ⏳ |
-| DS-47 | Code | 8B | Thinking | Few-shot | ⏳ |
-| DS-48 | Code | 8B | Thinking | Zero-shot | ⏳ |
+| NM-25 | Vuln | 49B | Instruct | Few-shot | ⏳ |
+| NM-26 | Vuln | 49B | Instruct | Zero-shot | ⏳ |
+| NM-27 | Vuln | 49B | Thinking | Few-shot | ⏳ |
+| NM-28 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
+| NM-29 | Vuln | 8B | Instruct | Few-shot | ⏳ |
+| NM-30 | Vuln | 8B | Instruct | Zero-shot | ⏳ |
+| NM-31 | Vuln | 8B | Thinking | Few-shot | ⏳ |
+| NM-32 | Vuln | 8B | Thinking | Zero-shot | ⏳ |
+| NM-41 | Code | 49B | Instruct | Few-shot | ⏳ |
+| NM-42 | Code | 49B | Instruct | Zero-shot | ⏳ |
+| NM-43 | Code | 49B | Thinking | Few-shot | ⏳ |
+| NM-44 | Code | 49B | Thinking | Zero-shot | ⏳ |
+| NM-45 | Code | 8B | Instruct | Few-shot | ⏳ |
+| NM-46 | Code | 8B | Instruct | Zero-shot | ⏳ |
+| NM-47 | Code | 8B | Thinking | Few-shot | ⏳ |
+| NM-48 | Code | 8B | Thinking | Zero-shot | ⏳ |
 
 ### Legend
 
