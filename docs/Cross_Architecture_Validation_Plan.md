@@ -2,8 +2,76 @@
 
 **Purpose**: Replicate RQ1 and RQ2 experiments using alternative model architectures to validate generalizability of findings beyond Qwen3
 **Date**: November 26, 2025
-**Last Updated**: December 6, 2025
-**Status**: Phase 1 - Code Preparation
+**Last Updated**: December 7, 2025
+**Status**: ✅ READY - Llama-Nemotron validated (Dec 7, 2025). Thinking toggle confirmed working.
+
+---
+
+## ⚠️ CRITICAL BLOCKER: DeepSeek R1 Distill Non-Thinking Mode
+
+**Date Discovered**: December 6, 2025
+
+### Summary
+
+DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode**. These models are reasoning-only by design - they always produce chain-of-thought reasoning regardless of API parameters or system prompts.
+
+### Evidence
+
+1. **HuggingFace Discussion #26** (DeepSeek-R1-Distill-Qwen-7B):
+   > "The only way is for you to prompt it not to think (unlikely that it will work) or to finetune to your dataset to train it to not think. The distilled models have no enable_thinking parameter because they always think."
+
+   Source: https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/discussions/26
+
+2. **Model Architecture Design**:
+   - DeepSeek-R1 (full 671B model with 0528 update) has `enable_thinking` parameter
+   - Distilled models were trained ONLY on R1's reasoning outputs
+   - No non-thinking training data was used in distillation
+   - Result: Distilled models lack the capability to suppress reasoning
+
+3. **vLLM Testing (Dec 6, 2025)**:
+   - Tested with vLLM 0.12.0 on RunPod H100
+   - `chat_template_kwargs.thinking: true` and `thinking: false` produce identical output
+   - Model always includes `</think>` tag regardless of parameter
+   - vLLM's `--enable-reasoning` flag is not available in 0.12.0 (unreleased feature)
+
+4. **Ollama's `/set nothink`**:
+   - This is a workaround that post-processes output, NOT a model capability
+   - Does not represent true non-thinking mode support
+
+### Impact on Cross-Architecture Validation
+
+| Requirement | DeepSeek R1 Distill | Status |
+|-------------|---------------------|--------|
+| Thinking mode support | ✅ Always outputs reasoning | Partial |
+| Non-thinking mode support | ❌ Not supported | **BLOCKER** |
+| True mode toggle (like Qwen3) | ❌ Cannot toggle | **BLOCKER** |
+
+### Options to Proceed
+
+1. **Select Alternative Model** (Recommended):
+   - Llama-Nemotron (system prompt toggle)
+   - GLM-4.5/4.6 (thinking mode support)
+   - OLMo 3-7B (has both Think and Instruct variants)
+   - GPT-OSS (reasoning effort parameter)
+
+2. **Use Full DeepSeek-R1-0528 (671B)**:
+   - Has true `enable_thinking` parameter
+   - Requires 8+ H100 GPUs (~$1,500-2,000)
+   - Not practical for current budget
+
+3. **Accept Limitation and Modify Experiment**:
+   - Compare only "thinking vs thinking" across architectures
+   - Loses ability to validate thinking/non-thinking patterns
+   - Weakens cross-architecture validation claim
+
+### Next Steps (✅ RESOLVED)
+
+- [x] Document blocker in validation plan (this section)
+- [x] Research alternative models with confirmed thinking/non-thinking support
+- [x] Select Llama-Nemotron as replacement model (Dec 7, 2025)
+- [x] Validate Nemotron thinking toggle on RunPod H100 (Dec 7, 2025) - **PASSED**
+- [ ] Obtain professor approval for revised plan
+- [ ] Run full experiments with Nemotron
 
 ---
 
@@ -14,8 +82,10 @@
 | Phase | Description | Status | Progress |
 |-------|-------------|--------|----------|
 | Phase 0 | Planning & Approval | ✅ Complete | 100% |
-| Phase 1 | Code Preparation | ✅ Complete | 100% |
-| Phase 2 | vLLM Deployment & Validation | ⏳ Pending | 0% |
+| Phase 1a | DeepSeek Code Preparation | ✅ Complete | 100% |
+| Phase 1b | **Nemotron Code Preparation** | ✅ Complete | 100% |
+| Phase 2a | DeepSeek Validation | ❌ **FAILED** | See Blocker |
+| Phase 2b | **Nemotron Validation** | ✅ **PASSED** | 100% |
 | Phase 3 | RQ1 Experiments (16 SA) | ⏳ Pending | 0% |
 | Phase 4 | RQ2 Experiments (32 DA/MA) | ⏳ Pending | 0% |
 | Phase 5 | Analysis & Comparison | ⏳ Pending | 0% |
@@ -33,22 +103,121 @@
 | Create config selector module | `src/config_selector.py` | ✅ Done |
 | Update experiment scripts for DeepSeek | 12 scripts updated | ✅ Done |
 
-### Phase 2: Deployment & Validation Checklist
+### Phase 1b: Nemotron Code Preparation Checklist (Dec 7, 2025)
 
-| Test | Model | Mode | Status |
-|------|-------|------|--------|
-| TC-1 (Math) | 8B | Thinking | ⏳ |
-| TC-1 (Math) | 8B | Non-Thinking | ⏳ |
-| TC-1 (Math) | 70B | Thinking | ⏳ |
-| TC-1 (Math) | 70B | Non-Thinking | ⏳ |
-| TC-2 (Vuln) | 8B | Thinking | ⏳ |
-| TC-2 (Vuln) | 8B | Non-Thinking | ⏳ |
-| TC-2 (Vuln) | 70B | Thinking | ⏳ |
-| TC-2 (Vuln) | 70B | Non-Thinking | ⏳ |
-| TC-3 (Code) | 8B | Thinking | ⏳ |
-| TC-3 (Code) | 8B | Non-Thinking | ⏳ |
-| TC-3 (Code) | 70B | Thinking | ⏳ |
-| TC-3 (Code) | 70B | Non-Thinking | ⏳ |
+| Task | File/Script | Status |
+|------|-------------|--------|
+| Create Nemotron env config (8B) | `.env.nemotron` | ✅ Done |
+| Create Nemotron env config (49B) | `.env.nemotron.49b` | ✅ Done |
+| Create Nemotron config module | `src/config_nemotron.py` | ✅ Done |
+| Create vLLM deployment script | `scripts/deploy_nemotron_vllm.sh` | ✅ Done |
+| Create validation script | `scripts/validate_nemotron_modes.py` | ✅ Done |
+
+### Phase 2a: DeepSeek Deployment & Validation (FAILED)
+
+**⚠️ VALIDATION FAILED (Dec 6, 2025)**
+
+DeepSeek R1 Distill models do **NOT** support non-thinking mode. Testing confirmed:
+- vLLM 0.12.0 does not have `--enable-reasoning` flag (unreleased feature)
+- `chat_template_kwargs.thinking: true/false` has NO effect on output
+- Model ALWAYS produces `</think>` tag regardless of parameters
+- This is a **model design limitation**, not an inference framework issue
+
+| Test | Model | Mode | Status | Notes |
+|------|-------|------|--------|-------|
+| TC-1 (Math) | 8B | Thinking | ✅ | Produces reasoning (expected) |
+| TC-1 (Math) | 8B | Non-Thinking | ❌ **FAIL** | Still produces reasoning |
+| TC-1 (Math) | 70B | Thinking | 🚫 | Blocked - validation failed |
+| TC-1 (Math) | 70B | Non-Thinking | 🚫 | Blocked - validation failed |
+| TC-2 (Vuln) | 8B | Thinking | ✅ | Produces reasoning (expected) |
+| TC-2 (Vuln) | 8B | Non-Thinking | ❌ **FAIL** | Still produces reasoning |
+| TC-2 (Vuln) | 70B | Thinking | 🚫 | Blocked - validation failed |
+| TC-2 (Vuln) | 70B | Non-Thinking | 🚫 | Blocked - validation failed |
+| TC-3 (Code) | 8B | Thinking | ✅ | Produces reasoning (expected) |
+| TC-3 (Code) | 8B | Non-Thinking | ❌ **FAIL** | Still produces reasoning |
+| TC-3 (Code) | 70B | Thinking | 🚫 | Blocked - validation failed |
+| TC-3 (Code) | 70B | Non-Thinking | 🚫 | Blocked - validation failed |
+
+**Conclusion**: DeepSeek R1 Distill is not suitable for experiments requiring thinking/non-thinking comparison. Alternative model required.
+
+### Phase 2b: Nemotron Deployment & Validation (✅ PASSED)
+
+**Validated**: December 7, 2025 on RunPod H100 80GB
+
+**Toggle Mechanism**: System Prompt (not API parameter)
+- Nano-8B: `"detailed thinking on"` / `"detailed thinking off"`
+- Super-49B: default = ON, `"/no_think"` = OFF
+
+| Test | Model | Mode | Status | Notes |
+|------|-------|------|--------|-------|
+| TC-1 (Math) | 8B | Thinking | ⚠️ | No `<think>` - model chose not to reason for trivial task |
+| TC-1 (Math) | 8B | Non-Thinking | ✅ | No tags (correct) |
+| TC-1 (Math) | 49B | Thinking | ✅ | `<think>` tags present (2× H100 SXM) |
+| TC-1 (Math) | 49B | Non-Thinking | ✅ | No tags (correct) (2× H100 SXM) |
+| TC-2 (Vuln) | 8B | Thinking | ✅ | `<think>` tags present |
+| TC-2 (Vuln) | 8B | Non-Thinking | ✅ | No tags (correct) |
+| TC-2 (Vuln) | 49B | Thinking | ✅ | `<think>` tags present (2× H100 SXM) |
+| TC-2 (Vuln) | 49B | Non-Thinking | ✅ | No tags (correct) (2× H100 SXM) |
+| TC-3 (Reasoning) | 8B | Thinking | ✅ | `<think>` tags present |
+| TC-3 (Reasoning) | 8B | Non-Thinking | ✅ | No tags (correct) |
+| TC-3 (Reasoning) | 49B | Thinking | ✅ | `<think>` tags present (2× H100 SXM) |
+| TC-3 (Reasoning) | 49B | Non-Thinking | ✅ | No tags (correct) (2× H100 SXM) |
+
+**Validation Summary (8B)**:
+- **Thinking mode**: 2/3 tests produced `<think>` tags (math test is trivial - model intelligently skipped reasoning)
+- **Non-thinking mode**: 3/3 tests produced NO `<think>` tags ✅
+
+**Validation Summary (49B)** - ✅ **PASSED on 2× H100 SXM**:
+- **Status**: ✅ Works on 2× H100 80GB SXM with tensor parallelism
+- **Thinking Toggle**: ✅ Working via system prompt (`/no_think` disables thinking)
+- **Single H100 80GB**: ❌ Does NOT fit (OOM at ~79GB during weight loading)
+
+**Validated Configurations** (Dec 7, 2025):
+
+| Precision | Model | GPU Memory | Utilization | Context | Status |
+|-----------|-------|-----------|-------------|---------|--------|
+| **FP8** (ModelOpt) | `nvidia/Llama-3_3-Nemotron-Super-49B-v1_5-FP8` | ~80GB/GPU | 99% | 64K | ✅ Validated |
+| **FP16** (Native) | `nvidia/Llama-3_3-Nemotron-Super-49B-v1_5` | ~77GB/GPU | 95% | 64K | ✅ Validated |
+
+**Note**: FP16 uses slightly less GPU memory than FP8 due to ModelOpt quantization overhead. Both configurations leave sufficient headroom for KV cache with 64K context.
+
+**Hardware Requirements Summary**:
+| Model | Single H100 80GB | 2× H100 80GB | H200 141GB |
+|-------|------------------|--------------|------------|
+| Nemotron-Nano-8B | ✅ FP16, 64K | ✅ | ✅ |
+| Nemotron-Super-49B | ❌ OOM | ✅ FP8/FP16, 64K | ✅ (estimated) |
+
+**Conclusion**: Toggle mechanism **confirmed working** on both 8B and 49B. Unlike DeepSeek R1 Distill, Nemotron correctly enables/disables thinking via system prompt.
+
+**Deployment Commands**:
+```bash
+# 8B model (FP16, single H100)
+./scripts/deploy_nemotron_vllm.sh 8b
+
+# 49B model - Option 1: FP8 (2× H100 with tensor parallelism)
+python3 -m vllm.entrypoints.openai.api_server \
+    --model "nvidia/Llama-3_3-Nemotron-Super-49B-v1_5-FP8" \
+    --trust-remote-code \
+    --tensor-parallel-size=2 \
+    --max-model-len=65536 \
+    --gpu-memory-utilization 0.95 \
+    --quantization=modelopt
+
+# 49B model - Option 2: FP16 (2× H100 with tensor parallelism)
+# Slightly lower memory usage (~77GB/GPU vs ~80GB/GPU for FP8)
+python3 -m vllm.entrypoints.openai.api_server \
+    --model "nvidia/Llama-3_3-Nemotron-Super-49B-v1_5" \
+    --trust-remote-code \
+    --tensor-parallel-size=2 \
+    --max-model-len=65536 \
+    --gpu-memory-utilization 0.90 \
+    --dtype float16
+```
+
+**Validation Command**:
+```bash
+python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
+```
 
 ### Experiment Progress (48 Total)
 
@@ -324,17 +493,18 @@ To validate findings beyond Qwen3, we evaluated multiple open-source model famil
 
 #### Summary Comparison Matrix
 
-| Model | True Arch Diversity | Thinking Support | Practical Size | Open Weights | Recommendation |
-|-------|---------------------|------------------|----------------|--------------|----------------|
-| DeepSeek-R1-Distill-**Llama** | ✅ Llama base | ✅ Native `<think>` | ✅ 8B, 70B | ✅ Yes | ⭐ **Primary choice** |
-| **OLMo 3** | ⚠️ Decoder-only | ⚠️ 7B: Think+Instruct, 32B: Think only | ✅ 7B, 32B | ✅ **Fully open** | ⚠️ 32B lacks Instruct |
-| GLM-4 | ✅ GLM arch | ✅ Yes | ✅ 9B, 26B | ✅ Yes | 🥉 **Alternative** |
-| Llama-Nemotron | ⚠️ Llama base | ✅ Prompt-based | ✅ 8B, 49B | ✅ Yes | 🔍 Consider |
-| Kimi K2 | ✅ Native MoE | ✅ Instruct/Thinking | ❌ 1T (32B active) | ✅ Yes | ⚠️ Large but viable |
-| DeepSeek-R1 (671B) | ✅ Native MoE | ✅ Native | ❌ Very large | ✅ Yes | ⚠️ High cost |
-| GPT-OSS | ✅ MoE arch | ✅ Effort param (Low/Med/High) | ✅ 20B, 120B (MoE efficient) | ✅ Apache 2.0 | 🥈 **Strong alternative** |
+| Model | True Arch Diversity | Thinking Support | Non-Thinking Support | Practical Size | Recommendation |
+|-------|---------------------|------------------|----------------------|----------------|----------------|
+| ~~DeepSeek-R1-Distill-Llama~~ | ✅ Llama base | ✅ Native `<think>` | ❌ **NOT SUPPORTED** | ✅ 8B, 70B | ❌ **REJECTED** |
+| **Llama-Nemotron** | ✅ Llama base | ✅ System prompt | ✅ System prompt | ✅ 8B, 49B | ⭐ **TOP CANDIDATE** |
+| **GPT-OSS** | ✅ MoE arch | ✅ Effort param | ✅ Effort=Low | ✅ 20B, 120B | ⭐ **TOP CANDIDATE** |
+| GLM-4 | ✅ GLM arch | ✅ Native toggle | ✅ Native toggle | ✅ 9B, 26B | 🥉 **Alternative** |
+| **OLMo 3** | ⚠️ Decoder-only | ⚠️ 7B: Think+Instruct, 32B: Think only | ⚠️ 7B only | ✅ 7B, 32B | ⚠️ 32B lacks Instruct |
+| Kimi K2 | ✅ Native MoE | ✅ Instruct/Thinking | ✅ Instruct variant | ❌ 1T (32B active) | ⚠️ Large but viable |
+| DeepSeek-R1 (671B) | ✅ Native MoE | ✅ Native | ✅ `enable_thinking` | ❌ Very large | ⚠️ High cost |
 
 **Key Updates from Research:**
+- **⚠️ DeepSeek R1 Distill (Dec 6, 2025)**: REJECTED - Does NOT support non-thinking mode. Distilled models always produce reasoning output regardless of parameters or prompts. Only the full 671B R1-0528 model has `enable_thinking` toggle.
 - **GPT-OSS**: OpenAI's first open-weight release (Aug 2025) - Apache 2.0, MoE with native MXFP4 quantization
 - **OLMo 3**: First fully open thinking model, BUT **32B only has Think variant** (no 32B-Instruct). Only 7B has both Think and Instruct for comparison.
 - **Kimi K2**: Confirmed Instruct/Thinking variants with 256K context and native INT4 quantization
@@ -463,22 +633,197 @@ With Unsloth's dynamic quantization + MoE CPU offloading:
 
 **Recommendation**: Consider for **future work** if multi-GPU infrastructure becomes available, or as a **pilot study** to validate that aggressive quantization doesn't degrade thinking mode performance.
 
-### 2.3 Final Recommendation: DeepSeek-R1-Distill-Llama
+### 2.3 ~~Final Recommendation: DeepSeek-R1-Distill-Llama~~ ❌ NOT SUITABLE
 
-**Selected Models**:
+**⚠️ UPDATE (Dec 6, 2025): DeepSeek R1 Distill CANNOT be used for this experiment.**
 
-| Qwen3 (Current) | DeepSeek Equivalent | Size | Base | Architecture |
-|-----------------|---------------------|------|------|--------------|
-| Qwen3-4B | **DeepSeek-R1-Distill-Llama-8B** | 8B | Llama-3.1-8B | Dense vs Dense ✅ |
-| Qwen3-30B-A3B | **DeepSeek-R1-Distill-Llama-70B** | 70B | Llama-3.3-70B | **MoE vs Dense** ⚠️ |
+The DeepSeek-R1-Distill-Llama models do not support non-thinking mode, making them unsuitable for cross-architecture validation that requires comparing thinking vs non-thinking performance.
 
-**Rationale**:
-1. **True architectural diversity**: Llama vs Qwen (different tokenizer, architecture, training)
-2. **Native thinking support**: `<think>` tags work identically to Qwen3-Thinking
-3. **Practical cost**: ~$800-1,000 vs $1,500+ for original 671B models
-4. **Manageable VRAM**: 70B fits on 1x H100 with INT8 quantization
+| Qwen3 (Current) | DeepSeek Equivalent | Status | Issue |
+|-----------------|---------------------|--------|-------|
+| Qwen3-4B | ~~DeepSeek-R1-Distill-Llama-8B~~ | ❌ Rejected | No non-thinking mode |
+| Qwen3-30B-A3B | ~~DeepSeek-R1-Distill-Llama-70B~~ | ❌ Rejected | No non-thinking mode |
 
-**Status**: Pending professor approval before proceeding.
+**Why DeepSeek R1 Distill Fails**:
+1. ❌ Distilled models were trained ONLY on reasoning outputs
+2. ❌ No `enable_thinking` parameter (only full R1-0528 has this)
+3. ❌ Model ALWAYS produces chain-of-thought regardless of prompts/parameters
+4. ❌ vLLM/Ollama workarounds are post-processing, not true mode control
+
+**Status**: ❌ REJECTED - Requires alternative model selection.
+
+### 2.3.1 Alternative Model Research (Dec 6, 2025)
+
+Comprehensive research conducted on alternative models with confirmed thinking/non-thinking toggle support.
+
+---
+
+#### ⭐ OPTION 1: Llama-Nemotron (NVIDIA) — RECOMMENDED
+
+**Confirmed**: True thinking/non-thinking toggle via system prompt.
+
+| Model | Params | VRAM (FP8) | Context | Deployment |
+|-------|--------|------------|---------|------------|
+| Llama-3.1-Nemotron-Nano-8B-v1 | 8B | ~16GB (FP16) | 64K | ✅ Single H100 |
+| Llama-3.3-Nemotron-Super-49B-v1.5 | 49B | ~77-80GB/GPU (FP16/FP8) | 64K | ✅ **2× H100 SXM** (validated Dec 7) |
+| Llama-3.1-Nemotron-Ultra-253B-v1 | 253B | ~253GB | - | ❌ Multi-GPU (4×+) required |
+
+**✅ 49B Hardware Update (Dec 7, 2025)**:
+- **Single H100 80GB**: ❌ OOM (model weights consume ~79GB, leaving no room for KV cache)
+- **2× H100 80GB SXM**: ✅ **VALIDATED** - Both FP8 (~80GB/GPU) and FP16 (~77GB/GPU) work with 64K context
+- **Key**: Use `--tensor-parallel-size=2` and `--quantization=modelopt` for pre-quantized FP8 model
+
+**Thinking Mode Toggle**:
+```python
+# v1 (Nano-8B): Use "detailed thinking on/off"
+messages = [
+    {"role": "system", "content": "detailed thinking on"},  # or "off"
+    {"role": "user", "content": "Your question here"}
+]
+
+# v1.5 (Super-49B): Use "/no_think" for non-thinking
+# Default (empty system prompt) = thinking ON
+messages = [
+    {"role": "system", "content": "/no_think"},  # Non-thinking mode
+    {"role": "user", "content": "Your question here"}
+]
+```
+
+**Recommended Settings**:
+- Thinking ON: `temperature=0.6`, `top_p=0.95`
+- Thinking OFF: `temperature=0.0` (greedy decoding)
+
+**vLLM Deployment**:
+```bash
+python3 -m vllm.entrypoints.openai.api_server \
+    --model "nvidia/Llama-3.1-Nemotron-Nano-8B-v1" \
+    --trust-remote-code \
+    --max-model-len=65536 \
+    --gpu-memory-utilization 0.9
+```
+
+**Pros**:
+- ✅ Confirmed system prompt toggle works
+- ✅ Llama architecture (different from Qwen3)
+- ✅ 8B model easily fits on H100
+- ✅ Official vLLM support documented
+- ✅ First open-source models with dynamic reasoning toggle
+
+**Cons**:
+- ⚠️ 49B requires FP8 or multi-GPU for single H100
+- ⚠️ Different temperature recommendations for each mode
+
+**Sources**: [NVIDIA HuggingFace](https://huggingface.co/nvidia/Llama-3_3-Nemotron-Super-49B-v1_5), [vLLM Blog](https://blog.vllm.ai/2025/10/23/now_serving_nvidia_nemotron_with_vllm.html)
+
+---
+
+#### ⭐ OPTION 2: GPT-OSS (OpenAI) — STRONG ALTERNATIVE
+
+**Confirmed**: Reasoning effort parameter (low/medium/high) via system prompt.
+
+| Model | Total Params | Active Params | VRAM | H100 Deployment |
+|-------|--------------|---------------|------|-----------------|
+| gpt-oss-20b | 21B | 3.6B | ~16GB | ✅ Single H100 |
+| gpt-oss-120b | 117B | 5.1B | ~80GB | ✅ Single H100 |
+
+**Reasoning Effort Toggle**:
+```python
+# Set reasoning effort in system prompt
+messages = [
+    {"role": "system", "content": "Reasoning: high"},  # or "medium" or "low"
+    {"role": "user", "content": "Your question here"}
+]
+```
+
+**Effort Levels**:
+- **Low**: Faster responses, reduced reasoning depth (≈ non-thinking)
+- **Medium**: Balanced performance (recommended default)
+- **High**: Maximum reasoning for complex problems (≈ full thinking)
+
+**Key Features**:
+- Native MXFP4 quantization (built-in, not post-hoc)
+- Full chain-of-thought access
+- Apache 2.0 license
+- 120B runs on single H100 80GB due to MoE efficiency
+
+**Pros**:
+- ✅ 3-level reasoning control (more granular than binary toggle)
+- ✅ MoE architecture (different from Qwen3's dense)
+- ✅ Both models fit on single H100
+- ✅ Apache 2.0 license
+- ✅ OpenAI backing (likely well-documented)
+
+**Cons**:
+- ⚠️ Reasoning effort is on a spectrum, not binary on/off
+- ⚠️ May need to map "low" ↔ "non-thinking" and "high" ↔ "thinking"
+- ⚠️ August 2025 release - newer, less battle-tested
+
+**Sources**: [OpenAI Announcement](https://openai.com/index/introducing-gpt-oss/), [GitHub](https://github.com/openai/gpt-oss), [HuggingFace](https://huggingface.co/openai/gpt-oss-120b)
+
+---
+
+#### ⚠️ OPTION 3: GLM-4.5 (Zhipu AI) — CAUTION
+
+**Partially Confirmed**: Has `enable_thinking` parameter, BUT reported bugs with disabling.
+
+| Model | Total Params | Active Params | VRAM | H100 Deployment |
+|-------|--------------|---------------|------|-----------------|
+| GLM-4.5-Air | 106B | 12B | ~24GB (INT4) | ✅ Single H100 |
+| GLM-4.5 | 355B | 32B | ~70GB (INT4) | ✅ Single H100 |
+
+**Thinking Mode Toggle**:
+```python
+# Via vLLM extra_body (like Qwen3)
+extra_body = {
+    "chat_template_kwargs": {
+        "enable_thinking": False  # or True
+    }
+}
+```
+
+**Known Issue (GitHub #42)**:
+> "GLM-4.5-Air thinking mode cannot be disabled despite setting `enable_thinking=false`"
+
+**Workaround**: When using direct HTTP requests (not OpenAI SDK), place parameter at root level of JSON body. Issue was marked "COMPLETED" on Aug 12, 2025.
+
+**Pros**:
+- ✅ Different architecture (GLM, bidirectional)
+- ✅ Uses same `enable_thinking` parameter as Qwen3
+- ✅ MoE with efficient active params
+
+**Cons**:
+- ❌ Reported bugs with `enable_thinking=false` on quantized models
+- ⚠️ Workaround may be fragile
+- ⚠️ Less documentation than Llama-Nemotron
+
+**Sources**: [GitHub Issue #42](https://github.com/zai-org/GLM-4.5/issues/42), [HuggingFace](https://huggingface.co/zai-org/GLM-4.5)
+
+---
+
+### 2.3.2 Recommendation Summary
+
+| Criteria | Llama-Nemotron | GPT-OSS | GLM-4.5 |
+|----------|----------------|---------|---------|
+| **Toggle Confirmed** | ✅ Yes | ✅ Yes | ⚠️ Bugs reported |
+| **Architecture Diversity** | ✅ Llama (diff from Qwen) | ✅ MoE (diff from Qwen) | ✅ GLM (diff from Qwen) |
+| **Single H100 (8B equiv)** | ✅ Nano-8B | ✅ gpt-oss-20b | ✅ GLM-4.5-Air |
+| **Single H100 (30B+ equiv)** | ⚠️ FP8 required | ✅ gpt-oss-120b | ✅ GLM-4.5 (INT4) |
+| **vLLM Support** | ✅ Official blog post | ✅ Yes | ✅ Yes |
+| **Toggle Mechanism** | System prompt | System prompt | `extra_body` param |
+| **License** | Llama 3 Community | Apache 2.0 | Custom |
+
+**Primary Recommendation**: **Llama-Nemotron-Nano-8B** (single H100)
+- ✅ Confirmed working toggle (thinking/non-thinking via system prompt)
+- ✅ True Llama architecture (different from Qwen3)
+- ✅ Well-documented vLLM support
+- ⚠️ **49B does NOT fit on single H100** (tested Dec 7, 2025 - OOM at 79GB with FP8)
+
+**Alternative**: **GPT-OSS-20b** + **GPT-OSS-120b**
+- Both fit on single H100
+- More granular reasoning control
+- Apache 2.0 license
+
+**Avoid for Now**: **GLM-4.5** (until enable_thinking bugs are confirmed fixed)
 
 ### 2.4 Model Details
 
