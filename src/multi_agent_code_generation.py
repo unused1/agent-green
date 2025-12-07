@@ -4,10 +4,14 @@ import time
 import argparse
 
 # Dynamic config selection based on MODEL_FAMILY environment variable
-# Usage: MODEL_FAMILY=deepseek python src/multi_agent_code_generation.py --prompt_type few_shot
-if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+# Usage: MODEL_FAMILY=nemotron python src/multi_agent_code_generation.py --prompt_type few_shot
+_model_family = os.getenv('MODEL_FAMILY', '').lower()
+if _model_family == 'deepseek':
     import config_deepseek as config
     print("[Config] Using DeepSeek configuration")
+elif _model_family == 'nemotron':
+    import config_nemotron as config
+    print("[Config] Using Nemotron configuration")
 else:
     import config
     print("[Config] Using Qwen3 configuration")

@@ -4,8 +4,11 @@ import time
 from datetime import datetime
 
 # Dynamic config selection based on MODEL_FAMILY environment variable
-if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+_model_family = os.getenv('MODEL_FAMILY', '').lower()
+if _model_family == 'deepseek':
     import config_deepseek as config
+elif _model_family == 'nemotron':
+    import config_nemotron as config
 else:
     import config
 from autogen import AssistantAgent, ConversableAgent

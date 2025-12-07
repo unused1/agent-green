@@ -4,10 +4,14 @@ import time
 from datetime import datetime
 
 # Dynamic config selection based on MODEL_FAMILY environment variable
-# Usage: MODEL_FAMILY=deepseek python src/single_agent_vuln_detection.py SA-few
-if os.getenv('MODEL_FAMILY', '').lower() == 'deepseek':
+# Usage: MODEL_FAMILY=nemotron python src/single_agent_vuln_detection.py SA-few
+_model_family = os.getenv('MODEL_FAMILY', '').lower()
+if _model_family == 'deepseek':
     import config_deepseek as config
     print("[Config] Using DeepSeek configuration")
+elif _model_family == 'nemotron':
+    import config_nemotron as config
+    print("[Config] Using Nemotron configuration")
 else:
     import config
     print("[Config] Using Qwen3 configuration")
@@ -282,7 +286,7 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
             print(f"Processing sample {i+1}/{len(remaining_samples)} (idx: {sample['idx']})")
             
             # Use format to insert function code into prompt template
-            content = task.format(func=sample['func'])
+            content = task.format(code=sample['func'])
             res = vulnerability_detector.generate_reply(messages=[{"content": content, "role": "user"}])
             
             # Initialize result with original metadata

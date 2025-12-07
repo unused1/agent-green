@@ -9,7 +9,7 @@ Usage:
     import config_selector as config
 
 Environment Variables:
-    MODEL_FAMILY: "qwen" (default) or "deepseek"
+    MODEL_FAMILY: "qwen" (default), "deepseek", or "nemotron"
 
 This allows running the same experiment scripts with different model configurations
 without modifying the code.
@@ -20,6 +20,9 @@ Examples:
 
     # Run with DeepSeek
     MODEL_FAMILY=deepseek python src/single_agent_code_generation.py SA-few
+
+    # Run with Nemotron
+    MODEL_FAMILY=nemotron python src/single_agent_code_generation.py SA-few
 """
 
 import os
@@ -31,10 +34,13 @@ MODEL_FAMILY = os.getenv('MODEL_FAMILY', 'qwen').lower()
 if MODEL_FAMILY == 'deepseek':
     print(f"[Config] Loading DeepSeek configuration (MODEL_FAMILY={MODEL_FAMILY})")
     from config_deepseek import *
-    # Also expose the module-level flag for scripts that check it
     _CONFIG_MODULE = 'config_deepseek'
+elif MODEL_FAMILY == 'nemotron':
+    print(f"[Config] Loading Nemotron configuration (MODEL_FAMILY={MODEL_FAMILY})")
+    from config_nemotron import *
+    _CONFIG_MODULE = 'config_nemotron'
 else:
-    print(f"[Config] Loading Qwen3 configuration (MODEL_FAMILY={MODEL_FAMILY})")
+    print(f"[Config] Using Qwen3 configuration")
     from config import *
     _CONFIG_MODULE = 'config'
 
