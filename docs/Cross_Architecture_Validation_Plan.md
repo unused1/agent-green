@@ -86,7 +86,7 @@ DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode
 | Phase 1b | **Nemotron Code Preparation** | ✅ Complete | 100% |
 | Phase 2a | DeepSeek Validation | ❌ **FAILED** | See Blocker |
 | Phase 2b | **Nemotron Validation** | ✅ **PASSED** | 100% |
-| Phase 3 | RQ1 Experiments (16 SA) | 🔄 In Progress | 6% (1/16) |
+| Phase 3 | RQ1 Experiments (16 SA) | 🔄 In Progress | 25% (4/16) |
 | Phase 4 | RQ2 Experiments (32 DA/MA) | ⏳ Pending | 0% |
 | Phase 5 | Analysis & Comparison | ⏳ Pending | 0% |
 
@@ -261,14 +261,95 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 
 **Results Location**: `results/rq2_cross_architecture/nemotron_8b_vuln_SA-zero_thinking/`
 
-#### NM-8B-SA-zero-instruct (🔄 In Progress)
+#### NM-8B-SA-zero-instruct (✅ Completed)
 
 | Field | Value |
 |-------|-------|
 | **Start Time** | Dec 7, 2025 16:52 UTC |
-| **Status** | Running |
+| **End Time** | Dec 7, 2025 17:32 UTC |
+| **Duration** | ~40 minutes |
+| **Samples** | 386/386 |
 | **Model** | `nvidia/Llama-3.1-Nemotron-Nano-8B-v1` |
 | **Mode** | Instruct (ENABLE_REASONING=false) |
+| **Hardware** | 1× H100 SXM 80GB (RunPod) |
+
+**Results**:
+| Metric | Value |
+|--------|-------|
+| Accuracy | 48.2% |
+| Precision | 0.43 |
+| Recall | 0.12 |
+| F1 Score | 0.19 |
+| Energy (CO2) | 0.119 kg |
+
+**Results Location**: `results/rq2_cross_architecture/nemotron_8b_vuln_SA-zero_instruct/`
+
+#### NM-8B-SA-few-thinking (✅ Completed - Pod 2)
+
+| Field | Value |
+|-------|-------|
+| **Start Time** | Dec 7, 2025 17:31 UTC |
+| **End Time** | Dec 7, 2025 18:28 UTC |
+| **Duration** | ~57 minutes |
+| **Samples** | 386/386 |
+| **Model** | `nvidia/Llama-3.1-Nemotron-Nano-8B-v1` |
+| **Mode** | Thinking (ENABLE_REASONING=true) |
+| **Prompting** | Few-shot |
+| **Hardware** | 1× H100 SXM 80GB (RunPod, no prefix caching) |
+
+**Results**:
+| Metric | Value |
+|--------|-------|
+| Accuracy | 47.9% |
+| Precision | 0.48 |
+| Recall | **0.44** |
+| F1 Score | **0.46** |
+| Energy (CO2) | 0.170 kg |
+
+**Key Finding**: Few-shot prompting dramatically improves recall (0.44 vs 0.12 for zero-shot) and F1 (0.46 vs 0.18). The model predicts 176/386 as vulnerable compared to only 23-53 in zero-shot modes.
+
+**Results Location**: `results/rq2_cross_architecture/nemotron_8b_vuln_SA-few_thinking/`
+
+#### NM-8B-SA-few-instruct (✅ Completed - Pod 1)
+
+| Field | Value |
+|-------|-------|
+| **Start Time** | Dec 7, 2025 17:43 UTC |
+| **End Time** | Dec 7, 2025 18:40 UTC |
+| **Duration** | ~57 minutes |
+| **Samples** | 386/386 |
+| **Model** | `nvidia/Llama-3.1-Nemotron-Nano-8B-v1` |
+| **Mode** | Instruct (ENABLE_REASONING=false) |
+| **Prompting** | Few-shot |
+| **Hardware** | 1× H100 SXM 80GB (RunPod) |
+
+**Results**:
+| Metric | Value |
+|--------|-------|
+| Accuracy | 48.7% |
+| Precision | 0.49 |
+| Recall | **0.45** |
+| F1 Score | **0.46** |
+| Energy (CO2) | 0.172 kg |
+
+**Results Location**: `results/rq2_cross_architecture/nemotron_8b_vuln_SA-few_instruct/`
+
+---
+
+### 8B SA Vuln Summary (All 4 Completed)
+
+| Experiment | Accuracy | Precision | Recall | F1 | Energy (kg CO2) |
+|------------|----------|-----------|--------|-----|-----------------|
+| SA-zero Thinking | 47.2% | 0.40 | 0.12 | 0.18 | 0.119 |
+| SA-zero Instruct | 48.2% | 0.43 | 0.12 | 0.19 | 0.119 |
+| **SA-few Thinking** | 47.9% | 0.48 | **0.44** | **0.46** | 0.170 |
+| **SA-few Instruct** | **48.7%** | **0.49** | **0.45** | **0.46** | 0.172 |
+
+**Key Findings**:
+1. **Few-shot prompting is the dominant factor** - F1 improves from ~0.18 to ~0.46 (2.5× improvement)
+2. **Thinking mode has minimal impact** - Instruct slightly outperforms Thinking in both zero-shot and few-shot
+3. **Energy cost of few-shot** - ~43% higher energy (0.17 vs 0.12 kg CO2) for 2.5× better F1
+4. **Consistent with Qwen3 findings** - Prompting strategy matters more than reasoning mode for classification tasks
 
 ---
 
@@ -282,9 +363,9 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-2 | Vuln | 49B | Instruct | Zero-shot | ⏳ |
 | NM-3 | Vuln | 49B | Thinking | Few-shot | ⏳ |
 | NM-4 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
-| NM-5 | Vuln | 8B | Instruct | Few-shot | ⏳ |
-| NM-6 | Vuln | 8B | Instruct | Zero-shot | 🔄 Running |
-| NM-7 | Vuln | 8B | Thinking | Few-shot | ⏳ |
+| NM-5 | Vuln | 8B | Instruct | Few-shot | ✅ Done |
+| NM-6 | Vuln | 8B | Instruct | Zero-shot | ✅ Done |
+| NM-7 | Vuln | 8B | Thinking | Few-shot | ✅ Done |
 | NM-8 | Vuln | 8B | Thinking | Zero-shot | ✅ Done |
 | NM-9 | Code | 49B | Instruct | Few-shot | ⏳ |
 | NM-10 | Code | 49B | Instruct | Zero-shot | ⏳ |
