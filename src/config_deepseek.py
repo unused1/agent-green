@@ -88,12 +88,15 @@ else:
     _config_entry["api_key"] = "not-needed"  # vLLM doesn't require API key by default
 
 # DeepSeek-specific: Control thinking mode via extra_body
-# Unlike Qwen3 which uses separate model files, DeepSeek uses enable_thinking parameter
-# - enable_thinking=True: Model outputs <think>...</think> blocks (default)
-# - enable_thinking=False: Model outputs direct responses
+# IMPORTANT: vLLM must be started with --enable-reasoning --reasoning-parser deepseek_r1
+#
+# DeepSeek R1 Distill uses "thinking" parameter (not "enable_thinking" like Qwen3)
+# Reference: https://docs.vllm.ai/projects/recipes/en/latest/DeepSeek/DeepSeek-V3_1.html
+# - thinking=True: Model outputs <think>...</think> blocks with reasoning
+# - thinking=False: Model outputs direct responses (non-thinking mode)
 _config_entry["extra_body"] = {
     "chat_template_kwargs": {
-        "enable_thinking": ENABLE_REASONING
+        "thinking": ENABLE_REASONING  # DeepSeek uses "thinking", not "enable_thinking"
     }
 }
 

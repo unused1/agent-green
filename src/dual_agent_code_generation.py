@@ -68,6 +68,13 @@ else:
     programmer_sys_prompt = config.SYS_MSG_PROGRAMMER_FEW_SHOT
     reviewer_sys_prompt = config.SYS_MSG_CODE_REVIEWER_FEW_SHOT
 
+# Apply Nemotron thinking toggle if using Nemotron config
+if _model_family == 'nemotron' and hasattr(config, 'prepend_thinking_toggle'):
+    programmer_sys_prompt = config.prepend_thinking_toggle(programmer_sys_prompt)
+    reviewer_sys_prompt = config.prepend_thinking_toggle(reviewer_sys_prompt)
+    print(f"[Nemotron] Applied thinking toggle: ENABLE_REASONING={config.ENABLE_REASONING}")
+    print(f"[Nemotron] System prompt prefix: '{config.get_reasoning_system_prompt()}'")
+
 # ---------------------------
 # Agent Creation
 # ---------------------------

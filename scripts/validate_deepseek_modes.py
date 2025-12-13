@@ -3,8 +3,13 @@
 DeepSeek R1 Distill Thinking Mode Validation Script
 
 This script validates that DeepSeek-R1-Distill-Llama models correctly:
-1. Output <think>...</think> blocks when enable_thinking=True (default)
-2. Output direct responses when enable_thinking=False
+1. Output <think>...</think> blocks when thinking=True (thinking mode)
+2. Output direct responses when thinking=False (non-thinking mode)
+
+IMPORTANT: vLLM must be started with these flags:
+    --enable-reasoning --reasoning-parser deepseek_r1
+
+NOTE: DeepSeek uses "thinking" parameter, not "enable_thinking" (Qwen3's param)
 
 Usage:
     python scripts/validate_deepseek_modes.py --endpoint http://localhost:8000/v1
@@ -79,9 +84,11 @@ def call_deepseek_api(
         "temperature": temperature,
         "max_tokens": max_tokens,
         # DeepSeek thinking mode control via chat_template_kwargs
+        # NOTE: DeepSeek uses "thinking" parameter (not "enable_thinking" like Qwen3)
+        # vLLM must be started with: --enable-reasoning --reasoning-parser deepseek_r1
         "extra_body": {
             "chat_template_kwargs": {
-                "enable_thinking": enable_thinking
+                "thinking": enable_thinking  # DeepSeek uses "thinking", not "enable_thinking"
             }
         }
     }
@@ -217,12 +224,12 @@ def print_summary(results: dict):
     print(f"Model: {results['model']}")
     print(f"Endpoint: {results['endpoint']}")
     print()
-    print("Thinking Enabled (enable_thinking=True):")
+    print("Thinking Enabled (thinking=True):")
     print(f"  Tests: {summary['thinking_enabled_tests']}")
     print(f"  Passed: {summary['thinking_enabled_pass']}")
     print(f"  Status: {'✅ ALL PASS' if summary['thinking_enabled_pass'] == summary['thinking_enabled_tests'] else '❌ SOME FAILED'}")
     print()
-    print("Thinking Disabled (enable_thinking=False):")
+    print("Thinking Disabled (thinking=False):")
     print(f"  Tests: {summary['thinking_disabled_tests']}")
     print(f"  Passed: {summary['thinking_disabled_pass']}")
     print(f"  Status: {'✅ ALL PASS' if summary['thinking_disabled_pass'] == summary['thinking_disabled_tests'] else '❌ SOME FAILED'}")

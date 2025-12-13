@@ -71,6 +71,13 @@ else:
         sys_prompt = config.SYS_MSG_CODE_GENERATOR_FEW_SHOT
         task = config.CODE_GENERATION_TASK_PROMPT
 
+# Apply Nemotron thinking toggle if using Nemotron config
+# This prepends "detailed thinking on/off" to the system prompt
+if _model_family == 'nemotron' and hasattr(config, 'prepend_thinking_toggle'):
+    sys_prompt = config.prepend_thinking_toggle(sys_prompt)
+    print(f"[Nemotron] Applied thinking toggle: ENABLE_REASONING={config.ENABLE_REASONING}")
+    print(f"[Nemotron] System prompt prefix: '{config.get_reasoning_system_prompt()}'")
+
 model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 exp_name = f"{DESIGN}_{model}_{timestamp}"

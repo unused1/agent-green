@@ -71,6 +71,15 @@ else:  # few_shot
     moderator_prompt = config.SYS_MSG_MODERATOR_FEW_SHOT
     review_board_prompt = config.SYS_MSG_REVIEW_BOARD_FEW_SHOT
 
+# Apply Nemotron thinking toggle if using Nemotron config
+if _model_family == 'nemotron' and hasattr(config, 'prepend_thinking_toggle'):
+    researcher_prompt = config.prepend_thinking_toggle(researcher_prompt)
+    author_prompt = config.prepend_thinking_toggle(author_prompt)
+    moderator_prompt = config.prepend_thinking_toggle(moderator_prompt)
+    review_board_prompt = config.prepend_thinking_toggle(review_board_prompt)
+    print(f"[Nemotron] Applied thinking toggle: ENABLE_REASONING={config.ENABLE_REASONING}")
+    print(f"[Nemotron] System prompt prefix: '{config.get_reasoning_system_prompt()}'")
+
 # --- Agent Creation ---
 def create_vulnerability_agents(llm_config, prompts):
     """Create the four vulnerability detection agents"""

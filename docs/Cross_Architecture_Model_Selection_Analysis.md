@@ -1,20 +1,39 @@
 # Cross-Architecture Model Selection Analysis
 
-**Date**: November 27, 2025
+**Date**: November 27, 2025 (Updated: December 2025)
 **Related Document**: [Cross_Architecture_Validation_Plan.md](./Cross_Architecture_Validation_Plan.md)
 **Context**: Selecting the optimal model family to replicate Agent Green experiments (RQ1/RQ2) and validate findings across architectures.
 
 ---
 
-## 1. Executive Summary of Top 3 Options
+## ⚠️ Status Update (December 2025)
+
+**Original Recommendation**: DeepSeek-R1-Distill-Llama was selected as the top candidate.
+
+**Outcome**: DeepSeek-R1-Distill-Llama **failed validation testing** due to a critical technical issue:
+- The thinking/non-thinking toggle did not work as expected
+- Model produced identical outputs regardless of thinking mode configuration
+- Detailed analysis in Section 7 below
+
+**Pivot**: **Nvidia Llama-3.1-Nemotron-Nano-8B-v1** was selected as the replacement:
+- Supports thinking toggle via system prompt ("detailed thinking on" / "detailed thinking off")
+- Successfully validated with distinct thinking vs non-thinking behavior
+- All 8 SA experiments completed successfully on H100 hardware
+
+---
+
+## 1. Executive Summary of Top 3 Options (Original Analysis)
 
 We evaluated three primary candidates to serve as the "Cross-Architecture" validation set against the Qwen3 baseline.
 
 | Rank | Model Candidate | Primary Strength | Critical Trade-off | Verdict |
 |------|-----------------|------------------|--------------------|---------|
-| **1** | **DeepSeek-R1-Distill-Llama** | **Strict Replication** | Requires Quantization (70B) | **RECOMMENDED** for RQ1/RQ2 |
+| ~~**1**~~ | ~~**DeepSeek-R1-Distill-Llama**~~ | ~~**Strict Replication**~~ | ~~Requires Quantization (70B)~~ | ❌ **FAILED** - Thinking toggle non-functional |
 | **2** | **GPT-OSS-120B** | **Novelty (Spectrum)** | Changes Experiment Design | **Strong Alternative** for new insights |
 | **3** | **OLMo 3** | **Openness** | **Missing 32B Instruct** | **Not Viable** for full replication |
+| **NEW** | **Nvidia Nemotron-Nano-8B** | **Working Thinking Toggle** | 8B only (no larger variant) | ✅ **USED** for cross-architecture validation |
+| **NEW** | **Nvidia Nemotron-Super-49B** | **Large Model Validation** | Requires 2× H100 | ✅ **IN PROGRESS** for RQ1 49B experiments |
+| **NEW** | **GLM-4.6** | **Different Architecture (GLM)** | MoE, 200K context | 🔍 **VIABLE** - `enable_thinking` toggle confirmed |
 
 ---
 
@@ -109,7 +128,9 @@ If you use Unsloth to **fine-tune** models:
 | **Feasibility (H100)** | ⭐⭐⭐ (Needs Quant) | ⭐⭐⭐⭐⭐ (Native MoE) | ⭐⭐⭐⭐⭐ (Native) |
 | **Unsloth Support** | ✅ Yes | ✅ Yes | ✅ Yes |
 
-**Primary Recommendation**: Proceed with **DeepSeek-R1-Distill-Llama** (Option 1).
+**Original Recommendation**: ~~Proceed with **DeepSeek-R1-Distill-Llama** (Option 1).~~
+
+**Updated Recommendation (Dec 2025)**: DeepSeek failed validation. Proceeded with **Nvidia Nemotron-Nano-8B** instead. See Section 7 for details.
 
 ---
 
@@ -178,7 +199,62 @@ A future study could address the size confound (Qwen3-30B vs DeepSeek-70B) by:
 
 ---
 
-## 6. Document References
+## 7. DeepSeek Failure Analysis & Nemotron Pivot (December 2025)
+
+### 7.1 DeepSeek-R1-Distill-Llama Testing Results
+
+**Test Date**: December 5-6, 2025
+
+**Issue Discovered**: The thinking/non-thinking toggle did not produce differentiated outputs.
+
+**Validation Attempts**:
+1. Tested `enable_thinking` API parameter - no effect
+2. Tested `<think>` tag injection in prompts - no effect
+3. Tested system prompt variations - no effect
+4. Both 8B and 70B variants exhibited the same behavior
+
+**Root Cause Hypothesis**:
+- DeepSeek R1 Distill models are **distilled from** the thinking model, meaning the "thinking behavior" is baked into the weights
+- Unlike Qwen3 (which has separate Instruct and Think model variants), DeepSeek Distill cannot disable thinking at inference time
+- The model always produces reasoning traces regardless of configuration
+
+**Conclusion**: DeepSeek-R1-Distill-Llama is **unsuitable** for binary thinking/non-thinking experiments.
+
+### 7.2 Nemotron Selection Rationale
+
+**Model**: `nvidia/Llama-3.1-Nemotron-Nano-8B-v1`
+
+**Why Nemotron**:
+1. **Working Thinking Toggle**: Uses system prompt prefix to control thinking mode
+   - Thinking ON: `"detailed thinking on"`
+   - Thinking OFF: `"detailed thinking off"`
+2. **Validated Behavior**: Produces distinctly different outputs between modes
+3. **Llama Architecture**: Provides cross-architecture validation (Llama vs Qwen)
+4. **Single Model**: One model supports both modes (no need for separate checkpoints)
+
+**Limitation**: Only 8B variant available (no 49B/70B equivalent for larger-scale validation)
+
+### 7.3 Validation Results Summary
+
+| Experiment | Task | Mode | Prompting | F1/Pass@1 | Energy (kg CO2) |
+|------------|------|------|-----------|-----------|-----------------|
+| NM-5 | Vuln | Instruct | Zero-shot | 0.25 | 0.133 |
+| NM-6 | Vuln | Instruct | Few-shot | 0.49 | 0.062 |
+| NM-7 | Vuln | Thinking | Zero-shot | 0.18 | 0.162 |
+| NM-8 | Vuln | Thinking | Few-shot | 0.46 | 0.236 |
+| NM-13 | Code | Instruct | Zero-shot | 98.17% | 0.316 |
+| NM-14 | Code | Instruct | Few-shot | 93.29% | 0.408 |
+| NM-15 | Code | Thinking | Zero-shot | 92.07% | 0.530 |
+| NM-16 | Code | Thinking | Few-shot | 92.68% | 0.527 |
+
+**Key Finding**: Patterns from Qwen3 experiments validated on Nemotron architecture:
+- Few-shot improves vulnerability detection F1
+- Instruct mode optimal for code generation
+- Thinking mode increases energy consumption
+
+---
+
+## 8. Document References
 
 - **Validation Plan**: [Cross_Architecture_Validation_Plan.md](./Cross_Architecture_Validation_Plan.md)
 - **Distillation Threats**: See Section 2.6 of Validation Plan

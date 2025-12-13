@@ -44,12 +44,14 @@ case "$MODEL_SIZE" in
         MAX_MODEL_LEN=65536
         QUANTIZATION="--quantization fp8"
         GPU_MEMORY_UTILIZATION=0.95
+        TENSOR_PARALLEL_SIZE=2  # REQUIRED: 49B needs 2× H100 80GB
         echo "Deploying: Llama-3.3-Nemotron-Super-49B-v1.5"
         echo "  Precision: FP8 (quantized)"
         echo "  Context: 64K tokens"
-        echo "  VRAM: ~60-70GB (FP8 weights + KV cache)"
+        echo "  VRAM: ~80GB/GPU with tensor parallelism"
         echo ""
-        echo "  Note: If OOM occurs, reduce MAX_MODEL_LEN to 32768"
+        echo "  IMPORTANT: Requires 2× H100 80GB GPUs!"
+        echo "  Single H100 80GB will OOM at ~79GB during weight loading."
         ;;
 
     *)

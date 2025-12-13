@@ -12,6 +12,8 @@ results/
 ├── runpod_rerun/            # Phase 2b: 30B re-runs + 4B hardware comparison (Nov 2-8, 2025)
 ├── mars_codegen/            # Phase 3a: Code generation on Mars 4B (Nov 6-7, 2025)
 ├── runpod_codegen/          # Phase 3b: Code generation on RunPod 30B (Nov 7, 2025)
+├── runpod_rq2_pod1-8/       # Phase 4: RQ2 Multi-Agent experiments (Nov 15-17, 2025)
+├── rq2_cross_architecture/  # Phase 5: Cross-architecture validation with Nemotron (Dec 9-10, 2025)
 ├── analysis/                # Analysis outputs from Jupyter notebooks
 └── analysis_prompt_comparison/ # Prompt comparison analysis outputs
 ```
@@ -204,6 +206,54 @@ Examples:
 
 ---
 
+### **Phase 5: Cross-Architecture Validation with Nemotron (Dec 9-10, 2025)**
+
+**Purpose**: Validate RQ1/RQ2 findings generalize beyond Qwen3 using NVIDIA Llama-Nemotron model family
+
+**Hardware**: RunPod (4× NVIDIA H100 80GB HBM3 pods in parallel)
+
+**Model**: `nvidia/Llama-3.1-Nemotron-Nano-8B-v1`
+
+**Directory**: `results/rq2_cross_architecture/`
+
+**Sub-directories**:
+```
+rq2_cross_architecture/
+├── nemotron_8b_vuln_SA-zero_instruct/   # NM-5: Vuln detection, zero-shot, instruct mode
+├── nemotron_8b_vuln_SA-zero_thinking/   # NM-7: Vuln detection, zero-shot, thinking mode
+├── nemotron_8b_vuln_SA-few_instruct/    # NM-6: Vuln detection, few-shot, instruct mode
+├── nemotron_8b_vuln_SA-few_thinking/    # NM-8: Vuln detection, few-shot, thinking mode
+├── nemotron_8b_code_SA-zero_instruct/   # NM-13: Code generation, zero-shot, instruct mode
+├── nemotron_8b_code_SA-zero_thinking/   # NM-15: Code generation, zero-shot, thinking mode
+├── nemotron_8b_code_SA-few_instruct/    # NM-14: Code generation, few-shot, instruct mode
+└── nemotron_8b_code_SA-few_thinking/    # NM-16: Code generation, few-shot, thinking mode
+```
+
+**Experiments**:
+
+| ID | Task | Prompting | Mode | F1/Pass@1 | Energy (kg CO2) | Status |
+|----|------|-----------|------|-----------|-----------------|--------|
+| NM-5 | Vuln | Zero-shot | Instruct | F1=0.25 | 0.1334 | ✅ |
+| NM-6 | Vuln | Few-shot | Instruct | **F1=0.49** | 0.0618 | ✅ |
+| NM-7 | Vuln | Zero-shot | Thinking | F1=0.18 | 0.0850 | ✅ |
+| NM-8 | Vuln | Few-shot | Thinking | F1=0.46 | 0.2404 | ✅ |
+| NM-13 | Code | Zero-shot | Instruct | **98.17%** | 0.3993 | ✅ |
+| NM-14 | Code | Few-shot | Instruct | 93.29% | 0.6777 | ✅ |
+| NM-15 | Code | Zero-shot | Thinking | 92.07% | 0.4290 | ✅ |
+| NM-16 | Code | Few-shot | Thinking | 92.68% | 0.4055 | ✅ |
+
+**Key Findings**:
+1. **Vulnerability Detection**: Few-shot Instruct (NM-6) achieves best F1 (0.49) with lowest energy (0.0618 kg CO2)
+2. **Code Generation**: Zero-shot Instruct (NM-13) achieves best Pass@1 (98.17%) - Thinking mode hurts performance
+3. **Consistent with Qwen3**: Prompting strategy matters more than reasoning mode for classification; Instruct outperforms Thinking for code generation
+4. **Total Energy**: 2.43 kg CO2 across all 8 experiments
+
+**Toggle Mechanism**: Unlike Qwen3's API parameter, Nemotron uses system prompt prefix:
+- Thinking: `"detailed thinking on\n\n{system_prompt}"`
+- Instruct: `"detailed thinking off\n\n{system_prompt}"`
+
+---
+
 ## Data Organization
 
 ### File Naming Convention
@@ -382,13 +432,20 @@ Analysis performed in `/notebooks/`:
    - Resolution: Successfully completed in second session (235404) with F1=47.81%
    - Status: Interrupted experiment (235757) excluded from analysis; only successful run (235404) included
 
+5. **Nemotron Toggle Bug (Fixed Dec 8, 2025)**:
+   - Issue: `prepend_thinking_toggle()` function was defined but never called by experiment scripts
+   - Affected: All 8 initial Nemotron experiments (Dec 7-8) ran without proper Thinking/Instruct toggle
+   - Resolution: Added toggle application to all 7 experiment scripts
+   - Status: All 8 experiments re-run with fix applied (Dec 9-10, 2025)
+
 ---
 
-**Last Updated**: 2025-11-24
-**Total Experiments**: 64 (32 RQ1 Single-Agent + 32 RQ2 Dual/Multi-Agent)
-  - **RQ1**: 16 vulnerability detection + 16 code generation (Single-Agent)
-  - **RQ2**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)
-**Total Samples Processed**: ~35,200 (64 experiments × ~550 avg samples)
+**Last Updated**: 2025-12-10
+**Total Experiments**: 72 (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 8 Cross-Architecture Nemotron)
+  - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
+  - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)
+  - **Cross-Architecture (Nemotron 8B)**: 4 vulnerability detection + 4 code generation (Single-Agent)
+**Total Samples Processed**: ~39,600 (72 experiments × ~550 avg samples)
 **Hardware Used**: Mars RTX A5000 + RunPod H100
-**Models Evaluated**: 4 (Qwen3 4B/30B × Instruct/Thinking)
+**Models Evaluated**: 5 (Qwen3 4B/30B × Instruct/Thinking + Nemotron-Nano-8B)
 **Agent Architectures**: 3 (Single-Agent, Dual-Agent, Multi-Agent)

@@ -75,6 +75,13 @@ else:
         sys_prompt = config.SYS_MSG_VULNERABILITY_DETECTOR_FEW_SHOT
         task = config.VULNERABILITY_TASK_PROMPT
 
+# Nemotron-specific: Prepend thinking toggle to system prompt
+# Nemotron uses system prompt (not API params) to control thinking mode
+if _model_family == 'nemotron':
+    sys_prompt = config.prepend_thinking_toggle(sys_prompt)
+    print(f"[Nemotron] Thinking toggle prepended. ENABLE_REASONING={config.ENABLE_REASONING}")
+    print(f"[Nemotron] System prompt starts with: '{sys_prompt[:50]}...'")
+
 model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 project_name = DESIGN.capitalize()

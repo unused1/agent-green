@@ -163,6 +163,12 @@ def create_dual_agents(llm_config, prompt_type="zero_shot"):
         analyst_prompt = config.SYS_MSG_SECURITY_ANALYST_ZERO_SHOT
         print("Using ZERO-SHOT prompts for both agents.")
 
+    # Apply Nemotron thinking toggle if using Nemotron config
+    if _model_family == 'nemotron' and hasattr(config, 'prepend_thinking_toggle'):
+        code_author_prompt = config.prepend_thinking_toggle(code_author_prompt)
+        analyst_prompt = config.prepend_thinking_toggle(analyst_prompt)
+        print(f"[Nemotron] Applied thinking toggle: ENABLE_REASONING={config.ENABLE_REASONING}")
+
     code_author = create_agent(
         "assistant", "code_author_agent", llm_config,
         sys_prompt=code_author_prompt,

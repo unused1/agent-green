@@ -12,14 +12,22 @@ os.environ["HF_ALLOW_CODE_EVAL"] = "1"
 def extract_code_from_prediction(prediction):
     """Extract actual Python code from prediction"""
     import re
-    
+
     if not prediction:
         return ""
-    
+
     prediction = str(prediction).strip()
-    
-    # Remove <think> blocks entirely
+
+    # Handle Thinking model outputs:
+    # Case 1: Full <think>...</think> blocks - remove entirely
     prediction = re.sub(r'<think>.*?</think>', '', prediction, flags=re.DOTALL)
+
+    # Case 2: Only </think> tag present (no opening tag) - take content AFTER </think>
+    # This handles Thinking models that output reasoning without opening <think> tag
+    if '</think>' in prediction:
+        # Split on </think> and take the last part (the actual code)
+        parts = prediction.split('</think>')
+        prediction = parts[-1].strip()
     
     # Remove <ANS> tags but keep content
     prediction = prediction.replace("<ANS>", "").replace("</ANS>", "")

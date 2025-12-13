@@ -77,6 +77,15 @@ else:  # few_shot
     analyst_task_template = config.MULTI_AGENT_TASK_ANALYST
     programmer_task_template = config.MULTI_AGENT_TASK_PROGRAMMER
 
+# Apply Nemotron thinking toggle if using Nemotron config
+if _model_family == 'nemotron' and hasattr(config, 'prepend_thinking_toggle'):
+    analyst_prompt = config.prepend_thinking_toggle(analyst_prompt)
+    programmer_prompt = config.prepend_thinking_toggle(programmer_prompt)
+    moderator_prompt = config.prepend_thinking_toggle(moderator_prompt)
+    review_board_prompt = config.prepend_thinking_toggle(review_board_prompt)
+    print(f"[Nemotron] Applied thinking toggle: ENABLE_REASONING={config.ENABLE_REASONING}")
+    print(f"[Nemotron] System prompt prefix: '{config.get_reasoning_system_prompt()}'")
+
 # --- Agent Creation ---
 def create_requirements_analyst(llm_config, sys_prompt):
     return AssistantAgent(

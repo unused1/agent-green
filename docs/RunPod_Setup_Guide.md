@@ -49,7 +49,9 @@ ssh root@ssh.runpod.io -p <YOUR_PORT> -i ~/.ssh/id_ed25519
 pip install hf_transfer --break-system-packages
 
 # Install experiment dependencies
-pip install vllm autogen python-dotenv codecarbon pandas numpy evaluate --break-system-packages
+pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn --break-system-packages
+
+pip install vllm --break-system-packages
 ```
 
 **Note**: vLLM will automatically download models from HuggingFace when you start the server. No need to pre-download.

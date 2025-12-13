@@ -2,8 +2,8 @@
 
 **Purpose**: Replicate RQ1 and RQ2 experiments using alternative model architectures to validate generalizability of findings beyond Qwen3
 **Date**: November 26, 2025
-**Last Updated**: December 8, 2025
-**Status**: 🔄 RUNNING - Pilot experiments in progress (Dec 7-8, 2025). First experiment (SA-zero-thinking) completed.
+**Last Updated**: December 10, 2025
+**Status**: ✅ PHASE 3 COMPLETE - All 8 Nemotron 8B Single-Agent experiments completed (Dec 9-10, 2025) with toggle fix applied.
 
 ---
 
@@ -64,14 +64,84 @@ DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode
    - Loses ability to validate thinking/non-thinking patterns
    - Weakens cross-architecture validation claim
 
-### Next Steps (✅ RESOLVED)
+### Next Steps (✅ 8B EXPERIMENTS COMPLETE)
 
 - [x] Document blocker in validation plan (this section)
 - [x] Research alternative models with confirmed thinking/non-thinking support
 - [x] Select Llama-Nemotron as replacement model (Dec 7, 2025)
 - [x] Validate Nemotron thinking toggle on RunPod H100 (Dec 7, 2025) - **PASSED**
-- [ ] Obtain professor approval for revised plan
-- [ ] Run full experiments with Nemotron
+- [x] Run 8B SA experiments with Nemotron (Dec 9-10, 2025) - **8/8 complete**
+- [x] Analyze 8B results and compare with Qwen3 (Dec 10-13, 2025)
+- [ ] Decide on 49B experiments (pending - may skip based on 8B validation)
+- [ ] Run DA/MA experiments if needed
+
+---
+
+## ⚠️ BUG DISCOVERED: Nemotron Toggle Not Applied (Dec 8, 2025)
+
+### Summary
+
+During analysis of the first 8 Nemotron experiments (NM-5 to NM-8, NM-13 to NM-16), we discovered that **the thinking toggle was never actually applied** to system prompts. All experiments ran in the model's default mode (thinking ON for code, indeterminate for vuln).
+
+### Evidence
+
+1. **Identical Results**: Code generation showed 100% identical responses between "Thinking" and "Instruct" modes
+2. **Identical Energy**: Both modes consumed exactly the same energy (e.g., 2.93 kWh vs 2.93 kWh)
+3. **Code Analysis**: The `prepend_thinking_toggle()` function was defined in `config_nemotron.py` but **never called** by any experiment script
+
+### Root Cause
+
+The `config_nemotron.py` correctly defines the toggle mechanism:
+```python
+def prepend_thinking_toggle(system_message: str) -> str:
+    """Prepend 'detailed thinking on/off' to system prompt"""
+    toggle = get_reasoning_system_prompt()  # "detailed thinking on" or "off"
+    return f"{toggle}\n\n{system_message}"
+```
+
+However, **none of the experiment scripts called this function**. They directly used the system prompts without applying the toggle.
+
+### Fix Applied (Dec 8, 2025)
+
+Added toggle application to all 7 experiment scripts:
+
+| Script | Fix Applied |
+|--------|-------------|
+| `single_agent_code_generation.py` | ✅ |
+| `single_agent_vuln_detection.py` | ✅ |
+| `dual_agent_code_generation.py` | ✅ |
+| `dual_agent_vuln.py` | ✅ |
+| `multi_agent_code_generation.py` | ✅ |
+| `multi_agent_vuln_detection_four_agents.py` | ✅ |
+| `multi_agent_vuln_detection_three_agents.py` | ✅ |
+
+Example fix:
+```python
+# Apply Nemotron thinking toggle if using Nemotron config
+if _model_family == 'nemotron' and hasattr(config, 'prepend_thinking_toggle'):
+    sys_prompt = config.prepend_thinking_toggle(sys_prompt)
+    print(f"[Nemotron] Applied thinking toggle: ENABLE_REASONING={config.ENABLE_REASONING}")
+```
+
+### Impact on Completed Experiments
+
+| Experiment ID | Status | Issue |
+|---------------|--------|-------|
+| NM-5 to NM-8 (SA Vuln 8B) | ✅ RE-RUN COMPLETE | Toggle fix applied, re-run Dec 9-10, 2025 |
+| NM-13 to NM-16 (SA Code 8B) | ✅ RE-RUN COMPLETE | Toggle fix applied, re-run Dec 9-10, 2025 |
+
+**All 8 experiments successfully re-run** with the fixed scripts (Dec 9-10, 2025).
+
+### Verification
+
+After fix, the toggle is correctly applied:
+```
+ENABLE_REASONING=true:
+  System prompt: "detailed thinking on\n\n{original_prompt}"
+
+ENABLE_REASONING=false:
+  System prompt: "detailed thinking off\n\n{original_prompt}"
+```
 
 ---
 
@@ -86,9 +156,9 @@ DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode
 | Phase 1b | **Nemotron Code Preparation** | ✅ Complete | 100% |
 | Phase 2a | DeepSeek Validation | ❌ **FAILED** | See Blocker |
 | Phase 2b | **Nemotron Validation** | ✅ **PASSED** | 100% |
-| Phase 3 | RQ1 Experiments (16 SA) | 🔄 In Progress | 25% (4/16) |
+| Phase 3 | RQ1 Experiments (16 SA) | 🟡 **IN PROGRESS** | 50% (8/16) - 8B complete, 49B decision pending |
 | Phase 4 | RQ2 Experiments (32 DA/MA) | ⏳ Pending | 0% |
-| Phase 5 | Analysis & Comparison | ⏳ Pending | 0% |
+| Phase 5 | Analysis & Comparison | 🟡 **IN PROGRESS** | 8B analysis complete (see notebook) |
 
 ### Phase 1: Code Preparation Checklist
 
@@ -336,20 +406,42 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 
 ---
 
-### 8B SA Vuln Summary (All 4 Completed)
+### 8B SA Vuln Summary (All 4 Re-Run Completed - Dec 9-10, 2025)
 
-| Experiment | Accuracy | Precision | Recall | F1 | Energy (kg CO2) |
-|------------|----------|-----------|--------|-----|-----------------|
-| SA-zero Thinking | 47.2% | 0.40 | 0.12 | 0.18 | 0.119 |
-| SA-zero Instruct | 48.2% | 0.43 | 0.12 | 0.19 | 0.119 |
-| **SA-few Thinking** | 47.9% | 0.48 | **0.44** | **0.46** | 0.170 |
-| **SA-few Instruct** | **48.7%** | **0.49** | **0.45** | **0.46** | 0.172 |
+| Experiment | Accuracy | Precision | Recall | F1 (Vuln) | F1 (Macro) | Energy (kg CO2) |
+|------------|----------|-----------|--------|-----------|------------|-----------------|
+| SA-zero Thinking (NM-7) | 51% | 0.53 | 0.11 | 0.18 | 0.41 | 0.0850 |
+| SA-zero Instruct (NM-5) | 51% | 0.52 | 0.17 | 0.25 | 0.44 | 0.1334 |
+| **SA-few Thinking (NM-8)** | 49% | 0.49 | **0.44** | **0.46** | 0.49 | 0.2404 |
+| **SA-few Instruct (NM-6)** | **51%** | **0.51** | **0.47** | **0.49** | **0.51** | 0.0618 |
 
-**Key Findings**:
-1. **Few-shot prompting is the dominant factor** - F1 improves from ~0.18 to ~0.46 (2.5× improvement)
-2. **Thinking mode has minimal impact** - Instruct slightly outperforms Thinking in both zero-shot and few-shot
-3. **Energy cost of few-shot** - ~43% higher energy (0.17 vs 0.12 kg CO2) for 2.5× better F1
+**Key Findings** (with toggle fix applied):
+1. **Few-shot prompting is the dominant factor** - F1 improves from ~0.18-0.25 to ~0.46-0.49 (2× improvement)
+2. **Instruct mode slightly outperforms Thinking** - SA-few Instruct (F1=0.49) > SA-few Thinking (F1=0.46)
+3. **SA-few Instruct is most energy-efficient** - Best F1 (0.49) with lowest energy (0.0618 kg CO2)
 4. **Consistent with Qwen3 findings** - Prompting strategy matters more than reasoning mode for classification tasks
+
+---
+
+### 8B SA Code Summary (All 4 Re-Run Completed - Dec 9-10, 2025)
+
+| Experiment | Pass@1 | Energy (kg CO2) |
+|------------|--------|-----------------|
+| SA-zero Thinking (NM-15) | 92.07% | 0.4290 |
+| **SA-zero Instruct (NM-13)** | **98.17%** | 0.3993 |
+| SA-few Thinking (NM-16) | 92.68% | 0.4055 |
+| SA-few Instruct (NM-14) | 93.29% | 0.6777 |
+
+**Key Findings** (with toggle fix applied):
+1. **SA-zero Instruct is the clear winner**: 98.17% Pass@1 - highest performance with moderate energy
+2. **Thinking mode hurts code generation**: Instruct consistently outperforms Thinking (98.17% vs 92.07%)
+3. **Few-shot does NOT help code generation**: Zero-shot Instruct (98.17%) > Few-shot Instruct (93.29%)
+4. **More syntax errors with Thinking/Few-shot**: Many failures due to unterminated string literals, invalid characters
+
+**Comparison with Vulnerability Detection**:
+- Vuln: Few-shot significantly improves F1 (2× improvement), Instruct slightly better than Thinking
+- Code: Zero-shot Instruct is optimal, Few-shot and Thinking hurt performance
+- Energy: Code generation uses more energy per sample than vulnerability detection
 
 ---
 
@@ -363,18 +455,18 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-2 | Vuln | 49B | Instruct | Zero-shot | ⏳ |
 | NM-3 | Vuln | 49B | Thinking | Few-shot | ⏳ |
 | NM-4 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
-| NM-5 | Vuln | 8B | Instruct | Few-shot | ✅ Done |
-| NM-6 | Vuln | 8B | Instruct | Zero-shot | ✅ Done |
-| NM-7 | Vuln | 8B | Thinking | Few-shot | ✅ Done |
-| NM-8 | Vuln | 8B | Thinking | Zero-shot | ✅ Done |
+| NM-5 | Vuln | 8B | Instruct | Zero-shot | ✅ Complete (Dec 9) |
+| NM-6 | Vuln | 8B | Instruct | Few-shot | ✅ Complete (Dec 9) |
+| NM-7 | Vuln | 8B | Thinking | Zero-shot | ✅ Complete (Dec 9) |
+| NM-8 | Vuln | 8B | Thinking | Few-shot | ✅ Complete (Dec 9) |
 | NM-9 | Code | 49B | Instruct | Few-shot | ⏳ |
 | NM-10 | Code | 49B | Instruct | Zero-shot | ⏳ |
 | NM-11 | Code | 49B | Thinking | Few-shot | ⏳ |
 | NM-12 | Code | 49B | Thinking | Zero-shot | ⏳ |
-| NM-13 | Code | 8B | Instruct | Few-shot | ⏳ |
-| NM-14 | Code | 8B | Instruct | Zero-shot | ⏳ |
-| NM-15 | Code | 8B | Thinking | Few-shot | ⏳ |
-| NM-16 | Code | 8B | Thinking | Zero-shot | ⏳ |
+| NM-13 | Code | 8B | Instruct | Zero-shot | ✅ Complete (Dec 9) |
+| NM-14 | Code | 8B | Instruct | Few-shot | ✅ Complete (Dec 10) |
+| NM-15 | Code | 8B | Thinking | Zero-shot | ✅ Complete (Dec 9) |
+| NM-16 | Code | 8B | Thinking | Few-shot | ✅ Complete (Dec 10) |
 
 #### RQ2 Dual-Agent (16 experiments)
 
@@ -461,7 +553,7 @@ To validate findings beyond Qwen3, we evaluated multiple open-source model famil
 | **DeepSeek-R1** | DeepSeek | 671B (37B active) | ✅ Native `<think>` | MoE (256 experts) | 🔍 Under consideration |
 | **DeepSeek-R1-Distill** | DeepSeek | 1.5B, 7B, 8B, 14B, 32B, 70B | ✅ Native `<think>` | Dense (Qwen/Llama base) | ✅ **Recommended** |
 | **OLMo 3** | AI2 | 7B, 32B | ⚠️ 7B: Think+Instruct; 32B: Think only | Dense (fully open) | ⚠️ 32B lacks Instruct |
-| **GLM-4** | Zhipu AI | 9B, 26B (GLM-4-Plus) | ✅ Thinking mode | GLM (bidirectional) | 🔍 Under consideration |
+| **GLM-4/4.6** | Zhipu AI | 9B, 26B, 106B (12B active), 355B (32B active) | ✅ `enable_thinking` toggle | GLM (bidirectional) + MoE | ✅ **Viable alternative** |
 | **Kimi K2** | Moonshot AI | 1T (32B active) | ✅ Instruct/Thinking variants | MoE (256K ctx) | ⚠️ Large but viable |
 | **Llama-Nemotron** | NVIDIA/Meta | 8B, 49B, 253B | ✅ System prompt toggle | Llama-based | 🔍 Under consideration |
 | **GPT-OSS** | OpenAI | 21B, 117B (MoE) | ✅ Reasoning effort (Low/Med/High) | MoE (MXFP4) | ✅ **Strong alternative** |

@@ -199,6 +199,7 @@ All RQ2 experiments have been completed successfully (32 experiments across 8 po
 ✅ **Energy Tracking**: CodeCarbon monitoring for sustainability analysis
 ✅ **Statistical Analysis**: T-tests, correlation analysis, efficiency metrics
 ✅ **Reproducibility**: All code, data, and notebooks version-controlled
+✅ **Consistent Precision**: All models run in BF16 (bfloat16) with no quantization
 
 ### Challenges & Limitations
 
@@ -575,68 +576,68 @@ class UserManager {
 **Total Experiments**: 60 (28 RQ1 + 32 RQ2)
 
 
-| Exp | Task | Agent Type | Model | Prompting | Platform | F1 (%) | Pass@1 (%) | Energy (kWh) | Avg Tokens |
-|-----|------|------------|-------|-----------|----------|--------|------------|--------------|------------|
-| RQ1 | Vulnerability Detection | Single-Agent | 30B Instruct | Few-shot (pre-CWE) | H100 | 37.99 | N/A | 0.278 | 836 |
-| RQ1 | Vulnerability Detection | Single-Agent | 30B Instruct | Few-shot | H100 | 54.45 | N/A | 0.477 | 1412 |
-| RQ1 | Vulnerability Detection | Single-Agent | 30B Instruct | Zero-shot | H100 | 51.24 | N/A | 0.349 | 1049 |
-| RQ1 | Vulnerability Detection | Single-Agent | 30B Thinking | Few-shot (pre-CWE) | H100 | 48.62 | N/A | 1.138 | 3710 |
-| RQ1 | Vulnerability Detection | Single-Agent | 30B Thinking | Few-shot | H100 | 55.56 | N/A | 1.235 | 3964 |
-| RQ1 | Vulnerability Detection | Single-Agent | 30B Thinking | Zero-shot | H100 | 54.81 | N/A | 1.316 | 4077 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Few-shot (pre-CWE) | RTX A5000 | 9.57 | N/A | 0.667 | 682 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Few-shot | RTX A5000 | 41.08 | N/A | 0.737 | 1232 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Few-shot | H100 | 37.84 | N/A | 0.751 | 1274 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Zero-shot | RTX A5000 | 22.58 | N/A | 0.910 | 899 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Zero-shot | H100 | 29.57 | N/A | 0.842 | 1426 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Few-shot (pre-CWE) | RTX A5000 | 27.13 | N/A | 2.628 | 2504 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Few-shot | RTX A5000 | 58.88 | N/A | 3.080 | 4824 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Few-shot | H100 | 58.88 | N/A | 3.651 | 6277 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Zero-shot | RTX A5000 | 38.78 | N/A | 4.301 | 3890 |
-| RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Zero-shot | H100 | 50.52 | N/A | 2.849 | 5254 |
-| RQ1 | Code Generation | Single-Agent | 30B Instruct | Few-shot | H100 | N/A | 90.24 | 0.312 | 231 |
-| RQ1 | Code Generation | Single-Agent | 30B Instruct | Zero-shot | H100 | N/A | 100.00 | 0.317 | 230 |
-| RQ1 | Code Generation | Single-Agent | 30B Thinking | Few-shot | H100 | N/A | 98.17 | 0.867 | 198 |
-| RQ1 | Code Generation | Single-Agent | 30B Thinking | Zero-shot | H100 | N/A | 98.78 | 1.152 | 347 |
-| RQ1 | Code Generation | Single-Agent | 4B Instruct | Few-shot | RTX A5000 | N/A | 98.17 | 0.548 | 178 |
-| RQ1 | Code Generation | Single-Agent | 4B Instruct | Few-shot | H100 | N/A | 98.78 | 0.186 | 182 |
-| RQ1 | Code Generation | Single-Agent | 4B Instruct | Zero-shot | RTX A5000 | N/A | 99.39 | 0.360 | 198 |
-| RQ1 | Code Generation | Single-Agent | 4B Instruct | Zero-shot | H100 | N/A | 98.78 | 0.204 | 202 |
-| RQ1 | Code Generation | Single-Agent | 4B Thinking | Few-shot | RTX A5000 | N/A | 99.39 | 1.817 | 67 |
-| RQ1 | Code Generation | Single-Agent | 4B Thinking | Few-shot | H100 | N/A | 98.17 | 0.887 | 193 |
-| RQ1 | Code Generation | Single-Agent | 4B Thinking | Zero-shot | RTX A5000 | N/A | 99.39 | 1.588 | 68 |
-| RQ1 | Code Generation | Single-Agent | 4B Thinking | Zero-shot | H100 | N/A | 99.39 | 0.928 | 196 |
-| RQ2 | Vulnerability Detection | Dual-Agent | 30B Instruct | Few-shot | H100 | 51.76 | N/A | 0.599 | 479 |
-| RQ2 | Vulnerability Detection | Dual-Agent | 30B Instruct | Zero-shot | H100 | 43.61 | N/A | 0.317 | 205 |
-| RQ2 | Vulnerability Detection | Dual-Agent | 30B Thinking | Few-shot | H100 | 45.35 | N/A | 1.495 | 1226 |
-| RQ2 | Vulnerability Detection | Dual-Agent | 30B Thinking | Zero-shot | H100 | 51.65 | N/A | 1.890 | 1288 |
-| RQ2 | Vulnerability Detection | Dual-Agent | 4B Instruct | Few-shot | H100 | 49.11 | N/A | 0.227 | 350 |
-| RQ2 | Vulnerability Detection | Dual-Agent | 4B Instruct | Zero-shot | H100 | 47.81 | N/A | 0.277 | 246 |
-| RQ2 | Vulnerability Detection | Dual-Agent | 4B Thinking | Few-shot | H100 | 50.08 | N/A | 1.728 | 1156 |
-| RQ2 | Vulnerability Detection | Dual-Agent | 4B Thinking | Zero-shot | H100 | 40.19 | N/A | 2.149 | 1447 |
-| RQ2 | Vulnerability Detection | Multi-Agent | 30B Instruct | Few-shot | H100 | 49.74 | N/A | 0.384 | 1438 |
-| RQ2 | Vulnerability Detection | Multi-Agent | 30B Instruct | Zero-shot | H100 | 33.33 | N/A | 0.665 | 2314 |
-| RQ2 | Vulnerability Detection | Multi-Agent | 30B Thinking | Few-shot | H100 | 33.50 | N/A | 2.619 | 8683 |
-| RQ2 | Vulnerability Detection | Multi-Agent | 30B Thinking | Zero-shot | H100 | 33.76 | N/A | 2.830 | 9235 |
-| RQ2 | Vulnerability Detection | Multi-Agent | 4B Instruct | Few-shot | H100 | 41.25 | N/A | 0.352 | 1294 |
-| RQ2 | Vulnerability Detection | Multi-Agent | 4B Instruct | Zero-shot | H100 | 33.04 | N/A | 1.067 | 2606 |
-| RQ2 | Vulnerability Detection | Multi-Agent | 4B Thinking | Few-shot | H100 | 33.65 | N/A | 3.052 | 9445 |
-| RQ2 | Vulnerability Detection | Multi-Agent | 4B Thinking | Zero-shot | H100 | 32.70 | N/A | 3.521 | 10499 |
-| RQ2 | Code Generation | Dual-Agent | 30B Instruct | Few-shot | H100 | N/A | 90.85 | 0.028 | 121 |
-| RQ2 | Code Generation | Dual-Agent | 30B Instruct | Zero-shot | H100 | N/A | 97.56 | 0.049 | 185 |
-| RQ2 | Code Generation | Dual-Agent | 30B Thinking | Few-shot | H100 | N/A | 68.90 | 0.515 | 432 |
-| RQ2 | Code Generation | Dual-Agent | 30B Thinking | Zero-shot | H100 | N/A | 46.58 | 0.450 | 358 |
-| RQ2 | Code Generation | Dual-Agent | 4B Instruct | Few-shot | H100 | N/A | 100.00 | 0.108 | 149 |
-| RQ2 | Code Generation | Dual-Agent | 4B Instruct | Zero-shot | H100 | N/A | 90.24 | 0.019 | 183 |
-| RQ2 | Code Generation | Dual-Agent | 4B Thinking | Few-shot | H100 | N/A | 89.02 | 0.665 | 71 |
-| RQ2 | Code Generation | Dual-Agent | 4B Thinking | Zero-shot | H100 | N/A | 64.02 | 0.710 | 434 |
-| RQ2 | Code Generation | Multi-Agent | 30B Instruct | Few-shot | H100 | N/A | 100.00 | 0.193 | 1545 |
-| RQ2 | Code Generation | Multi-Agent | 30B Instruct | Zero-shot | H100 | N/A | 99.39 | 0.236 | 1836 |
-| RQ2 | Code Generation | Multi-Agent | 30B Thinking | Few-shot | H100 | N/A | 90.24 | 0.763 | 6628 |
-| RQ2 | Code Generation | Multi-Agent | 30B Thinking | Zero-shot | H100 | N/A | 95.12 | 1.014 | 7724 |
-| RQ2 | Code Generation | Multi-Agent | 4B Instruct | Few-shot | H100 | N/A | 100.00 | 0.213 | 1587 |
-| RQ2 | Code Generation | Multi-Agent | 4B Instruct | Zero-shot | H100 | N/A | 100.00 | 0.230 | 1537 |
-| RQ2 | Code Generation | Multi-Agent | 4B Thinking | Few-shot | H100 | N/A | 94.51 | 0.977 | 7800 |
-| RQ2 | Code Generation | Multi-Agent | 4B Thinking | Zero-shot | H100 | N/A | 98.78 | 1.173 | 8596 |
+| # | Exp | Task | Agent Type | Model | Prompting | Platform | F1 (%) | Pass@1 (%) | Energy (kWh) | Avg Tokens |
+|---|-----|------|------------|-------|-----------|----------|--------|------------|--------------|------------|
+| 1 | RQ1 | Vulnerability Detection | Single-Agent | 30B Instruct | Few-shot (pre-CWE) | H100 | 37.99 | N/A | 0.278 | 836 |
+| 2 | RQ1 | Vulnerability Detection | Single-Agent | 30B Instruct | Few-shot | H100 | 54.45 | N/A | 0.477 | 1412 |
+| 3 | RQ1 | Vulnerability Detection | Single-Agent | 30B Instruct | Zero-shot | H100 | 51.24 | N/A | 0.349 | 1049 |
+| 4 | RQ1 | Vulnerability Detection | Single-Agent | 30B Thinking | Few-shot (pre-CWE) | H100 | 48.62 | N/A | 1.138 | 3710 |
+| 5 | RQ1 | Vulnerability Detection | Single-Agent | 30B Thinking | Few-shot | H100 | 55.56 | N/A | 1.235 | 3964 |
+| 6 | RQ1 | Vulnerability Detection | Single-Agent | 30B Thinking | Zero-shot | H100 | 54.81 | N/A | 1.316 | 4077 |
+| 7 | RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Few-shot (pre-CWE) | RTX A5000 | 9.57 | N/A | 0.667 | 682 |
+| 8 | RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Few-shot | RTX A5000 | 41.08 | N/A | 0.737 | 1232 |
+| 9 | RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Few-shot | H100 | 37.84 | N/A | 0.751 | 1274 |
+| 10 | RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Zero-shot | RTX A5000 | 22.58 | N/A | 0.910 | 899 |
+| 11 | RQ1 | Vulnerability Detection | Single-Agent | 4B Instruct | Zero-shot | H100 | 29.57 | N/A | 0.842 | 1426 |
+| 12 | RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Few-shot (pre-CWE) | RTX A5000 | 27.13 | N/A | 2.628 | 2504 |
+| 13 | RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Few-shot | RTX A5000 | 58.88 | N/A | 3.080 | 4824 |
+| 14 | RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Few-shot | H100 | 58.88 | N/A | 3.651 | 6277 |
+| 15 | RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Zero-shot | RTX A5000 | 38.78 | N/A | 4.301 | 3890 |
+| 16 | RQ1 | Vulnerability Detection | Single-Agent | 4B Thinking | Zero-shot | H100 | 50.52 | N/A | 2.849 | 5254 |
+| 17 | RQ1 | Code Generation | Single-Agent | 30B Instruct | Few-shot | H100 | N/A | 90.24 | 0.312 | 231 |
+| 18 | RQ1 | Code Generation | Single-Agent | 30B Instruct | Zero-shot | H100 | N/A | 100.00 | 0.317 | 230 |
+| 19 | RQ1 | Code Generation | Single-Agent | 30B Thinking | Few-shot | H100 | N/A | 98.17 | 0.867 | 198 |
+| 20 | RQ1 | Code Generation | Single-Agent | 30B Thinking | Zero-shot | H100 | N/A | 98.78 | 1.152 | 347 |
+| 21 | RQ1 | Code Generation | Single-Agent | 4B Instruct | Few-shot | RTX A5000 | N/A | 98.17 | 0.548 | 178 |
+| 22 | RQ1 | Code Generation | Single-Agent | 4B Instruct | Few-shot | H100 | N/A | 98.78 | 0.186 | 182 |
+| 23 | RQ1 | Code Generation | Single-Agent | 4B Instruct | Zero-shot | RTX A5000 | N/A | 99.39 | 0.360 | 198 |
+| 24 | RQ1 | Code Generation | Single-Agent | 4B Instruct | Zero-shot | H100 | N/A | 98.78 | 0.204 | 202 |
+| 25 | RQ1 | Code Generation | Single-Agent | 4B Thinking | Few-shot | RTX A5000 | N/A | 99.39 | 1.817 | 67 |
+| 26 | RQ1 | Code Generation | Single-Agent | 4B Thinking | Few-shot | H100 | N/A | 98.17 | 0.887 | 193 |
+| 27 | RQ1 | Code Generation | Single-Agent | 4B Thinking | Zero-shot | RTX A5000 | N/A | 99.39 | 1.588 | 68 |
+| 28 | RQ1 | Code Generation | Single-Agent | 4B Thinking | Zero-shot | H100 | N/A | 99.39 | 0.928 | 196 |
+| 29 | RQ2 | Vulnerability Detection | Dual-Agent | 30B Instruct | Few-shot | H100 | 51.76 | N/A | 0.599 | 479 |
+| 30 | RQ2 | Vulnerability Detection | Dual-Agent | 30B Instruct | Zero-shot | H100 | 43.61 | N/A | 0.317 | 205 |
+| 31 | RQ2 | Vulnerability Detection | Dual-Agent | 30B Thinking | Few-shot | H100 | 45.35 | N/A | 1.495 | 1226 |
+| 32 | RQ2 | Vulnerability Detection | Dual-Agent | 30B Thinking | Zero-shot | H100 | 51.65 | N/A | 1.890 | 1288 |
+| 33 | RQ2 | Vulnerability Detection | Dual-Agent | 4B Instruct | Few-shot | H100 | 49.11 | N/A | 0.227 | 350 |
+| 34 | RQ2 | Vulnerability Detection | Dual-Agent | 4B Instruct | Zero-shot | H100 | 47.81 | N/A | 0.277 | 246 |
+| 35 | RQ2 | Vulnerability Detection | Dual-Agent | 4B Thinking | Few-shot | H100 | 50.08 | N/A | 1.728 | 1156 |
+| 36 | RQ2 | Vulnerability Detection | Dual-Agent | 4B Thinking | Zero-shot | H100 | 40.19 | N/A | 2.149 | 1447 |
+| 37 | RQ2 | Vulnerability Detection | Multi-Agent | 30B Instruct | Few-shot | H100 | 49.74 | N/A | 0.384 | 1438 |
+| 38 | RQ2 | Vulnerability Detection | Multi-Agent | 30B Instruct | Zero-shot | H100 | 33.33 | N/A | 0.665 | 2314 |
+| 39 | RQ2 | Vulnerability Detection | Multi-Agent | 30B Thinking | Few-shot | H100 | 33.50 | N/A | 2.619 | 8683 |
+| 40 | RQ2 | Vulnerability Detection | Multi-Agent | 30B Thinking | Zero-shot | H100 | 33.76 | N/A | 2.830 | 9235 |
+| 41 | RQ2 | Vulnerability Detection | Multi-Agent | 4B Instruct | Few-shot | H100 | 41.25 | N/A | 0.352 | 1294 |
+| 42 | RQ2 | Vulnerability Detection | Multi-Agent | 4B Instruct | Zero-shot | H100 | 33.04 | N/A | 1.067 | 2606 |
+| 43 | RQ2 | Vulnerability Detection | Multi-Agent | 4B Thinking | Few-shot | H100 | 33.65 | N/A | 3.052 | 9445 |
+| 44 | RQ2 | Vulnerability Detection | Multi-Agent | 4B Thinking | Zero-shot | H100 | 32.70 | N/A | 3.521 | 10499 |
+| 45 | RQ2 | Code Generation | Dual-Agent | 30B Instruct | Few-shot | H100 | N/A | 90.85 | 0.028 | 121 |
+| 46 | RQ2 | Code Generation | Dual-Agent | 30B Instruct | Zero-shot | H100 | N/A | 97.56 | 0.049 | 185 |
+| 47 | RQ2 | Code Generation | Dual-Agent | 30B Thinking | Few-shot | H100 | N/A | 68.90 | 0.515 | 432 |
+| 48 | RQ2 | Code Generation | Dual-Agent | 30B Thinking | Zero-shot | H100 | N/A | 46.58 | 0.450 | 358 |
+| 49 | RQ2 | Code Generation | Dual-Agent | 4B Instruct | Few-shot | H100 | N/A | 100.00 | 0.108 | 149 |
+| 50 | RQ2 | Code Generation | Dual-Agent | 4B Instruct | Zero-shot | H100 | N/A | 90.24 | 0.019 | 183 |
+| 51 | RQ2 | Code Generation | Dual-Agent | 4B Thinking | Few-shot | H100 | N/A | 89.02 | 0.665 | 71 |
+| 52 | RQ2 | Code Generation | Dual-Agent | 4B Thinking | Zero-shot | H100 | N/A | 64.02 | 0.710 | 434 |
+| 53 | RQ2 | Code Generation | Multi-Agent | 30B Instruct | Few-shot | H100 | N/A | 100.00 | 0.193 | 1545 |
+| 54 | RQ2 | Code Generation | Multi-Agent | 30B Instruct | Zero-shot | H100 | N/A | 99.39 | 0.236 | 1836 |
+| 55 | RQ2 | Code Generation | Multi-Agent | 30B Thinking | Few-shot | H100 | N/A | 90.24 | 0.763 | 6628 |
+| 56 | RQ2 | Code Generation | Multi-Agent | 30B Thinking | Zero-shot | H100 | N/A | 95.12 | 1.014 | 7724 |
+| 57 | RQ2 | Code Generation | Multi-Agent | 4B Instruct | Few-shot | H100 | N/A | 100.00 | 0.213 | 1587 |
+| 58 | RQ2 | Code Generation | Multi-Agent | 4B Instruct | Zero-shot | H100 | N/A | 100.00 | 0.230 | 1537 |
+| 59 | RQ2 | Code Generation | Multi-Agent | 4B Thinking | Few-shot | H100 | N/A | 94.51 | 0.977 | 7800 |
+| 60 | RQ2 | Code Generation | Multi-Agent | 4B Thinking | Zero-shot | H100 | N/A | 98.78 | 1.173 | 8596 |
 
 **Total Rows**: 60 experiments (all completed ✅)
 
@@ -708,6 +709,8 @@ class UserManager {
 
 **Compute**: Alibaba Cloud RunPod (8 H100 GPUs × 72 hours)
 **Models**: Qwen3-4B-Instruct, Qwen3-4B-Thinking, Qwen3-30B-A3B-Instruct, Qwen3-30B-A3B-Thinking
+**Model Precision**: BF16 (bfloat16) - No quantization applied
+**Inference Engine**: vLLM with `--dtype bfloat16` (or `--dtype auto` defaulting to BF16)
 **Datasets**: Real-world vulnerability dataset (386 samples), HumanEval benchmark (164 problems)
 
 ---

@@ -153,6 +153,15 @@
 5. **Hardware** (1 level):
    - RunPod (H100 SXM 80GB) - All experiments for fair comparison
 
+6. **Model Precision** (1 level):
+   - BF16 (bfloat16) - No quantization applied
+   - vLLM `--dtype bfloat16` or `--dtype auto` (defaults to BF16 on H100)
+
+7. **Temperature** (1 level):
+   - **0.0** (deterministic/greedy decoding)
+   - Ensures reproducibility and consistent outputs across runs
+   - Configured in `src/config.py`: `TEMPERATURE = 0.0`
+
 **Dependent Variables:**
 1. **Performance Metrics**:
    - Vulnerability Detection: Accuracy, Precision, Recall, F1 Score

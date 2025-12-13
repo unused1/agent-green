@@ -1,0 +1,20 @@
+# RunPod Experiment Dependencies
+# For Nemotron 49B experiments on vLLM
+# Install with: pip install -r requirements-runpod.txt --break-system-packages
+
+# Core experiment dependencies
+autogen>=0.7.0
+python-dotenv>=1.0.0
+codecarbon>=3.0.0
+pandas>=2.0.0
+numpy>=2.0.0
+scikit-learn>=1.5.0
+
+# Metrics and evaluation
+evaluate>=0.4.0
+
+# vLLM (for inference server)
+vllm>=0.12.0
+
+# Optional: For JSON parsing in experiments
+fix-busted-json>=0.0.18
