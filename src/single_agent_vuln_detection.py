@@ -31,6 +31,14 @@ task = config.VULNERABILITY_TASK_PROMPT
 sys_prompt_few_shot_vulnerability_detector = config.SYS_MSG_VULNERABILITY_DETECTOR_FEW_SHOT
 sys_prompt_zero_shot_vulnerability_detector = config.SYS_MSG_VULNERABILITY_DETECTOR_ZERO_SHOT
 
+# Apply Nemotron thinking toggle if using Nemotron config
+# This prepends "detailed thinking on/off" to the system prompt
+if _model_family == 'nemotron' and hasattr(config, 'prepend_thinking_toggle'):
+    sys_prompt_few_shot_vulnerability_detector = config.prepend_thinking_toggle(sys_prompt_few_shot_vulnerability_detector)
+    sys_prompt_zero_shot_vulnerability_detector = config.prepend_thinking_toggle(sys_prompt_zero_shot_vulnerability_detector)
+    print(f"[Nemotron] Applied thinking toggle: ENABLE_REASONING={config.ENABLE_REASONING}")
+    print(f"[Nemotron] System prompt prefix: '{config.get_reasoning_system_prompt()}'")
+
 # Directories (following original pattern)
 DATASET_FILE = config.VULN_DATASET
 RESULT_DIR = config.RESULT_DIR
@@ -45,9 +53,16 @@ if len(sys.argv) > 1:
         print(f"Error: Invalid design '{DESIGN}'. Must be 'SA-zero' or 'SA-few'")
         sys.exit(1)
 else:
-    print("Usage: python script.py <design>")
+    print("Usage: python script.py <design> [--resume <exp_name>]")
     print("design: SA-zero or SA-few")
+    print("--resume: Optional. Provide existing exp_name to resume from checkpoint")
     sys.exit(1)
+
+# Check for --resume flag
+RESUME_EXP_NAME = None
+if len(sys.argv) > 2 and sys.argv[2] == "--resume" and len(sys.argv) > 3:
+    RESUME_EXP_NAME = sys.argv[3]
+    print(f"Resuming from experiment: {RESUME_EXP_NAME}")
 
 print(f"Running with design: {DESIGN}")
 
@@ -55,7 +70,11 @@ print(f"Running with design: {DESIGN}")
 model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 project_name = DESIGN.capitalize()
-exp_name = f"{project_name}_{model}_{timestamp}"
+if RESUME_EXP_NAME:
+    exp_name = RESUME_EXP_NAME
+    print(f"Using existing experiment name: {exp_name}")
+else:
+    exp_name = f"{project_name}_{model}_{timestamp}"
 input_dataset_file = "VulTrial_386_samples_balanced.jsonl"  # Example dataset file name
 
 # --- Agent Creation ---
@@ -151,10 +170,11 @@ def initialize_results_files(exp_name, result_dir):
     # Initialize detailed results JSON file
     detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
     
-    # Initialize CSV file with headers
+    # Initialize CSV file with headers (only if it doesn't exist - for resume support)
     csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
-    with open(csv_file, 'w') as f:
-        f.write("idx,project,commit_id,project_url,commit_url,commit_message,ground_truth,vuln,reasoning,cwe,cve,cve_desc\n")
+    if not os.path.exists(csv_file):
+        with open(csv_file, 'w') as f:
+            f.write("idx,project,commit_id,project_url,commit_url,commit_message,ground_truth,vuln,reasoning,cwe,cve,cve_desc\n")
     
     # Initialize energy tracking file
     energy_file = os.path.join(result_dir, f"{exp_name}_energy_tracking.json")

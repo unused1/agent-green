@@ -1,0 +1,834 @@
+{
+  "model": "SA-few_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-085657_detailed_results",
+  "timestamp": "2025-12-13 17:34:11",
+  "results_file": "/workspace/agent-green/results/SA-few_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-085657_detailed_results.jsonl",
+  "metrics": {
+    "pass@1": 1.0,
+    "total_samples": 164,
+    "passed_samples": 164,
+    "failed_samples": 0,
+    "pass_rate_percentage": 100.0
+  },
+  "per_sample_results": [
+    {
+      "task_id": "HumanEval/0",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/1",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/2",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/3",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/4",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/5",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/6",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/7",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/8",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/9",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/10",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/11",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/12",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/13",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/14",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/15",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/16",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/17",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/18",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/19",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/20",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/21",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/22",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/23",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/24",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/25",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/26",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/27",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/28",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/29",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/30",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/31",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/32",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/33",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/34",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/35",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/36",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/37",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/38",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/39",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/40",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/41",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/42",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/43",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/44",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/45",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/46",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/47",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/48",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/49",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/50",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/51",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/52",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/53",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/54",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/55",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/56",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/57",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/58",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/59",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/60",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/61",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/62",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/63",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/64",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/65",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/66",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/67",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/68",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/69",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/70",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/71",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/72",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/73",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/74",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/75",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/76",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/77",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/78",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/79",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/80",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/81",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/82",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/83",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/84",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/85",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/86",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/87",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/88",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/89",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/90",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/91",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/92",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/93",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/94",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/95",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/96",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/97",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/98",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/99",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/100",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/101",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/102",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/103",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/104",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/105",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/106",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/107",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/108",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/109",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/110",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/111",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/112",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/113",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/114",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/115",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/116",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/117",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/118",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/119",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/120",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/121",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/122",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/123",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/124",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/125",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/126",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/127",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/128",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/129",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/130",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/131",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/132",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/133",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/134",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/135",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/136",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/137",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/138",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/139",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/140",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/141",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/142",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/143",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/144",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/145",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/146",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/147",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/148",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/149",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/150",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/151",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/152",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/153",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/154",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/155",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/156",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/157",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/158",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/159",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/160",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/161",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/162",
+      "test_result": "passed",
+      "passed": true
+    },
+    {
+      "task_id": "HumanEval/163",
+      "test_result": "passed",
+      "passed": true
+    }
+  ]
+}

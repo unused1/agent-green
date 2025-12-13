@@ -1,0 +1,56 @@
+{
+  "total_emissions": 2.3127554134867343,
+  "sessions": 10,
+  "session_history": [
+    {
+      "timestamp": "2025-12-13T10:13:44.386676",
+      "emissions_kg_co2": 0.3444240356594227,
+      "samples_processed": 164
+    },
+    {
+      "timestamp": "2025-12-13T11:07:56.028615",
+      "emissions_kg_co2": 0.2417153292878998,
+      "samples_processed": 139
+    },
+    {
+      "timestamp": "2025-12-13T13:52:05.887644",
+      "emissions_kg_co2": 0.7376814407880599,
+      "samples_processed": 119
+    },
+    {
+      "timestamp": "2025-12-13T14:33:41.293407",
+      "emissions_kg_co2": 0.18447730251351827,
+      "samples_processed": 74
+    },
+    {
+      "timestamp": "2025-12-13T15:07:16.103943",
+      "emissions_kg_co2": 0.15029372204770242,
+      "samples_processed": 53
+    },
+    {
+      "timestamp": "2025-12-13T15:47:36.119085",
+      "emissions_kg_co2": 0.1783878919860419,
+      "samples_processed": 47
+    },
+    {
+      "timestamp": "2025-12-13T16:14:30.020847",
+      "emissions_kg_co2": 0.1202186687171577,
+      "samples_processed": 31
+    },
+    {
+      "timestamp": "2025-12-13T16:29:24.153575",
+      "emissions_kg_co2": 0.06664548607186577,
+      "samples_processed": 18
+    },
+    {
+      "timestamp": "2025-12-13T17:33:49.940176",
+      "emissions_kg_co2": 0.2889088039505362,
+      "samples_processed": 17
+    },
+    {
+      "timestamp": "2025-12-13T17:34:01.335656",
+      "emissions_kg_co2": 2.7324645295797594e-06,
+      "samples_processed": 0
+    }
+  ]
+}

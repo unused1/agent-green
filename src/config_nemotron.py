@@ -160,7 +160,8 @@ else:
 LLM_CONFIG = {
     "cache_seed": None,
     "config_list": [_config_entry],
-    "temperature": TEMPERATURE
+    "temperature": TEMPERATURE,
+    "timeout": 900  # 15 minutes - balance between long traces and stuck samples
 }
 
 # ========================================================================================
