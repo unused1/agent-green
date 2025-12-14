@@ -158,7 +158,7 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 
 ### 4.1 Experiment Matrix (RQ1 SA - 8 experiments)
 
-**Progress**: 7/8 complete, 1 running (as of Dec 14, 2025)
+**Progress**: 8/8 complete ✅ (Dec 14, 2025)
 
 | ID | Task | Mode | Prompting | ENABLE_REASONING | Status | Result |
 |----|------|------|-----------|------------------|--------|--------|
@@ -169,7 +169,7 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-9 | Code | Instruct | Few-shot | false | ✅ Complete (164/164) | - |
 | NM-10 | Code | Instruct | Zero-shot | false | ✅ Complete (164/164) | - |
 | NM-11 | Code | Thinking | Few-shot | true | ✅ Complete (164/164) | **Pass@1: 100%** |
-| NM-12 | Code | Thinking | Zero-shot | true | 🔄 Running (Pod 2) | 77/164 |
+| NM-12 | Code | Thinking | Zero-shot | true | ✅ Complete (164/164) | **Pass@1: 92.07%** |
 
 ### 4.2 Run Vulnerability Detection Experiments
 
@@ -561,4 +561,4 @@ Due to runaway generation, Thinking mode experiments required multiple interrupt
 |------------|----------|-----------------|--------------|
 | NM-11 (Code Few-shot Thinking) | 10 | ~30 | Pass@1: 100% |
 | NM-3 (Vuln Few-shot Thinking) | 2 | 2 | Acc: 55%, F1: 0.53 |
-| NM-12 (Code Zero-shot Thinking) | TBD | TBD | In Progress |
+| NM-12 (Code Zero-shot Thinking) | ~10 | 13 failed | Pass@1: 92.07% |
