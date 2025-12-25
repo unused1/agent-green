@@ -2,8 +2,8 @@
 
 **Purpose**: Replicate RQ1 and RQ2 experiments using alternative model architectures to validate generalizability of findings beyond Qwen3
 **Date**: November 26, 2025
-**Last Updated**: December 10, 2025
-**Status**: ✅ PHASE 3 COMPLETE - All 8 Nemotron 8B Single-Agent experiments completed (Dec 9-10, 2025) with toggle fix applied.
+**Last Updated**: December 25, 2025
+**Status**: 🟡 PHASE 4 IN PROGRESS - RQ2 DA/MA 8B experiments running (Dec 23-25, 2025). DA complete, MA Vuln in progress.
 
 ---
 
@@ -64,7 +64,7 @@ DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode
    - Loses ability to validate thinking/non-thinking patterns
    - Weakens cross-architecture validation claim
 
-### Next Steps (✅ 8B EXPERIMENTS COMPLETE)
+### Next Steps (🟡 RQ2 DA/MA IN PROGRESS)
 
 - [x] Document blocker in validation plan (this section)
 - [x] Research alternative models with confirmed thinking/non-thinking support
@@ -72,8 +72,12 @@ DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode
 - [x] Validate Nemotron thinking toggle on RunPod H100 (Dec 7, 2025) - **PASSED**
 - [x] Run 8B SA experiments with Nemotron (Dec 9-10, 2025) - **8/8 complete**
 - [x] Analyze 8B results and compare with Qwen3 (Dec 10-13, 2025)
-- [ ] Decide on 49B experiments (pending - may skip based on 8B validation)
-- [ ] Run DA/MA experiments if needed
+- [x] Run 49B SA experiments with Nemotron (Dec 13-14, 2025) - **8/8 complete**
+- [x] Run DA 8B Vuln experiments (Dec 23, 2025) - **4/4 complete**
+- [x] Run DA 8B Code experiments (Dec 24-25, 2025) - **4/4 complete**
+- [x] Run MA 8B Vuln Instruct experiments (Dec 25, 2025) - **1/2 complete, 1 in progress**
+- [ ] Run MA 8B Vuln Thinking experiments (NM-31, NM-32)
+- [ ] Run MA 8B Code experiments (NM-45 to NM-48)
 
 ---
 
@@ -156,9 +160,9 @@ ENABLE_REASONING=false:
 | Phase 1b | **Nemotron Code Preparation** | ✅ Complete | 100% |
 | Phase 2a | DeepSeek Validation | ❌ **FAILED** | See Blocker |
 | Phase 2b | **Nemotron Validation** | ✅ **PASSED** | 100% |
-| Phase 3 | RQ1 Experiments (16 SA) | 🟡 **IN PROGRESS** | 50% (8/16) - 8B complete, 49B decision pending |
-| Phase 4 | RQ2 Experiments (32 DA/MA) | ⏳ Pending | 0% |
-| Phase 5 | Analysis & Comparison | 🟡 **IN PROGRESS** | 8B analysis complete (see notebook) |
+| Phase 3 | RQ1 Experiments (16 SA) | ✅ Complete | 100% (16/16) - 8B + 49B SA complete |
+| Phase 4 | RQ2 Experiments (32 DA/MA) | 🟡 **IN PROGRESS** | 56% (9/16 8B) - DA complete, MA Vuln in progress |
+| Phase 5 | Analysis & Comparison | 🟡 **IN PROGRESS** | 8B SA analysis complete (see notebook) |
 
 ### Phase 1: Code Preparation Checklist
 
@@ -451,18 +455,18 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 
 | ID | Task | Model | Mode | Prompting | Status |
 |----|------|-------|------|-----------|--------|
-| NM-1 | Vuln | 49B | Instruct | Few-shot | ⏳ |
-| NM-2 | Vuln | 49B | Instruct | Zero-shot | ⏳ |
-| NM-3 | Vuln | 49B | Thinking | Few-shot | ⏳ |
-| NM-4 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
+| NM-1 | Vuln | 49B | Instruct | Few-shot | ✅ Complete (Dec 13) |
+| NM-2 | Vuln | 49B | Instruct | Zero-shot | ✅ Complete (Dec 13) |
+| NM-3 | Vuln | 49B | Thinking | Few-shot | ✅ Complete (Dec 13) |
+| NM-4 | Vuln | 49B | Thinking | Zero-shot | ✅ Complete (Dec 13) |
 | NM-5 | Vuln | 8B | Instruct | Zero-shot | ✅ Complete (Dec 9) |
 | NM-6 | Vuln | 8B | Instruct | Few-shot | ✅ Complete (Dec 9) |
 | NM-7 | Vuln | 8B | Thinking | Zero-shot | ✅ Complete (Dec 9) |
 | NM-8 | Vuln | 8B | Thinking | Few-shot | ✅ Complete (Dec 9) |
-| NM-9 | Code | 49B | Instruct | Few-shot | ⏳ |
-| NM-10 | Code | 49B | Instruct | Zero-shot | ⏳ |
-| NM-11 | Code | 49B | Thinking | Few-shot | ⏳ |
-| NM-12 | Code | 49B | Thinking | Zero-shot | ⏳ |
+| NM-9 | Code | 49B | Instruct | Few-shot | ✅ Complete (Dec 13) |
+| NM-10 | Code | 49B | Instruct | Zero-shot | ✅ Complete (Dec 13) |
+| NM-11 | Code | 49B | Thinking | Few-shot | ✅ Complete (Dec 14) |
+| NM-12 | Code | 49B | Thinking | Zero-shot | ✅ Complete (Dec 14) |
 | NM-13 | Code | 8B | Instruct | Zero-shot | ✅ Complete (Dec 9) |
 | NM-14 | Code | 8B | Instruct | Few-shot | ✅ Complete (Dec 10) |
 | NM-15 | Code | 8B | Thinking | Zero-shot | ✅ Complete (Dec 9) |
@@ -476,18 +480,18 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-18 | Vuln | 49B | Instruct | Zero-shot | ⏳ |
 | NM-19 | Vuln | 49B | Thinking | Few-shot | ⏳ |
 | NM-20 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
-| NM-21 | Vuln | 8B | Instruct | Few-shot | ⏳ |
-| NM-22 | Vuln | 8B | Instruct | Zero-shot | ⏳ |
-| NM-23 | Vuln | 8B | Thinking | Few-shot | ⏳ |
-| NM-24 | Vuln | 8B | Thinking | Zero-shot | ⏳ |
+| NM-21 | Vuln | 8B | Instruct | Few-shot | ✅ Complete (Dec 23) |
+| NM-22 | Vuln | 8B | Instruct | Zero-shot | ✅ Complete (Dec 23) |
+| NM-23 | Vuln | 8B | Thinking | Few-shot | ✅ Complete (Dec 23) |
+| NM-24 | Vuln | 8B | Thinking | Zero-shot | ✅ Complete (Dec 23) |
 | NM-33 | Code | 49B | Instruct | Few-shot | ⏳ |
 | NM-34 | Code | 49B | Instruct | Zero-shot | ⏳ |
 | NM-35 | Code | 49B | Thinking | Few-shot | ⏳ |
 | NM-36 | Code | 49B | Thinking | Zero-shot | ⏳ |
-| NM-37 | Code | 8B | Instruct | Few-shot | ⏳ |
-| NM-38 | Code | 8B | Instruct | Zero-shot | ⏳ |
-| NM-39 | Code | 8B | Thinking | Few-shot | ⏳ |
-| NM-40 | Code | 8B | Thinking | Zero-shot | ⏳ |
+| NM-37 | Code | 8B | Instruct | Few-shot | ✅ Complete (Dec 24) |
+| NM-38 | Code | 8B | Instruct | Zero-shot | ✅ Complete (Dec 24) |
+| NM-39 | Code | 8B | Thinking | Few-shot | ✅ Complete (Dec 25) |
+| NM-40 | Code | 8B | Thinking | Zero-shot | ✅ Complete (Dec 25) |
 
 #### RQ2 Multi-Agent (16 experiments)
 
@@ -497,8 +501,8 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-26 | Vuln | 49B | Instruct | Zero-shot | ⏳ |
 | NM-27 | Vuln | 49B | Thinking | Few-shot | ⏳ |
 | NM-28 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
-| NM-29 | Vuln | 8B | Instruct | Few-shot | ⏳ |
-| NM-30 | Vuln | 8B | Instruct | Zero-shot | ⏳ |
+| NM-29 | Vuln | 8B | Instruct | Few-shot | ✅ Complete (Dec 25) |
+| NM-30 | Vuln | 8B | Instruct | Zero-shot | 🟡 In Progress (Dec 25) |
 | NM-31 | Vuln | 8B | Thinking | Few-shot | ⏳ |
 | NM-32 | Vuln | 8B | Thinking | Zero-shot | ⏳ |
 | NM-41 | Code | 49B | Instruct | Few-shot | ⏳ |
