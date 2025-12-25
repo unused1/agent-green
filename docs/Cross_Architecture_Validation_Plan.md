@@ -2,8 +2,8 @@
 
 **Purpose**: Replicate RQ1 and RQ2 experiments using alternative model architectures to validate generalizability of findings beyond Qwen3
 **Date**: November 26, 2025
-**Last Updated**: December 25, 2025
-**Status**: 🟡 PHASE 4 IN PROGRESS - RQ2 DA/MA 8B experiments running (Dec 23-25, 2025). DA complete, MA Vuln in progress.
+**Last Updated**: December 26, 2025
+**Status**: 🟡 PHASE 4 IN PROGRESS - RQ2 DA/MA 8B experiments running (Dec 23-26, 2025). DA complete, MA Vuln Instruct complete.
 
 ---
 
@@ -75,7 +75,7 @@ DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode
 - [x] Run 49B SA experiments with Nemotron (Dec 13-14, 2025) - **8/8 complete**
 - [x] Run DA 8B Vuln experiments (Dec 23, 2025) - **4/4 complete**
 - [x] Run DA 8B Code experiments (Dec 24-25, 2025) - **4/4 complete**
-- [x] Run MA 8B Vuln Instruct experiments (Dec 25, 2025) - **1/2 complete, 1 in progress**
+- [x] Run MA 8B Vuln Instruct experiments (Dec 25-26, 2025) - **2/2 complete**
 - [ ] Run MA 8B Vuln Thinking experiments (NM-31, NM-32)
 - [ ] Run MA 8B Code experiments (NM-45 to NM-48)
 
@@ -161,7 +161,7 @@ ENABLE_REASONING=false:
 | Phase 2a | DeepSeek Validation | ❌ **FAILED** | See Blocker |
 | Phase 2b | **Nemotron Validation** | ✅ **PASSED** | 100% |
 | Phase 3 | RQ1 Experiments (16 SA) | ✅ Complete | 100% (16/16) - 8B + 49B SA complete |
-| Phase 4 | RQ2 Experiments (32 DA/MA) | 🟡 **IN PROGRESS** | 56% (9/16 8B) - DA complete, MA Vuln in progress |
+| Phase 4 | RQ2 Experiments (32 DA/MA) | 🟡 **IN PROGRESS** | 62.5% (10/16 8B) - DA complete, MA Vuln Instruct complete |
 | Phase 5 | Analysis & Comparison | 🟡 **IN PROGRESS** | 8B SA analysis complete (see notebook) |
 
 ### Phase 1: Code Preparation Checklist
@@ -502,7 +502,7 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-27 | Vuln | 49B | Thinking | Few-shot | ⏳ |
 | NM-28 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
 | NM-29 | Vuln | 8B | Instruct | Few-shot | ✅ Complete (Dec 25) |
-| NM-30 | Vuln | 8B | Instruct | Zero-shot | 🟡 In Progress (Dec 25) |
+| NM-30 | Vuln | 8B | Instruct | Zero-shot | ✅ Complete (Dec 26) |
 | NM-31 | Vuln | 8B | Thinking | Few-shot | ⏳ |
 | NM-32 | Vuln | 8B | Thinking | Zero-shot | ⏳ |
 | NM-41 | Code | 49B | Instruct | Few-shot | ⏳ |
@@ -513,6 +513,23 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-46 | Code | 8B | Instruct | Zero-shot | ⏳ |
 | NM-47 | Code | 8B | Thinking | Few-shot | ⏳ |
 | NM-48 | Code | 8B | Thinking | Zero-shot | ⏳ |
+
+### MA Context Length Observations (Dec 25, 2025)
+
+**Issue**: Multi-Agent (4-agent) experiments with Nemotron-Nano-8B encounter frequent context overflow errors at 64K context length.
+
+| Experiment | Sessions Required | Samples Skipped | Notes |
+|------------|-------------------|-----------------|-------|
+| NM-29 (MA-few Instruct) | 18 | ~2 | Completed with 384/386 samples |
+| NM-30 (MA-zero Instruct) | 26 | ~2 | Completed with 384/386 samples |
+
+**Analysis**:
+- The 4-agent pipeline (Security Researcher → Code Author → Moderator → Review Board) generates significantly more tokens per sample than SA or DA designs
+- Even with 64K context (fair comparison baseline), MA frequently exceeds limits on complex vulnerability samples
+- This aligns with RQ2 hypothesis: Multi-agent architectures incur coordination overhead, reflected in both token usage and energy consumption
+- Skip/resume mechanism successfully handles overflows, but results in higher session counts and slightly reduced sample coverage
+
+**Implication for RQ2**: The context overflow frequency itself is a measurable indicator of agent coordination overhead, supporting the hypothesis that multi-agent designs have higher computational costs.
 
 ### Legend
 
