@@ -225,10 +225,12 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, prom
 
     code_author, security_analyst = create_dual_agents(llm_config, prompt_type)
     results, errors = existing_results.copy(), 0
+    completed_count = len(existing_results)
 
     try:
         for i, s in enumerate(remaining_samples):
-            print(f"\n--- Processing sample {i+1}/{len(remaining_samples)} ---")
+            overall_progress = completed_count + i + 1
+            print(f"\n--- Processing sample {overall_progress}/{len(samples)} ---")
 
             try:
                 #Code Author Stage

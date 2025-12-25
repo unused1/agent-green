@@ -254,10 +254,12 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, desi
 
     user_proxy, security_researcher, code_author, moderator, review_board = create_vulnerability_agents(llm_config, prompts)
     results = existing_results.copy()
+    completed_count = len(existing_results)
 
     try:
         for i, sample in enumerate(remaining_samples):
-            sample_info = f"Sample {i+1}/{len(remaining_samples)}, idx: {sample['idx']}"
+            overall_progress = completed_count + i + 1
+            sample_info = f"Sample {overall_progress}/{len(samples)}, idx: {sample['idx']}"
             print(f"\n--- Processing {sample_info} ---")
 
             # Step 1: Security Researcher

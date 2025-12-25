@@ -214,10 +214,12 @@ def run_dual_agent_inference(samples, llm_config, exp_name, result_dir, prompt_t
         programmer = create_programmer_agent(llm_config, programmer_sys_prompt)
         refiner = create_refiner_agent(llm_config, reviewer_sys_prompt)
 
+        completed_count = len(existing_results)
         for i, sample in enumerate(remaining_samples):
             task_id = sample.get('task_id', f'sample_{i}')
+            overall_progress = completed_count + i + 1
             print(f"\n{'='*60}")
-            print(f"Processing {i+1}/{len(samples)}: {task_id}")
+            print(f"Processing {overall_progress}/{len(samples)}: {task_id}")
             print(f"{'='*60}")
             
             prompt = sample.get('prompt', sample.get('description', ''))

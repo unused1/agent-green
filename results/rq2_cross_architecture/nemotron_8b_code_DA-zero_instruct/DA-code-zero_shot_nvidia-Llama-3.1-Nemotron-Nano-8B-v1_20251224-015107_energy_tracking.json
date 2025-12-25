@@ -1,0 +1,26 @@
+{
+  "total_emissions": 1.0438135760821137,
+  "sessions": 4,
+  "session_history": [
+    {
+      "timestamp": "2025-12-24T03:18:31.876340",
+      "emissions_kg_co2": 0.25114597292125923,
+      "samples_processed": 164
+    },
+    {
+      "timestamp": "2025-12-24T06:28:30.711653",
+      "emissions_kg_co2": 0.5063900001356261,
+      "samples_processed": 122
+    },
+    {
+      "timestamp": "2025-12-24T08:46:38.985847",
+      "emissions_kg_co2": 0.12467843943043017,
+      "samples_processed": 48
+    },
+    {
+      "timestamp": "2025-12-24T10:28:16.788484",
+      "emissions_kg_co2": 0.1615991635947983,
+      "samples_processed": 33
+    }
+  ]
+}

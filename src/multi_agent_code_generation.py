@@ -246,10 +246,12 @@ def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir,
         programmer = create_programmer_agent(llm_config, programmer_prompt)
         moderator = create_moderator_agent(llm_config, moderator_prompt)
         review_board = create_review_board_agent(llm_config, review_board_prompt)
+        completed_count = len(existing_results)
 
         for i, sample in enumerate(remaining_samples):
             task_id = sample.get('task_id', f'sample_{i}')
-            sample_info = f"Sample {i+1}/{len(remaining_samples)}, task_id: {task_id}"
+            overall_progress = completed_count + i + 1
+            sample_info = f"Sample {overall_progress}/{len(code_samples)}, task_id: {task_id}"
             print(f"\n{'='*60}")
             print(f"Processing {sample_info}")
             print(f"{'='*60}")
