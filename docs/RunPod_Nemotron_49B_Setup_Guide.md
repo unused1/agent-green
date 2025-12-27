@@ -79,10 +79,6 @@ scp -P $POD_PORT -i $SSH_KEY /Users/shanetan/Documents/Code_Projects/SMU/SCIS_En
 ```bash
 cd /workspace/agent-green
 
-# Option 1: Install from requirements file (recommended)
-pip install -q -r requirements-runpod.txt --break-system-packages
-
-# Option 2: Install manually
 pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn --break-system-packages
 pip install vllm --break-system-packages
 ```
@@ -119,6 +115,9 @@ export ENABLE_REASONING=false  # for instruct mode
 ### 3.1 Start vLLM with Tensor Parallelism
 ```bash
 cd /workspace/agent-green
+
+# IMPORTANT: Unset HF_HUB_ENABLE_HF_TRANSFER to avoid vLLM startup errors
+unset HF_HUB_ENABLE_HF_TRANSFER
 
 # Start vLLM server for Nemotron-Super-49B (requires 2× H100)
 # Using FP16 (validated Dec 2025 - slightly less memory than FP8)
@@ -345,7 +344,8 @@ nvidia-smi --query-compute-apps=pid --format=csv,noheader | xargs -r kill -9
 nvidia-smi --query-gpu=memory.free,memory.total --format=csv
 # Should show ~81000 MiB free
 
-# Step 4: Now restart vLLM
+# Step 4: Unset HF_HUB_ENABLE_HF_TRANSFER and restart vLLM
+unset HF_HUB_ENABLE_HF_TRANSFER
 nohup python3 -m vllm.entrypoints.openai.api_server \
     --model nvidia/Llama-3_3-Nemotron-Super-49B-v1_5 \
     --trust-remote-code --max-model-len 65536 \
@@ -454,6 +454,9 @@ python src/single_agent_vuln.py SA-few
 ```bash
 # SSH into pod
 ssh root@<IP> -p <PORT> -i ~/.ssh/runpod_ed25519
+
+# IMPORTANT: Unset HF_HUB_ENABLE_HF_TRANSFER to avoid vLLM startup errors
+unset HF_HUB_ENABLE_HF_TRANSFER
 
 # Start vLLM 49B (FP16)
 nohup python3 -m vllm.entrypoints.openai.api_server \

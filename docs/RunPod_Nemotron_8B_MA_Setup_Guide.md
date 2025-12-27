@@ -73,10 +73,6 @@ scp -P $POD_PORT -i $SSH_KEY /Users/shanetan/Documents/Code_Projects/SMU/SCIS_En
 ```bash
 cd /workspace/agent-green
 
-# Install from requirements file
-pip install -q -r requirements-runpod.txt --break-system-packages
-
-# Or install manually
 pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn Levenshtein --break-system-packages
 pip install vllm --break-system-packages
 
@@ -116,6 +112,9 @@ export ENABLE_REASONING=false  # for instruct mode
 ### 3.1 Start vLLM for Nemotron-Nano-8B
 ```bash
 cd /workspace/agent-green
+
+# IMPORTANT: Unset HF_HUB_ENABLE_HF_TRANSFER to avoid vLLM startup errors
+unset HF_HUB_ENABLE_HF_TRANSFER
 
 # Start vLLM server for Nemotron-Nano-8B (single H100)
 # Using 64K context to match Qwen3/49B experiments for fair comparison
@@ -391,6 +390,9 @@ nvidia-smi
 ```bash
 # SSH into pod
 ssh root@<IP> -p <PORT> -i ~/.ssh/runpod_ed25519
+
+# IMPORTANT: Unset HF_HUB_ENABLE_HF_TRANSFER to avoid vLLM startup errors
+unset HF_HUB_ENABLE_HF_TRANSFER
 
 # Start vLLM 8B (64K context - matches Qwen3/49B for fair comparison)
 nohup python3 -m vllm.entrypoints.openai.api_server \
