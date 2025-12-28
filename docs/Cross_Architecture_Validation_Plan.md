@@ -2,8 +2,8 @@
 
 **Purpose**: Replicate RQ1 and RQ2 experiments using alternative model architectures to validate generalizability of findings beyond Qwen3
 **Date**: November 26, 2025
-**Last Updated**: December 27, 2025
-**Status**: 🟡 PHASE 4 IN PROGRESS - RQ2 DA/MA 8B experiments running (Dec 23-27, 2025). DA complete, MA Vuln complete. MA Code pending.
+**Last Updated**: December 28, 2025
+**Status**: 🟡 PHASE 4 IN PROGRESS - RQ2 DA/MA 8B experiments (Dec 23-28, 2025). DA complete, MA Vuln complete, MA Code 3/4 complete (NM-48 running).
 
 ---
 
@@ -76,8 +76,8 @@ DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode
 - [x] Run DA 8B Vuln experiments (Dec 23, 2025) - **4/4 complete**
 - [x] Run DA 8B Code experiments (Dec 24-25, 2025) - **4/4 complete**
 - [x] Run MA 8B Vuln Instruct experiments (Dec 25-26, 2025) - **2/2 complete**
-- [ ] Run MA 8B Vuln Thinking experiments (NM-31, NM-32)
-- [ ] Run MA 8B Code experiments (NM-45 to NM-48)
+- [x] Run MA 8B Vuln Thinking experiments (NM-31, NM-32) - **2/2 complete (Dec 27)**
+- [x] Run MA 8B Code experiments (NM-45 to NM-48) - **3/4 complete (Dec 28), NM-48 running**
 
 ---
 
@@ -509,10 +509,10 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-42 | Code | 49B | Instruct | Zero-shot | ⏳ |
 | NM-43 | Code | 49B | Thinking | Few-shot | ⏳ |
 | NM-44 | Code | 49B | Thinking | Zero-shot | ⏳ |
-| NM-45 | Code | 8B | Instruct | Few-shot | ⏳ |
-| NM-46 | Code | 8B | Instruct | Zero-shot | ⏳ |
-| NM-47 | Code | 8B | Thinking | Few-shot | ⏳ |
-| NM-48 | Code | 8B | Thinking | Zero-shot | ⏳ |
+| NM-45 | Code | 8B | Instruct | Few-shot | ✅ Complete (Dec 27) |
+| NM-46 | Code | 8B | Instruct | Zero-shot | ✅ Complete (Dec 28) |
+| NM-47 | Code | 8B | Thinking | Few-shot | ✅ Complete (Dec 28) |
+| NM-48 | Code | 8B | Thinking | Zero-shot | 🔄 Running |
 
 ### MA Context Length Observations (Dec 25-27, 2025)
 
@@ -555,6 +555,21 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 - Qwen3-4B outperforms Nemotron-8B in MA setup (60% vs 50% accuracy) while using 3-15x less energy
 - Thinking mode significantly increases energy consumption (~2x) without proportional accuracy gains
 - The context overflow frequency is a measurable indicator of agent coordination overhead
+
+### MA Code Generation Observations (Dec 27-28, 2025)
+
+| Experiment | Sessions | Pass@1 | Emissions (kg CO2) | Notes |
+|------------|----------|--------|-------------------|-------|
+| NM-45 (MA-few Instruct) | 1 | 96.95% | 0.54 | 164/164 samples, no restarts |
+| NM-46 (MA-zero Instruct) | 1 | 99.39% | 0.82 | 164/164 samples, no restarts |
+| NM-47 (MA-few Thinking) | 5 | 95.12% | 0.89 | Context overflows handled |
+| NM-48 (MA-zero Thinking) | - | - | - | 🔄 Running |
+
+**Key Findings (MA Code Gen)**:
+- Zero-shot Instruct achieves highest Pass@1 (99.39%) with moderate energy
+- Thinking mode requires more sessions due to context overflows but doesn't improve accuracy
+- Few-shot prompting slightly underperforms zero-shot in this task
+- Code generation is more stable than vulnerability detection (fewer context overflows)
 
 ### Legend
 

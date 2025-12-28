@@ -1,0 +1,31 @@
+{
+  "total_emissions": 0.8861381787654994,
+  "sessions": 5,
+  "session_history": [
+    {
+      "timestamp": "2025-12-27T16:57:18.713866",
+      "emissions_kg_co2": 0.10620439102364927,
+      "samples_processed": 164
+    },
+    {
+      "timestamp": "2025-12-27T19:37:29.958966",
+      "emissions_kg_co2": 0.4441145981474325,
+      "samples_processed": 142
+    },
+    {
+      "timestamp": "2025-12-27T20:00:12.663259",
+      "emissions_kg_co2": 0.06476007103152161,
+      "samples_processed": 58
+    },
+    {
+      "timestamp": "2025-12-27T21:35:14.706660",
+      "emissions_kg_co2": 0.27105580674883034,
+      "samples_processed": 53
+    },
+    {
+      "timestamp": "2025-12-27T23:13:57.174974",
+      "emissions_kg_co2": 3.3118140656325565e-06,
+      "samples_processed": 0
+    }
+  ]
+}
