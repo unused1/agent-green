@@ -23,15 +23,23 @@ while true; do
     EXIT_CODE=$?
 
     # Check sample count for robust completion detection
-    SAMPLES=$(wc -l < results/DA-*_detailed_results.jsonl 2>/dev/null | tr -d ' ' || echo "0")
+    # Use most recent results file to avoid counting old experiments
+    RESULTS_FILE=$(ls -t results/DA-vuln-*_detailed_results.jsonl 2>/dev/null | head -1)
+    if [ -n "$RESULTS_FILE" ]; then
+        SAMPLES=$(wc -l < "$RESULTS_FILE" | tr -d ' ')
+    else
+        SAMPLES=0
+    fi
 
-    if [ $EXIT_CODE -eq 0 ] || [ "$SAMPLES" -ge 380 ]; then
+    # ONLY use sample count for completion detection (exit code 0 is unreliable)
+    if [ "$SAMPLES" -ge 380 ]; then
         echo "========================================"
         echo "Experiment completed! ($SAMPLES/386 samples)"
         echo "========================================"
         break
     fi
-    echo "Error encountered (exit code: $EXIT_CODE). $SAMPLES/386 samples completed."
+
+    echo "Run ended (exit code: $EXIT_CODE). $SAMPLES/386 samples completed."
     echo "Restarting in 5 seconds..."
     sleep 5
 done

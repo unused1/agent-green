@@ -3,7 +3,7 @@
 **Purpose**: Replicate RQ1 and RQ2 experiments using alternative model architectures to validate generalizability of findings beyond Qwen3
 **Date**: November 26, 2025
 **Last Updated**: December 28, 2025
-**Status**: 🟡 PHASE 4 IN PROGRESS - RQ2 DA/MA 8B experiments (Dec 23-28, 2025). DA complete, MA Vuln complete, MA Code 3/4 complete (NM-48 running).
+**Status**: 🟡 PHASE 4 IN PROGRESS - RQ2 DA/MA experiments (Dec 23-28, 2025). 8B complete, 49B DA in progress (6/8 done, 2 running).
 
 ---
 
@@ -77,7 +77,11 @@ DeepSeek-R1-Distill-Llama models (8B and 70B) do **NOT support non-thinking mode
 - [x] Run DA 8B Code experiments (Dec 24-25, 2025) - **4/4 complete**
 - [x] Run MA 8B Vuln Instruct experiments (Dec 25-26, 2025) - **2/2 complete**
 - [x] Run MA 8B Vuln Thinking experiments (NM-31, NM-32) - **2/2 complete (Dec 27)**
-- [x] Run MA 8B Code experiments (NM-45 to NM-48) - **3/4 complete (Dec 28), NM-48 running**
+- [x] Run MA 8B Code experiments (NM-45 to NM-48) - **4/4 complete (Dec 28)**
+- [x] Run DA 49B Vuln experiments (NM-17 to NM-20) - **3/4 complete (Dec 28), NM-20 running**
+- [x] Run DA 49B Code Instruct experiments (NM-33, NM-34) - **2/2 complete (Dec 28)**
+- [ ] Run DA 49B Code Thinking experiments (NM-35, NM-36) - **0/2 running (Dec 28)**
+- [ ] Run MA 49B experiments (NM-25 to NM-28, NM-41 to NM-44)
 
 ---
 
@@ -161,7 +165,7 @@ ENABLE_REASONING=false:
 | Phase 2a | DeepSeek Validation | ❌ **FAILED** | See Blocker |
 | Phase 2b | **Nemotron Validation** | ✅ **PASSED** | 100% |
 | Phase 3 | RQ1 Experiments (16 SA) | ✅ Complete | 100% (16/16) - 8B + 49B SA complete |
-| Phase 4 | RQ2 Experiments (32 DA/MA) | 🟡 **IN PROGRESS** | 75% (12/16 8B) - DA complete, MA Vuln complete |
+| Phase 4 | RQ2 Experiments (32 DA/MA) | 🟡 **IN PROGRESS** | 66% (21/32) - 8B complete, 49B DA 5/8 done (3 running) |
 | Phase 5 | Analysis & Comparison | 🟡 **IN PROGRESS** | 8B SA analysis complete (see notebook) |
 
 ### Phase 1: Code Preparation Checklist
@@ -476,18 +480,18 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 
 | ID | Task | Model | Mode | Prompting | Status |
 |----|------|-------|------|-----------|--------|
-| NM-17 | Vuln | 49B | Instruct | Few-shot | ⏳ |
-| NM-18 | Vuln | 49B | Instruct | Zero-shot | ⏳ |
-| NM-19 | Vuln | 49B | Thinking | Few-shot | ⏳ |
-| NM-20 | Vuln | 49B | Thinking | Zero-shot | ⏳ |
+| NM-17 | Vuln | 49B | Instruct | Few-shot | ✅ Complete (Dec 28) |
+| NM-18 | Vuln | 49B | Instruct | Zero-shot | ✅ Complete (Dec 28) |
+| NM-19 | Vuln | 49B | Thinking | Few-shot | ✅ Complete (Dec 28) |
+| NM-20 | Vuln | 49B | Thinking | Zero-shot | 🔄 Running |
 | NM-21 | Vuln | 8B | Instruct | Few-shot | ✅ Complete (Dec 23) |
 | NM-22 | Vuln | 8B | Instruct | Zero-shot | ✅ Complete (Dec 23) |
 | NM-23 | Vuln | 8B | Thinking | Few-shot | ✅ Complete (Dec 23) |
 | NM-24 | Vuln | 8B | Thinking | Zero-shot | ✅ Complete (Dec 23) |
-| NM-33 | Code | 49B | Instruct | Few-shot | ⏳ |
-| NM-34 | Code | 49B | Instruct | Zero-shot | ⏳ |
-| NM-35 | Code | 49B | Thinking | Few-shot | ⏳ |
-| NM-36 | Code | 49B | Thinking | Zero-shot | ⏳ |
+| NM-33 | Code | 49B | Instruct | Few-shot | ✅ Complete (Dec 28) |
+| NM-34 | Code | 49B | Instruct | Zero-shot | ✅ Complete (Dec 28) |
+| NM-35 | Code | 49B | Thinking | Few-shot | 🔄 Running |
+| NM-36 | Code | 49B | Thinking | Zero-shot | 🔄 Running |
 | NM-37 | Code | 8B | Instruct | Few-shot | ✅ Complete (Dec 24) |
 | NM-38 | Code | 8B | Instruct | Zero-shot | ✅ Complete (Dec 24) |
 | NM-39 | Code | 8B | Thinking | Few-shot | ✅ Complete (Dec 25) |
@@ -512,7 +516,7 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-45 | Code | 8B | Instruct | Few-shot | ✅ Complete (Dec 27) |
 | NM-46 | Code | 8B | Instruct | Zero-shot | ✅ Complete (Dec 28) |
 | NM-47 | Code | 8B | Thinking | Few-shot | ✅ Complete (Dec 28) |
-| NM-48 | Code | 8B | Thinking | Zero-shot | 🔄 Running |
+| NM-48 | Code | 8B | Thinking | Zero-shot | ✅ Complete (Dec 28) |
 
 ### MA Context Length Observations (Dec 25-27, 2025)
 
@@ -563,13 +567,49 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | NM-45 (MA-few Instruct) | 1 | 96.95% | 0.54 | 164/164 samples, no restarts |
 | NM-46 (MA-zero Instruct) | 1 | 99.39% | 0.82 | 164/164 samples, no restarts |
 | NM-47 (MA-few Thinking) | 5 | 95.12% | 0.89 | Context overflows handled |
-| NM-48 (MA-zero Thinking) | - | - | - | 🔄 Running |
+| NM-48 (MA-zero Thinking) | 5 | 90.24% | 0.87 | Context overflows handled |
 
 **Key Findings (MA Code Gen)**:
 - Zero-shot Instruct achieves highest Pass@1 (99.39%) with moderate energy
 - Thinking mode requires more sessions due to context overflows but doesn't improve accuracy
 - Few-shot prompting slightly underperforms zero-shot in this task
 - Code generation is more stable than vulnerability detection (fewer context overflows)
+
+### 49B DA Observations (Dec 28, 2025)
+
+**Dual-Agent Vulnerability Detection (NM-17 to NM-20)**:
+
+| Experiment | Accuracy | F1 (Vuln) | Recall | Emissions (kg CO2) | Notes |
+|------------|----------|-----------|--------|-------------------|-------|
+| NM-17 (DA-few Instruct) | 52% | - | - | 0.63 | Fast execution |
+| NM-18 (DA-zero Instruct) | 52% | - | - | 0.63 | Fast execution |
+| NM-19 (DA-few Thinking) | 52% | - | - | 1.86 | ~3x more emissions than Instruct |
+| NM-20 (DA-zero Thinking) | - | - | - | - | 🔄 Running |
+
+**Dual-Agent Code Generation (NM-33 to NM-36)**:
+
+| Experiment | Pass@1 | Emissions (kg CO2) | Duration | Notes |
+|------------|--------|-------------------|----------|-------|
+| NM-33 (DA-few Instruct) | 100% | 0.05 | ~12 min | Extremely fast, perfect score |
+| NM-34 (DA-zero Instruct) | 99.39% | 0.08 | ~15 min | Near-perfect, very efficient |
+| NM-35 (DA-few Thinking) | - | - | - | 🔄 Running |
+| NM-36 (DA-zero Thinking) | - | - | - | 🔄 Running |
+
+**Key Findings (49B DA)**:
+- **DA Code Instruct is remarkably efficient**: ~100% Pass@1 in 12-15 minutes with 0.05-0.08 kg CO2
+- **49B outperforms 8B on DA Code**: 100% vs 96.95% Pass@1 for few-shot instruct
+- **Thinking mode ~3x slower for Vuln**: 1.86 kg vs 0.63 kg CO2 for same accuracy
+- **Accuracy plateau at 52%**: All 49B DA Vuln experiments show 52% accuracy (similar to 8B's ~50%)
+
+**Comparison: 8B vs 49B DA Code**:
+| Model | Mode | Prompting | Pass@1 | Emissions |
+|-------|------|-----------|--------|-----------|
+| 8B | Instruct | Few-shot | 99.39% | 0.24 kg |
+| 8B | Instruct | Zero-shot | 100% | 0.15 kg |
+| 49B | Instruct | Few-shot | 100% | 0.05 kg |
+| 49B | Instruct | Zero-shot | 99.39% | 0.08 kg |
+
+**Note**: 49B uses 2× H100 GPUs with tensor parallelism, enabling faster inference per sample despite larger model size. The higher throughput results in lower total emissions for the same experiment.
 
 ### Legend
 
