@@ -196,17 +196,22 @@ def extract_vulnerability_decision(review_board_response):
 
     Handles both Qwen3 (clean JSON) and Nemotron (markdown-wrapped JSON) formats.
 
-    Decision interpretation:
-    - Qwen3 uses: 'valid', 'partially valid', 'No vulnerability found'
-    - Nemotron uses: 'Accepted', 'Confirmed', 'Mitigated', 'Acknowledged', etc.
+    MA Workflow Context:
+    - Security Researcher reports vulnerabilities
+    - Code Author responds/disputes
+    - Moderator summarizes
+    - Review Board issues FINAL VERDICT on each vulnerability claim
 
-    Vulnerability signals (return 1):
-    - 'valid', 'partially valid', 'confirmed', 'critical', 'required'
-    - High/critical severity with acceptance
+    Decision Interpretation (Review Board validates/rejects the vulnerability claim):
 
-    Safe signals (return 0):
-    - 'no vulnerability', 'invalid', 'rejected', 'mitigated', 'resolved'
-    - 'acknowledged', 'no action' (theoretical concerns, not real vulns)
+    VULNERABLE (1) - RB accepts the vulnerability claim as valid:
+    - "confirmed", "accept", "valid", "partially valid"
+    - "critical", "high", "vulnerable"
+    - "accept with mitigation", "fix required"
+
+    SAFE (0) - RB rejects the claim OR says issue was addressed:
+    - "no vulnerability", "reject", "invalid", "safe", "not exploitable"
+    - "mitigated", "resolved", "fixed" (issue was addressed)
     """
     import re
 
@@ -224,37 +229,47 @@ def extract_vulnerability_decision(review_board_response):
 
         verdicts = json.loads(json_str)
 
-        # Step 3: Analyze verdicts with model-agnostic logic
+        # Step 3: Analyze each verdict
         vuln_signals = 0
         safe_signals = 0
 
         for v in verdicts:
-            decision = v.get('decision', '').lower()
-            severity = v.get('severity', '').lower()
+            decision = v.get('decision', '').lower().strip()
+            severity = v.get('severity', '').lower().strip()
 
-            # Explicit "no vulnerability" - definitely safe
-            if 'no vulnerability' in decision or 'invalid' in decision or 'rejected' in decision:
-                safe_signals += 2  # Strong safe signal
+            # === SAFE signals (RB rejects claim or says issue addressed) ===
+            if any(kw in decision for kw in ['no vulnerability', 'no_vulnerability', 'reject', 'invalid', 'safe', 'not exploitable']):
+                safe_signals += 2
+                continue
+            if any(kw in decision for kw in ['mitigated', 'resolved', 'fixed', 'patched']):
+                safe_signals += 2
                 continue
 
-            # Qwen3 style: 'valid' or 'partially valid'
+            # === VULNERABLE signals (RB accepts the vulnerability claim) ===
+            if any(kw in decision for kw in ['confirmed', 'vulnerable', 'exploitable']):
+                vuln_signals += 2
+                continue
             if decision in ['valid', 'partially valid']:
-                vuln_signals += 2  # Strong vuln signal
+                vuln_signals += 2
+                continue
+            if 'accept' in decision:
+                vuln_signals += 2
+                continue
+            if decision in ['critical', 'high', 'high severity', 'critical severity']:
+                vuln_signals += 2
+                continue
+            if any(kw in decision for kw in ['fix required', 'action required', 'requires fix']):
+                vuln_signals += 1
+                continue
+            if decision in ['medium', 'low', 'moderate', 'medium severity', 'low severity']:
+                vuln_signals += 1
                 continue
 
-            # Nemotron style decisions
-            # Safe signals: issue addressed or theoretical concern
-            if any(kw in decision for kw in ['mitigated', 'resolved', 'no action', 'monitoring', 'acknowledged']):
-                safe_signals += 1
-            # Vuln signals: confirmed real issue
-            elif any(kw in decision for kw in ['confirmed', 'required', 'critical']):
+            # === AMBIGUOUS - use severity field as tiebreaker ===
+            if severity in ['critical', 'high']:
                 vuln_signals += 1
-            # "Accepted" is ambiguous - check severity
-            elif 'accepted' in decision or 'accept' in decision:
-                if any(s in severity for s in ['high', 'critical']):
-                    vuln_signals += 1
-                else:
-                    safe_signals += 1  # Low/medium severity accepted = likely theoretical
+            elif severity in ['low', 'medium', 'moderate']:
+                safe_signals += 1
 
         # Build reasoning string
         reasoning = "; ".join(
@@ -263,19 +278,17 @@ def extract_vulnerability_decision(review_board_response):
         )
 
         # Decision: more vuln signals than safe signals = vulnerable
-        has_vulnerability = vuln_signals > safe_signals
+        # Tie goes to vulnerable (conservative for security)
+        has_vulnerability = vuln_signals >= safe_signals and vuln_signals > 0
         return (1 if has_vulnerability else 0), reasoning
 
     except Exception as e:
         # Fallback: keyword matching (but exclude overly broad terms)
         text = review_board_response.lower()
-        # Only trigger on strong vulnerability indicators, NOT on generic "vulnerability" word
         if any(k in text for k in ['confirmed vulnerability', 'critical vulnerability', 'exploitable']):
             return 1, review_board_response
-        # Check for explicit safe signals
-        if any(k in text for k in ['no vulnerability', 'not vulnerable', 'safe']):
+        if any(k in text for k in ['no vulnerability', 'not vulnerable', 'safe', 'mitigated', 'resolved']):
             return 0, review_board_response
-        # Default to safe if we can't parse (avoid false positives)
         return 0, f"Parse error: {e}"
 
 

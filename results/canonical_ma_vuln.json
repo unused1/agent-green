@@ -1,0 +1,346 @@
+{
+  "generated_at": "2025-12-30T00:39:28.578345",
+  "filters": {
+    "task": "vuln",
+    "design": "MA",
+    "include_mars": false
+  },
+  "summary": {
+    "total_found": 15,
+    "canonical": 15,
+    "excluded": 0
+  },
+  "canonical": [
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_8b_vuln_MA-few_instruct/MA-vuln-four-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-111018_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-111018_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Nano-8B",
+      "model_family": "Nemotron",
+      "parameters_b": 8,
+      "mode": "instruct",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 384,
+        "vuln_predictions": 363,
+        "safe_predictions": 4,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 191,
+        "has_review_board": 367,
+        "errors": 19
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_8b_vuln_MA-few_think/MA-vuln-four-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251226-131456_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251226-131456_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Nano-8B",
+      "model_family": "Nemotron",
+      "parameters_b": 8,
+      "mode": "thinking",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 384,
+        "vuln_predictions": 344,
+        "safe_predictions": 6,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 191,
+        "has_review_board": 350,
+        "errors": 37
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_8b_vuln_MA-zero_instruct/MA-vuln-four-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-103040_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-103040_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Nano-8B",
+      "model_family": "Nemotron",
+      "parameters_b": 8,
+      "mode": "instruct",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 384,
+        "vuln_predictions": 359,
+        "safe_predictions": 0,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 191,
+        "has_review_board": 359,
+        "errors": 45
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_8b_vuln_MA-zero_think/MA-vuln-four-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251226-132727_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251226-132727_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Nano-8B",
+      "model_family": "Nemotron",
+      "parameters_b": 8,
+      "mode": "thinking",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 384,
+        "vuln_predictions": 340,
+        "safe_predictions": 5,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 191,
+        "has_review_board": 345,
+        "errors": 52
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_49b_vuln_MA-few_instruct/MA-vuln-four-few_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251228-214947_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-few_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251228-214947_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Super-49B",
+      "model_family": "Nemotron",
+      "parameters_b": 49,
+      "mode": "instruct",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 386,
+        "safe_predictions": 0,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 386,
+        "errors": 2
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_49b_vuln_MA-few_think/MA-vuln-four-few_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251229-031939_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-few_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251229-031939_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Super-49B",
+      "model_family": "Nemotron",
+      "parameters_b": 49,
+      "mode": "thinking",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 384,
+        "vuln_predictions": 373,
+        "safe_predictions": 10,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 191,
+        "has_review_board": 383,
+        "errors": 6
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_49b_vuln_MA-zero_instruct/MA-vuln-four-zero_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251229-031838_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-zero_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251229-031838_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Super-49B",
+      "model_family": "Nemotron",
+      "parameters_b": 49,
+      "mode": "instruct",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 386,
+        "safe_predictions": 0,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 386,
+        "errors": 2
+      }
+    },
+    {
+      "file_path": "results/runpod_rq2_pod3/MA-vuln-four-few_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-011412_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-few_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-011412_detailed_results.jsonl",
+      "source_type": "runpod_rq2",
+      "priority": 2,
+      "model": "Qwen3-4B-Instruct",
+      "model_family": "Qwen",
+      "parameters_b": 4,
+      "mode": "instruct",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 44,
+        "safe_predictions": 342,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 386,
+        "errors": 2
+      }
+    },
+    {
+      "file_path": "results/runpod_rq2_pod4/MA-vuln-four-few_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-051514_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-few_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-051514_detailed_results.jsonl",
+      "source_type": "runpod_rq2",
+      "priority": 2,
+      "model": "Qwen3-4B-Thinking",
+      "model_family": "Qwen",
+      "parameters_b": 4,
+      "mode": "thinking",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 385,
+        "vuln_predictions": 375,
+        "safe_predictions": 2,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 192,
+        "has_review_board": 377,
+        "errors": 11
+      }
+    },
+    {
+      "file_path": "results/runpod_rq2_pod1/results/MA-vuln-four-zero_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-005140_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-zero_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-005140_detailed_results.jsonl",
+      "source_type": "runpod_rq2",
+      "priority": 2,
+      "model": "Qwen3-4B-Instruct",
+      "model_family": "Qwen",
+      "parameters_b": 4,
+      "mode": "instruct",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 384,
+        "vuln_predictions": 380,
+        "safe_predictions": 0,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 191,
+        "has_review_board": 380,
+        "errors": 5
+      }
+    },
+    {
+      "file_path": "results/runpod_rq2_pod2/MA-vuln-four-zero_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-052135_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-zero_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-052135_detailed_results.jsonl",
+      "source_type": "runpod_rq2",
+      "priority": 2,
+      "model": "Qwen3-4B-Thinking",
+      "model_family": "Qwen",
+      "parameters_b": 4,
+      "mode": "thinking",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 384,
+        "vuln_predictions": 375,
+        "safe_predictions": 3,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 191,
+        "has_review_board": 378,
+        "errors": 6
+      }
+    },
+    {
+      "file_path": "results/runpod_rq2_pod7/results/MA-vuln-four-few_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-043150_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-few_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-043150_detailed_results.jsonl",
+      "source_type": "runpod_rq2",
+      "priority": 2,
+      "model": "Qwen3-30B-A3B-Instruct",
+      "model_family": "Qwen",
+      "parameters_b": 30,
+      "mode": "instruct",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 289,
+        "safe_predictions": 97,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 386,
+        "errors": 11
+      }
+    },
+    {
+      "file_path": "results/runpod_rq2_pod8/MA-vuln-four-few_shot_Qwen-Qwen3-30B-A3B-Thinking-2507_20251116-090122_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-few_shot_Qwen-Qwen3-30B-A3B-Thinking-2507_20251116-090122_detailed_results.jsonl",
+      "source_type": "runpod_rq2",
+      "priority": 2,
+      "model": "Qwen3-30B-A3B-Thinking",
+      "model_family": "Qwen",
+      "parameters_b": 30,
+      "mode": "thinking",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 384,
+        "vuln_predictions": 376,
+        "safe_predictions": 2,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 191,
+        "has_review_board": 378,
+        "errors": 12
+      }
+    },
+    {
+      "file_path": "results/runpod_rq2_pod5/results/MA-vuln-four-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-032753_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-032753_detailed_results.jsonl",
+      "source_type": "runpod_rq2",
+      "priority": 2,
+      "model": "Qwen3-30B-A3B-Instruct",
+      "model_family": "Qwen",
+      "parameters_b": 30,
+      "mode": "instruct",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 386,
+        "safe_predictions": 0,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 386,
+        "errors": 3
+      }
+    },
+    {
+      "file_path": "results/runpod_rq2_pod6/MA-vuln-four-zero_shot_Qwen-Qwen3-30B-A3B-Thinking-2507_20251116-091327_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-zero_shot_Qwen-Qwen3-30B-A3B-Thinking-2507_20251116-091327_detailed_results.jsonl",
+      "source_type": "runpod_rq2",
+      "priority": 2,
+      "model": "Qwen3-30B-A3B-Thinking",
+      "model_family": "Qwen",
+      "parameters_b": 30,
+      "mode": "thinking",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 385,
+        "vuln_predictions": 379,
+        "safe_predictions": 1,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 192,
+        "has_review_board": 380,
+        "errors": 8
+      }
+    }
+  ],
+  "excluded": []
+}

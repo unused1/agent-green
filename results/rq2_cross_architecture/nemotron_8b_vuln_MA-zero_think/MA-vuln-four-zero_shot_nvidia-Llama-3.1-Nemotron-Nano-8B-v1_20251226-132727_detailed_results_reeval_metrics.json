@@ -1,0 +1,31 @@
+{
+  "original_file": "results/rq2_cross_architecture/nemotron_8b_vuln_MA-zero_think/MA-vuln-four-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251226-132727_detailed_results.jsonl",
+  "corrected_file": "results/rq2_cross_architecture/nemotron_8b_vuln_MA-zero_think/MA-vuln-four-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251226-132727_detailed_results_corrected.jsonl",
+  "timestamp": "2025-12-30T01:15:23.512919",
+  "total_samples": 345,
+  "ground_truth": {
+    "vuln": 171,
+    "safe": 174
+  },
+  "original": {
+    "vuln_predictions": 340,
+    "accuracy": 0.5043478260869565,
+    "distribution": {
+      "1": 340,
+      "0": 5
+    }
+  },
+  "corrected": {
+    "vuln_predictions": 46,
+    "accuracy": 0.5101449275362319,
+    "distribution": {
+      "0": 299,
+      "1": 46
+    }
+  },
+  "changes": 294,
+  "parse_stats": {
+    "parsed": 182,
+    "fallback": 163
+  }
+}
