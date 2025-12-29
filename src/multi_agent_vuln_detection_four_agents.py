@@ -192,20 +192,91 @@ def append_result(result, detailed_file, csv_file):
 
 
 def extract_vulnerability_decision(review_board_response):
-    """Parse review board response into (decision, reasoning)"""
+    """Parse review board response into (decision, reasoning)
+
+    Handles both Qwen3 (clean JSON) and Nemotron (markdown-wrapped JSON) formats.
+
+    Decision interpretation:
+    - Qwen3 uses: 'valid', 'partially valid', 'No vulnerability found'
+    - Nemotron uses: 'Accepted', 'Confirmed', 'Mitigated', 'Acknowledged', etc.
+
+    Vulnerability signals (return 1):
+    - 'valid', 'partially valid', 'confirmed', 'critical', 'required'
+    - High/critical severity with acceptance
+
+    Safe signals (return 0):
+    - 'no vulnerability', 'invalid', 'rejected', 'mitigated', 'resolved'
+    - 'acknowledged', 'no action' (theoretical concerns, not real vulns)
+    """
+    import re
+
     try:
-        verdicts = json.loads(review_board_response.strip())
-        has_vulnerability = any(v.get('decision') in ['valid', 'partially valid'] for v in verdicts)
+        # Step 1: Strip markdown code blocks (handles Nemotron's format)
+        text = re.sub(r'```(?:json)?\s*', '', review_board_response)
+        text = re.sub(r'```\s*', '', text)
+
+        # Step 2: Extract JSON array from response
+        match = re.search(r'(\[[\s\S]*\])', text)
+        if match:
+            json_str = match.group(1)
+        else:
+            json_str = text.strip()
+
+        verdicts = json.loads(json_str)
+
+        # Step 3: Analyze verdicts with model-agnostic logic
+        vuln_signals = 0
+        safe_signals = 0
+
+        for v in verdicts:
+            decision = v.get('decision', '').lower()
+            severity = v.get('severity', '').lower()
+
+            # Explicit "no vulnerability" - definitely safe
+            if 'no vulnerability' in decision or 'invalid' in decision or 'rejected' in decision:
+                safe_signals += 2  # Strong safe signal
+                continue
+
+            # Qwen3 style: 'valid' or 'partially valid'
+            if decision in ['valid', 'partially valid']:
+                vuln_signals += 2  # Strong vuln signal
+                continue
+
+            # Nemotron style decisions
+            # Safe signals: issue addressed or theoretical concern
+            if any(kw in decision for kw in ['mitigated', 'resolved', 'no action', 'monitoring', 'acknowledged']):
+                safe_signals += 1
+            # Vuln signals: confirmed real issue
+            elif any(kw in decision for kw in ['confirmed', 'required', 'critical']):
+                vuln_signals += 1
+            # "Accepted" is ambiguous - check severity
+            elif 'accepted' in decision or 'accept' in decision:
+                if any(s in severity for s in ['high', 'critical']):
+                    vuln_signals += 1
+                else:
+                    safe_signals += 1  # Low/medium severity accepted = likely theoretical
+
+        # Build reasoning string
         reasoning = "; ".join(
-            f"{v.get('vulnerability','Unknown')}: {v.get('decision','Unknown')} ({v.get('reason','No reason')})"
+            f"{v.get('vulnerability','Unknown')}: {v.get('decision','Unknown')} ({v.get('reason','No reason')[:100]})"
             for v in verdicts
         )
+
+        # Decision: more vuln signals than safe signals = vulnerable
+        has_vulnerability = vuln_signals > safe_signals
         return (1 if has_vulnerability else 0), reasoning
-    except Exception:
+
+    except Exception as e:
+        # Fallback: keyword matching (but exclude overly broad terms)
         text = review_board_response.lower()
-        if any(k in text for k in ['valid', 'vulnerability', 'security risk']):
+        # Only trigger on strong vulnerability indicators, NOT on generic "vulnerability" word
+        if any(k in text for k in ['confirmed vulnerability', 'critical vulnerability', 'exploitable']):
             return 1, review_board_response
-        return 0, review_board_response
+        # Check for explicit safe signals
+        if any(k in text for k in ['no vulnerability', 'not vulnerable', 'safe']):
+            return 0, review_board_response
+        # Default to safe if we can't parse (avoid false positives)
+        return 0, f"Parse error: {e}"
 
 
 # --- Inference with Emissions ---
