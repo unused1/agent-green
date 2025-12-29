@@ -93,15 +93,15 @@ def evaluate_code_generation(results_file, k=[1]):
     """Evaluate code generation results"""
     # Load the evaluation function
     code_eval = load("code_eval")
-    
+
     # Read results file
     data = []
     with open(results_file, 'r') as f:
         for line in f:
             data.append(json.loads(line.strip()))
-    
+
     df = pd.DataFrame(data)
-    
+
     # Handle different field names
     if 'test_cases' in df.columns:
         test_cases = df['test_cases'].tolist()
@@ -109,32 +109,63 @@ def evaluate_code_generation(results_file, k=[1]):
         test_cases = df['test'].tolist()
     else:
         raise ValueError(f"No test cases field found. Available: {df.columns.tolist()}")
-    
+
     if 'prediction' in df.columns:
         prediction_field = 'prediction'
     elif 'generated_solution' in df.columns:
         prediction_field = 'generated_solution'
     else:
         raise ValueError(f"No prediction field found. Available: {df.columns.tolist()}")
-    
+
+    # Check for skipped samples
+    has_skipped = 'skipped' in df.columns
+    skipped_count = df['skipped'].sum() if has_skipped else 0
+    if skipped_count > 0:
+        print(f"WARNING: Found {skipped_count} skipped samples - these will be marked as FAILED")
+
     # Prepare candidates
     candidates = []
     df['cleaned_prediction'] = ""
-    
+    df['is_empty_or_skipped'] = False
+
     for index in range(len(df)):
         prediction = df[prediction_field].iloc[index]
-        
+
+        # Check if sample was skipped or has empty solution
+        is_skipped = has_skipped and df['skipped'].iloc[index] == True
+        is_empty = not prediction or (isinstance(prediction, str) and len(prediction.strip()) == 0)
+
+        if is_skipped or is_empty:
+            df.loc[index, 'is_empty_or_skipped'] = True
+            df.loc[index, "cleaned_prediction"] = ""
+            # Use intentionally failing code for empty/skipped samples
+            # This ensures they are properly evaluated as failed
+            candidates.append(["# SKIPPED OR EMPTY - INTENTIONAL FAIL\nraise RuntimeError('Sample was skipped or had empty solution')"])
+            continue
+
         # Extract actual code
         cleaned_prediction = extract_code_from_prediction(prediction)
-        
+
+        # Also check if cleaned prediction is empty
+        if not cleaned_prediction or len(cleaned_prediction.strip()) == 0:
+            df.loc[index, 'is_empty_or_skipped'] = True
+            df.loc[index, "cleaned_prediction"] = ""
+            candidates.append(["# EMPTY AFTER EXTRACTION - INTENTIONAL FAIL\nraise RuntimeError('No code could be extracted from solution')"])
+            continue
+
         # Store cleaned prediction
         df.loc[index, "cleaned_prediction"] = cleaned_prediction
         candidates.append([cleaned_prediction])
-    
+
+    # Report empty/skipped statistics
+    empty_skipped_count = df['is_empty_or_skipped'].sum()
+    if empty_skipped_count > 0:
+        print(f"Total empty/skipped samples that will fail: {empty_skipped_count}")
+
     # Compute pass@k
     print(f"Evaluating pass@{k}...")
     pass_at_k, results = code_eval.compute(references=test_cases, predictions=candidates, k=k)
-    
+
     return pass_at_k, results, df
 
 def copy_test_results_to_df(df, results):
