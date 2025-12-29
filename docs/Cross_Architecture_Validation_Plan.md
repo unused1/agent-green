@@ -2,8 +2,8 @@
 
 **Purpose**: Replicate RQ1 and RQ2 experiments using alternative model architectures to validate generalizability of findings beyond Qwen3
 **Date**: November 26, 2025
-**Last Updated**: December 29, 2025
-**Status**: 🟡 PHASE 4 IN PROGRESS - RQ2 DA/MA experiments (Dec 23-29, 2025). 8B complete, 49B DA complete (8/8 done). 49B MA in progress (3 running).
+**Last Updated**: December 30, 2025
+**Status**: 🟡 PHASE 4 IN PROGRESS - RQ2 DA/MA experiments (Dec 23-30, 2025). 8B complete, 49B DA complete (8/8 done). 49B MA Vuln 3/4 complete (NM-28 at 52%). MA Code pending.
 
 ---
 
@@ -503,8 +503,8 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 |----|------|-------|------|-----------|--------|
 | NM-25 | Vuln | 49B | Instruct | Few-shot | ✅ Complete (Dec 29) |
 | NM-26 | Vuln | 49B | Instruct | Zero-shot | ✅ Complete (Dec 29) |
-| NM-27 | Vuln | 49B | Thinking | Few-shot | 🔄 Running |
-| NM-28 | Vuln | 49B | Thinking | Zero-shot | 🔄 Running |
+| NM-27 | Vuln | 49B | Thinking | Few-shot | ✅ Complete (Dec 30) |
+| NM-28 | Vuln | 49B | Thinking | Zero-shot | 🔄 Running (52%) |
 | NM-29 | Vuln | 8B | Instruct | Few-shot | ✅ Complete (Dec 25) |
 | NM-30 | Vuln | 8B | Instruct | Zero-shot | ✅ Complete (Dec 26) |
 | NM-31 | Vuln | 8B | Thinking | Few-shot | ✅ Complete (Dec 27) |
@@ -538,7 +538,7 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | Thinking | Few-shot | 49% | 0.66 | 98% | 1.95 kg |
 | Thinking | Zero-shot | 51% | 0.67 | 99% | 2.20 kg |
 
-> **⚠️ EXTRACTION BUG IDENTIFIED (Dec 29, 2025)**: The metrics above are affected by a JSON extraction bug. Nemotron wraps Review Board JSON in markdown code blocks, causing parsing to fail and the fallback to trigger on the word "vulnerability" (always present). This resulted in ~100% of samples being predicted as vulnerable. See `docs/MA_Vuln_Investigation_NM25_NM26.md` for full investigation. Fix committed in `c8793c6`. After re-processing with fixed extraction, accuracy improves slightly (50-54%) but remains limited due to fundamental MA Vuln design issues.
+> **⚠️ EXTRACTION BUG IDENTIFIED & FIXED (Dec 29-30, 2025)**: The metrics above were affected by a JSON extraction bug. Nemotron wraps Review Board JSON in markdown code blocks, causing parsing to fail. **All 15 MA Vuln experiments have been re-evaluated** using corrected extraction logic (`scripts/reeval_ma_vuln.py`). Results: 66% of predictions changed, accuracy remains ~50% (random level). See `docs/Vuln_Extraction_Reliability_Analysis.md` for full details.
 
 **Note on "Skipped" Samples**: The original dataset (`VulTrial_386_samples_balanced.jsonl`) contains 386 lines but only 384 unique samples (idx 349259 and 439495 are duplicated). MA experiments correctly process all 384 unique samples.
 
