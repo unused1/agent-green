@@ -1,0 +1,90 @@
+=== Batch Code Re-evaluation ===
+Started: Mon Dec 29 06:04:03 UTC 2025
+
+Total files to evaluate: 27
+
+[1/27] Evaluating: DA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-104625_detailed_results.jsonl
+  -> Pass@1: 0.9939
+
+[2/27] Evaluating: DA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-002517_detailed_results.jsonl
+  -> Pass@1: 0.8963
+
+[3/27] Evaluating: DA-code-few_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251228-131816_detailed_results.jsonl
+  -> Pass@1: 0.9268
+
+[4/27] Evaluating: DA-code-few_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251228-132830_detailed_results.jsonl
+  -> Pass@1: 0.9939
+
+[5/27] Evaluating: DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-015107_detailed_results.jsonl
+  -> Pass@1: 0.9634
+
+[6/27] Evaluating: DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-144230_detailed_results.jsonl
+  -> Pass@1: 0.9146
+
+[7/27] Evaluating: DA-code-zero_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251228-141231_detailed_results.jsonl
+  -> Pass@1: 0.9878
+
+[8/27] Evaluating: MA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-125849_detailed_results.jsonl
+  -> Pass@1: 0.9634
+
+[9/27] Evaluating: MA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-162009_detailed_results.jsonl
+  -> Pass@1: 0.9268
+
+[10/27] Evaluating: MA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-132809_detailed_results.jsonl
+  -> Pass@1: 0.9878
+
+[11/27] Evaluating: MA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-232350_detailed_results.jsonl
+  -> Pass@1: 0.8780
+
+[12/27] Evaluating: DA-code-few_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-042302_detailed_results.jsonl
+  -> Pass@1: 0.9024
+
+[13/27] Evaluating: DA-code-few_shot_Qwen-Qwen3-30B-A3B-Thinking-2507_20251116-070752_detailed_results.jsonl
+  -> Pass@1: 0.9207
+
+[14/27] Evaluating: DA-code-few_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-005950_detailed_results.jsonl
+  -> Pass@1: 0.9939
+
+[15/27] Evaluating: DA-code-few_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-035603_detailed_results.jsonl
+  -> Pass@1: 0.8841
+
+[16/27] Evaluating: DA-code-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-031151_detailed_results.jsonl
+  -> Pass@1: 0.9695
+
+[17/27] Evaluating: DA-code-zero_shot_Qwen-Qwen3-30B-A3B-Thinking-2507_20251116-072218_detailed_results.jsonl
+  -> Pass@1: 0.9041
+
+[18/27] Evaluating: DA-code-zero_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-003629_detailed_results.jsonl
+  -> Pass@1: 0.8963
+
+[19/27] Evaluating: DA-code-zero_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-040031_detailed_results.jsonl
+  -> Pass@1: 0.9085
+
+[20/27] Evaluating: MA-code-few_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-052753_detailed_results.jsonl
+  -> Pass@1: 0.9939
+
+[21/27] Evaluating: MA-code-few_shot_Qwen-Qwen3-30B-A3B-Thinking-2507_20251116-154627_detailed_results.jsonl
+  -> Pass@1: 0.9756
+
+[22/27] Evaluating: MA-code-few_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-022158_detailed_results.jsonl
+  -> Pass@1: 0.9939
+
+[23/27] Evaluating: MA-code-few_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-130051_detailed_results.jsonl
+  -> Pass@1: 0.9634
+
+[24/27] Evaluating: MA-code-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-051047_detailed_results.jsonl
+  -> Pass@1: 0.9878
+
+[25/27] Evaluating: MA-code-zero_shot_Qwen-Qwen3-30B-A3B-Thinking-2507_20251116-162809_detailed_results.jsonl
+  -> Pass@1: 0.9817
+
+[26/27] Evaluating: MA-code-zero_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-034744_detailed_results.jsonl
+  -> Pass@1: 0.9939
+
+[27/27] Evaluating: MA-code-zero_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-133536_detailed_results.jsonl
+  -> Pass@1: 0.9817
+
+=== Re-evaluation Complete ===
+Finished: Mon Dec 29 06:09:12 UTC 2025
+
+Summary saved to: results_reeval/reeval_summary.txt

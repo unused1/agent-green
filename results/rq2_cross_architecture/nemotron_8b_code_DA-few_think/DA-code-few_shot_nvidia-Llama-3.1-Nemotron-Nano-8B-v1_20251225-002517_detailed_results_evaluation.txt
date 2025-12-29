@@ -3,17 +3,17 @@ CODE GENERATION EVALUATION RESULTS
 ================================================================================
 
 Model: DA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-002517_detailed_results
-Timestamp: 2025-12-25 07:40:23
-Results File: /workspace/agent-green/results/DA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-002517_detailed_results.jsonl
+Timestamp: 2025-12-29 06:04:26
+Results File: results_reeval/nemotron/DA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-002517_detailed_results.jsonl
 
 --------------------------------------------------------------------------------
 SUMMARY METRICS
 --------------------------------------------------------------------------------
-Pass@1 Score: 0.9024
+Pass@1 Score: 0.8963
 Total Samples: 164
-Passed Samples: 148
-Failed Samples: 16
-Pass Rate: 90.24%
+Passed Samples: 147
+Failed Samples: 17
+Pass Rate: 89.63%
 
 --------------------------------------------------------------------------------
 PER-SAMPLE RESULTS
@@ -119,7 +119,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/97: passed
 ✓ HumanEval/98: passed
 ✓ HumanEval/99: passed
-✓ HumanEval/100: passed
+✗ HumanEval/100: failed: Sample was skipped or had empty solution
 ✓ HumanEval/101: passed
 ✗ HumanEval/102: failed: unterminated string literal (detected at line 61) (<string>, line 61)
 ✓ HumanEval/103: passed

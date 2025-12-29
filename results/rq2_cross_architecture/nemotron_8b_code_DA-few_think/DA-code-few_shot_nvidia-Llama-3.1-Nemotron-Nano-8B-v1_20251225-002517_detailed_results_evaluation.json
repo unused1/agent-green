@@ -1,13 +1,13 @@
 {
   "model": "DA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-002517_detailed_results",
-  "timestamp": "2025-12-25 07:40:23",
-  "results_file": "/workspace/agent-green/results/DA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-002517_detailed_results.jsonl",
+  "timestamp": "2025-12-29 06:04:26",
+  "results_file": "results_reeval/nemotron/DA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251225-002517_detailed_results.jsonl",
   "metrics": {
-    "pass@1": 0.9024390243902439,
+    "pass@1": 0.8963414634146342,
     "total_samples": 164,
-    "passed_samples": 148,
-    "failed_samples": 16,
-    "pass_rate_percentage": 90.2439024390244
+    "passed_samples": 147,
+    "failed_samples": 17,
+    "pass_rate_percentage": 89.63414634146342
   },
   "per_sample_results": [
     {
@@ -512,8 +512,8 @@
     },
     {
       "task_id": "HumanEval/100",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/101",

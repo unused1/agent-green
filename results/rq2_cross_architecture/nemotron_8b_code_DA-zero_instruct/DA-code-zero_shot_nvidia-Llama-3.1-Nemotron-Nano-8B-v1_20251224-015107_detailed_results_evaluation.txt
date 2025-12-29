@@ -3,17 +3,17 @@ CODE GENERATION EVALUATION RESULTS
 ================================================================================
 
 Model: DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-015107_detailed_results
-Timestamp: 2025-12-24 10:28:28
-Results File: /workspace/agent-green/results/DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-015107_detailed_results.jsonl
+Timestamp: 2025-12-29 06:05:00
+Results File: results_reeval/nemotron/DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-015107_detailed_results.jsonl
 
 --------------------------------------------------------------------------------
 SUMMARY METRICS
 --------------------------------------------------------------------------------
-Pass@1 Score: 0.9817
+Pass@1 Score: 0.9634
 Total Samples: 164
-Passed Samples: 161
-Failed Samples: 3
-Pass Rate: 98.17%
+Passed Samples: 158
+Failed Samples: 6
+Pass Rate: 96.34%
 
 --------------------------------------------------------------------------------
 PER-SAMPLE RESULTS
@@ -60,7 +60,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/38: passed
 ✓ HumanEval/39: passed
 ✓ HumanEval/40: passed
-✓ HumanEval/41: passed
+✗ HumanEval/41: failed: Sample was skipped or had empty solution
 ✓ HumanEval/42: passed
 ✓ HumanEval/43: passed
 ✓ HumanEval/44: passed
@@ -134,7 +134,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/112: passed
 ✓ HumanEval/113: passed
 ✓ HumanEval/114: passed
-✓ HumanEval/115: passed
+✗ HumanEval/115: failed: Sample was skipped or had empty solution
 ✓ HumanEval/116: passed
 ✓ HumanEval/117: passed
 ✓ HumanEval/118: passed
@@ -149,7 +149,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/127: passed
 ✓ HumanEval/128: passed
 ✓ HumanEval/129: passed
-✓ HumanEval/130: passed
+✗ HumanEval/130: failed: Sample was skipped or had empty solution
 ✓ HumanEval/131: passed
 ✓ HumanEval/132: passed
 ✓ HumanEval/133: passed

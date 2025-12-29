@@ -1,13 +1,13 @@
 {
   "model": "DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-144230_detailed_results",
-  "timestamp": "2025-12-24 23:49:56",
-  "results_file": "/workspace/agent-green/results/DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-144230_detailed_results.jsonl",
+  "timestamp": "2025-12-29 06:05:13",
+  "results_file": "results_reeval/nemotron/DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-144230_detailed_results.jsonl",
   "metrics": {
-    "pass@1": 0.9512195121951219,
+    "pass@1": 0.9146341463414634,
     "total_samples": 164,
-    "passed_samples": 156,
-    "failed_samples": 8,
-    "pass_rate_percentage": 95.1219512195122
+    "passed_samples": 150,
+    "failed_samples": 14,
+    "pass_rate_percentage": 91.46341463414635
   },
   "per_sample_results": [
     {
@@ -282,8 +282,8 @@
     },
     {
       "task_id": "HumanEval/54",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/55",
@@ -577,8 +577,8 @@
     },
     {
       "task_id": "HumanEval/113",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/114",
@@ -592,8 +592,8 @@
     },
     {
       "task_id": "HumanEval/116",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/117",
@@ -662,8 +662,8 @@
     },
     {
       "task_id": "HumanEval/130",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/131",
@@ -672,8 +672,8 @@
     },
     {
       "task_id": "HumanEval/132",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/133",
@@ -682,8 +682,8 @@
     },
     {
       "task_id": "HumanEval/134",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/135",

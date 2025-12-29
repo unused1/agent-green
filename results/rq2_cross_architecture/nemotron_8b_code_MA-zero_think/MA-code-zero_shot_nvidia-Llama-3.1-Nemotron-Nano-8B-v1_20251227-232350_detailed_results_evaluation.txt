@@ -3,17 +3,17 @@ CODE GENERATION EVALUATION RESULTS
 ================================================================================
 
 Model: MA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-232350_detailed_results
-Timestamp: 2025-12-28 04:27:05
-Results File: /workspace/agent-green/results/MA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-232350_detailed_results.jsonl
+Timestamp: 2025-12-29 06:06:11
+Results File: results_reeval/nemotron/MA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-232350_detailed_results.jsonl
 
 --------------------------------------------------------------------------------
 SUMMARY METRICS
 --------------------------------------------------------------------------------
-Pass@1 Score: 0.9024
+Pass@1 Score: 0.8780
 Total Samples: 164
-Passed Samples: 148
-Failed Samples: 16
-Pass Rate: 90.24%
+Passed Samples: 144
+Failed Samples: 20
+Pass Rate: 87.80%
 
 --------------------------------------------------------------------------------
 PER-SAMPLE RESULTS
@@ -29,7 +29,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/7: passed
 ✓ HumanEval/8: passed
 ✓ HumanEval/9: passed
-✓ HumanEval/10: passed
+✗ HumanEval/10: failed: Sample was skipped or had empty solution
 ✓ HumanEval/11: passed
 ✓ HumanEval/12: passed
 ✓ HumanEval/13: passed
@@ -130,7 +130,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/108: passed
 ✓ HumanEval/109: passed
 ✓ HumanEval/110: passed
-✓ HumanEval/111: passed
+✗ HumanEval/111: failed: Sample was skipped or had empty solution
 ✓ HumanEval/112: passed
 ✓ HumanEval/113: passed
 ✓ HumanEval/114: passed
@@ -138,7 +138,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/116: passed
 ✓ HumanEval/117: passed
 ✓ HumanEval/118: passed
-✓ HumanEval/119: passed
+✗ HumanEval/119: failed: Sample was skipped or had empty solution
 ✓ HumanEval/120: passed
 ✓ HumanEval/121: passed
 ✓ HumanEval/122: passed
@@ -152,7 +152,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/130: passed
 ✓ HumanEval/131: passed
 ✗ HumanEval/132: failed: unterminated string literal (detected at line 30) (<string>, line 30)
-✓ HumanEval/133: passed
+✗ HumanEval/133: failed: Sample was skipped or had empty solution
 ✓ HumanEval/134: passed
 ✓ HumanEval/135: passed
 ✓ HumanEval/136: passed

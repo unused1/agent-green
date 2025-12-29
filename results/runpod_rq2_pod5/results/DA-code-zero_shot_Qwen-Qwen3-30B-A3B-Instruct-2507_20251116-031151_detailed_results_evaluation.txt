@@ -3,17 +3,17 @@ CODE GENERATION EVALUATION RESULTS
 ================================================================================
 
 Model: DA-code-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-031151_detailed_results
-Timestamp: 2025-11-16 03:18:48
-Results File: /workspace/agent-green/results/DA-code-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-031151_detailed_results.jsonl
+Timestamp: 2025-12-29 06:07:06
+Results File: results_reeval/qwen_rq2/DA-code-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-031151_detailed_results.jsonl
 
 --------------------------------------------------------------------------------
 SUMMARY METRICS
 --------------------------------------------------------------------------------
-Pass@1 Score: 0.9756
+Pass@1 Score: 0.9695
 Total Samples: 164
-Passed Samples: 160
-Failed Samples: 4
-Pass Rate: 97.56%
+Passed Samples: 159
+Failed Samples: 5
+Pass Rate: 96.95%
 
 --------------------------------------------------------------------------------
 PER-SAMPLE RESULTS
@@ -119,7 +119,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/97: passed
 ✓ HumanEval/98: passed
 ✓ HumanEval/99: passed
-✓ HumanEval/100: passed
+✗ HumanEval/100: failed: Sample was skipped or had empty solution
 ✓ HumanEval/101: passed
 ✓ HumanEval/102: passed
 ✓ HumanEval/103: passed

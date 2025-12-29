@@ -1,13 +1,13 @@
 {
   "model": "MA-code-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-051047_detailed_results",
-  "timestamp": "2025-11-16 05:41:18",
-  "results_file": "/workspace/agent-green/results/MA-code-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-051047_detailed_results.jsonl",
+  "timestamp": "2025-12-29 06:08:36",
+  "results_file": "results_reeval/qwen_rq2/MA-code-zero_shot_Qwen-Qwen3-30B-A3B-Instruct-2507_20251116-051047_detailed_results.jsonl",
   "metrics": {
-    "pass@1": 0.9939024390243902,
+    "pass@1": 0.9878048780487805,
     "total_samples": 164,
-    "passed_samples": 163,
-    "failed_samples": 1,
-    "pass_rate_percentage": 99.39024390243902
+    "passed_samples": 162,
+    "failed_samples": 2,
+    "pass_rate_percentage": 98.78048780487805
   },
   "per_sample_results": [
     {
@@ -512,8 +512,8 @@
     },
     {
       "task_id": "HumanEval/100",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/101",

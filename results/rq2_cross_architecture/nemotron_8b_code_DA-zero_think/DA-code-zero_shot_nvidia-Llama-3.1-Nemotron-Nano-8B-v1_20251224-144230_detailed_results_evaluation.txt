@@ -3,17 +3,17 @@ CODE GENERATION EVALUATION RESULTS
 ================================================================================
 
 Model: DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-144230_detailed_results
-Timestamp: 2025-12-24 23:49:56
-Results File: /workspace/agent-green/results/DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-144230_detailed_results.jsonl
+Timestamp: 2025-12-29 06:05:13
+Results File: results_reeval/nemotron/DA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251224-144230_detailed_results.jsonl
 
 --------------------------------------------------------------------------------
 SUMMARY METRICS
 --------------------------------------------------------------------------------
-Pass@1 Score: 0.9512
+Pass@1 Score: 0.9146
 Total Samples: 164
-Passed Samples: 156
-Failed Samples: 8
-Pass Rate: 95.12%
+Passed Samples: 150
+Failed Samples: 14
+Pass Rate: 91.46%
 
 --------------------------------------------------------------------------------
 PER-SAMPLE RESULTS
@@ -73,7 +73,7 @@ PER-SAMPLE RESULTS
 ✗ HumanEval/51: failed: unterminated string literal (detected at line 1) (<string>, line 1)
 ✓ HumanEval/52: passed
 ✓ HumanEval/53: passed
-✓ HumanEval/54: passed
+✗ HumanEval/54: failed: Sample was skipped or had empty solution
 ✓ HumanEval/55: passed
 ✓ HumanEval/56: passed
 ✓ HumanEval/57: passed
@@ -132,10 +132,10 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/110: passed
 ✓ HumanEval/111: passed
 ✓ HumanEval/112: passed
-✓ HumanEval/113: passed
+✗ HumanEval/113: failed: Sample was skipped or had empty solution
 ✓ HumanEval/114: passed
 ✓ HumanEval/115: passed
-✓ HumanEval/116: passed
+✗ HumanEval/116: failed: Sample was skipped or had empty solution
 ✓ HumanEval/117: passed
 ✓ HumanEval/118: passed
 ✓ HumanEval/119: passed
@@ -149,11 +149,11 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/127: passed
 ✓ HumanEval/128: passed
 ✓ HumanEval/129: passed
-✓ HumanEval/130: passed
+✗ HumanEval/130: failed: Sample was skipped or had empty solution
 ✓ HumanEval/131: passed
-✓ HumanEval/132: passed
+✗ HumanEval/132: failed: Sample was skipped or had empty solution
 ✓ HumanEval/133: passed
-✓ HumanEval/134: passed
+✗ HumanEval/134: failed: Sample was skipped or had empty solution
 ✓ HumanEval/135: passed
 ✓ HumanEval/136: passed
 ✓ HumanEval/137: passed

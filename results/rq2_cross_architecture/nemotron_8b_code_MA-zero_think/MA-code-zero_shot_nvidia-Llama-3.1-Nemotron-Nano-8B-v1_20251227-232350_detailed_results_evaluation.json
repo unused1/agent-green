@@ -1,13 +1,13 @@
 {
   "model": "MA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-232350_detailed_results",
-  "timestamp": "2025-12-28 04:27:05",
-  "results_file": "/workspace/agent-green/results/MA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-232350_detailed_results.jsonl",
+  "timestamp": "2025-12-29 06:06:11",
+  "results_file": "results_reeval/nemotron/MA-code-zero_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-232350_detailed_results.jsonl",
   "metrics": {
-    "pass@1": 0.9024390243902439,
+    "pass@1": 0.8780487804878049,
     "total_samples": 164,
-    "passed_samples": 148,
-    "failed_samples": 16,
-    "pass_rate_percentage": 90.2439024390244
+    "passed_samples": 144,
+    "failed_samples": 20,
+    "pass_rate_percentage": 87.8048780487805
   },
   "per_sample_results": [
     {
@@ -62,8 +62,8 @@
     },
     {
       "task_id": "HumanEval/10",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/11",
@@ -567,8 +567,8 @@
     },
     {
       "task_id": "HumanEval/111",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/112",
@@ -607,8 +607,8 @@
     },
     {
       "task_id": "HumanEval/119",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/120",
@@ -677,8 +677,8 @@
     },
     {
       "task_id": "HumanEval/133",
-      "test_result": "passed",
-      "passed": true
+      "test_result": "failed: Sample was skipped or had empty solution",
+      "passed": false
     },
     {
       "task_id": "HumanEval/134",

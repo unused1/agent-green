@@ -3,17 +3,17 @@ CODE GENERATION EVALUATION RESULTS
 ================================================================================
 
 Model: MA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-162009_detailed_results
-Timestamp: 2025-12-27 23:14:08
-Results File: /workspace/agent-green/results/MA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-162009_detailed_results.jsonl
+Timestamp: 2025-12-29 06:05:47
+Results File: results_reeval/nemotron/MA-code-few_shot_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251227-162009_detailed_results.jsonl
 
 --------------------------------------------------------------------------------
 SUMMARY METRICS
 --------------------------------------------------------------------------------
-Pass@1 Score: 0.9512
+Pass@1 Score: 0.9268
 Total Samples: 164
-Passed Samples: 156
-Failed Samples: 8
-Pass Rate: 95.12%
+Passed Samples: 152
+Failed Samples: 12
+Pass Rate: 92.68%
 
 --------------------------------------------------------------------------------
 PER-SAMPLE RESULTS
@@ -40,7 +40,7 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/18: passed
 ✓ HumanEval/19: passed
 ✓ HumanEval/20: passed
-✓ HumanEval/21: passed
+✗ HumanEval/21: failed: Sample was skipped or had empty solution
 ✓ HumanEval/22: passed
 ✓ HumanEval/23: passed
 ✓ HumanEval/24: passed
@@ -124,12 +124,12 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/102: passed
 ✓ HumanEval/103: passed
 ✓ HumanEval/104: passed
-✓ HumanEval/105: passed
+✗ HumanEval/105: failed: Sample was skipped or had empty solution
 ✓ HumanEval/106: passed
 ✓ HumanEval/107: passed
 ✓ HumanEval/108: passed
 ✓ HumanEval/109: passed
-✓ HumanEval/110: passed
+✗ HumanEval/110: failed: Sample was skipped or had empty solution
 ✗ HumanEval/111: failed: unterminated triple-quoted string literal (detected at line 46) (<string>, line 21)
 ✓ HumanEval/112: passed
 ✓ HumanEval/113: passed
@@ -182,4 +182,4 @@ PER-SAMPLE RESULTS
 ✓ HumanEval/160: passed
 ✓ HumanEval/161: passed
 ✓ HumanEval/162: passed
-✓ HumanEval/163: passed
+✗ HumanEval/163: failed: Sample was skipped or had empty solution

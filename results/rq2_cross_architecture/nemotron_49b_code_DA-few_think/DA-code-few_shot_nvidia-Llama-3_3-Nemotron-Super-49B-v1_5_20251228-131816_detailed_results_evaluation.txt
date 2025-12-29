@@ -3,183 +3,183 @@ CODE GENERATION EVALUATION RESULTS
 ================================================================================
 
 Model: DA-code-few_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251228-131816_detailed_results
-Timestamp: 2025-12-29 11:14:50
-Results File: results/rq2_cross_architecture/nemotron_49b_code_DA-few_think/DA-code-few_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251228-131816_detailed_results.jsonl
+Timestamp: 2025-12-29 06:04:37
+Results File: results_reeval/nemotron/DA-code-few_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251228-131816_detailed_results.jsonl
 
 --------------------------------------------------------------------------------
 SUMMARY METRICS
 --------------------------------------------------------------------------------
-Pass@1 Score: 0.0000
+Pass@1 Score: 0.9268
 Total Samples: 164
-Passed Samples: 0
-Failed Samples: 164
-Pass Rate: 0.00%
+Passed Samples: 152
+Failed Samples: 12
+Pass Rate: 92.68%
 
 --------------------------------------------------------------------------------
 PER-SAMPLE RESULTS
 --------------------------------------------------------------------------------
 
-✗ HumanEval/0: timed out
-✗ HumanEval/1: timed out
-✗ HumanEval/2: timed out
-✗ HumanEval/3: timed out
-✗ HumanEval/4: timed out
-✗ HumanEval/5: timed out
-✗ HumanEval/6: timed out
-✗ HumanEval/7: timed out
-✗ HumanEval/8: timed out
-✗ HumanEval/9: timed out
-✗ HumanEval/10: timed out
-✗ HumanEval/11: timed out
-✗ HumanEval/12: timed out
-✗ HumanEval/13: timed out
-✗ HumanEval/14: timed out
-✗ HumanEval/15: timed out
-✗ HumanEval/16: timed out
-✗ HumanEval/17: timed out
-✗ HumanEval/18: timed out
-✗ HumanEval/19: timed out
-✗ HumanEval/20: timed out
-✗ HumanEval/21: timed out
-✗ HumanEval/22: timed out
-✗ HumanEval/23: timed out
-✗ HumanEval/24: timed out
-✗ HumanEval/25: timed out
-✗ HumanEval/26: timed out
-✗ HumanEval/27: timed out
-✗ HumanEval/28: timed out
-✗ HumanEval/29: timed out
-✗ HumanEval/30: timed out
-✗ HumanEval/31: timed out
-✗ HumanEval/32: timed out
-✗ HumanEval/33: timed out
-✗ HumanEval/34: timed out
-✗ HumanEval/35: timed out
-✗ HumanEval/36: timed out
-✗ HumanEval/37: timed out
-✗ HumanEval/38: timed out
-✗ HumanEval/39: timed out
-✗ HumanEval/40: timed out
-✗ HumanEval/41: timed out
-✗ HumanEval/42: timed out
-✗ HumanEval/43: timed out
-✗ HumanEval/44: timed out
-✗ HumanEval/45: timed out
-✗ HumanEval/46: timed out
-✗ HumanEval/47: timed out
-✗ HumanEval/48: timed out
-✗ HumanEval/49: timed out
-✗ HumanEval/50: timed out
-✗ HumanEval/51: timed out
-✗ HumanEval/52: timed out
-✗ HumanEval/53: timed out
-✗ HumanEval/54: timed out
-✗ HumanEval/55: timed out
-✗ HumanEval/56: timed out
-✗ HumanEval/57: timed out
-✗ HumanEval/58: timed out
-✗ HumanEval/59: timed out
-✗ HumanEval/60: timed out
-✗ HumanEval/61: timed out
-✗ HumanEval/62: timed out
-✗ HumanEval/63: timed out
-✗ HumanEval/64: timed out
-✗ HumanEval/65: timed out
-✗ HumanEval/66: timed out
-✗ HumanEval/67: timed out
-✗ HumanEval/68: timed out
-✗ HumanEval/69: timed out
-✗ HumanEval/70: timed out
-✗ HumanEval/71: timed out
-✗ HumanEval/72: timed out
-✗ HumanEval/73: timed out
-✗ HumanEval/74: timed out
-✗ HumanEval/75: timed out
-✗ HumanEval/76: timed out
-✗ HumanEval/77: timed out
-✗ HumanEval/78: timed out
-✗ HumanEval/79: timed out
-✗ HumanEval/80: timed out
-✗ HumanEval/81: timed out
-✗ HumanEval/82: timed out
-✗ HumanEval/83: timed out
-✗ HumanEval/84: timed out
-✗ HumanEval/85: timed out
-✗ HumanEval/86: timed out
-✗ HumanEval/87: timed out
-✗ HumanEval/88: timed out
-✗ HumanEval/89: timed out
-✗ HumanEval/90: timed out
-✗ HumanEval/91: timed out
-✗ HumanEval/92: timed out
-✗ HumanEval/93: timed out
-✗ HumanEval/94: timed out
-✗ HumanEval/95: timed out
-✗ HumanEval/96: timed out
-✗ HumanEval/97: timed out
-✗ HumanEval/98: timed out
-✗ HumanEval/99: timed out
-✗ HumanEval/100: timed out
-✗ HumanEval/101: timed out
-✗ HumanEval/102: timed out
-✗ HumanEval/103: timed out
-✗ HumanEval/104: timed out
-✗ HumanEval/105: timed out
-✗ HumanEval/106: timed out
-✗ HumanEval/107: timed out
-✗ HumanEval/108: timed out
-✗ HumanEval/109: timed out
-✗ HumanEval/110: timed out
-✗ HumanEval/111: timed out
-✗ HumanEval/112: timed out
-✗ HumanEval/113: timed out
-✗ HumanEval/114: timed out
-✗ HumanEval/115: timed out
-✗ HumanEval/116: timed out
-✗ HumanEval/117: timed out
-✗ HumanEval/118: timed out
-✗ HumanEval/119: timed out
-✗ HumanEval/120: timed out
-✗ HumanEval/121: timed out
-✗ HumanEval/122: timed out
-✗ HumanEval/123: timed out
-✗ HumanEval/124: timed out
-✗ HumanEval/125: timed out
-✗ HumanEval/126: timed out
-✗ HumanEval/127: timed out
-✗ HumanEval/128: timed out
-✗ HumanEval/129: timed out
-✗ HumanEval/130: timed out
-✗ HumanEval/131: timed out
-✗ HumanEval/132: timed out
-✗ HumanEval/133: timed out
-✗ HumanEval/134: timed out
-✗ HumanEval/135: timed out
-✗ HumanEval/136: timed out
-✗ HumanEval/137: timed out
-✗ HumanEval/138: timed out
-✗ HumanEval/139: timed out
-✗ HumanEval/140: timed out
-✗ HumanEval/141: timed out
-✗ HumanEval/142: timed out
-✗ HumanEval/143: timed out
-✗ HumanEval/144: timed out
-✗ HumanEval/145: timed out
-✗ HumanEval/146: timed out
-✗ HumanEval/147: timed out
-✗ HumanEval/148: timed out
-✗ HumanEval/149: timed out
-✗ HumanEval/150: timed out
-✗ HumanEval/151: timed out
-✗ HumanEval/152: timed out
-✗ HumanEval/153: timed out
-✗ HumanEval/154: timed out
-✗ HumanEval/155: timed out
-✗ HumanEval/156: timed out
-✗ HumanEval/157: timed out
-✗ HumanEval/158: timed out
-✗ HumanEval/159: timed out
-✗ HumanEval/160: timed out
-✗ HumanEval/161: timed out
-✗ HumanEval/162: timed out
-✗ HumanEval/163: timed out
+✓ HumanEval/0: passed
+✓ HumanEval/1: passed
+✓ HumanEval/2: passed
+✓ HumanEval/3: passed
+✓ HumanEval/4: passed
+✓ HumanEval/5: passed
+✓ HumanEval/6: passed
+✓ HumanEval/7: passed
+✓ HumanEval/8: passed
+✓ HumanEval/9: passed
+✗ HumanEval/10: failed: Sample was skipped or had empty solution
+✓ HumanEval/11: passed
+✓ HumanEval/12: passed
+✗ HumanEval/13: failed: Sample was skipped or had empty solution
+✗ HumanEval/14: failed: Sample was skipped or had empty solution
+✓ HumanEval/15: passed
+✓ HumanEval/16: passed
+✓ HumanEval/17: passed
+✓ HumanEval/18: passed
+✓ HumanEval/19: passed
+✓ HumanEval/20: passed
+✓ HumanEval/21: passed
+✓ HumanEval/22: passed
+✓ HumanEval/23: passed
+✓ HumanEval/24: passed
+✓ HumanEval/25: passed
+✓ HumanEval/26: passed
+✓ HumanEval/27: passed
+✓ HumanEval/28: passed
+✓ HumanEval/29: passed
+✓ HumanEval/30: passed
+✓ HumanEval/31: passed
+✓ HumanEval/32: passed
+✓ HumanEval/33: passed
+✓ HumanEval/34: passed
+✓ HumanEval/35: passed
+✓ HumanEval/36: passed
+✓ HumanEval/37: passed
+✓ HumanEval/38: passed
+✓ HumanEval/39: passed
+✓ HumanEval/40: passed
+✓ HumanEval/41: passed
+✓ HumanEval/42: passed
+✓ HumanEval/43: passed
+✓ HumanEval/44: passed
+✓ HumanEval/45: passed
+✓ HumanEval/46: passed
+✗ HumanEval/47: failed: Sample was skipped or had empty solution
+✓ HumanEval/48: passed
+✓ HumanEval/49: passed
+✓ HumanEval/50: passed
+✓ HumanEval/51: passed
+✓ HumanEval/52: passed
+✓ HumanEval/53: passed
+✓ HumanEval/54: passed
+✓ HumanEval/55: passed
+✓ HumanEval/56: passed
+✓ HumanEval/57: passed
+✓ HumanEval/58: passed
+✓ HumanEval/59: passed
+✓ HumanEval/60: passed
+✓ HumanEval/61: passed
+✓ HumanEval/62: passed
+✓ HumanEval/63: passed
+✓ HumanEval/64: passed
+✓ HumanEval/65: passed
+✓ HumanEval/66: passed
+✓ HumanEval/67: passed
+✓ HumanEval/68: passed
+✓ HumanEval/69: passed
+✓ HumanEval/70: passed
+✓ HumanEval/71: passed
+✓ HumanEval/72: passed
+✓ HumanEval/73: passed
+✓ HumanEval/74: passed
+✓ HumanEval/75: passed
+✗ HumanEval/76: failed: Sample was skipped or had empty solution
+✓ HumanEval/77: passed
+✓ HumanEval/78: passed
+✓ HumanEval/79: passed
+✓ HumanEval/80: passed
+✓ HumanEval/81: passed
+✓ HumanEval/82: passed
+✓ HumanEval/83: passed
+✓ HumanEval/84: passed
+✓ HumanEval/85: passed
+✗ HumanEval/86: failed: Sample was skipped or had empty solution
+✓ HumanEval/87: passed
+✓ HumanEval/88: passed
+✗ HumanEval/89: failed: Sample was skipped or had empty solution
+✓ HumanEval/90: passed
+✓ HumanEval/91: passed
+✓ HumanEval/92: passed
+✓ HumanEval/93: passed
+✓ HumanEval/94: passed
+✓ HumanEval/95: passed
+✓ HumanEval/96: passed
+✓ HumanEval/97: passed
+✓ HumanEval/98: passed
+✓ HumanEval/99: passed
+✓ HumanEval/100: passed
+✓ HumanEval/101: passed
+✓ HumanEval/102: passed
+✗ HumanEval/103: failed: Sample was skipped or had empty solution
+✓ HumanEval/104: passed
+✓ HumanEval/105: passed
+✓ HumanEval/106: passed
+✓ HumanEval/107: passed
+✓ HumanEval/108: passed
+✓ HumanEval/109: passed
+✓ HumanEval/110: passed
+✓ HumanEval/111: passed
+✓ HumanEval/112: passed
+✓ HumanEval/113: passed
+✓ HumanEval/114: passed
+✓ HumanEval/115: passed
+✗ HumanEval/116: failed: Sample was skipped or had empty solution
+✓ HumanEval/117: passed
+✓ HumanEval/118: passed
+✓ HumanEval/119: passed
+✓ HumanEval/120: passed
+✓ HumanEval/121: passed
+✓ HumanEval/122: passed
+✓ HumanEval/123: passed
+✓ HumanEval/124: passed
+✓ HumanEval/125: passed
+✓ HumanEval/126: passed
+✓ HumanEval/127: passed
+✓ HumanEval/128: passed
+✓ HumanEval/129: passed
+✗ HumanEval/130: failed: Sample was skipped or had empty solution
+✓ HumanEval/131: passed
+✗ HumanEval/132: failed: Sample was skipped or had empty solution
+✓ HumanEval/133: passed
+✓ HumanEval/134: passed
+✓ HumanEval/135: passed
+✓ HumanEval/136: passed
+✓ HumanEval/137: passed
+✓ HumanEval/138: passed
+✓ HumanEval/139: passed
+✓ HumanEval/140: passed
+✓ HumanEval/141: passed
+✓ HumanEval/142: passed
+✓ HumanEval/143: passed
+✓ HumanEval/144: passed
+✗ HumanEval/145: failed: Sample was skipped or had empty solution
+✓ HumanEval/146: passed
+✓ HumanEval/147: passed
+✓ HumanEval/148: passed
+✓ HumanEval/149: passed
+✓ HumanEval/150: passed
+✓ HumanEval/151: passed
+✓ HumanEval/152: passed
+✓ HumanEval/153: passed
+✓ HumanEval/154: passed
+✓ HumanEval/155: passed
+✓ HumanEval/156: passed
+✓ HumanEval/157: passed
+✓ HumanEval/158: passed
+✓ HumanEval/159: passed
+✓ HumanEval/160: passed
+✓ HumanEval/161: passed
+✓ HumanEval/162: passed
+✓ HumanEval/163: passed

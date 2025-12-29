@@ -93,7 +93,7 @@ def has_close_elements(numbers: List[float], threshold: float) -> bool:
         for j in range(i + 1, len(numbers)):
             if abs(numbers[i] - numbers[j]) < threshold:
                 return True
-    return False",False,timed out
+    return False",False,passed
 HumanEval/1,"from typing import List
 
 
@@ -298,7 +298,7 @@ def separate_paren_groups(paren_string: str) -> List[str]:
             if depth == 0:
                 result.append(''.join(current))
                 current = []
-    return result",False,timed out
+    return result",False,passed
 HumanEval/2,"
 
 def truncate_number(number: float) -> float:
@@ -374,7 +374,7 @@ def truncate_number(number: float) -> float:
 ```","{'programmer_code': 'from typing import List\n\ndef truncate_number(number: float) -> float:\n    return number % 1.0', 'refiner_code': 'from typing import List\n\ndef truncate_number(number: float) -> float:\n    return number % 1.0'}","{'timestamp': '2025-12-28T13:21:01.971059', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def truncate_number(number: float) -> float:
-    return number % 1.0",False,timed out
+    return number % 1.0",False,passed
 HumanEval/3,"from typing import List
 
 
@@ -464,7 +464,7 @@ def below_zero(operations: List[int]) -> bool:
         balance += op
         if balance < 0:
             return True
-    return False",False,timed out
+    return False",False,passed
 HumanEval/4,"from typing import List
 
 
@@ -542,7 +542,7 @@ def mean_absolute_deviation(numbers: List[float]) -> float:
 def mean_absolute_deviation(numbers: List[float]) -> float:
     mean = sum(numbers) / len(numbers)
     sum_abs = sum(abs(x - mean) for x in numbers)
-    return sum_abs / len(numbers)",False,timed out
+    return sum_abs / len(numbers)",False,passed
 HumanEval/5,"from typing import List
 
 
@@ -631,7 +631,7 @@ def intersperse(numbers: List[int], delimeter: int) -> List[int]:
     for num in numbers[1:]:
         result.append(delimeter)
         result.append(num)
-    return result",False,timed out
+    return result",False,passed
 HumanEval/6,"from typing import List
 
 
@@ -787,7 +787,7 @@ def parse_nested_parens(paren_string: str) -> List[int]:
             elif char == ')':
                 current_depth -= 1
         result.append(max_depth)
-    return result",False,timed out
+    return result",False,passed
 HumanEval/7,"from typing import List
 
 
@@ -846,7 +846,7 @@ def filter_by_substring(strings: List[str], substring: str) -> List[str]:
 ```","{'programmer_code': 'from typing import List\n\ndef filter_by_substring(strings: List[str], substring: str) -> List[str]:\n    return [s for s in strings if substring in s]', 'refiner_code': 'from typing import List\n\ndef filter_by_substring(strings: List[str], substring: str) -> List[str]:\n    return [s for s in strings if substring in s]'}","{'timestamp': '2025-12-28T13:24:11.928548', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def filter_by_substring(strings: List[str], substring: str) -> List[str]:
-    return [s for s in strings if substring in s]",False,timed out
+    return [s for s in strings if substring in s]",False,passed
 HumanEval/8,"from typing import List, Tuple
 
 
@@ -931,7 +931,7 @@ def sum_product(numbers: List[int]) -> Tuple[int, int]:
     for num in numbers:
         total_sum += num
         product *= num
-    return (total_sum, product)",False,timed out
+    return (total_sum, product)",False,passed
 HumanEval/9,"from typing import List, Tuple
 
 
@@ -1062,7 +1062,7 @@ def rolling_max(numbers: List[int]) -> List[int]:
         if num > current_max:
             current_max = num
         result.append(current_max)
-    return result",False,timed out
+    return result",False,passed
 HumanEval/10,"
 
 def is_palindrome(string: str) -> bool:
@@ -1105,7 +1105,7 @@ def check(candidate):
     assert candidate('xyz') == 'xyzyx'
     assert candidate('xyx') == 'xyx'
     assert candidate('jerry') == 'jerryrrej'
-",,,,,,USER_SKIP,2025-12-28T14:31:13.288531,True,,True,timed out
+",,,,,,USER_SKIP,2025-12-28T14:31:13.288531,True,,True,failed: Sample was skipped or had empty solution
 HumanEval/11,"from typing import List
 
 
@@ -1225,7 +1225,7 @@ def string_xor(a: str, b: str) -> str:
             result.append('1')
         else:
             result.append('0')
-    return ''.join(result)",False,timed out
+    return ''.join(result)",False,passed
 HumanEval/12,"from typing import List, Optional
 
 
@@ -1292,7 +1292,7 @@ def longest(strings: List[str]) -> Optional[str]:
 def longest(strings: List[str]) -> Optional[str]:
     if not strings:
         return None
-    return max(strings, key=len)",False,timed out
+    return max(strings, key=len)",False,passed
 HumanEval/13,"
 
 def greatest_common_divisor(a: int, b: int) -> int:
@@ -1318,7 +1318,7 @@ def check(candidate):
     assert candidate(10, 15) == 5
     assert candidate(49, 14) == 7
     assert candidate(144, 60) == 12
-",,,,,,USER_SKIP,2025-12-28T15:30:25.550313,True,,True,timed out
+",,,,,,USER_SKIP,2025-12-28T15:30:25.550313,True,,True,failed: Sample was skipped or had empty solution
 HumanEval/14,"from typing import List
 
 
@@ -1344,7 +1344,7 @@ def check(candidate):
     assert candidate('') == []
     assert candidate('asdfgh') == ['a', 'as', 'asd', 'asdf', 'asdfg', 'asdfgh']
     assert candidate('WWW') == ['W', 'WW', 'WWW']
-",,,,,,USER_SKIP,2025-12-28T15:57:55.681309,True,,True,timed out
+",,,,,,USER_SKIP,2025-12-28T15:57:55.681309,True,,True,failed: Sample was skipped or had empty solution
 HumanEval/15,"
 
 def string_sequence(n: int) -> str:
@@ -1411,7 +1411,7 @@ def string_sequence(n: int) -> str:
 ```","{'programmer_code': ""from typing import List\n\ndef string_sequence(n: int) -> str:\n    return ' '.join(str(i) for i in range(n + 1))"", 'refiner_code': ""from typing import List\n\ndef string_sequence(n: int) -> str:\n    return ' '.join(str(i) for i in range(n + 1))""}","{'timestamp': '2025-12-28T15:58:44.283940', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def string_sequence(n: int) -> str:
-    return ' '.join(str(i) for i in range(n + 1))",False,timed out
+    return ' '.join(str(i) for i in range(n + 1))",False,passed
 HumanEval/16,"
 
 def count_distinct_characters(string: str) -> int:
@@ -1488,7 +1488,7 @@ def count_distinct_characters(string: str) -> int:
 ```","{'programmer_code': 'from typing import List\n\ndef count_distinct_characters(string: str) -> int:\n    return len(set(string.lower()))', 'refiner_code': 'from typing import List\n\ndef count_distinct_characters(string: str) -> int:\n    return len(set(string.lower()))'}","{'timestamp': '2025-12-28T15:59:18.668561', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def count_distinct_characters(string: str) -> int:
-    return len(set(string.lower()))",False,timed out
+    return len(set(string.lower()))",False,passed
 HumanEval/17,"from typing import List
 
 
@@ -1619,7 +1619,7 @@ def parse_music(music_string: str) -> List[int]:
             beats.append(2)
         elif note == '.|':
             beats.append(1)
-    return beats",False,timed out
+    return beats",False,passed
 HumanEval/18,"
 
 def how_many_times(string: str, substring: str) -> int:
@@ -1740,7 +1740,7 @@ def how_many_times(string: str, substring: str) -> int:
     for i in range(len(string) - sub_len + 1):
         if string[i:i+sub_len] == substring:
             count += 1
-    return count",False,timed out
+    return count",False,passed
 HumanEval/19,"from typing import List
 
 
@@ -1842,7 +1842,7 @@ def sort_numbers(numbers: str) -> str:
     nums = [word_to_num[word] for word in words]
     sorted_nums = sorted(nums)
     sorted_words = [number_words[n] for n in sorted_nums]
-    return ' '.join(sorted_words)",False,timed out
+    return ' '.join(sorted_words)",False,passed
 HumanEval/20,"from typing import List, Tuple
 
 
@@ -2017,7 +2017,7 @@ def find_closest_elements(numbers: List[float]) -> Tuple[float, float]:
                 min_diff = current_diff
                 result = (min(num1, num2), max(num1, num2))
     
-    return result",False,timed out
+    return result",False,passed
 HumanEval/21,"from typing import List
 
 
@@ -2090,7 +2090,7 @@ def rescale_to_unit(numbers: List[float]) -> List[float]:
     max_val = max(numbers)
     if min_val == max_val:
         return [0.0] * len(numbers)
-    return [(x - min_val) / (max_val - min_val) for x in numbers]",False,timed out
+    return [(x - min_val) / (max_val - min_val) for x in numbers]",False,passed
 HumanEval/22,"from typing import List, Any
 
 
@@ -2170,7 +2170,7 @@ def filter_integers(values: List[Any]) -> List[int]:
 ```","{'programmer_code': 'from typing import List, Any\n\ndef filter_integers(values: List[Any]) -> List[int]:\n    return [x for x in values if type(x) is int]', 'refiner_code': 'from typing import List, Any\n\ndef filter_integers(values: List[Any]) -> List[int]:\n    return [x for x in values if type(x) is int]'}","{'timestamp': '2025-12-28T16:22:40.278530', 'prompt_type': 'few_shot'}",,,,"from typing import List, Any
 
 def filter_integers(values: List[Any]) -> List[int]:
-    return [x for x in values if type(x) is int]",False,timed out
+    return [x for x in values if type(x) is int]",False,passed
 HumanEval/23,"
 
 def strlen(string: str) -> int:
@@ -2220,7 +2220,7 @@ I don't see any issues with the code. Therefore, the correct action is to return
 def strlen(string: str) -> int:
     return len(string)
 ```","{'programmer_code': 'def strlen(string: str) -> int:\n    return len(string)', 'refiner_code': 'def strlen(string: str) -> int:\n    return len(string)'}","{'timestamp': '2025-12-28T16:22:55.894682', 'prompt_type': 'few_shot'}",,,,"def strlen(string: str) -> int:
-    return len(string)",False,timed out
+    return len(string)",False,passed
 HumanEval/24,"
 
 def largest_divisor(n: int) -> int:
@@ -2307,7 +2307,7 @@ def largest_divisor(n: int) -> int:
     for i in range(2, int(n**0.5) + 1):
         if n % i == 0:
             return n // i
-    return 1",False,timed out
+    return 1",False,passed
 HumanEval/25,"from typing import List
 
 
@@ -2448,7 +2448,7 @@ def factorize(n: int) -> List[int]:
         i += 2
     if n > 1:
         factors.append(n)
-    return factors",False,timed out
+    return factors",False,passed
 HumanEval/26,"from typing import List
 
 
@@ -2517,7 +2517,7 @@ def remove_duplicates(numbers: List[int]) -> List[int]:
     count = {}
     for num in numbers:
         count[num] = count.get(num, 0) + 1
-    return [num for num in numbers if count[num] == 1]",False,timed out
+    return [num for num in numbers if count[num] == 1]",False,passed
 HumanEval/27,"
 
 def flip_case(string: str) -> str:
@@ -2560,7 +2560,7 @@ I don't see any issues here. The code matches the problem description and the ex
 def flip_case(string: str) -> str:
     return ''.join([c.lower() if c.isupper() else c.upper() for c in string])
 ```","{'programmer_code': ""def flip_case(string: str) -> str:\n    return ''.join([c.lower() if c.isupper() else c.upper() for c in string])"", 'refiner_code': ""def flip_case(string: str) -> str:\n    return ''.join([c.lower() if c.isupper() else c.upper() for c in string])""}","{'timestamp': '2025-12-28T16:26:53.262214', 'prompt_type': 'few_shot'}",,,,"def flip_case(string: str) -> str:
-    return ''.join([c.lower() if c.isupper() else c.upper() for c in string])",False,timed out
+    return ''.join([c.lower() if c.isupper() else c.upper() for c in string])",False,passed
 HumanEval/28,"from typing import List
 
 
@@ -2612,7 +2612,7 @@ def concatenate(strings: List[str]) -> str:
 ```","{'programmer_code': ""from typing import List\n\ndef concatenate(strings: List[str]) -> str:\n    return ''.join(strings)"", 'refiner_code': ""from typing import List\n\ndef concatenate(strings: List[str]) -> str:\n    return ''.join(strings)""}","{'timestamp': '2025-12-28T16:27:09.336501', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def concatenate(strings: List[str]) -> str:
-    return ''.join(strings)",False,timed out
+    return ''.join(strings)",False,passed
 HumanEval/29,"from typing import List
 
 
@@ -2665,7 +2665,7 @@ def filter_by_prefix(strings: List[str], prefix: str) -> List[str]:
 ```","{'programmer_code': 'from typing import List\n\ndef filter_by_prefix(strings: List[str], prefix: str) -> List[str]:\n    return [s for s in strings if s.startswith(prefix)]', 'refiner_code': 'from typing import List\n\ndef filter_by_prefix(strings: List[str], prefix: str) -> List[str]:\n    return [s for s in strings if s.startswith(prefix)]'}","{'timestamp': '2025-12-28T16:27:33.699101', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def filter_by_prefix(strings: List[str], prefix: str) -> List[str]:
-    return [s for s in strings if s.startswith(prefix)]",False,timed out
+    return [s for s in strings if s.startswith(prefix)]",False,passed
 HumanEval/30,"
 
 def get_positive(l: list):
@@ -2715,7 +2715,7 @@ def get_positive(l: List[int]) -> List[int]:
 ```","{'programmer_code': 'from typing import List\n\ndef get_positive(l: List[int]) -> List[int]:\n    return [x for x in l if x > 0]', 'refiner_code': 'from typing import List\n\ndef get_positive(l: List[int]) -> List[int]:\n    return [x for x in l if x > 0]'}","{'timestamp': '2025-12-28T16:27:56.053505', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def get_positive(l: List[int]) -> List[int]:
-    return [x for x in l if x > 0]",False,timed out
+    return [x for x in l if x > 0]",False,passed
 HumanEval/31,"
 
 def is_prime(n):
@@ -3019,7 +3019,7 @@ def is_prime(n):
     for d in range(3, max_divisor, 2):
         if n % d == 0:
             return False
-    return True",False,timed out
+    return True",False,passed
 HumanEval/32,"import math
 
 
@@ -3430,7 +3430,7 @@ def find_zero(xs: List[float]) -> float:
             x += 0.001
             continue
         x -= fx / derivative
-    return x",False,timed out
+    return x",False,passed
 HumanEval/33,"
 
 def sort_third(l: list):
@@ -3538,7 +3538,7 @@ def sort_third(l: List) -> List:
             result.append(next(sorted_iter))
         else:
             result.append(l[i])
-    return result",False,timed out
+    return result",False,passed
 HumanEval/34,"
 
 def unique(l: list):
@@ -3584,7 +3584,7 @@ Therefore, the initial code is correct. The function returns the sorted list of 
 def unique(l: list):
     return sorted(set(l))
 ```","{'programmer_code': 'def unique(l: list):\n    return sorted(set(l))', 'refiner_code': 'def unique(l: list):\n    return sorted(set(l))'}","{'timestamp': '2025-12-28T16:38:16.404416', 'prompt_type': 'few_shot'}",,,,"def unique(l: list):
-    return sorted(set(l))",False,timed out
+    return sorted(set(l))",False,passed
 HumanEval/35,"
 
 def max_element(l: list):
@@ -4429,7 +4429,7 @@ def max_element(l: List[int]) -> int:
 ```","{'programmer_code': 'from typing import List\n\ndef max_element(l: List) -> any:\n    return max(l)', 'refiner_code': 'from typing import List\n\ndef max_element(l: List[int]) -> int:\n    return max(l)'}","{'timestamp': '2025-12-28T16:41:38.202120', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def max_element(l: List[int]) -> int:
-    return max(l)",False,timed out
+    return max(l)",False,passed
 HumanEval/36,"
 
 def fizz_buzz(n: int):
@@ -4580,7 +4580,7 @@ def fizz_buzz(n: int) -> int:
     for i in range(1, n):
         if i % 11 == 0 or i % 13 == 0:
             count += str(i).count('7')
-    return count",False,timed out
+    return count",False,passed
 HumanEval/37,"
 
 def sort_even(l: list):
@@ -4701,7 +4701,7 @@ def sort_even(l: List) -> List:
             result.append(next(ev_iter))
         else:
             result.append(l[i])
-    return result",False,timed out
+    return result",False,passed
 HumanEval/38,"
 
 def encode_cyclic(s: str):
@@ -4791,7 +4791,7 @@ def decode_cyclic(s: str) -> str:
 ```","{'programmer_code': ""def decode_cyclic(s: str) -> str:\n    groups = [s[(3 * i):min((3 * i + 3), len(s))] for i in range((len(s) + 2) // 3)]\n    decoded_groups = [group[-1] + group[:-1] if len(group) == 3 else group for group in groups]\n    return ''.join(decoded_groups)"", 'refiner_code': ""def decode_cyclic(s: str) -> str:\n    groups = [s[(3 * i):min((3 * i + 3), len(s))] for i in range((len(s) + 2) // 3)]\n    decoded_groups = [group[-1] + group[:-1] if len(group) == 3 else group for group in groups]\n    return ''.join(decoded_groups)""}","{'timestamp': '2025-12-28T16:45:20.053789', 'prompt_type': 'few_shot'}",,,,"def decode_cyclic(s: str) -> str:
     groups = [s[(3 * i):min((3 * i + 3), len(s))] for i in range((len(s) + 2) // 3)]
     decoded_groups = [group[-1] + group[:-1] if len(group) == 3 else group for group in groups]
-    return ''.join(decoded_groups)",False,timed out
+    return ''.join(decoded_groups)",False,passed
 HumanEval/39,"
 
 def prime_fib(n: int):
@@ -5229,7 +5229,7 @@ def prime_fib(n: int) -> int:
             count += 1
             if count == n:
                 return current
-        a, b = b, a + b",False,timed out
+        a, b = b, a + b",False,passed
 HumanEval/40,"
 
 def triples_sum_to_zero(l: list):
@@ -5377,7 +5377,7 @@ def triples_sum_to_zero(l: List[int]) -> bool:
                 left += 1
             else:
                 right -= 1
-    return False",False,timed out
+    return False",False,passed
 HumanEval/41,"
 
 def car_race_collision(n: int):
@@ -5427,7 +5427,7 @@ So the initial code is correct. Therefore, the output should be the same as the 
 def car_race_collision(n: int) -> int:
     return n * n
 ```","{'programmer_code': 'def car_race_collision(n: int) -> int:\n    return n * n', 'refiner_code': 'def car_race_collision(n: int) -> int:\n    return n * n'}","{'timestamp': '2025-12-28T16:52:28.846107', 'prompt_type': 'few_shot'}",,,,"def car_race_collision(n: int) -> int:
-    return n * n",False,timed out
+    return n * n",False,passed
 HumanEval/42,"
 
 def incr_list(l: list):
@@ -5468,7 +5468,7 @@ I don't see any logical errors here. The code is concise and does exactly what's
 def incr_list(l: list):
     return [x + 1 for x in l]
 ```","{'programmer_code': 'def incr_list(l: list):\n    return [x + 1 for x in l]', 'refiner_code': 'def incr_list(l: list):\n    return [x + 1 for x in l]'}","{'timestamp': '2025-12-28T16:52:54.775943', 'prompt_type': 'few_shot'}",,,,"def incr_list(l: list):
-    return [x + 1 for x in l]",False,timed out
+    return [x + 1 for x in l]",False,passed
 HumanEval/43,"
 
 def pairs_sum_to_zero(l):
@@ -5589,7 +5589,7 @@ def pairs_sum_to_zero(l: List[int]) -> bool:
         if -num in seen:
             return True
         seen.add(num)
-    return False",False,timed out
+    return False",False,passed
 HumanEval/44,"
 
 def change_base(x: int, base: int):
@@ -5748,7 +5748,7 @@ def change_base(x: int, base: int) -> str:
         digits.append(str(remainder))
         x = x // base
     digits.reverse()
-    return ''.join(digits)",False,timed out
+    return ''.join(digits)",False,passed
 HumanEval/45,"
 
 def triangle_area(a, h):
@@ -5787,7 +5787,7 @@ Therefore, the code is correct and should be returned unchanged.
 def triangle_area(a, h):
     return (a * h) / 2
 ```","{'programmer_code': 'def triangle_area(a, h):\n    return (a * h) / 2', 'refiner_code': 'def triangle_area(a, h):\n    return (a * h) / 2'}","{'timestamp': '2025-12-28T16:55:58.542476', 'prompt_type': 'few_shot'}",,,,"def triangle_area(a, h):
-    return (a * h) / 2",False,timed out
+    return (a * h) / 2",False,passed
 HumanEval/46,"
 
 def fib4(n: int):
@@ -5939,7 +5939,7 @@ def fib4(n: int) -> int:
         for _ in range(4, n + 1):
             current = a + b + c + d
             a, b, c, d = b, c, d, current
-        return d",False,timed out
+        return d",False,passed
 HumanEval/47,"
 
 def median(l: list):
@@ -5966,7 +5966,7 @@ def check(candidate):
     assert candidate([6, 5]) == 5.5
     assert candidate([8, 1, 3, 9, 9, 2, 7]) == 7 
 
-",,,,,,USER_SKIP,2025-12-28T17:22:00.844767,True,,True,timed out
+",,,,,,USER_SKIP,2025-12-28T17:22:00.844767,True,,True,failed: Sample was skipped or had empty solution
 HumanEval/48,"
 
 def is_palindrome(text: str):
@@ -6021,7 +6021,7 @@ Therefore, the code is correct and should be returned unchanged.
 def is_palindrome(text: str) -> bool:
     return text == text[::-1]
 ```","{'programmer_code': 'def is_palindrome(text: str) -> bool:\n    return text == text[::-1]', 'refiner_code': 'def is_palindrome(text: str) -> bool:\n    return text == text[::-1]'}","{'timestamp': '2025-12-28T17:22:30.708029', 'prompt_type': 'few_shot'}",,,,"def is_palindrome(text: str) -> bool:
-    return text == text[::-1]",False,timed out
+    return text == text[::-1]",False,passed
 HumanEval/49,"
 
 def modp(n: int, p: int):
@@ -6187,7 +6187,7 @@ def modp(n: int, p: int) -> int:
             result = (result * base) % p
         base = (base * base) % p
         n = n // 2
-    return result",False,timed out
+    return result",False,passed
 HumanEval/50,"
 
 def encode_shift(s: str):
@@ -6246,7 +6246,7 @@ Therefore, the initial code for decode_shift is correct. So according to the rul
 def decode_shift(s: str) -> str:
     return """".join([chr(((ord(ch) - ord(""a"") - 5) % 26) + ord(""a"")) for ch in s])
 ```","{'programmer_code': 'def decode_shift(s: str) -> str:\n    return """".join([chr(((ord(ch) - ord(""a"") - 5) % 26) + ord(""a"")) for ch in s])', 'refiner_code': 'def decode_shift(s: str) -> str:\n    return """".join([chr(((ord(ch) - ord(""a"") - 5) % 26) + ord(""a"")) for ch in s])'}","{'timestamp': '2025-12-28T17:24:50.440872', 'prompt_type': 'few_shot'}",,,,"def decode_shift(s: str) -> str:
-    return """".join([chr(((ord(ch) - ord(""a"") - 5) % 26) + ord(""a"")) for ch in s])",False,timed out
+    return """".join([chr(((ord(ch) - ord(""a"") - 5) % 26) + ord(""a"")) for ch in s])",False,passed
 HumanEval/51,"
 
 def remove_vowels(text):
@@ -6347,7 +6347,7 @@ def remove_vowels(text: str) -> str:
 
 def remove_vowels(text: str) -> str:
     vowels = {'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'}
-    return ''.join([char for char in text if char not in vowels])",False,timed out
+    return ''.join([char for char in text if char not in vowels])",False,passed
 HumanEval/52,"
 
 def below_threshold(l: list, t: int):
@@ -6402,7 +6402,7 @@ def below_threshold(l: List[int], t: int) -> bool:
 ```","{'programmer_code': 'from typing import List\n\ndef below_threshold(l: List[int], t: int) -> bool:\n    return all(num < t for num in l)', 'refiner_code': 'from typing import List\n\ndef below_threshold(l: List[int], t: int) -> bool:\n    return all(num < t for num in l)'}","{'timestamp': '2025-12-28T17:26:08.065124', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def below_threshold(l: List[int], t: int) -> bool:
-    return all(num < t for num in l)",False,timed out
+    return all(num < t for num in l)",False,passed
 HumanEval/53,"
 
 def add(x: int, y: int):
@@ -6448,7 +6448,7 @@ Wait, but the problem says that the function should add two numbers. The code do
 def add(x: int, y: int) -> int:
     return x + y
 ```","{'programmer_code': 'def add(x: int, y: int) -> int:\n    return x + y', 'refiner_code': 'def add(x: int, y: int) -> int:\n    return x + y'}","{'timestamp': '2025-12-28T17:26:21.451568', 'prompt_type': 'few_shot'}",,,,"def add(x: int, y: int) -> int:
-    return x + y",False,timed out
+    return x + y",False,passed
 HumanEval/54,"
 
 def same_chars(s0: str, s1: str):
@@ -6580,7 +6580,7 @@ def same_chars(s0: str, s1: str) -> bool:
 ```","{'programmer_code': 'from typing import List\n\ndef same_chars(s0: str, s1: str) -> bool:\n    return set(s0) == set(s1)', 'refiner_code': 'from typing import List\n\ndef same_chars(s0: str, s1: str) -> bool:\n    return set(s0) == set(s1)'}","{'timestamp': '2025-12-28T17:27:42.176844', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def same_chars(s0: str, s1: str) -> bool:
-    return set(s0) == set(s1)",False,timed out
+    return set(s0) == set(s1)",False,passed
 HumanEval/55,"
 
 def fib(n: int):
@@ -6673,7 +6673,7 @@ def fib(n: int) -> int:
     for _ in range(3, n + 1):
         current = prev_prev + prev
         prev_prev, prev = prev, current
-    return prev",False,timed out
+    return prev",False,passed
 HumanEval/56,"
 
 def correct_bracketing(brackets: str):
@@ -6923,7 +6923,7 @@ def correct_bracketing(brackets: str) -> bool:
             if not stack:
                 return False
             stack.pop()
-    return not stack",False,timed out
+    return not stack",False,passed
 HumanEval/57,"
 
 def monotonic(l: list):
@@ -7025,7 +7025,7 @@ def monotonic(l: List[int]) -> bool:
             is_increasing = False
         if l[i] < l[i + 1]:
             is_decreasing = False
-    return is_increasing or is_decreasing",False,timed out
+    return is_increasing or is_decreasing",False,passed
 HumanEval/58,"
 
 def common(l1: list, l2: list):
@@ -7085,7 +7085,7 @@ def common(l1: List, l2: List) -> List:
 ```","{'programmer_code': 'from typing import List\n\ndef common(l1: List, l2: List) -> List:\n    return sorted(set(l1) & set(l2))', 'refiner_code': 'from typing import List\n\ndef common(l1: List, l2: List) -> List:\n    return sorted(set(l1) & set(l2))'}","{'timestamp': '2025-12-28T17:31:41.346931', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def common(l1: List, l2: List) -> List:
-    return sorted(set(l1) & set(l2))",False,timed out
+    return sorted(set(l1) & set(l2))",False,passed
 HumanEval/59,"
 
 def largest_prime_factor(n: int):
@@ -7209,7 +7209,7 @@ def largest_prime_factor(n: int) -> int:
         i += 2
     if n > 1:
         largest = n
-    return largest",False,timed out
+    return largest",False,passed
 HumanEval/60,"
 
 def sum_to_n(n: int):
@@ -7264,7 +7264,7 @@ def sum_to_n(n: int) -> int:
 ```","{'programmer_code': 'def sum_to_n(n: int) -> int:\n    if n < 1:\n        return 0\n    return n * (n + 1) // 2', 'refiner_code': 'def sum_to_n(n: int) -> int:\n    if n < 1:\n        return 0\n    return n * (n + 1) // 2'}","{'timestamp': '2025-12-28T17:33:52.872864', 'prompt_type': 'few_shot'}",,,,"def sum_to_n(n: int) -> int:
     if n < 1:
         return 0
-    return n * (n + 1) // 2",False,timed out
+    return n * (n + 1) // 2",False,passed
 HumanEval/61,"
 
 def correct_bracketing(brackets: str):
@@ -7407,7 +7407,7 @@ def correct_bracketing(brackets: str) -> bool:
             if not stack:
                 return False
             stack.pop()
-    return len(stack) == 0",False,timed out
+    return len(stack) == 0",False,passed
 HumanEval/62,"
 
 def derivative(xs: list):
@@ -7674,7 +7674,7 @@ def derivative(xs: List[float]) -> List[float]:
 def derivative(xs: List[float]) -> List[float]:
     if len(xs) == 1:
         return [0]
-    return [xs[i] * i for i in range(1, len(xs))]",False,timed out
+    return [xs[i] * i for i in range(1, len(xs))]",False,passed
 HumanEval/63,"
 
 def fibfib(n: int):
@@ -7819,7 +7819,7 @@ def fibfib(n: int) -> int:
     for _ in range(3, n + 1):
         next_val = a + b + c
         a, b, c = b, c, next_val
-    return c",False,timed out
+    return c",False,passed
 HumanEval/64,"
 FIX = """"""
 Add more test cases.
@@ -7948,7 +7948,7 @@ def vowels_count(s: str) -> int:
         else:
             if char in {'a', 'e', 'i', 'o', 'u'}:
                 count += 1
-    return count",False,timed out
+    return count",False,passed
 HumanEval/65,"
 def circular_shift(x, shift):
     """"""Circular shift the digits of the integer x, shift the digits right by shift
@@ -8093,7 +8093,7 @@ def circular_shift(x: int, shift: int) -> str:
     effective_shift = shift % n
     if effective_shift == 0:
         return s
-    return s[-effective_shift:] + s[:-effective_shift]",False,timed out
+    return s[-effective_shift:] + s[:-effective_shift]",False,passed
 HumanEval/66,"
 def digitSum(s):
     """"""Task
@@ -8154,7 +8154,7 @@ So all examples are handled correctly. The code seems to be correct. Therefore, 
 def digitSum(s):
     return sum(ord(c) for c in s if c.isupper())
 ```","{'programmer_code': 'def digitSum(s):\n    return sum(ord(c) for c in s if c.isupper())', 'refiner_code': 'def digitSum(s):\n    return sum(ord(c) for c in s if c.isupper())'}","{'timestamp': '2025-12-28T17:41:12.548861', 'prompt_type': 'few_shot'}",,,,"def digitSum(s):
-    return sum(ord(c) for c in s if c.isupper())",False,timed out
+    return sum(ord(c) for c in s if c.isupper())",False,passed
 HumanEval/67,"
 def fruit_distribution(s,n):
     """"""
@@ -8238,7 +8238,7 @@ def fruit_distribution(s: str, n: int) -> int:
     numbers = re.findall(r'\d+', s)
     apples = int(numbers[0])
     oranges = int(numbers[1])
-    return n - apples - oranges",False,timed out
+    return n - apples - oranges",False,passed
 HumanEval/68,"
 def pluck(arr):
     """"""
@@ -8436,7 +8436,7 @@ def pluck(arr: List[int]) -> List[int]:
                 elif num == current_min_value:
                     if index < current_min_index:
                         current_min_index = index
-    return [current_min_value, current_min_index] if current_min_value is not None else []",False,timed out
+    return [current_min_value, current_min_index] if current_min_value is not None else []",False,passed
 HumanEval/69,"
 def search(lst):
     '''
@@ -8546,7 +8546,7 @@ from typing import List
 def search(lst: List[int]) -> int:
     counts = Counter(lst)
     candidates = [num for num, freq in counts.items() if freq >= num]
-    return max(candidates) if candidates else -1",False,timed out
+    return max(candidates) if candidates else -1",False,passed
 HumanEval/70,"
 def strange_sort_list(lst):
     '''
@@ -8669,7 +8669,7 @@ def strange_sort_list(lst: List[int]) -> List[int]:
         left += 1
         result.append(sorted_lst[right])
         right -= 1
-    return result",False,timed out
+    return result",False,passed
 HumanEval/71,"
 def triangle_area(a, b, c):
     '''
@@ -8771,7 +8771,7 @@ def triangle_area(a, b, c):
         area = math.sqrt(s * (s - a) * (s - b) * (s - c))
         return round(area, 2)
     else:
-        return -1",False,timed out
+        return -1",False,passed
 HumanEval/72,"
 def will_it_fly(q,w):
     '''
@@ -8844,7 +8844,7 @@ def will_it_fly(q: List[int], w: int) -> bool:
 ```","{'programmer_code': 'from typing import List\n\ndef will_it_fly(q: List[int], w: int) -> bool:\n    return q == q[::-1] and sum(q) <= w', 'refiner_code': 'from typing import List\n\ndef will_it_fly(q: List[int], w: int) -> bool:\n    return q == q[::-1] and sum(q) <= w'}","{'timestamp': '2025-12-28T17:48:00.680953', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def will_it_fly(q: List[int], w: int) -> bool:
-    return q == q[::-1] and sum(q) <= w",False,timed out
+    return q == q[::-1] and sum(q) <= w",False,passed
 HumanEval/73,"
 def smallest_change(arr):
     """"""
@@ -8942,7 +8942,7 @@ def smallest_change(arr: List[int]) -> int:
     for i in range(n // 2):
         if arr[i] != arr[n - 1 - i]:
             changes += 1
-    return changes",False,timed out
+    return changes",False,passed
 HumanEval/74,"
 def total_match(lst1, lst2):
     '''
@@ -9032,7 +9032,7 @@ def total_match(lst1: List[str], lst2: List[str]) -> List[str]:
 def total_match(lst1: List[str], lst2: List[str]) -> List[str]:
     sum1 = sum(len(s) for s in lst1)
     sum2 = sum(len(s) for s in lst2)
-    return lst1 if sum1 <= sum2 else lst2",False,timed out
+    return lst1 if sum1 <= sum2 else lst2",False,passed
 HumanEval/75,"
 def is_multiply_prime(a):
     """"""Write a function that returns true if the given number is the multiplication of 3 prime numbers
@@ -9339,7 +9339,7 @@ def is_multiply_prime(a: int) -> bool:
             a2 = a1 // q
             if is_prime(a2):
                 return True
-    return False",False,timed out
+    return False",False,passed
 HumanEval/76,"
 def is_simple_power(x, n):
     """"""Your task is to write a function that returns true if a number x is a simple
@@ -9375,7 +9375,7 @@ def is_simple_power(x, n):
     assert candidate(1, 1)==True, ""This prints if this assert fails 2 (also good for debugging!)""
     assert candidate(1, 12)==True, ""This prints if this assert fails 2 (also good for debugging!)""
 
-",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-28T18:44:33.671087', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,timed out
+",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-28T18:44:33.671087', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,failed: Sample was skipped or had empty solution
 HumanEval/77,"
 def iscube(a):
     '''
@@ -9663,7 +9663,7 @@ def iscube(a):
             low = mid + 1
         else:
             high = mid - 1
-    return False",False,timed out
+    return False",False,passed
 HumanEval/78,"
 def hex_key(num):
     """"""You have been tasked to write a function that receives 
@@ -9733,7 +9733,7 @@ def hex_key(num):
     return sum(1 for c in num if c in prime_digits)
 ```","{'programmer_code': ""def hex_key(num):\n    prime_digits = {'2', '3', '5', '7', 'B', 'D'}\n    return sum(1 for c in num if c in prime_digits)"", 'refiner_code': ""def hex_key(num):\n    prime_digits = {'2', '3', '5', '7', 'B', 'D'}\n    return sum(1 for c in num if c in prime_digits)""}","{'timestamp': '2025-12-28T18:49:02.448733', 'prompt_type': 'few_shot'}",,,,"def hex_key(num):
     prime_digits = {'2', '3', '5', '7', 'B', 'D'}
-    return sum(1 for c in num if c in prime_digits)",False,timed out
+    return sum(1 for c in num if c in prime_digits)",False,passed
 HumanEval/79,"
 def decimal_to_binary(decimal):
     """"""You will be given a number in decimal form and your task is to convert it to
@@ -9793,7 +9793,7 @@ def decimal_to_binary(decimal: int) -> str:
 
 def decimal_to_binary(decimal: int) -> str:
     binary_str = bin(decimal)[2:]
-    return 'db' + binary_str + 'db'",False,timed out
+    return 'db' + binary_str + 'db'",False,passed
 HumanEval/80,"
 def is_happy(s):
     """"""You are given a string s.
@@ -9902,7 +9902,7 @@ def is_happy(s: str) -> bool:
         a, b, c = s[i], s[i+1], s[i+2]
         if a == b or a == c or b == c:
             return False
-    return True",False,timed out
+    return True",False,passed
 HumanEval/81,"
 def numerical_letter_grade(grades):
     """"""It is the last week of the semester and the teacher has to give the grades
@@ -10218,7 +10218,7 @@ def numerical_letter_grade(grades: List[float]) -> List[str]:
             result.append('D-')
         else:
             result.append('E')
-    return result",False,timed out
+    return result",False,passed
 HumanEval/82,"
 def prime_length(string):
     """"""Write a function that takes a string and returns True if the string
@@ -10358,7 +10358,7 @@ def prime_length(string: str) -> bool:
         return True
     
     length = len(string)
-    return is_prime(length)",False,timed out
+    return is_prime(length)",False,passed
 HumanEval/83,"
 def starts_one_ends(n):
     """"""
@@ -10502,7 +10502,7 @@ def starts_one_ends(n):
     start = 10 ** (n - 1)
     end = 9 * (10 ** (n - 2)) if n > 1 else 1
     both = 10 ** (n - 2) if n > 1 else 1
-    return start + end - both",False,timed out
+    return start + end - both",False,passed
 HumanEval/84,"
 def solve(N):
     """"""Given a positive integer N, return the total sum of its digits in binary.
@@ -10568,7 +10568,7 @@ def solve(N):
     return bin(sum_digits)[2:]
 ```","{'programmer_code': 'def solve(N):\n    sum_digits = sum(int(d) for d in str(N))\n    return bin(sum_digits)[2:]', 'refiner_code': 'def solve(N):\n    sum_digits = sum(int(d) for d in str(N))\n    return bin(sum_digits)[2:]'}","{'timestamp': '2025-12-28T18:56:32.887295', 'prompt_type': 'few_shot'}",,,,"def solve(N):
     sum_digits = sum(int(d) for d in str(N))
-    return bin(sum_digits)[2:]",False,timed out
+    return bin(sum_digits)[2:]",False,passed
 HumanEval/85,"
 def add(lst):
     """"""Given a non-empty list of integers lst. add the even elements that are at odd indices..
@@ -10628,7 +10628,7 @@ def add(lst):
     for i, num in enumerate(lst):
         if i % 2 != 0 and num % 2 == 0:
             total += num
-    return total",False,timed out
+    return total",False,passed
 HumanEval/86,"
 def anti_shuffle(s):
     """"""
@@ -10657,7 +10657,7 @@ def anti_shuffle(s):
     # Check some edge cases that are easy to work out by hand.
     assert True
 
-",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-28T19:43:17.082274', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,timed out
+",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-28T19:43:17.082274', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,failed: Sample was skipped or had empty solution
 HumanEval/87,"
 def get_row(lst, x):
     """"""
@@ -10779,7 +10779,7 @@ def get_row(lst: List[List[int]], x: int) -> List[Tuple[int, int]]:
         for j, num in enumerate(row):
             if num == x:
                 coordinates.append((i, j))
-    return sorted(coordinates, key=lambda coord: (coord[0], -coord[1]))",False,timed out
+    return sorted(coordinates, key=lambda coord: (coord[0], -coord[1]))",False,passed
 HumanEval/88,"
 def sort_array(array):
     """"""
@@ -10935,7 +10935,7 @@ def sort_array(array: List[int]) -> List[int]:
         arr_copy.sort(reverse=True)
     else:
         arr_copy.sort()
-    return arr_copy",False,timed out
+    return arr_copy",False,passed
 HumanEval/89,"
 def encrypt(s):
     """"""Create a function encrypt that takes a string as an argument and
@@ -10971,7 +10971,7 @@ def encrypt(s):
     # Check some edge cases that are easy to work out by hand.
     assert candidate('a')=='e', ""This prints if this assert fails 2 (also good for debugging!)""
 
-",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-28T20:31:14.191551', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,timed out
+",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-28T20:31:14.191551', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,failed: Sample was skipped or had empty solution
 HumanEval/90,"
 def next_smallest(lst):
     """"""
@@ -11034,7 +11034,7 @@ def next_smallest(lst: List[int]) -> Optional[int]:
 
 def next_smallest(lst: List[int]) -> Optional[int]:
     unique = sorted(set(lst))
-    return unique[1] if len(unique) >= 2 else None",False,timed out
+    return unique[1] if len(unique) >= 2 else None",False,passed
 HumanEval/91,"
 def is_bored(S):
     """"""
@@ -11228,7 +11228,7 @@ def is_bored(S: str) -> int:
         words = stripped.split()
         if words and words[0] == 'I':
             count += 1
-    return count",False,timed out
+    return count",False,passed
 HumanEval/92,"
 def any_int(x, y, z):
     '''
@@ -11358,7 +11358,7 @@ def any_int(x, y, z):
 def any_int(x, y, z):
     if not (isinstance(x, int) and isinstance(y, int) and isinstance(z, int)):
         return False
-    return x == y + z or y == x + z or z == x + y",False,timed out
+    return x == y + z or y == x + z or z == x + y",False,passed
 HumanEval/93,"
 def encode(message):
     """"""
@@ -11731,7 +11731,7 @@ def encode(message):
             result.append(chr(ord(swapped) + 2))
         else:
             result.append(swapped)
-    return ''.join(result)",False,timed out
+    return ''.join(result)",False,passed
 HumanEval/94,"
 
 def skjkasdkd(lst):
@@ -11924,7 +11924,7 @@ def skjkasdkd(lst: List[int]) -> int:
     if not primes:
         return 0
     max_prime = max(primes)
-    return sum(int(d) for d in str(max_prime))",False,timed out
+    return sum(int(d) for d in str(max_prime))",False,passed
 HumanEval/95,"
 def check_dict_case(dict):
     """"""
@@ -12078,7 +12078,7 @@ def check_dict_case(d: Dict) -> bool:
             return False
     all_lower = all(key.islower() for key in d)
     all_upper = all(key.isupper() for key in d)
-    return all_lower or all_upper",False,timed out
+    return all_lower or all_upper",False,passed
 HumanEval/96,"
 def count_up_to(n):
     """"""Implement a function that takes an non-negative integer and returns an array of the first n
@@ -12263,7 +12263,7 @@ def count_up_to(n: int) -> List[int]:
         if sieve[current]:
             for multiple in range(current * current, n, current):
                 sieve[multiple] = False
-    return [i for i, is_prime in enumerate(sieve) if is_prime]",False,timed out
+    return [i for i, is_prime in enumerate(sieve) if is_prime]",False,passed
 HumanEval/97,"
 def multiply(a, b):
     """"""Complete the function that takes two integers and returns 
@@ -12327,7 +12327,7 @@ def multiply(a, b):
 ```","{'programmer_code': 'def multiply(a, b):\n    unit_a = abs(a) % 10\n    unit_b = abs(b) % 10\n    return unit_a * unit_b', 'refiner_code': 'def multiply(a, b):\n    unit_a = abs(a) % 10\n    unit_b = abs(b) % 10\n    return unit_a * unit_b'}","{'timestamp': '2025-12-28T20:46:00.224333', 'prompt_type': 'few_shot'}",,,,"def multiply(a, b):
     unit_a = abs(a) % 10
     unit_b = abs(b) % 10
-    return unit_a * unit_b",False,timed out
+    return unit_a * unit_b",False,passed
 HumanEval/98,"
 def count_upper(s):
     """"""
@@ -12403,7 +12403,7 @@ def count_upper(s):
     for index, char in enumerate(s):
         if index % 2 == 0 and char in vowels:
             count += 1
-    return count",False,timed out
+    return count",False,passed
 HumanEval/99,"
 def closest_integer(value):
     '''
@@ -12662,7 +12662,7 @@ def closest_integer(value: str) -> int:
     elif d_upper < d_lower:
         return int(upper)
     else:
-        return int(lower) if abs(lower) > abs(upper) else int(upper)",False,timed out
+        return int(lower) if abs(lower) > abs(upper) else int(upper)",False,passed
 HumanEval/100,"
 def make_a_pile(n):
     """"""
@@ -12735,7 +12735,7 @@ def make_a_pile(n: int) -> List[int]:
 ```","{'programmer_code': 'from typing import List\n\ndef make_a_pile(n: int) -> List[int]:\n    return [n + 2 * i for i in range(n)]', 'refiner_code': 'from typing import List\n\ndef make_a_pile(n: int) -> List[int]:\n    return [n + 2 * i for i in range(n)]'}","{'timestamp': '2025-12-28T21:05:52.890464', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def make_a_pile(n: int) -> List[int]:
-    return [n + 2 * i for i in range(n)]",False,timed out
+    return [n + 2 * i for i in range(n)]",False,passed
 HumanEval/101,"
 def words_string(s):
     """"""
@@ -12801,7 +12801,7 @@ So the code seems to handle all cases. Therefore, the initial code is correct. S
 def words_string(s):
     return s.replace(',', ' ').split()
 ```","{'programmer_code': ""def words_string(s):\n    return s.replace(',', ' ').split()"", 'refiner_code': ""def words_string(s):\n    return s.replace(',', ' ').split()""}","{'timestamp': '2025-12-28T21:06:20.643005', 'prompt_type': 'few_shot'}",,,,"def words_string(s):
-    return s.replace(',', ' ').split()",False,timed out
+    return s.replace(',', ' ').split()",False,passed
 HumanEval/102,"
 def choose_num(x, y):
     """"""This function takes two positive numbers x and y and returns the
@@ -12969,7 +12969,7 @@ def choose_num(x, y):
     if candidate >= x:
         return int(candidate)
     else:
-        return -1",False,timed out
+        return -1",False,passed
 HumanEval/103,"
 def rounded_avg(n, m):
     """"""You are given two positive integers n and m, and your task is to compute the
@@ -13007,7 +13007,7 @@ def rounded_avg(n, m):
     assert candidate(5, 1) == -1
     assert candidate(5, 5) == ""0b101""
 
-",,,,,,USER_SKIP,2025-12-28T21:42:56.404649,True,,True,timed out
+",,,,,,USER_SKIP,2025-12-28T21:42:56.404649,True,,True,failed: Sample was skipped or had empty solution
 HumanEval/104,"
 def unique_digits(x):
     """"""Given a list of positive integers x. return a sorted list of all 
@@ -13129,7 +13129,7 @@ def unique_digits(x: List[int]) -> List[int]:
         if valid:
             result.append(num)
     result.sort()
-    return result",False,timed out
+    return result",False,passed
 HumanEval/105,"
 def by_length(arr):
     """"""
@@ -13275,7 +13275,7 @@ def by_length(arr):
         8: ""Eight"",
         9: ""Nine""
     }
-    return [mapping[num] for num in reversed_list]",False,timed out
+    return [mapping[num] for num in reversed_list]",False,passed
 HumanEval/106,"
 def f(n):
     """""" Implement the function f that takes n as a parameter,
@@ -13397,7 +13397,7 @@ def f(n: int) -> List[int]:
         else:
             sum_val = i * (i + 1) // 2
             result.append(sum_val)
-    return result",False,timed out
+    return result",False,passed
 HumanEval/107,"
 def even_odd_palindrome(n):
     """"""
@@ -13532,7 +13532,7 @@ def even_odd_palindrome(n: int) -> Tuple[int, int]:
                 even += 1
             else:
                 odd += 1
-    return (even, odd)",False,timed out
+    return (even, odd)",False,passed
 HumanEval/108,"
 def count_nums(arr):
     """"""
@@ -13949,7 +13949,7 @@ def count_nums(arr: List[int]) -> int:
                 total += int(c)
         if total > 0:
             count += 1
-    return count",False,timed out
+    return count",False,passed
 HumanEval/109,"
 def move_one_ball(arr):
     """"""We have an array 'arr' of N integers arr[1], arr[2], ..., arr[N].The
@@ -14061,7 +14061,7 @@ def move_one_ball(arr: List[int]) -> bool:
     for i in range(n):
         if arr[i] > arr[(i + 1) % n]:
             drops += 1
-    return drops <= 1",False,timed out
+    return drops <= 1",False,passed
 HumanEval/110,"
 def exchange(lst1, lst2):
     """"""In this problem, you will implement a function that takes two lists of numbers,
@@ -14547,7 +14547,7 @@ def exchange(lst1: List[float], lst2: List[float]) -> str:
 def exchange(lst1: List[float], lst2: List[float]) -> str:
     odds_in_lst1 = sum(1 for x in lst1 if x % 2 != 0)
     evens_in_lst2 = sum(1 for x in lst2 if x % 2 == 0)
-    return ""YES"" if evens_in_lst2 >= odds_in_lst1 else ""NO""",False,timed out
+    return ""YES"" if evens_in_lst2 >= odds_in_lst1 else ""NO""",False,passed
 HumanEval/111,"
 def histogram(test):
     """"""Given a string representing a space separated lowercase letters, return a dictionary
@@ -14678,7 +14678,7 @@ def histogram(test: str) -> Dict[str, int]:
     if not freq:
         return {}
     max_count = max(freq.values())
-    return {k: v for k, v in freq.items() if v == max_count}",False,timed out
+    return {k: v for k, v in freq.items() if v == max_count}",False,passed
 HumanEval/112,"
 def reverse_delete(s,c):
     """"""Task
@@ -14752,7 +14752,7 @@ def reverse_delete(s: str, c: str) -> Tuple[str, bool]:
     filtered = [char for char in s if char not in c_set]
     filtered_str = ''.join(filtered)
     is_palindrome = filtered_str == filtered_str[::-1]
-    return (filtered_str, is_palindrome)",False,timed out
+    return (filtered_str, is_palindrome)",False,passed
 HumanEval/113,"
 def odd_count(lst):
     """"""Given a list of strings, where each string consists of only digits, return a list.
@@ -14975,7 +14975,7 @@ def odd_count(lst):
     for s in lst:
         count = sum(1 for c in s if int(c) % 2 == 1)
         result.append(template.replace('1', str(count)))
-    return result",False,timed out
+    return result",False,passed
 HumanEval/114,"
 def minSubArraySum(nums):
     """"""
@@ -15117,7 +15117,7 @@ def minSubArraySum(nums: List[int]) -> int:
     for num in nums[1:]:
         current_min = min(num, current_min + num)
         global_min = min(global_min, current_min)
-    return global_min",False,timed out
+    return global_min",False,passed
 HumanEval/115,"
 def max_fill(grid, capacity):
     import math
@@ -15271,7 +15271,7 @@ def max_fill(grid, capacity):
             continue
         buckets = (sum_row + capacity - 1) // capacity
         total += buckets
-    return total",False,timed out
+    return total",False,passed
 HumanEval/116,"
 def sort_array(arr):
     """"""
@@ -15301,7 +15301,7 @@ def sort_array(arr):
     # Check some edge cases that are easy to work out by hand.
     assert True, ""This prints if this assert fails 2 (also good for debugging!)""
 
-",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-28T22:47:54.990373', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,timed out
+",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-28T22:47:54.990373', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,failed: Sample was skipped or had empty solution
 HumanEval/117,"
 def select_words(s, n):
     """"""Given a string s and a natural number n, you have been tasked to implement 
@@ -15476,7 +15476,7 @@ def select_words(s: str, n: int) -> List[str]:
                 consonant_count += 1
         if consonant_count == n:
             result.append(word)
-    return result",False,timed out
+    return result",False,passed
 HumanEval/118,"
 def get_closest_vowel(word):
     """"""You are given a word. Your task is to find the closest vowel that stands between 
@@ -15655,7 +15655,7 @@ def get_closest_vowel(word):
             next_char = word[i+1]
             if prev not in vowels and next_char not in vowels:
                 return char
-    return """"",False,timed out
+    return """"",False,passed
 HumanEval/119,"
 def match_parens(lst):
     '''
@@ -16297,7 +16297,7 @@ def match_parens(lst: List[str]) -> str:
     if (min1 >= 0 and (min2 + total1) >= 0) or (min2 >= 0 and (min1 + total2) >= 0):
         return 'Yes'
     else:
-        return 'No'",False,timed out
+        return 'No'",False,passed
 HumanEval/120,"
 def maximum(arr, k):
     """"""
@@ -16402,7 +16402,7 @@ def maximum(arr, k):
         return []
     sorted_desc = sorted(arr, reverse=True)
     top_k = sorted_desc[:k]
-    return sorted(top_k)",False,timed out
+    return sorted(top_k)",False,passed
 HumanEval/121,"
 def solution(lst):
     """"""Given a non-empty list of integers, return the sum of all of the odd elements that are in even positions.
@@ -16475,7 +16475,7 @@ def solution(lst: List[int]) -> int:
     for index, num in enumerate(lst):
         if index % 2 == 0 and num % 2 != 0:
             total += num
-    return total",False,timed out
+    return total",False,passed
 HumanEval/122,"
 def add_elements(arr, k):
     """"""
@@ -16559,7 +16559,7 @@ def add_elements(arr: List[int], k: int) -> int:
     for num in arr[:k]:
         if abs(num) < 100:
             total += num
-    return total",False,timed out
+    return total",False,passed
 HumanEval/123,"
 def get_odd_collatz(n):
     """"""
@@ -16746,7 +16746,7 @@ def get_odd_collatz(n: int) -> List[int]:
             current = 3 * current + 1
     sequence.append(1)
     odds = [num for num in sequence if num % 2 == 1]
-    return sorted(odds)",False,timed out
+    return sorted(odds)",False,passed
 HumanEval/124,"
 def valid_date(date):
     """"""You have to write a function which validates a given date string and
@@ -17012,7 +17012,7 @@ def valid_date(date: str) -> bool:
         max_day = 29
     if dd > max_day:
         return False
-    return True",False,timed out
+    return True",False,passed
 HumanEval/125,"
 def split_words(txt):
     '''
@@ -17159,7 +17159,7 @@ def split_words(txt):
                 order = ord(c) - ord('a')
                 if order % 2 == 1:
                     count += 1
-        return count",False,timed out
+        return count",False,passed
 HumanEval/126,"
 def is_sorted(lst):
     '''
@@ -17323,7 +17323,7 @@ def is_sorted(lst):
         counts[num] = counts.get(num, 0) + 1
         if counts[num] > 2:
             return False
-    return True",False,timed out
+    return True",False,passed
 HumanEval/127,"
 def intersection(interval1, interval2):
     """"""You are given two intervals,
@@ -17798,7 +17798,7 @@ def intersection(interval1, interval2):
         if length % i == 0:
             return ""NO""
 
-    return ""YES""",False,timed out
+    return ""YES""",False,passed
 HumanEval/128,"
 def prod_signs(arr):
     """"""
@@ -17909,7 +17909,7 @@ def prod_signs(arr: List[int]) -> Optional[int]:
             break
         else:
             product_sign *= 1 if num > 0 else -1
-    return sum_abs * product_sign",False,timed out
+    return sum_abs * product_sign",False,passed
 HumanEval/129,"
 def minPath(grid, k):
     """"""
@@ -18718,7 +18718,7 @@ def minPath(grid: List[List[int]], k: int) -> List[int]:
         path.append(next_val)
         current_i, current_j = next_i, next_j
     
-    return path",False,timed out
+    return path",False,passed
 HumanEval/130,"
 def tri(n):
     """"""Everyone knows Fibonacci sequence, it was studied deeply by mathematicians in 
@@ -18762,7 +18762,7 @@ def tri(n):
     # Check some edge cases that are easy to work out by hand.
     assert candidate(0) == [1]
     assert candidate(1) == [1, 3]
-",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-29T00:14:10.225882', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,timed out
+",,,TIMEOUT: OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).,{},"{'timestamp': '2025-12-29T00:14:10.225882', 'prompt_type': 'few_shot', 'error': 'timeout', 'error_message': ""OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly).""}",,,,,True,failed: Sample was skipped or had empty solution
 HumanEval/131,"
 def digits(n):
     """"""Given a positive integer n, return the product of the odd digits.
@@ -18994,7 +18994,7 @@ def digits(n: int) -> int:
         if d % 2 == 1:
             product *= d
             has_odd = True
-    return product if has_odd else 0",False,timed out
+    return product if has_odd else 0",False,passed
 HumanEval/132,"
 def is_nested(string):
     '''
@@ -19047,7 +19047,7 @@ def is_nested(string):
     assert candidate('[[[[[[[[') == False
     assert candidate(']]]]]]]]') == False
 
-",,,,,,USER_SKIP,2025-12-29T00:47:37.191623,True,,True,timed out
+",,,,,,USER_SKIP,2025-12-29T00:47:37.191623,True,,True,failed: Sample was skipped or had empty solution
 HumanEval/133,"
 
 def sum_squares(lst):
@@ -19124,7 +19124,7 @@ def sum_squares(lst: List[float]) -> float:
 from typing import List
 
 def sum_squares(lst: List[float]) -> float:
-    return sum(math.ceil(x) ** 2 for x in lst)",False,timed out
+    return sum(math.ceil(x) ** 2 for x in lst)",False,passed
 HumanEval/134,"
 def check_if_last_char_is_a_letter(txt):
     '''
@@ -19303,7 +19303,7 @@ def check_if_last_char_is_a_letter(txt):
     if not last_char.isalpha():
         return False
     words = txt.split()
-    return len(words[-1]) == 1",False,timed out
+    return len(words[-1]) == 1",False,passed
 HumanEval/135,"
 def can_arrange(arr):
     """"""Create a function which returns the largest index of an element which
@@ -19389,7 +19389,7 @@ def can_arrange(arr: List[int]) -> int:
     for i in range(len(arr)-1, 0, -1):
         if arr[i] < arr[i-1]:
             return i
-    return -1",False,timed out
+    return -1",False,passed
 HumanEval/136,"
 def largest_smallest_integers(lst):
     '''
@@ -19497,7 +19497,7 @@ def largest_smallest_integers(lst: List[int]) -> Tuple[Optional[int], Optional[i
     positives = [x for x in lst if x > 0]
     a = max(negatives) if negatives else None
     b = min(positives) if positives else None
-    return (a, b)",False,timed out
+    return (a, b)",False,passed
 HumanEval/137,"
 def compare_one(a, b):
     """"""
@@ -19633,7 +19633,7 @@ def compare_one(a: Union[int, float, str], b: Union[int, float, str]) -> Union[i
     elif b_num > a_num:
         return b
     else:
-        return None",False,timed out
+        return None",False,passed
 HumanEval/138,"
 def is_equal_to_sum_even(n):
     """"""Evaluate whether the given number n can be written as the sum of exactly 4 positive even numbers
@@ -19682,7 +19682,7 @@ Therefore, the initial code is correct. So the output should be the same as the 
 def is_equal_to_sum_even(n):
     return n >= 8 and n % 2 == 0
 ```","{'programmer_code': 'def is_equal_to_sum_even(n):\n    return n >= 8 and n % 2 == 0', 'refiner_code': 'def is_equal_to_sum_even(n):\n    return n >= 8 and n % 2 == 0'}","{'timestamp': '2025-12-29T01:10:48.965849', 'prompt_type': 'few_shot'}",,,,"def is_equal_to_sum_even(n):
-    return n >= 8 and n % 2 == 0",False,timed out
+    return n >= 8 and n % 2 == 0",False,passed
 HumanEval/139,"
 def special_factorial(n):
     """"""The Brazilian factorial is defined as:
@@ -19885,7 +19885,7 @@ def special_factorial(n: int) -> int:
     for i in range(1, n + 1):
         current_fact *= i
         result *= current_fact
-    return result",False,timed out
+    return result",False,passed
 HumanEval/140,"
 def fix_spaces(text):
     """"""
@@ -20267,7 +20267,7 @@ def fix_spaces(text):
                 result.append('_' * len(space))
         else:
             result.append(non_space)
-    return ''.join(result)",False,timed out
+    return ''.join(result)",False,passed
 HumanEval/141,"
 def file_name_check(file_name):
     """"""Create a function which takes a string representing a file's name, and returns
@@ -20632,7 +20632,7 @@ def file_name_check(file_name: str) -> str:
         return 'No'
     if sum(c.isdigit() for c in file_name) > 3:
         return 'No'
-    return 'Yes'",False,timed out
+    return 'Yes'",False,passed
 HumanEval/142,"
 
 
@@ -20756,7 +20756,7 @@ def sum_squares(lst: List[int]) -> int:
         val ** 3 if i % 4 == 0 else
         val
         for i, val in enumerate(lst)
-    )",False,timed out
+    )",False,passed
 HumanEval/143,"
 def words_in_sentence(sentence):
     """"""
@@ -20886,7 +20886,7 @@ def words_in_sentence(sentence):
     for word in words:
         if is_prime(len(word)):
             result.append(word)
-    return ' '.join(result)",False,timed out
+    return ' '.join(result)",False,passed
 HumanEval/144,"
 def simplify(x, n):
     """"""Your task is to implement a function that will simplify the expression
@@ -21211,7 +21211,7 @@ def simplify(x, n):
     num_product = x_num * n_num
     den_product = x_den * n_den
     common_divisor = gcd(num_product, den_product)
-    return (den_product // common_divisor) == 1",False,timed out
+    return (den_product // common_divisor) == 1",False,passed
 HumanEval/145,"
 def order_by_points(nums):
     """"""
@@ -21244,7 +21244,7 @@ def order_by_points(nums):
     # Check some edge cases that are easy to work out by hand.
     assert True, ""This prints if this assert fails 2 (also good for debugging!)""
 
-",,,,,,USER_SKIP,2025-12-29T02:02:41.428918,True,,True,timed out
+",,,,,,USER_SKIP,2025-12-29T02:02:41.428918,True,,True,failed: Sample was skipped or had empty solution
 HumanEval/146,"
 def specialFilter(nums):
     """"""Write a function that takes an array of numbers as input and returns 
@@ -21404,7 +21404,7 @@ def specialFilter(nums):
             s = str(abs(num))
             if s[0] in '13579' and s[-1] in '13579':
                 count += 1
-    return count",False,timed out
+    return count",False,passed
 HumanEval/147,"
 def get_max_triples(n):
     """"""
@@ -21700,7 +21700,7 @@ def get_max_triples(n):
     count1 = n - count0
     c0 = count0 * (count0 - 1) * (count0 - 2) // 6 if count0 >= 3 else 0
     c1 = count1 * (count1 - 1) * (count1 - 2) // 6 if count1 >= 3 else 0
-    return c0 + c1",False,timed out
+    return c0 + c1",False,passed
 HumanEval/148,"
 def bf(planet1, planet2):
     '''
@@ -21799,7 +21799,7 @@ def bf(planet1, planet2):
     index2 = planets.index(planet2)
     lower = min(index1, index2)
     higher = max(index1, index2)
-    return tuple(planets[lower+1 : higher])",False,timed out
+    return tuple(planets[lower+1 : higher])",False,passed
 HumanEval/149,"
 def sorted_list_sum(lst):
     """"""Write a function that accepts a list of strings as a parameter,
@@ -21895,7 +21895,7 @@ def list_sort(lst: List[str]) -> List[str]:
 
 def list_sort(lst: List[str]) -> List[str]:
     filtered = [s for s in lst if len(s) % 2 == 0]
-    return sorted(filtered, key=lambda x: (len(x), x))",False,timed out
+    return sorted(filtered, key=lambda x: (len(x), x))",False,passed
 HumanEval/150,"
 def x_or_y(n, x, y):
     """"""A simple program which should return the value of x if n is 
@@ -22027,7 +22027,7 @@ def x_or_y(n, x, y):
                 return False
         return True
     
-    return x if is_prime(n) else y",False,timed out
+    return x if is_prime(n) else y",False,passed
 HumanEval/151,"
 def double_the_difference(lst):
     '''
@@ -22276,7 +22276,7 @@ def double_the_difference(lst: List[float]) -> int:
                 int_num = int(num)
                 if int_num % 2 != 0:
                     total += int_num ** 2
-    return total",False,timed out
+    return total",False,passed
 HumanEval/152,"
 def compare(game,guess):
     """"""I think we all remember that feeling when the result of some long-awaited
@@ -22333,7 +22333,7 @@ def compare(game: List[int], guess: List[int]) -> List[int]:
 ```","{'programmer_code': 'from typing import List\n\ndef compare(game: List[int], guess: List[int]) -> List[int]:\n    return [abs(s - g) for s, g in zip(game, guess)]', 'refiner_code': 'from typing import List\n\ndef compare(game: List[int], guess: List[int]) -> List[int]:\n    return [abs(s - g) for s, g in zip(game, guess)]'}","{'timestamp': '2025-12-29T02:29:35.409053', 'prompt_type': 'few_shot'}",,,,"from typing import List
 
 def compare(game: List[int], guess: List[int]) -> List[int]:
-    return [abs(s - g) for s, g in zip(game, guess)]",False,timed out
+    return [abs(s - g) for s, g in zip(game, guess)]",False,passed
 HumanEval/153,"
 def Strongest_Extension(class_name, extensions):
     """"""You will be given the name of a class (a string) and a list of extensions.
@@ -22462,7 +22462,7 @@ def Strongest_Extension(class_name, extensions):
         if strength > max_strength:
             max_strength = strength
             best_ext = ext
-    return f""{class_name}.{best_ext}""",False,timed out
+    return f""{class_name}.{best_ext}""",False,passed
 HumanEval/154,"
 def cycpattern_check(a , b):
     """"""You are given 2 words. You need to return True if the second word or any of its rotations is a substring in the first word
@@ -22633,7 +22633,7 @@ def cycpattern_check(a: str, b: str) -> bool:
     if m == 0:
         return False
     rotations = [b[i:] + b[:i] for i in range(m)]
-    return any(rot in a for rot in rotations)",False,timed out
+    return any(rot in a for rot in rotations)",False,passed
 HumanEval/155,"
 def even_odd_count(num):
     """"""Given an integer. return a tuple that has the number of even and odd digits respectively.
@@ -22734,7 +22734,7 @@ def even_odd_count(num: int) -> Tuple[int, int]:
             even += 1
         else:
             odd += 1
-    return (even, odd)",False,timed out
+    return (even, odd)",False,passed
 HumanEval/156,"
 def int_to_mini_roman(number):
     """"""
@@ -22900,7 +22900,7 @@ def int_to_mini_roman(number: int) -> str:
         while number >= value:
             roman.append(symbol)
             number -= value
-    return ''.join(roman)",False,timed out
+    return ''.join(roman)",False,passed
 HumanEval/157,"
 def right_angle_triangle(a, b, c):
     '''
@@ -22978,7 +22978,7 @@ def right_angle_triangle(a, b, c):
     if a + b <= c or a + c <= b or b + c <= a:
         return False
     sides = sorted([a, b, c])
-    return sides[0]**2 + sides[1]**2 == sides[2]**2",False,timed out
+    return sides[0]**2 + sides[1]**2 == sides[2]**2",False,passed
 HumanEval/158,"
 def find_max(words):
     """"""Write a function that accepts a list of strings.
@@ -23123,7 +23123,7 @@ def find_max(words: List[str]) -> str:
         elif current_count == max_count:
             if word < best_word:
                 best_word = word
-    return best_word",False,timed out
+    return best_word",False,passed
 HumanEval/159,"
 def eat(number, need, remaining):
     """"""
@@ -23208,7 +23208,7 @@ def eat(number, need, remaining):
     return [number + amount, remaining - amount]
 ```","{'programmer_code': 'def eat(number, need, remaining):\n    amount = min(need, remaining)\n    return [number + amount, remaining - amount]', 'refiner_code': 'def eat(number, need, remaining):\n    amount = min(need, remaining)\n    return [number + amount, remaining - amount]'}","{'timestamp': '2025-12-29T02:52:53.700969', 'prompt_type': 'few_shot'}",,,,"def eat(number, need, remaining):
     amount = min(need, remaining)
-    return [number + amount, remaining - amount]",False,timed out
+    return [number + amount, remaining - amount]",False,passed
 HumanEval/160,"
 def do_algebra(operator, operand):
     """"""
@@ -23321,7 +23321,7 @@ def do_algebra(operator: List[str], operand: List[int]) -> int:
     expr = str(operand[0])
     for op, num in zip(operator, operand[1:]):
         expr += op + str(num)
-    return eval(expr)",False,timed out
+    return eval(expr)",False,passed
 HumanEval/161,"
 def solve(s):
     """"""You are given a string s.
@@ -23427,7 +23427,7 @@ def solve(s):
 ```","{'programmer_code': ""def solve(s):\n    if not any(c.isalpha() for c in s):\n        return s[::-1]\n    return ''.join([c.swapcase() if c.isalpha() else c for c in s])"", 'refiner_code': ""def solve(s):\n    if not any(c.isalpha() for c in s):\n        return s[::-1]\n    return ''.join([c.swapcase() if c.isalpha() else c for c in s])""}","{'timestamp': '2025-12-29T02:54:44.376630', 'prompt_type': 'few_shot'}",,,,"def solve(s):
     if not any(c.isalpha() for c in s):
         return s[::-1]
-    return ''.join([c.swapcase() if c.isalpha() else c for c in s])",False,timed out
+    return ''.join([c.swapcase() if c.isalpha() else c for c in s])",False,passed
 HumanEval/162,"
 def string_to_md5(text):
     """"""
@@ -23497,7 +23497,7 @@ def string_to_md5(text):
     if not text:
         return None
     hash_object = hashlib.md5(text.encode('utf-8'))
-    return hash_object.hexdigest()",False,timed out
+    return hash_object.hexdigest()",False,passed
 HumanEval/163,"
 def generate_integers(a, b):
     """"""
@@ -23596,4 +23596,4 @@ def generate_integers(a: int, b: int) -> List[int]:
     lower = min(a, b)
     upper = max(a, b)
     even_digits = [0, 2, 4, 6, 8]
-    return [d for d in even_digits if lower <= d <= upper]",False,timed out
+    return [d for d in even_digits if lower <= d <= upper]",False,passed

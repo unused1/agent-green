@@ -1,4 +1,4 @@
-task_id,prompt,entry_point,canonical_solution,test,initial_code,generated_solution,review,conversation,metadata,cleaned_prediction,test_oracle
+task_id,prompt,entry_point,canonical_solution,test,initial_code,generated_solution,review,conversation,metadata,cleaned_prediction,is_empty_or_skipped,test_oracle
 HumanEval/0,"from typing import List
 
 
@@ -77,7 +77,7 @@ def has_close_elements(numbers: List[float], threshold: float) -> bool:
     for i in range(len(numbers) - 1):
         if numbers[i + 1] - numbers[i] < threshold:
             return True
-    return False",passed
+    return False",False,passed
 HumanEval/1,"from typing import List
 
 
@@ -267,7 +267,7 @@ def separate_paren_groups(paren_string: str) -> List[str]:
                 result.append(current_group)
                 current_group = """"
 
-    return result",passed
+    return result",False,passed
 HumanEval/2,"
 
 def truncate_number(number: float) -> float:
@@ -330,7 +330,7 @@ def truncate_number(number: float) -> float:
     >>> truncate_number(3.5)
     0.5
     """"""
-    return number - int(number)",passed
+    return number - int(number)",False,passed
 HumanEval/3,"from typing import List
 
 
@@ -400,7 +400,7 @@ def below_zero(operations: List[int]) -> bool:
         balance += operation
         if balance < 0:
             return True
-    return False",passed
+    return False",False,passed
 HumanEval/4,"from typing import List
 
 
@@ -486,7 +486,7 @@ def mean_absolute_deviation(numbers: List[float]) -> float:
     
     mean = sum(numbers) / len(numbers)
     absolute_deviations = [abs(x - mean) for x in numbers]
-    return sum(absolute_deviations) / len(numbers)",passed
+    return sum(absolute_deviations) / len(numbers)",False,passed
 HumanEval/5,"from typing import List
 
 
@@ -573,7 +573,7 @@ def intersperse(numbers: List[int], delimiter: int) -> List[int]:
     result = [numbers[0]]
     for num in numbers[1:]:
         result.extend([delimiter, num])
-    return result",passed
+    return result",False,passed
 HumanEval/6,"from typing import List
 
 
@@ -686,7 +686,7 @@ def parse_nested_parens(paren_string: str) -> List[int]:
         return max_level
 
     groups = paren_string.split()
-    return [max_nesting_level(group) for group in groups]",passed
+    return [max_nesting_level(group) for group in groups]",False,passed
 HumanEval/7,"from typing import List
 
 
@@ -749,7 +749,7 @@ def filter_by_substring(strings: List[str], substring: str) -> List[str]:
     >>> filter_by_substring(['abc', 'bacd', 'cde', 'array'], 'a')
     ['abc', 'bacd', 'array']
     """"""
-    return [s for s in strings if substring in s]",passed
+    return [s for s in strings if substring in s]",False,passed
 HumanEval/8,"from typing import List, Tuple
 
 
@@ -840,7 +840,7 @@ def sum_product(numbers: List[int]) -> Tuple[int, int]:
     total_product = 1
     for num in numbers:
         total_product *= num
-    return total_sum, total_product",passed
+    return total_sum, total_product",False,passed
 HumanEval/9,"from typing import List, Tuple
 
 
@@ -913,7 +913,7 @@ def rolling_max(numbers: List[int]) -> List[int]:
     result = [numbers[0]]
     for num in numbers[1:]:
         result.append(max(result[-1], num))
-    return result",passed
+    return result",False,passed
 HumanEval/10,"
 
 def is_palindrome(string: str) -> bool:
@@ -1042,7 +1042,7 @@ def make_palindrome(string: str) -> str:
     for i in range(len(string), -1, -1):
         if is_palindrome(string[:i]):
             suffix = string[i:][::-1]
-            return string + suffix",passed
+            return string + suffix",False,passed
 HumanEval/11,"from typing import List
 
 
@@ -1137,7 +1137,7 @@ def string_xor(a: str, b: str) -> str:
     # Perform XOR operation on each pair of bits and convert the result back to a string
     result = ''.join('1' if bit_a != bit_b else '0' for bit_a, bit_b in zip(a, b))
     
-    return result",passed
+    return result",False,passed
 HumanEval/12,"from typing import List, Optional
 
 
@@ -1204,7 +1204,7 @@ def longest(strings: List[str]) -> Optional[str]:
     """"""
     if not strings:
         return None
-    return max(strings, key=len)",passed
+    return max(strings, key=len)",False,passed
 HumanEval/13,"
 
 def greatest_common_divisor(a: int, b: int) -> int:
@@ -1268,7 +1268,7 @@ def greatest_common_divisor(a: int, b: int) -> int:
     """"""
     while b:
         a, b = b, a % b
-    return abs(a)",passed
+    return abs(a)",False,passed
 HumanEval/14,"from typing import List
 
 
@@ -1324,7 +1324,7 @@ def all_prefixes(string: str) -> List[str]:
     >>> all_prefixes('abc')
     ['a', 'ab', 'abc']
     """"""
-    return [string[:i] for i in range(1, len(string) + 1)]",passed
+    return [string[:i] for i in range(1, len(string) + 1)]",False,passed
 HumanEval/15,"
 
 def string_sequence(n: int) -> str:
@@ -1377,7 +1377,7 @@ def string_sequence(n: int) -> str:
     >>> string_sequence(5)
     '0 1 2 3 4 5'
     """"""
-    return ' '.join(str(i) for i in range(n + 1))",passed
+    return ' '.join(str(i) for i in range(n + 1))",False,passed
 HumanEval/16,"
 
 def count_distinct_characters(string: str) -> int:
@@ -1432,7 +1432,7 @@ def count_distinct_characters(string: str) -> int:
     >>> count_distinct_characters('Jerry')
     4
     """"""
-    return len(set(string.casefold()))",passed
+    return len(set(string.casefold()))",False,passed
 HumanEval/17,"from typing import List
 
 
@@ -1601,7 +1601,7 @@ def parse_music(music_string: str) -> List[int]:
         else:
             # Skip unknown notes and move to the next
             i += 1
-    return result",passed
+    return result",False,passed
 HumanEval/18,"
 
 def how_many_times(string: str, substring: str) -> int:
@@ -1699,7 +1699,7 @@ def how_many_times(string: str, substring: str) -> int:
             start = pos + 1  # Move start to the next character after the found position
         else:
             break
-    return count",passed
+    return count",False,passed
 HumanEval/19,"from typing import List
 
 
@@ -1799,7 +1799,7 @@ def sort_numbers(numbers: str) -> str:
     }
     number_list: List[str] = numbers.split()
     number_list.sort(key=lambda x: number_map[x])
-    return ' '.join(number_list)",passed
+    return ' '.join(number_list)",False,passed
 HumanEval/20,"from typing import List, Tuple
 
 
@@ -1896,7 +1896,7 @@ def find_closest_elements(numbers: List[float]) -> Tuple[float, float]:
                 min_diff = diff
                 closest_pair = (min(numbers[i], numbers[j]), max(numbers[i], numbers[j]))
     
-    return closest_pair",passed
+    return closest_pair",False,passed
 HumanEval/21,"from typing import List
 
 
@@ -1998,7 +1998,7 @@ def rescale_to_unit(numbers: List[float]) -> List[float]:
     if max_val == min_val:
         return [0.0] * len(numbers)
     rescaled = [(x - min_val) / (max_val - min_val) for x in numbers]
-    return rescaled",passed
+    return rescaled",False,passed
 HumanEval/22,"from typing import List, Any
 
 
@@ -2060,7 +2060,7 @@ def filter_integers(values: List[Any]) -> List[int]:
     >>> filter_integers([1, 2, 3, 'abc', {}, []])
     [1, 2, 3]
     """"""
-    return [value for value in values if isinstance(value, int)]",passed
+    return [value for value in values if isinstance(value, int)]",False,passed
 HumanEval/23,"
 
 def strlen(string: str) -> int:
@@ -2113,7 +2113,7 @@ def strlen(string: str) -> int:
     >>> strlen('abc')
     3
     """"""
-    return len(string)",passed
+    return len(string)",False,passed
 HumanEval/24,"
 
 def largest_divisor(n: int) -> int:
@@ -2168,7 +2168,7 @@ def largest_divisor(n: int) -> int:
     """"""
     for i in range(n - 1, 0, -1):
         if n % i == 0:
-            return i",passed
+            return i",False,passed
 HumanEval/25,"from typing import List
 
 
@@ -2295,7 +2295,7 @@ def factorize(n: int) -> List[int]:
             factors.append(divisor)
             n //= divisor
         divisor += 1
-    return factors",passed
+    return factors",False,passed
 HumanEval/26,"from typing import List
 
 
@@ -2389,7 +2389,7 @@ def remove_duplicates(numbers: List[int]) -> List[int]:
             seen.add(num)
         if num not in seen_more_than_once:
             result.append(num)
-    return result",passed
+    return result",False,passed
 HumanEval/27,"
 
 def flip_case(string: str) -> str:
@@ -2432,7 +2432,7 @@ def flip_case(string: str) -> str:
     >>> flip_case('Hello')
     'hELLO'
     """"""
-    return string.swapcase()",passed
+    return string.swapcase()",False,passed
 HumanEval/28,"from typing import List
 
 
@@ -2494,7 +2494,7 @@ def concatenate(strings: List[str]) -> str:
     >>> concatenate(['a', 'b', 'c'])
     'abc'
     """"""
-    return ''.join(strings)",passed
+    return ''.join(strings)",False,passed
 HumanEval/29,"from typing import List
 
 
@@ -2555,7 +2555,7 @@ def filter_by_prefix(strings: List[str], prefix: str) -> List[str]:
     >>> filter_by_prefix(['abc', 'bcd', 'cde', 'array'], 'a')
     ['abc', 'array']
     """"""
-    return [s for s in strings if s.startswith(prefix)]",passed
+    return [s for s in strings if s.startswith(prefix)]",False,passed
 HumanEval/30,"
 
 def get_positive(l: list):
@@ -2615,7 +2615,7 @@ def get_positive(l: list):
     Returns:
     list: A list containing only the positive integers from the input list.
     """"""
-    return [num for num in l if num > 0]",passed
+    return [num for num in l if num > 0]",False,passed
 HumanEval/31,"
 
 def is_prime(n):
@@ -2775,7 +2775,7 @@ def is_prime(n):
         if n % i == 0 or n % (i + 2) == 0:
             return False
         i += 6
-    return True",passed
+    return True",False,passed
 HumanEval/32,"import math
 
 
@@ -3020,7 +3020,7 @@ def find_zero(xs: list):
         
         x0 = x0 - f_x0 / derivative
 
-    return x0",passed
+    return x0",False,passed
 HumanEval/33,"
 
 def sort_third(l: list):
@@ -3170,7 +3170,7 @@ def sort_third(l: list):
             # At other indices, use the original value from the list
             result.append(l[i])
     
-    return result",passed
+    return result",False,passed
 HumanEval/34,"
 
 def unique(l: list):
@@ -3209,7 +3209,7 @@ def unique(l: list):
     >>> unique([5, 3, 5, 2, 3, 3, 9, 0, 123])
     [0, 2, 3, 5, 9, 123]
     """"""
-    return sorted(set(l))",passed
+    return sorted(set(l))",False,passed
 HumanEval/35,"
 
 def max_element(l: list):
@@ -3270,7 +3270,7 @@ def max_element(l: list):
     """"""
     if not l:
         raise ValueError(""List is empty"")
-    return max(l)",passed
+    return max(l)",False,passed
 HumanEval/36,"
 
 def fizz_buzz(n: int):
@@ -3352,7 +3352,7 @@ def fizz_buzz(n: int) -> int:
     for i in range(n):
         if i % 11 == 0 or i % 13 == 0:
             count += str(i).count('7')
-    return count",passed
+    return count",False,passed
 HumanEval/37,"
 
 def sort_even(l: list):
@@ -3457,7 +3457,7 @@ def sort_even(l: list):
             even_index += 1
         else:
             result.append(l[i])
-    return result",passed
+    return result",False,passed
 HumanEval/38,"
 
 def encode_cyclic(s: str):
@@ -3525,7 +3525,7 @@ def decode_cyclic(s: str):
     groups = [s[(3 * i):min((3 * i + 3), len(s))] for i in range((len(s) + 2) // 3)]
     # reverse the cycling of elements in each group. Unless group has fewer elements than 3.
     groups = [(group[2] + group[:2]) if len(group) == 3 else group for group in groups]
-    return """".join(groups)",passed
+    return """".join(groups)",False,passed
 HumanEval/39,"
 
 def prime_fib(n: int):
@@ -3725,7 +3725,7 @@ def prime_fib(n: int) -> int:
             count += 1
             # If this is the n-th prime Fibonacci number, return it
             if count == n:
-                return b",passed
+                return b",False,passed
 HumanEval/40,"
 
 def triples_sum_to_zero(l: list):
@@ -3880,7 +3880,7 @@ def triples_sum_to_zero(l: list) -> bool:
                 left += 1
             else:
                 right -= 1
-    return False",passed
+    return False",False,passed
 HumanEval/41,"
 
 def car_race_collision(n: int):
@@ -3958,7 +3958,7 @@ def car_race_collision(n: int) -> int:
     """"""
     # Since each car from one set will collide with every car from the other set,
     # the total number of collisions is the product of the number of cars in each set.
-    return n * n",passed
+    return n * n",False,passed
 HumanEval/42,"
 
 def incr_list(l: list):
@@ -4009,7 +4009,7 @@ def incr_list(l: list):
     >>> incr_list([5, 3, 5, 2, 3, 3, 9, 0, 123])
     [6, 4, 6, 3, 4, 4, 10, 1, 124]
     """"""
-    return [x + 1 for x in l]",passed
+    return [x + 1 for x in l]",False,passed
 HumanEval/43,"
 
 def pairs_sum_to_zero(l):
@@ -4121,7 +4121,7 @@ def pairs_sum_to_zero(l):
         if -num in seen and -num != num:
             return True
         seen.add(num)
-    return False",passed
+    return False",False,passed
 HumanEval/44,"
 
 def change_base(x: int, base: int):
@@ -4225,7 +4225,7 @@ def change_base(x: int, base: int) -> str:
     while x:
         digits.append(str(x % base))
         x //= base
-    return ''.join(reversed(digits))",passed
+    return ''.join(reversed(digits))",False,passed
 HumanEval/45,"
 
 def triangle_area(a, h):
@@ -4266,7 +4266,7 @@ def triangle_area(a, h):
     >>> triangle_area(5, 3)
     7.5
     """"""
-    return 0.5 * a * h",passed
+    return 0.5 * a * h",False,passed
 HumanEval/46,"
 
 def fib4(n: int):
@@ -4366,7 +4366,7 @@ def fib4(n: int) -> int:
     a, b, c, d = 0, 0, 2, 0
     for _ in range(4, n + 1):
         a, b, c, d = b, c, d, a + b + c + d
-    return d",passed
+    return d",False,passed
 HumanEval/47,"
 
 def median(l: list):
@@ -4451,7 +4451,7 @@ def median(l: list):
     if length % 2 == 0:
         return (sorted_list[middle_index - 1] + sorted_list[middle_index]) / 2
     else:
-        return sorted_list[middle_index]",passed
+        return sorted_list[middle_index]",False,passed
 HumanEval/48,"
 
 def is_palindrome(text: str):
@@ -4514,7 +4514,7 @@ def is_palindrome(text: str) -> bool:
     :param text: The input string to check
     :return: True if the string is a palindrome, False otherwise
     """"""
-    return text == text[::-1]",passed
+    return text == text[::-1]",False,passed
 HumanEval/49,"
 
 def modp(n: int, p: int):
@@ -4594,7 +4594,7 @@ def modp(n: int, p: int):
             result = (result * base) % p
         base = (base * base) % p
         n = n // 2
-    return result",passed
+    return result",False,passed
 HumanEval/50,"
 
 def encode_shift(s: str):
@@ -4643,7 +4643,7 @@ def decode_shift(s: str):
     """"""
     takes as input string encoded with encode_shift function. Returns decoded string.
     """"""
-    return """".join([chr(((ord(ch) - 5 - ord(""a"")) % 26 + 26) % 26 + ord(""a"")) for ch in s])",passed
+    return """".join([chr(((ord(ch) - 5 - ord(""a"")) % 26 + 26) % 26 + ord(""a"")) for ch in s])",False,passed
 HumanEval/51,"
 
 def remove_vowels(text):
@@ -4735,7 +4735,7 @@ def remove_vowels(text):
     'zbcd'
     """"""
     vowels = 'aeiouAEIOU'
-    return ''.join(char for char in text if char not in vowels)",passed
+    return ''.join(char for char in text if char not in vowels)",False,passed
 HumanEval/52,"
 
 def below_threshold(l: list, t: int):
@@ -4792,7 +4792,7 @@ def below_threshold(l: list, t: int):
     >>> below_threshold([1, 20, 4, 10], 5)
     False
     """"""
-    return all(num < t for num in l)",passed
+    return all(num < t for num in l)",False,passed
 HumanEval/53,"
 
 def add(x: int, y: int):
@@ -4851,7 +4851,7 @@ def add(x: int, y: int) -> int:
     >>> add(5, 7)
     12
     """"""
-    return x + y",passed
+    return x + y",False,passed
 HumanEval/54,"
 
 def same_chars(s0: str, s1: str):
@@ -4891,7 +4891,7 @@ def check(candidate):
 def same_chars(s0: str, s1: str) -> bool:
     return sorted(s0) == sorted(s1)
 ```","{'programmer_code': 'def same_chars(s0: str, s1: str) -> bool:\n    return sorted(s0) == sorted(s1)', 'refiner_code': 'def same_chars(s0: str, s1: str) -> bool:\n    return sorted(s0) == sorted(s1)'}","{'timestamp': '2025-12-28T14:17:51.137514', 'prompt_type': 'zero_shot'}","def same_chars(s0: str, s1: str) -> bool:
-    return sorted(s0) == sorted(s1)",passed
+    return sorted(s0) == sorted(s1)",False,passed
 HumanEval/55,"
 
 def fib(n: int):
@@ -4998,7 +4998,7 @@ def fib(n: int) -> int:
         a, b = 1, 1
         for _ in range(2, n):
             a, b = b, a + b
-        return b",passed
+        return b",False,passed
 HumanEval/56,"
 
 def correct_bracketing(brackets: str):
@@ -5116,7 +5116,7 @@ def correct_bracketing(brackets: str) -> bool:
             if not stack:
                 return False
             stack.pop()
-    return not stack",passed
+    return not stack",False,passed
 HumanEval/57,"
 
 def monotonic(l: list):
@@ -5231,7 +5231,7 @@ def monotonic(l: list):
         if not increasing and not decreasing:  # Early exit if both are False
             return False
     
-    return increasing or decreasing",passed
+    return increasing or decreasing",False,passed
 HumanEval/58,"
 
 def common(l1: list, l2: list):
@@ -5293,7 +5293,7 @@ def common(l1: list, l2: list) -> list:
     >>> common([5, 3, 2, 8], [3, 2])
     [2, 3]
     """"""
-    return sorted(set(l1) & set(l2))",passed
+    return sorted(set(l1) & set(l2))",False,passed
 HumanEval/59,"
 
 def largest_prime_factor(n: int):
@@ -5428,7 +5428,7 @@ def largest_prime_factor(n: int) -> int:
         # If i is a factor of n and is prime
         if n % i == 0 and is_prime(i):
             # Since we're checking from largest to smallest, the first prime factor we find is the largest
-            return i",passed
+            return i",False,passed
 HumanEval/60,"
 
 def sum_to_n(n: int):
@@ -5519,7 +5519,7 @@ def sum_to_n(n: int) -> int:
     """"""
     if n < 1:
         return 0
-    return n * (n + 1) // 2",passed
+    return n * (n + 1) // 2",False,passed
 HumanEval/61,"
 
 def correct_bracketing(brackets: str):
@@ -5601,7 +5601,7 @@ def correct_bracketing(brackets: str) -> bool:
             balance -= 1
             if balance < 0:
                 return False
-    return balance == 0",passed
+    return balance == 0",False,passed
 HumanEval/62,"
 
 def derivative(xs: list):
@@ -5672,7 +5672,7 @@ def derivative(xs: list):
     if len(xs) <= 1:
         return [0]
     
-    return [i * x for i, x in enumerate(xs[1:], start=1)]",passed
+    return [i * x for i, x in enumerate(xs[1:], start=1)]",False,passed
 HumanEval/63,"
 
 def fibfib(n: int):
@@ -5760,7 +5760,7 @@ def fibfib(n: int) -> int:
     for _ in range(3, n + 1):
         a, b, c = b, c, a + b + c
     
-    return c",passed
+    return c",False,passed
 HumanEval/64,"
 FIX = """"""
 Add more test cases.
@@ -5866,7 +5866,7 @@ def vowels_count(s):
     for i, char in enumerate(s_lower):
         if char in vowels or (char == 'y' and i == len(s_lower) - 1):
             count += 1
-    return count",passed
+    return count",False,passed
 HumanEval/65,"
 def circular_shift(x, shift):
     """"""Circular shift the digits of the integer x, shift the digits right by shift
@@ -5967,7 +5967,7 @@ def circular_shift(x, shift):
     elif shift > num_digits:
         return num_str[::-1]
     else:
-        return num_str[-effective_shift:] + num_str[:-effective_shift]",passed
+        return num_str[-effective_shift:] + num_str[:-effective_shift]",False,passed
 HumanEval/66,"
 def digitSum(s):
     """"""Task
@@ -6042,7 +6042,7 @@ def digitSum(s):
         digitSum(""woArBld"") => 131
         digitSum(""aAaaaXa"") => 153
     """"""
-    return sum(ord(char) for char in s if char.isupper())",passed
+    return sum(ord(char) for char in s if char.isupper())",False,passed
 HumanEval/67,"
 def fruit_distribution(s,n):
     """"""
@@ -6194,7 +6194,7 @@ def fruit_distribution(s, n):
     if mangoes < 0:
         raise ValueError(""The calculated number of mangoes cannot be negative."")
     
-    return mangoes",passed
+    return mangoes",False,passed
 HumanEval/68,"
 def pluck(arr):
     """"""
@@ -6308,7 +6308,7 @@ def pluck(arr):
     if not even_nodes:
         return []
     smallest_even = min(even_nodes, key=lambda x: (x[0], x[1]))
-    return [smallest_even[0], smallest_even[1]]",passed
+    return [smallest_even[0], smallest_even[1]]",False,passed
 HumanEval/69,"
 def search(lst):
     '''
@@ -6400,7 +6400,7 @@ def search(lst):
         if num > 0 and count[num] >= num:
             result = num
             break
-    return result",passed
+    return result",False,passed
 HumanEval/70,"
 def strange_sort_list(lst):
     '''
@@ -6502,7 +6502,7 @@ def strange_sort_list(lst):
         if lst:
             result.append(max(lst))
             lst.remove(max(lst))
-    return result",passed
+    return result",False,passed
 HumanEval/71,"
 def triangle_area(a, b, c):
     '''
@@ -6616,7 +6616,7 @@ def triangle_area(a, b, c):
         area = math.sqrt(semi_perimeter * (semi_perimeter - a) * (semi_perimeter - b) * (semi_perimeter - c))
         return round(area, 2)
     else:
-        return -1",passed
+        return -1",False,passed
 HumanEval/72,"
 def will_it_fly(q,w):
     '''
@@ -6744,7 +6744,7 @@ def will_it_fly(q, w):
     total_weight = sum(q)
     
     # Return True if the list is balanced and the sum is less than or equal to the maximum weight
-    return is_balanced and total_weight <= w",passed
+    return is_balanced and total_weight <= w",False,passed
 HumanEval/73,"
 def smallest_change(arr):
     """"""
@@ -6842,7 +6842,7 @@ def smallest_change(arr):
         left += 1
         right -= 1
     
-    return changes",passed
+    return changes",False,passed
 HumanEval/74,"
 def total_match(lst1, lst2):
     '''
@@ -6949,7 +6949,7 @@ def total_match(lst1, lst2):
         return sum(len(s) for s in lst)
 
     total1, total2 = total_chars(lst1), total_chars(lst2)
-    return lst1 if total1 <= total2 else lst2",passed
+    return lst1 if total1 <= total2 else lst2",False,passed
 HumanEval/75,"
 def is_multiply_prime(a):
     """"""Write a function that returns true if the given number is the multiplication of 3 prime numbers
@@ -7073,7 +7073,7 @@ def is_multiply_prime(a):
                     k = quotient // j
                     if is_prime(k):
                         return True
-    return False",passed
+    return False",False,passed
 HumanEval/76,"
 def is_simple_power(x, n):
     """"""Your task is to write a function that returns true if a number x is a simple
@@ -7162,7 +7162,7 @@ def is_simple_power(x, n):
         log_result = math.log(x, n)
     except ValueError:  # Handle case where n is 1 (already covered) or x is negative (also covered)
         return False
-    return log_result.is_integer()",passed
+    return log_result.is_integer()",False,passed
 HumanEval/77,"
 def iscube(a):
     '''
@@ -7248,7 +7248,7 @@ def iscube(a):
     if a >= 0:
         return round(a ** (1. / 3)) ** 3 == a
     else:
-        return round((-a) ** (1. / 3)) ** 3 == -a",passed
+        return round((-a) ** (1. / 3)) ** 3 == -a",False,passed
 HumanEval/78,"
 def hex_key(num):
     """"""You have been tasked to write a function that receives 
@@ -7402,7 +7402,7 @@ def hex_key(num):
             count += 1
     
     # Return the total count of prime hexadecimal digits
-    return count",passed
+    return count",False,passed
 HumanEval/79,"
 def decimal_to_binary(decimal):
     """"""You will be given a number in decimal form and your task is to convert it to
@@ -7438,7 +7438,7 @@ def decimal_to_binary(decimal):
     return ""db"" + bin(decimal)[2:] + ""db""
 ```","{'programmer_code': 'def decimal_to_binary(decimal):\n    """"""Converts a decimal number to binary format with \'db\' prefix and suffix.""""""\n    return ""db"" + bin(decimal)[2:] + ""db""', 'refiner_code': 'def decimal_to_binary(decimal):\n    """"""Converts a decimal number to binary format with \'db\' prefix and suffix.""""""\n    return ""db"" + bin(decimal)[2:] + ""db""'}","{'timestamp': '2025-12-28T14:20:28.438704', 'prompt_type': 'zero_shot'}","def decimal_to_binary(decimal):
     """"""Converts a decimal number to binary format with 'db' prefix and suffix.""""""
-    return ""db"" + bin(decimal)[2:] + ""db""",passed
+    return ""db"" + bin(decimal)[2:] + ""db""",False,passed
 HumanEval/80,"
 def is_happy(s):
     """"""You are given a string s.
@@ -7541,7 +7541,7 @@ def is_happy(s):
     for i in range(len(s) - 2):
         if len(set(s[i:i+3])) < 3:
             return False
-    return True",passed
+    return True",False,passed
 HumanEval/81,"
 def numerical_letter_grade(grades):
     """"""It is the last week of the semester and the teacher has to give the grades
@@ -7734,7 +7734,7 @@ def numerical_letter_grade(grades):
             letter_grades.append('D-')
         else:
             letter_grades.append('E')
-    return letter_grades",passed
+    return letter_grades",False,passed
 HumanEval/82,"
 def prime_length(string):
     """"""Write a function that takes a string and returns True if the string
@@ -7820,7 +7820,7 @@ def prime_length(string):
 
 def prime_length(string):
     """"""Check if the length of a string is a prime number.""""""
-    return is_prime(len(string))",passed
+    return is_prime(len(string))",False,passed
 HumanEval/83,"
 def starts_one_ends(n):
     """"""
@@ -7920,7 +7920,7 @@ def starts_one_ends(n):
     starts_and_ends_with_one = 10 ** (n - 2) if n > 1 else 0
     
     # Apply the principle of inclusion-exclusion
-    return starts_with_one + ends_with_one - starts_and_ends_with_one",passed
+    return starts_with_one + ends_with_one - starts_and_ends_with_one",False,passed
 HumanEval/84,"
 def solve(N):
     """"""Given a positive integer N, return the total sum of its digits in binary.
@@ -8044,7 +8044,7 @@ def solve(N):
     # Convert the sum of digits to binary and remove the '0b' prefix
     binary_sum = bin(sum_of_digits)[2:]
     
-    return binary_sum",passed
+    return binary_sum",False,passed
 HumanEval/85,"
 def add(lst):
     """"""Given a non-empty list of integers lst. add the even elements that are at odd indices..
@@ -8074,7 +8074,7 @@ def add(lst):
     return sum(num for idx, num in enumerate(lst) if idx % 2 != 0 and num % 2 == 0)
 ```","{'programmer_code': 'def add(lst):\n    """"""Given a non-empty list of integers lst. Add the even elements that are at odd indices.""""""\n    return sum(num for idx, num in enumerate(lst) if idx % 2 != 0 and num % 2 == 0)', 'refiner_code': 'def add(lst):\n    """"""Given a non-empty list of integers lst. Add the even elements that are at odd indices.""""""\n    return sum(num for idx, num in enumerate(lst) if idx % 2 != 0 and num % 2 == 0)'}","{'timestamp': '2025-12-28T14:21:16.544847', 'prompt_type': 'zero_shot'}","def add(lst):
     """"""Given a non-empty list of integers lst. Add the even elements that are at odd indices.""""""
-    return sum(num for idx, num in enumerate(lst) if idx % 2 != 0 and num % 2 == 0)",passed
+    return sum(num for idx, num in enumerate(lst) if idx % 2 != 0 and num % 2 == 0)",False,passed
 HumanEval/86,"
 def anti_shuffle(s):
     """"""
@@ -8145,7 +8145,7 @@ def anti_shuffle(s):
     :return: Ordered version of the string
     """"""
     return ' '.join(''.join(sorted(word)) if word.isalpha() else word 
-                    for word in s.split(' '))",passed
+                    for word in s.split(' '))",False,passed
 HumanEval/87,"
 def get_row(lst, x):
     """"""
@@ -8275,7 +8275,7 @@ def get_row(lst, x):
                 coordinates.append((row_idx, col_idx))
     # Sort by row ascending, then by column descending
     coordinates.sort(key=lambda coord: (coord[0], -coord[1]))
-    return coordinates",passed
+    return coordinates",False,passed
 HumanEval/88,"
 def sort_array(array):
     """"""
@@ -8400,7 +8400,7 @@ def sort_array(array):
     if first_last_sum % 2 == 0:  # If sum is even, sort in descending order
         return sorted(array, reverse=True)
     else:  # If sum is odd, sort in ascending order
-        return sorted(array)",passed
+        return sorted(array)",False,passed
 HumanEval/89,"
 def encrypt(s):
     """"""Create a function encrypt that takes a string as an argument and
@@ -8510,7 +8510,7 @@ def encrypt(s):
             encrypted_string += encrypted_char
         else:
             encrypted_string += char
-    return encrypted_string",passed
+    return encrypted_string",False,passed
 HumanEval/90,"
 def next_smallest(lst):
     """"""
@@ -8617,7 +8617,7 @@ def next_smallest(lst):
     if len(unique_sorted) < 2:
         return None
     
-    return unique_sorted[1]",passed
+    return unique_sorted[1]",False,passed
 HumanEval/91,"
 def is_bored(S):
     """"""
@@ -8761,7 +8761,7 @@ def is_bored(S):
     # Count the number of sentences that start with ""I"" (case-insensitive)
     boredoms = sum(1 for sentence in sentences if sentence and sentence.strip().lower().startswith(""i""))
 
-    return boredoms",passed
+    return boredoms",False,passed
 HumanEval/92,"
 def any_int(x, y, z):
     '''
@@ -8813,7 +8813,7 @@ def any_int(x, y, z):
             (x == y + z or y == x + z or z == x + y))
 ```","{'programmer_code': 'def any_int(x, y, z):\n    return (isinstance(x, int) and isinstance(y, int) and isinstance(z, int) and\n            (x == y + z or y == x + z or z == x + y))', 'refiner_code': 'def any_int(x, y, z):\n    return (isinstance(x, int) and isinstance(y, int) and isinstance(z, int) and\n            (x == y + z or y == x + z or z == x + y))'}","{'timestamp': '2025-12-28T14:22:07.245440', 'prompt_type': 'zero_shot'}","def any_int(x, y, z):
     return (isinstance(x, int) and isinstance(y, int) and isinstance(z, int) and
-            (x == y + z or y == x + z or z == x + y))",passed
+            (x == y + z or y == x + z or z == x + y))",False,passed
 HumanEval/93,"
 def encode(message):
     """"""
@@ -8965,7 +8965,7 @@ def encode(message):
         else:
             encoded_message += char
 
-    return encoded_message",passed
+    return encoded_message",False,passed
 HumanEval/94,"
 
 def skjkasdkd(lst):
@@ -9095,7 +9095,7 @@ def skjkasdkd(lst):
     if not primes:
         return 0
     largest_prime = max(primes)
-    return sum_of_digits(largest_prime)",passed
+    return sum_of_digits(largest_prime)",False,passed
 HumanEval/95,"
 def check_dict_case(dict):
     """"""
@@ -9215,7 +9215,7 @@ def check_dict_case(dictionary):
     all_lower = all(key.islower() for key in dictionary.keys())
     all_upper = all(key.isupper() for key in dictionary.keys())
 
-    return all_lower or all_upper",passed
+    return all_lower or all_upper",False,passed
 HumanEval/96,"
 def count_up_to(n):
     """"""Implement a function that takes an non-negative integer and returns an array of the first n
@@ -9324,7 +9324,7 @@ def count_up_to(n):
         if is_prime(num):
             primes.append(num)
         num += 1
-    return primes",passed
+    return primes",False,passed
 HumanEval/97,"
 def multiply(a, b):
     """"""Complete the function that takes two integers and returns 
@@ -9414,7 +9414,7 @@ def multiply(a, b):
     unit_digit_b = abs(b) % 10
     
     # Return the product of the unit digits
-    return unit_digit_a * unit_digit_b",passed
+    return unit_digit_a * unit_digit_b",False,passed
 HumanEval/98,"
 def count_upper(s):
     """"""
@@ -9486,7 +9486,7 @@ def count_upper(s):
     count_upper('dBBE') returns 0
     """"""
     vowels = 'AEIOU'
-    return sum(1 for i, char in enumerate(s) if i % 2 == 0 and char in vowels)",passed
+    return sum(1 for i, char in enumerate(s) if i % 2 == 0 and char in vowels)",False,passed
 HumanEval/99,"
 def closest_integer(value):
     '''
@@ -9610,7 +9610,7 @@ def closest_integer(value):
     if num >= 0:
         return int(num + 0.5)
     else:
-        return int(num - 0.5)",passed
+        return int(num - 0.5)",False,passed
 HumanEval/100,"
 def make_a_pile(n):
     """"""
@@ -9639,7 +9639,7 @@ def make_a_pile(n):
     # Check some edge cases that are easy to work out by hand.
     assert True, ""This prints if this assert fails 2 (also good for debugging!)""
 
-",,,,"{'programmer_code': '', 'refiner_code': ''}","{'timestamp': '2025-12-28T14:22:52.383696', 'prompt_type': 'zero_shot'}",,passed
+",,,,"{'programmer_code': '', 'refiner_code': ''}","{'timestamp': '2025-12-28T14:22:52.383696', 'prompt_type': 'zero_shot'}",,True,failed: Sample was skipped or had empty solution
 HumanEval/101,"
 def words_string(s):
     """"""
@@ -9723,7 +9723,7 @@ def words_string(s):
     words_string(""Hi, my name is John"") == [""Hi"", ""my"", ""name"", ""is"", ""John""]
     words_string(""One, two, three, four, five, six"") == [""One"", ""two"", ""three"", ""four"", ""five"", ""six""]
     """"""
-    return [word for word in re.split(r'[,\s]+', s) if word]",passed
+    return [word for word in re.split(r'[,\s]+', s) if word]",False,passed
 HumanEval/102,"
 def choose_num(x, y):
     """"""This function takes two positive numbers x and y and returns the
@@ -9845,7 +9845,7 @@ def choose_num(x, y):
     if largest_even < lower:
         return -1
     
-    return largest_even",passed
+    return largest_even",False,passed
 HumanEval/103,"
 def rounded_avg(n, m):
     """"""You are given two positive integers n and m, and your task is to compute the
@@ -9949,7 +9949,7 @@ def rounded_avg(n, m):
     
     total = (n + m) * (m - n + 1) // 2
     avg = round(total / (m - n + 1))
-    return bin(avg)",passed
+    return bin(avg)",False,passed
 HumanEval/104,"
 def unique_digits(x):
     """"""Given a list of positive integers x. return a sorted list of all 
@@ -10041,7 +10041,7 @@ def unique_digits(x):
     def has_no_even_digit(n):
         return all(int(digit) % 2 != 0 for digit in str(n))
 
-    return sorted(filter(has_no_even_digit, x))",passed
+    return sorted(filter(has_no_even_digit, x))",False,passed
 HumanEval/105,"
 def by_length(arr):
     """"""
@@ -10195,7 +10195,7 @@ def by_length(arr):
     # Replace each digit with its name
     result = [number_names[num] for num in reversed_arr]
     
-    return result",passed
+    return result",False,passed
 HumanEval/106,"
 def f(n):
     """""" Implement the function f that takes n as a parameter,
@@ -10309,7 +10309,7 @@ def f(n):
             # Calculate sum from 1 to i for odd i
             total = sum(range(1, i + 1))
             result.append(total)
-    return result",passed
+    return result",False,passed
 HumanEval/107,"
 def even_odd_palindrome(n):
     """"""
@@ -10418,7 +10418,7 @@ def even_odd_palindrome(n):
             else:
                 odd_count += 1
     
-    return (even_count, odd_count)",passed
+    return (even_count, odd_count)",False,passed
 HumanEval/108,"
 def count_nums(arr):
     """"""
@@ -10535,7 +10535,7 @@ def count_nums(arr):
     for num in arr:
         if sum_of_digits(num) > 0:
             count += 1
-    return count",passed
+    return count",False,passed
 HumanEval/109,"
 def move_one_ball(arr):
     """"""We have an array 'arr' of N integers arr[1], arr[2], ..., arr[N].The
@@ -10659,7 +10659,7 @@ def move_one_ball(arr):
             return True
     
     # If no rotation matches the sorted array, return False
-    return False",passed
+    return False",False,passed
 HumanEval/110,"
 def exchange(lst1, lst2):
     """"""In this problem, you will implement a function that takes two lists of numbers,
@@ -10749,7 +10749,7 @@ def exchange(lst1, lst2):
     if len(odd1) <= len(even2) and len(odd2) <= len(even1):
         return ""YES""
     else:
-        return ""NO""",passed
+        return ""NO""",False,passed
 HumanEval/111,"
 def histogram(test):
     """"""Given a string representing a space separated lowercase letters, return a dictionary
@@ -10914,7 +10914,7 @@ def histogram(test):
     # Filter the dictionary to include only characters with the maximum count
     result = {char: count for char, count in char_count.items() if count == max_count}
     
-    return result",passed
+    return result",False,passed
 HumanEval/112,"
 def reverse_delete(s,c):
     """"""Task
@@ -11014,7 +11014,7 @@ def reverse_delete(s, c):
     # Check if the resulting string is a palindrome
     is_palindrome = result_str == result_str[::-1]
     
-    return (result_str, is_palindrome)",passed
+    return (result_str, is_palindrome)",False,passed
 HumanEval/113,"
 def odd_count(lst):
     """"""Given a list of strings, where each string consists of only digits, return a list.
@@ -11069,7 +11069,7 @@ def odd_count(lst):
     for s in lst:
         odd_digit_count = sum(1 for digit in s if int(digit) % 2 != 0)
         result.append(f""the number of odd elements {odd_digit_count}n the str{odd_digit_count}ng {odd_digit_count} of the {odd_digit_count}nput."")
-    return result",passed
+    return result",False,passed
 HumanEval/114,"
 def minSubArraySum(nums):
     """"""
@@ -11193,7 +11193,7 @@ def minSubArraySum(nums):
         current_sum = min(num, current_sum + num)
         min_sum = min(min_sum, current_sum)
 
-    return min_sum",passed
+    return min_sum",False,passed
 HumanEval/115,"
 def max_fill(grid, capacity):
     import math
@@ -11388,7 +11388,7 @@ def max_fill(grid, capacity):
         * 1 <= capacity <= 10
     """"""
     total_water = sum(sum(row) for row in grid)
-    return (total_water + capacity - 1) // capacity",passed
+    return (total_water + capacity - 1) // capacity",False,passed
 HumanEval/116,"
 def sort_array(arr):
     """"""
@@ -11424,7 +11424,7 @@ def sort_array(arr):
 def sort_array(arr):
     return sorted(arr, key=lambda x: (bin(abs(x)).count('1'), x))
 ```","{'programmer_code': ""def sort_array(arr):\n    return sorted(arr, key=lambda x: (bin(x).count('1') if x >= 0 else bin(abs(x)).count('1'), x))"", 'refiner_code': ""def sort_array(arr):\n    return sorted(arr, key=lambda x: (bin(abs(x)).count('1'), x))""}","{'timestamp': '2025-12-28T14:24:58.201902', 'prompt_type': 'zero_shot'}","def sort_array(arr):
-    return sorted(arr, key=lambda x: (bin(abs(x)).count('1'), x))",passed
+    return sorted(arr, key=lambda x: (bin(abs(x)).count('1'), x))",False,passed
 HumanEval/117,"
 def select_words(s, n):
     """"""Given a string s and a natural number n, you have been tasked to implement 
@@ -11533,7 +11533,7 @@ def select_words(s, n):
         if consonant_count == n:
             result.append(word)
 
-    return result",passed
+    return result",False,passed
 HumanEval/118,"
 def get_closest_vowel(word):
     """"""You are given a word. Your task is to find the closest vowel that stands between 
@@ -11654,7 +11654,7 @@ def get_closest_vowel(word):
         if word[i] in vowels and word[i - 1] not in vowels and word[i + 1] not in vowels:
             closest_vowel = word[i]
             break
-    return closest_vowel",passed
+    return closest_vowel",False,passed
 HumanEval/119,"
 def match_parens(lst):
     '''
@@ -11806,7 +11806,7 @@ def match_parens(lst):
 
     s1, s2 = lst
     # Check both concatenation orders
-    return 'Yes' if is_balanced(s1 + s2) or is_balanced(s2 + s1) else 'No'",passed
+    return 'Yes' if is_balanced(s1 + s2) or is_balanced(s2 + s1) else 'No'",False,passed
 HumanEval/120,"
 def maximum(arr, k):
     """"""
@@ -11933,7 +11933,7 @@ def maximum(arr, k):
         2. The elements in the array will be in the range of [-1000, 1000].
         3. 0 <= k <= len(arr)
     """"""
-    return sorted(arr, reverse=True)[:k]",passed
+    return sorted(arr, reverse=True)[:k]",False,passed
 HumanEval/121,"
 def solution(lst):
     """"""Given a non-empty list of integers, return the sum of all of the odd elements that are in even positions.
@@ -11992,7 +11992,7 @@ def solution(lst):
     solution([3, 3, 3, 3, 3]) ==> 9
     solution([30, 13, 24, 321]) ==> 0
     """"""
-    return sum(val for idx, val in enumerate(lst) if idx % 2 == 0 and val % 2 != 0)",passed
+    return sum(val for idx, val in enumerate(lst) if idx % 2 == 0 and val % 2 != 0)",False,passed
 HumanEval/122,"
 def add_elements(arr, k):
     """"""
@@ -12078,7 +12078,7 @@ def add_elements(arr, k):
         1. 1 <= len(arr) <= 100
         2. 1 <= k <= len(arr)
     """"""
-    return sum(num for num in arr[:k] if -99 <= num <= 99)",passed
+    return sum(num for num in arr[:k] if -99 <= num <= 99)",False,passed
 HumanEval/123,"
 def get_odd_collatz(n):
     """"""
@@ -12243,7 +12243,7 @@ def get_odd_collatz(n):
 
     sequence = collatz_sequence(n)
     odd_numbers = [x for x in sequence if x % 2 != 0]
-    return sorted(odd_numbers)",passed
+    return sorted(odd_numbers)",False,passed
 HumanEval/124,"
 def valid_date(date):
     """"""You have to write a function which validates a given date string and
@@ -12446,7 +12446,7 @@ def valid_date(date):
     if day < 1 or day > num_days_in_month:
         return False
     
-    return True",passed
+    return True",False,passed
 HumanEval/125,"
 def split_words(txt):
     '''
@@ -12530,7 +12530,7 @@ def split_words(txt):
         return txt.split(',')
     else:
         # Corrected condition to check for odd order in the alphabet (1, 3, 5, ...)
-        return sum(1 for c in txt if c.islower() and (ord(c) - ord('a')) % 2 != 0)",passed
+        return sum(1 for c in txt if c.islower() and (ord(c) - ord('a')) % 2 != 0)",False,passed
 HumanEval/126,"
 def is_sorted(lst):
     '''
@@ -12584,7 +12584,7 @@ def is_sorted(lst):
 def is_sorted(lst):
     return all(lst[i] <= lst[i+1] for i in range(len(lst)-1)) and len(lst) == len(set(lst))
 ```","{'programmer_code': 'def is_sorted(lst):\n    return all(lst[i] <= lst[i+1] for i in range(len(lst)-1)) and len(lst) == len(set(lst))', 'refiner_code': 'def is_sorted(lst):\n    return all(lst[i] <= lst[i+1] for i in range(len(lst)-1)) and len(lst) == len(set(lst))'}","{'timestamp': '2025-12-28T14:26:13.160892', 'prompt_type': 'zero_shot'}","def is_sorted(lst):
-    return all(lst[i] <= lst[i+1] for i in range(len(lst)-1)) and len(lst) == len(set(lst))",passed
+    return all(lst[i] <= lst[i+1] for i in range(len(lst)-1)) and len(lst) == len(set(lst))",False,passed
 HumanEval/127,"
 def intersection(interval1, interval2):
     """"""You are given two intervals,
@@ -12758,7 +12758,7 @@ def intersection(interval1, interval2):
     if is_prime(intersection_length):
         return ""YES""
     else:
-        return ""NO""",passed
+        return ""NO""",False,passed
 HumanEval/128,"
 def prod_signs(arr):
     """"""
@@ -12887,7 +12887,7 @@ def prod_signs(arr):
         sign_product *= 1 if num > 0 else -1
         magnitude_sum += abs(num)
 
-    return sign_product * magnitude_sum",passed
+    return sign_product * magnitude_sum",False,passed
 HumanEval/129,"
 def minPath(grid, k):
     """"""
@@ -13198,7 +13198,7 @@ def minPath(grid: List[List[int]], k: int) -> List[int]:
                 # we cannot break here. Instead, we continue to explore all starting points.
                 # pass  # Removed the break to ensure all paths are considered
 
-    return min_path","failed: expected an indented block after 'if' statement on line 46 (<string>, line 51)"
+    return min_path",False,"failed: expected an indented block after 'if' statement on line 46 (<string>, line 51)"
 HumanEval/130,"
 def tri(n):
     """"""Everyone knows Fibonacci sequence, it was studied deeply by mathematicians in 
@@ -13385,7 +13385,7 @@ def tri(n):
                 # If next_even is beyond the sequence length, use available terms
                 sequence.append(sequence[i - 1] + sequence[i - 2])
     
-    return sequence[:n + 1]",passed
+    return sequence[:n + 1]",False,passed
 HumanEval/131,"
 def digits(n):
     """"""Given a positive integer n, return the product of the odd digits.
@@ -13481,7 +13481,7 @@ def digits(n):
         if d % 2 != 0:
             product *= d
             all_even = False
-    return product if not all_even else 0",passed
+    return product if not all_even else 0",False,passed
 HumanEval/132,"
 def is_nested(string):
     '''
@@ -13636,7 +13636,7 @@ def is_nested(string):
                 # Mismatched closing bracket, invalid sequence
                 return False
     # Return True if nested and all opening brackets have been matched
-    return nested and not stack",passed
+    return nested and not stack",False,passed
 HumanEval/133,"
 
 def sum_squares(lst):
@@ -13731,7 +13731,7 @@ def sum_squares(lst):
     Returns:
     int: The sum of squared numbers after rounding each to the upper int.
     """"""
-    return sum((math.ceil(num)) ** 2 for num in lst)",passed
+    return sum((math.ceil(num)) ** 2 for num in lst)",False,passed
 HumanEval/134,"
 def check_if_last_char_is_a_letter(txt):
     '''
@@ -13823,7 +13823,7 @@ def check_if_last_char_is_a_letter(txt):
     if not stripped_txt:
         return False
     last_char = stripped_txt[-1]
-    return last_char.isalpha() and (len(stripped_txt) == 1 or stripped_txt[-2] == ' ')",passed
+    return last_char.isalpha() and (len(stripped_txt) == 1 or stripped_txt[-2] == ' ')",False,passed
 HumanEval/135,"
 def can_arrange(arr):
     """"""Create a function which returns the largest index of an element which
@@ -13911,7 +13911,7 @@ def can_arrange(arr):
     for i in range(1, len(arr)):
         if arr[i] < arr[i - 1]:
             max_index = i
-    return max_index",passed
+    return max_index",False,passed
 HumanEval/136,"
 def largest_smallest_integers(lst):
     '''
@@ -14008,7 +14008,7 @@ def largest_smallest_integers(lst):
     largest_negative = max(negatives) if negatives else None
     smallest_positive = min(positives) if positives else None
     
-    return largest_negative, smallest_positive",passed
+    return largest_negative, smallest_positive",False,passed
 HumanEval/137,"
 def compare_one(a, b):
     """"""
@@ -14163,7 +14163,7 @@ def compare_one(a, b):
         return b if isinstance(b, str) else b_float if isinstance(b, float) else int(b_float)
     else:
         # Return None if the values are equal
-        return None",passed
+        return None",False,passed
 HumanEval/138,"
 def is_equal_to_sum_even(n):
     """"""Evaluate whether the given number n can be written as the sum of exactly 4 positive even numbers
@@ -14288,7 +14288,7 @@ def is_equal_to_sum_even(n):
     # Now, we need to check if there are at least 4 positive integers that sum up to target_sum
     # This is always possible if target_sum >= 4 because we can start with 1+1+1+1 and increment
     # any of the numbers to reach the desired sum
-    return True",passed
+    return True",False,passed
 HumanEval/139,"
 def special_factorial(n):
     """"""The Brazilian factorial is defined as:
@@ -14397,7 +14397,7 @@ def special_factorial(n):
     result = 1
     for i in range(1, n + 1):
         result *= math.factorial(i)
-    return result",passed
+    return result",False,passed
 HumanEval/140,"
 def fix_spaces(text):
     """"""
@@ -14511,7 +14511,7 @@ def fix_spaces(text):
     text = re.sub(' {3,}', '-', text)
     # Replace remaining single or double spaces with '_'
     text = text.replace(' ', '_')
-    return text",passed
+    return text",False,passed
 HumanEval/141,"
 def file_name_check(file_name):
     """"""Create a function which takes a string representing a file's name, and returns
@@ -14725,7 +14725,7 @@ def file_name_check(file_name):
         return 'No'
 
     # If all checks pass, the file name is valid
-    return 'Yes'",passed
+    return 'Yes'",False,passed
 HumanEval/142,"
 
 
@@ -14833,7 +14833,7 @@ def sum_squares(lst):
         x ** 3 if i % 4 == 0 and i % 3 != 0 else 
         x 
         for i, x in enumerate(lst)
-    )",passed
+    )",False,passed
 HumanEval/143,"
 def words_in_sentence(sentence):
     """"""
@@ -14979,7 +14979,7 @@ def words_in_sentence(sentence):
     """"""
     words = sentence.split()
     prime_words = [word for word in words if is_prime(len(word))]
-    return ' '.join(prime_words)",passed
+    return ' '.join(prime_words)",False,passed
 HumanEval/144,"
 def simplify(x, n):
     """"""Your task is to implement a function that will simplify the expression
@@ -15121,7 +15121,7 @@ def simplify(x, n):
     simplified_num = product_num // gcd(product_num, product_den)
     simplified_den = product_den // gcd(product_num, product_den)
     
-    return simplified_den == 1",passed
+    return simplified_den == 1",False,passed
 HumanEval/145,"
 def order_by_points(nums):
     """"""
@@ -15228,7 +15228,7 @@ def order_by_points(nums):
         """"""Helper function to calculate the sum of digits of a number.""""""
         return sum(int(digit) for digit in str(abs(n)))
 
-    return [x[1] for x in sorted(enumerate(nums), key=lambda x: (sum_of_digits(x[1]), x[0]))]",passed
+    return [x[1] for x in sorted(enumerate(nums), key=lambda x: (sum_of_digits(x[1]), x[0]))]",False,passed
 HumanEval/146,"
 def specialFilter(nums):
     """"""Write a function that takes an array of numbers as input and returns 
@@ -15298,7 +15298,7 @@ def specialFilter(nums):
             str_num = str(abs(num))
             if int(str_num[0]) % 2 != 0 and int(str_num[-1]) % 2 != 0:
                 count += 1
-    return count",passed
+    return count",False,passed
 HumanEval/147,"
 def get_max_triples(n):
     """"""
@@ -15414,7 +15414,7 @@ def get_max_triples(n):
                 if (a[i] + a[j] + a[k]) % 3 == 0:
                     count += 1
     
-    return count",passed
+    return count",False,passed
 HumanEval/148,"
 def bf(planet1, planet2):
     '''
@@ -15571,7 +15571,7 @@ def bf(planet1, planet2):
     
     # Adjusted to include the planet closer to the sun if the order is reversed
     # and to ensure correct slicing
-    return tuple(planets[start:end])",passed
+    return tuple(planets[start:end])",False,passed
 HumanEval/149,"
 def sorted_list_sum(lst):
     """"""Write a function that accepts a list of strings as a parameter,
@@ -15679,7 +15679,7 @@ def sorted_list_sum(lst):
     # Sort the list first by length of the strings, then alphabetically
     sorted_list = sorted(even_length_strings, key=lambda s: (len(s), s))
     
-    return sorted_list",passed
+    return sorted_list",False,passed
 HumanEval/150,"
 def x_or_y(n, x, y):
     """"""A simple program which should return the value of x if n is 
@@ -15765,7 +15765,7 @@ def x_or_y(n: int, x: any, y: any) -> any:
 
 def x_or_y(n: int, x: any, y: any) -> any:
     """"""Return x if n is prime, otherwise return y.""""""
-    return x if is_prime(n) else y",passed
+    return x if is_prime(n) else y",False,passed
 HumanEval/151,"
 def double_the_difference(lst):
     '''
@@ -15802,7 +15802,7 @@ def double_the_difference(lst):
 def double_the_difference(lst):
     return sum(x**2 for x in lst if isinstance(x, int) and x >= 0 and x % 2 != 0)
 ```","{'programmer_code': 'def double_the_difference(lst):\n    return sum(x**2 for x in lst if isinstance(x, int) and x >= 0 and x % 2 != 0)', 'refiner_code': 'def double_the_difference(lst):\n    return sum(x**2 for x in lst if isinstance(x, int) and x >= 0 and x % 2 != 0)'}","{'timestamp': '2025-12-28T14:30:12.324574', 'prompt_type': 'zero_shot'}","def double_the_difference(lst):
-    return sum(x**2 for x in lst if isinstance(x, int) and x >= 0 and x % 2 != 0)",passed
+    return sum(x**2 for x in lst if isinstance(x, int) and x >= 0 and x % 2 != 0)",False,passed
 HumanEval/152,"
 def compare(game,guess):
     """"""I think we all remember that feeling when the result of some long-awaited
@@ -15877,7 +15877,7 @@ def compare(game, guess):
     Returns:
     list: A list of integers representing the absolute difference between the actual and guessed scores.
     """"""
-    return [0 if g == gg else abs(g - gg) for g, gg in zip(game, guess)]",passed
+    return [0 if g == gg else abs(g - gg) for g, gg in zip(game, guess)]",False,passed
 HumanEval/153,"
 def Strongest_Extension(class_name, extensions):
     """"""You will be given the name of a class (a string) and a list of extensions.
@@ -15952,7 +15952,7 @@ def Strongest_Extension(class_name, extensions):
         return cap - sm
 
     strongest_extension = max(extensions, key=calculate_strength)
-    return f""{class_name}.{strongest_extension}""",passed
+    return f""{class_name}.{strongest_extension}""",False,passed
 HumanEval/154,"
 def cycpattern_check(a , b):
     """"""You are given 2 words. You need to return True if the second word or any of its rotations is a substring in the first word
@@ -16083,7 +16083,7 @@ def cycpattern_check(a: str, b: str) -> bool:
             return True
     
     # If no rotation of b is found in a, return False
-    return False",passed
+    return False",False,passed
 HumanEval/155,"
 def even_odd_count(num):
     """"""Given an integer. return a tuple that has the number of even and odd digits respectively.
@@ -16186,7 +16186,7 @@ def even_odd_count(num):
         else:
             odd_count += 1
         num //= 10
-    return (even_count, odd_count)",passed
+    return (even_count, odd_count)",False,passed
 HumanEval/156,"
 def int_to_mini_roman(number):
     """"""
@@ -16360,7 +16360,7 @@ def int_to_mini_roman(number):
         while number >= value:
             result += numeral
             number -= value
-    return result",passed
+    return result",False,passed
 HumanEval/157,"
 def right_angle_triangle(a, b, c):
     '''
@@ -16453,7 +16453,7 @@ def right_angle_triangle(a, b, c):
     # Sort the sides to ensure a <= b <= c
     sides = sorted([a, b, c])
     # Check if the square of the longest side is equal to the sum of squares of the other two sides
-    return sides[0] ** 2 + sides[1] ** 2 == sides[2] ** 2",passed
+    return sides[0] ** 2 + sides[1] ** 2 == sides[2] ** 2",False,passed
 HumanEval/158,"
 def find_max(words):
     """"""Write a function that accepts a list of strings.
@@ -16616,7 +16616,7 @@ def find_max(words):
             max_unique_count = unique_count
             result_word = word
 
-    return result_word",passed
+    return result_word",False,passed
 HumanEval/159,"
 def eat(number, need, remaining):
     """"""
@@ -16759,7 +16759,7 @@ def eat(number, need, remaining):
     """"""
     total_eaten = number + min(need, remaining)
     left = remaining - min(need, remaining)
-    return [total_eaten, left]",passed
+    return [total_eaten, left]",False,passed
 HumanEval/160,"
 def do_algebra(operator, operand):
     """"""
@@ -16988,7 +16988,7 @@ def do_algebra(operator, operand):
             # Handle unknown operators
             raise ValueError(f""Unknown operator: {op}"")
     
-    return result",passed
+    return result",False,passed
 HumanEval/161,"
 def solve(s):
     """"""You are given a string s.
@@ -17088,7 +17088,7 @@ def solve(s):
     if not any(c.isalpha() for c in s):
         return s[::-1]
     
-    return ''.join(c.swapcase() if c.isalpha() else c for c in s)",passed
+    return ''.join(c.swapcase() if c.isalpha() else c for c in s)",False,passed
 HumanEval/162,"
 def string_to_md5(text):
     """"""
@@ -17156,7 +17156,7 @@ def string_to_md5(text):
     """"""
     if not text:
         return None
-    return hashlib.md5(text.encode('utf-8')).hexdigest()",passed
+    return hashlib.md5(text.encode('utf-8')).hexdigest()",False,passed
 HumanEval/163,"
 def generate_integers(a, b):
     """"""
@@ -17233,4 +17233,4 @@ def generate_integers(a, b):
     """"""
     start = min(a, b)
     end = max(a, b)
-    return [i for i in range(start, end + 1) if i % 2 == 0 and i < 10]",passed
+    return [i for i in range(start, end + 1) if i % 2 == 0 and i < 10]",False,passed
