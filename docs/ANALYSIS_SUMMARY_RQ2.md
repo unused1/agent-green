@@ -3,7 +3,15 @@
 **Subject**: RQ2 Experimental Results & RQ1 vs RQ2 Comparative Analysis
 **Date**: November 18, 2025
 
-> **⚠️ Note (Dec 29, 2025)**: Investigation of cross-architecture validation (Nemotron) revealed fundamental issues with MA Vuln design. The 4-agent pipeline evaluates discussion quality rather than vulnerability presence, resulting in ~50% accuracy (random level) across both Qwen3 and Nemotron. See `docs/MA_Vuln_Investigation_NM25_NM26.md` for details. The findings below remain valid but should be interpreted with this context.
+> **⚠️ MA Vuln Update (Dec 30, 2025)**:
+>
+> **All MA Vuln metrics in this document have been corrected** following re-extraction using fixed parsing logic. Key changes:
+> - **Old MA F1**: 36.37% (biased due to faulty keyword fallback defaulting to "vulnerable")
+> - **Corrected MA F1**: 43.56% (proper Review Board decision parsing)
+>
+> Despite correction, MA Vuln results remain at ~50% accuracy (random level) because the design fundamentally evaluates discussion quality, not vulnerability presence. See `docs/Vuln_Extraction_Reliability_Analysis.md` for full details.
+>
+> The narrowed DA-MA gap (from ~8% to ~1.4%) and all configurations hovering around 45-50% F1 confirms that vulnerability detection is not well-suited for multi-agent approaches.
 
 ---
 
@@ -42,7 +50,7 @@ All RQ2 experiments have been completed successfully (32 experiments across 8 po
 
 | Task Type | Single-Agent (RQ1) | Dual-Agent (RQ2) | Multi-Agent (RQ2) | Winner |
 |-----------|-------------------|-----------------|------------------|---------|
-| **Vulnerability Detection** | **48.22%** F1 | 44.22% F1 | 36.37% F1 | ✅ Single |
+| **Vulnerability Detection** | **48.22%** F1 | 44.91% F1 | 43.56% F1 | ✅ Single |
 | **Code Generation** | **99.25%** Pass@1 | 79.56% Pass@1 | 97.26% Pass@1 | ✅ Single |
 
 **Critical Finding**: Multi-agent coordination **hurts** performance on analytical tasks (vulnerability detection) by introducing noise and coordination overhead.
@@ -60,10 +68,10 @@ All RQ2 experiments have been completed successfully (32 experiments across 8 po
 
 | Model Size | Dual-Agent Avg F1 | Multi-Agent Avg F1 | Best Configuration | Best F1 |
 |------------|-------------------|--------------------|--------------------|---------|
-| **30B** | **46.80%** | **38.52%** | 30B-Inst-Few (DA) | **51.76%** |
-| **4B** | **41.64%** | **34.22%** | 4B-Thin-Few (DA) | **50.08%** |
+| **30B** | **48.09%** | **43.24%** | 30B-Inst-Few (DA) | **51.76%** |
+| **4B** | **44.99%** | **43.88%** | 4B-Thin-Few (DA) | **50.08%** |
 
-**Analysis**: 30B models show **+5.16% F1 improvement** over 4B on average for Dual-Agent, and **+4.30%** for Multi-Agent.
+**Analysis**: After extraction correction, 30B models show **+3.10% F1 improvement** over 4B for Dual-Agent, while Multi-Agent shows minimal difference (~0.6%). Both hover around ~44% F1, confirming random-level performance.
 
 #### Top 5 RQ2 Configurations
 
@@ -86,8 +94,8 @@ All RQ2 experiments have been completed successfully (32 experiments across 8 po
 
 | Agent Type | Avg Energy (kWh) | Performance-per-kWh |
 |------------|-----------------|---------------------|
-| Dual-Agent | 1.17 (vuln) | 37.8 F1/kWh |
-| Multi-Agent | 1.95 (vuln) | 18.7 F1/kWh |
+| Dual-Agent | 0.995 (vuln) | 45.1 F1/kWh |
+| Multi-Agent | 1.811 (vuln) | 24.1 F1/kWh |
 
 ### 3. Task-Dependent Recommendations
 
