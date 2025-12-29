@@ -502,7 +502,7 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | ID | Task | Model | Mode | Prompting | Status |
 |----|------|-------|------|-----------|--------|
 | NM-25 | Vuln | 49B | Instruct | Few-shot | ✅ Complete (Dec 29) |
-| NM-26 | Vuln | 49B | Instruct | Zero-shot | 🔄 Running |
+| NM-26 | Vuln | 49B | Instruct | Zero-shot | ✅ Complete (Dec 29) |
 | NM-27 | Vuln | 49B | Thinking | Few-shot | 🔄 Running |
 | NM-28 | Vuln | 49B | Thinking | Zero-shot | 🔄 Running |
 | NM-29 | Vuln | 8B | Instruct | Few-shot | ✅ Complete (Dec 25) |
@@ -538,25 +538,29 @@ python scripts/validate_nemotron_modes.py --endpoint http://localhost:8000/v1
 | Thinking | Few-shot | 49% | 0.66 | 98% | 1.95 kg |
 | Thinking | Zero-shot | 51% | 0.67 | 99% | 2.20 kg |
 
+> **⚠️ EXTRACTION BUG IDENTIFIED (Dec 29, 2025)**: The metrics above are affected by a JSON extraction bug. Nemotron wraps Review Board JSON in markdown code blocks, causing parsing to fail and the fallback to trigger on the word "vulnerability" (always present). This resulted in ~100% of samples being predicted as vulnerable. See `docs/MA_Vuln_Investigation_NM25_NM26.md` for full investigation. Fix committed in `c8793c6`. After re-processing with fixed extraction, accuracy improves slightly (50-54%) but remains limited due to fundamental MA Vuln design issues.
+
 **Note on "Skipped" Samples**: The original dataset (`VulTrial_386_samples_balanced.jsonl`) contains 386 lines but only 384 unique samples (idx 349259 and 439495 are duplicated). MA experiments correctly process all 384 unique samples.
 
 **Analysis**:
 - The 4-agent pipeline (Security Researcher → Code Author → Moderator → Review Board) generates significantly more tokens per sample than SA or DA designs
 - Even with 64K context (fair comparison baseline), MA frequently exceeds limits on complex vulnerability samples
 - Thinking mode doubles session counts (35-40 vs 18-26) and emissions (~2x) compared to Instruct mode
-- All MA experiments show ~50% accuracy with very high recall (~99%) but low precision - model tends to predict "vulnerable" for most samples
+- All MA experiments show ~50% accuracy (**NOTE**: high recall figures above are due to extraction bug - see warning)
 - Skip/resume mechanism successfully handles overflows, but results in higher session counts
 
 **Comparison with Qwen3-4B MA Vuln**:
 | Model | Mode | Avg Accuracy | Avg Emissions | Efficiency |
 |-------|------|--------------|---------------|------------|
-| Qwen3-4B | Instruct | 60% | 0.12 kg | Best |
-| Qwen3-4B | Thinking | 54% | 0.56 kg | Good |
-| Nemotron-8B | Instruct | 50% | 1.32 kg | Low |
-| Nemotron-8B | Thinking | 50% | 2.08 kg | Poor |
+| Qwen3-4B | Instruct | 50%* | 0.12 kg | Best |
+| Qwen3-4B | Thinking | 50%* | 0.56 kg | Good |
+| Nemotron-8B | Instruct | 50%* | 1.32 kg | Low |
+| Nemotron-8B | Thinking | 50%* | 2.08 kg | Poor |
+
+*\*Note: Investigation revealed both Qwen3 and Nemotron MA Vuln achieve ~50% accuracy (random level). The apparent Qwen3 advantage was due to different extraction behavior. See `docs/MA_Vuln_Investigation_NM25_NM26.md`.*
 
 **Implication for RQ2**:
-- Qwen3-4B outperforms Nemotron-8B in MA setup (60% vs 50% accuracy) while using 3-15x less energy
+- Both Qwen3 and Nemotron achieve similar ~50% accuracy in MA Vuln setup
 - Thinking mode significantly increases energy consumption (~2x) without proportional accuracy gains
 - The context overflow frequency is a measurable indicator of agent coordination overhead
 

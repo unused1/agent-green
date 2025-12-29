@@ -3,6 +3,8 @@
 **Subject**: RQ2 Experimental Results & RQ1 vs RQ2 Comparative Analysis
 **Date**: November 18, 2025
 
+> **⚠️ Note (Dec 29, 2025)**: Investigation of cross-architecture validation (Nemotron) revealed fundamental issues with MA Vuln design. The 4-agent pipeline evaluates discussion quality rather than vulnerability presence, resulting in ~50% accuracy (random level) across both Qwen3 and Nemotron. See `docs/MA_Vuln_Investigation_NM25_NM26.md` for details. The findings below remain valid but should be interpreted with this context.
+
 ---
 
 ## Executive Summary
