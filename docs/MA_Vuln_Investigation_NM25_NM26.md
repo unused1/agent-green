@@ -32,6 +32,71 @@ Ground truth is balanced: 193 safe, 193 vulnerable.
 
 ---
 
+## Qwen3 vs Nemotron Response Comparison
+
+### Response Format Differences
+
+| Metric | Qwen3 4B | Nemotron 49B |
+|--------|----------|--------------|
+| Markdown-wrapped responses | 43 (11%) | **386 (100%)** |
+| Clean JSON responses | 343 (89%) | **0 (0%)** |
+| "No vulnerability" decisions | 21 | **0** |
+| Original predictions | 342 safe, 44 vuln | **0 safe, 386 vuln** |
+
+### Qwen3 Example Response (Clean JSON)
+
+```json
+[
+  {
+    "vulnerability": "Race Condition",
+    "decision": "Confirmed",
+    "severity": "High",
+    "recommended_action": "Acquire the uring_lock before accessing ctx->file_table...",
+    "reason": "The function operates under a context where the uring_lock is dropped..."
+  }
+]
+```
+
+### Nemotron Example Response (Markdown-wrapped)
+
+```
+Based on the Moderator's summary, the Review Board issues the following final verdicts:
+
+` ` `json
+[
+  {
+    "vulnerability": "Potential Information Leak / Data Exposure",
+    "decision": "Acknowledged - No Immediate Action",
+    "severity": "Low",
+    ...
+  }
+]
+` ` `
+```
+
+### Decision Value Comparison
+
+**Qwen3 4B decision values:**
+- `Accept` (173), `Confirmed` (100), `Mitigated` (70), `Critical` (57)
+- Also includes: `No vulnerability found` (11), `No vulnerability` (6)
+
+**Nemotron 49B decision values:**
+- `Accepted and Mitigated` (760), `Accepted` (131), `Mitigated` (85)
+- **Never uses "No vulnerability" type decisions**
+
+### After Fixing Nemotron Extraction
+
+With proper markdown stripping and decision interpretation:
+
+| Model | Accuracy | Precision | Recall | F1 |
+|-------|----------|-----------|--------|-----|
+| Qwen3 4B (original) | 50.0% | 50.0% | 11.4% | 18.6% |
+| Nemotron 49B (fixed) | 50.1% | 50.0% | 10.5% | 17.3% |
+
+**Conclusion:** Even with correct parsing, both models achieve ~50% accuracy (random guessing level). The fundamental issue is the MA Vuln design, not just parsing.
+
+---
+
 ## Root Cause Analysis
 
 ### Issue 1: JSON Parsing Failure
