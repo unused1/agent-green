@@ -1,0 +1,192 @@
+{
+  "generated_at": "2025-12-30T18:59:26.294015",
+  "filters": {
+    "task": "vuln",
+    "design": "SA",
+    "include_mars": false
+  },
+  "summary": {
+    "total_found": 8,
+    "canonical": 8,
+    "excluded": 0
+  },
+  "canonical": [
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_8b_vuln_SA-few_instruct/Sa-few_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251209-225004_detailed_results.jsonl",
+      "file_name": "Sa-few_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251209-225004_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Nano-8B",
+      "model_family": "Nemotron",
+      "parameters_b": 8,
+      "mode": "instruct",
+      "design": "SA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 179,
+        "safe_predictions": 207,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 0,
+        "errors": 14
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_8b_vuln_SA-few_thinking/Sa-few_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251209-155137_detailed_results.jsonl",
+      "file_name": "Sa-few_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251209-155137_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Nano-8B",
+      "model_family": "Nemotron",
+      "parameters_b": 8,
+      "mode": "thinking",
+      "design": "SA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 174,
+        "safe_predictions": 212,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 0,
+        "errors": 13
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_8b_vuln_SA-zero_instruct/Sa-zero_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251209-153013_detailed_results.jsonl",
+      "file_name": "Sa-zero_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251209-153013_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Nano-8B",
+      "model_family": "Nemotron",
+      "parameters_b": 8,
+      "mode": "instruct",
+      "design": "SA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 61,
+        "safe_predictions": 325,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 0,
+        "errors": 16
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_8b_vuln_SA-zero_thinking/Sa-zero_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251209-151004_detailed_results.jsonl",
+      "file_name": "Sa-zero_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_20251209-151004_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Nano-8B",
+      "model_family": "Nemotron",
+      "parameters_b": 8,
+      "mode": "thinking",
+      "design": "SA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 40,
+        "safe_predictions": 346,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 0,
+        "errors": 19
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_49b_vuln_SA-few_instruct/Sa-few_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-033603_detailed_results.jsonl",
+      "file_name": "Sa-few_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-033603_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Super-49B",
+      "model_family": "Nemotron",
+      "parameters_b": 49,
+      "mode": "instruct",
+      "design": "SA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 225,
+        "safe_predictions": 161,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 0,
+        "errors": 23
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_49b_vuln_SA-few_thinking/Sa-few_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-065655_detailed_results.jsonl",
+      "file_name": "Sa-few_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-065655_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Super-49B",
+      "model_family": "Nemotron",
+      "parameters_b": 49,
+      "mode": "thinking",
+      "design": "SA",
+      "task": "vulnerability_detection",
+      "prompting": "few-shot",
+      "stats": {
+        "total_samples": 384,
+        "vuln_predictions": 277,
+        "safe_predictions": 107,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 191,
+        "has_review_board": 0,
+        "errors": 22
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_49b_vuln_SA-zero_instruct/Sa-zero_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-012352_detailed_results.jsonl",
+      "file_name": "Sa-zero_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-012352_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Super-49B",
+      "model_family": "Nemotron",
+      "parameters_b": 49,
+      "mode": "instruct",
+      "design": "SA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 184,
+        "safe_predictions": 202,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 0,
+        "errors": 14
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_49b_vuln_SA-zero_thinking/Sa-zero_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-015057_detailed_results.jsonl",
+      "file_name": "Sa-zero_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251213-015057_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Super-49B",
+      "model_family": "Nemotron",
+      "parameters_b": 49,
+      "mode": "thinking",
+      "design": "SA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 304,
+        "safe_predictions": 82,
+        "ground_truth_vuln": 191,
+        "ground_truth_safe": 195,
+        "has_review_board": 0,
+        "errors": 26
+      }
+    }
+  ],
+  "excluded": []
+}

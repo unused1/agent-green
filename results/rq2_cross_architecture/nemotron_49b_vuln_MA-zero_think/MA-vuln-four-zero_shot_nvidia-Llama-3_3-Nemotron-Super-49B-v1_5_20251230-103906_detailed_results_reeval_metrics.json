@@ -1,0 +1,31 @@
+{
+  "original_file": "results/rq2_cross_architecture/nemotron_49b_vuln_MA-zero_think/MA-vuln-four-zero_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251230-103906_detailed_results.jsonl",
+  "corrected_file": "results/rq2_cross_architecture/nemotron_49b_vuln_MA-zero_think/MA-vuln-four-zero_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251230-103906_detailed_results_corrected.jsonl",
+  "timestamp": "2025-12-31T15:58:55.609195",
+  "total_samples": 380,
+  "ground_truth": {
+    "vuln": 188,
+    "safe": 192
+  },
+  "original": {
+    "vuln_predictions": 222,
+    "accuracy": 0.531578947368421,
+    "distribution": {
+      "1": 222,
+      "0": 158
+    }
+  },
+  "corrected": {
+    "vuln_predictions": 222,
+    "accuracy": 0.531578947368421,
+    "distribution": {
+      "1": 222,
+      "0": 158
+    }
+  },
+  "changes": 0,
+  "parse_stats": {
+    "parsed": 322,
+    "fallback": 58
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "total_samples": 164,
+  "successful_extractions": 144,
+  "failed_extractions": 20,
+  "skipped_review": 146,
+  "full_pipeline": 18,
+  "emissions_kg_co2": 0.1754875211549139,
+  "total_emissions": 5.920853202885034
+}
