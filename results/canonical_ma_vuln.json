@@ -1,13 +1,13 @@
 {
-  "generated_at": "2025-12-30T00:39:28.578345",
+  "generated_at": "2026-01-01T22:12:54.303654",
   "filters": {
     "task": "vuln",
     "design": "MA",
     "include_mars": false
   },
   "summary": {
-    "total_found": 15,
-    "canonical": 15,
+    "total_found": 16,
+    "canonical": 16,
     "excluded": 0
   },
   "canonical": [
@@ -163,6 +163,28 @@
         "ground_truth_safe": 193,
         "has_review_board": 386,
         "errors": 2
+      }
+    },
+    {
+      "file_path": "results/rq2_cross_architecture/nemotron_49b_vuln_MA-zero_think/MA-vuln-four-zero_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251230-103906_detailed_results.jsonl",
+      "file_name": "MA-vuln-four-zero_shot_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_20251230-103906_detailed_results.jsonl",
+      "source_type": "rq2_cross_architecture",
+      "priority": 3,
+      "model": "Nemotron-Super-49B",
+      "model_family": "Nemotron",
+      "parameters_b": 49,
+      "mode": "thinking",
+      "design": "MA",
+      "task": "vulnerability_detection",
+      "prompting": "zero-shot",
+      "stats": {
+        "total_samples": 386,
+        "vuln_predictions": 222,
+        "safe_predictions": 158,
+        "ground_truth_vuln": 193,
+        "ground_truth_safe": 193,
+        "has_review_board": 380,
+        "errors": 7
       }
     },
     {
