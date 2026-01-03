@@ -191,8 +191,11 @@ def get_sample_count(file_path: Path) -> dict:
                     if fd.get("review_board"):
                         stats["has_review_board"] += 1
 
-                    # Count errors
-                    if data.get("skipped") or "ERROR" in str(data.get("reasoning", "")):
+                    # Count errors (actual failed extractions, not just "ERROR" text in reasoning)
+                    # A sample is an error if: skipped=True OR vuln prediction is None/-1
+                    vuln_pred = data.get("vuln", data.get("predicted", data.get("prediction")))
+                    is_failed_extraction = vuln_pred is None or vuln_pred == -1
+                    if data.get("skipped") or is_failed_extraction:
                         stats["errors"] += 1
 
                 except json.JSONDecodeError:
