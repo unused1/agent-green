@@ -13,7 +13,8 @@ results/
 ├── mars_codegen/            # Phase 3a: Code generation on Mars 4B (Nov 6-7, 2025)
 ├── runpod_codegen/          # Phase 3b: Code generation on RunPod 4B+30B (Nov 7, 2025)
 ├── runpod_rq2_pod1-8/       # Phase 4: RQ2 Multi-Agent experiments (Nov 15-17, 2025)
-├── rq2_cross_architecture/  # Phase 5-6: Cross-architecture validation with Nemotron 8B+49B (Dec 9-25, 2025)
+├── rq2_cross_architecture/  # Phase 5-6: Cross-architecture validation with Nemotron 8B+49B (Dec 9-Jan 2026)
+├── rq2_nm8b_ma_rerun_20260103/ # Rerun verification for Nemotron 8B MA Vuln experiments (Jan 3, 2026)
 ├── analysis/                # Analysis outputs from Jupyter notebooks (Phase 1-2)
 ├── analysis_prompt_comparison/ # Prompt comparison analysis outputs
 ├── analysis_phase2a/        # Phase 2a analysis outputs
@@ -280,7 +281,7 @@ rq2_cross_architecture/
 
 ---
 
-### **Phase 6: Cross-Architecture Validation with Nemotron DA/MA (Dec 23-25, 2025)**
+### **Phase 6: Cross-Architecture Validation with Nemotron DA/MA (Dec 23, 2025 - Jan 3, 2026)**
 
 **Purpose**: Validate RQ2 findings (Dual-Agent and Multi-Agent) generalize beyond Qwen3
 
@@ -304,14 +305,14 @@ rq2_cross_architecture/
 **Sub-directories (Multi-Agent)**:
 ```
 rq2_cross_architecture/
-├── nemotron_8b_vuln_MA-zero_instruct/   # NM-30: 8B MA Vuln, zero-shot, instruct (in progress)
-├── nemotron_8b_vuln_MA-few_instruct/    # NM-29: 8B MA Vuln, few-shot, instruct
-├── nemotron_8b_vuln_MA-zero_think/      # NM-32: 8B MA Vuln, zero-shot, thinking (pending)
-├── nemotron_8b_vuln_MA-few_think/       # NM-31: 8B MA Vuln, few-shot, thinking (pending)
-├── nemotron_8b_code_MA-zero_instruct/   # NM-46: 8B MA Code, zero-shot, instruct (pending)
-├── nemotron_8b_code_MA-few_instruct/    # NM-45: 8B MA Code, few-shot, instruct (pending)
-├── nemotron_8b_code_MA-zero_think/      # NM-48: 8B MA Code, zero-shot, thinking (pending)
-└── nemotron_8b_code_MA-few_think/       # NM-47: 8B MA Code, few-shot, thinking (pending)
+├── nemotron_8b_vuln_MA-zero_instruct/   # NM-30: 8B MA Vuln, zero-shot, instruct ✅
+├── nemotron_8b_vuln_MA-few_instruct/    # NM-29: 8B MA Vuln, few-shot, instruct ✅
+├── nemotron_8b_vuln_MA-zero_think/      # NM-32: 8B MA Vuln, zero-shot, thinking ✅
+├── nemotron_8b_vuln_MA-few_think/       # NM-31: 8B MA Vuln, few-shot, thinking ✅
+├── nemotron_8b_code_MA-zero_instruct/   # NM-46: 8B MA Code, zero-shot, instruct ✅
+├── nemotron_8b_code_MA-few_instruct/    # NM-45: 8B MA Code, few-shot, instruct ✅
+├── nemotron_8b_code_MA-zero_think/      # NM-48: 8B MA Code, zero-shot, thinking ✅
+└── nemotron_8b_code_MA-few_think/       # NM-47: 8B MA Code, few-shot, thinking ✅
 ```
 
 **Nemotron-8B Dual-Agent Experiments (Dec 23-25)**:
@@ -327,24 +328,27 @@ rq2_cross_architecture/
 | NM-39 | Code | Few-shot | Thinking | 90.24% | 1.248 | ✅ Complete (Dec 25) |
 | NM-40 | Code | Zero-shot | Thinking | 95.12% | 0.872 | ✅ Complete (Dec 25) |
 
-**Nemotron-8B Multi-Agent Experiments (Dec 25)**:
+**Nemotron-8B Multi-Agent Experiments (Dec 25, 2025 - Jan 3, 2026)**:
 
-| ID | Task | Prompting | Mode | Accuracy | Energy (kg CO2) | Sessions | Status |
-|----|------|-----------|------|----------|-----------------|----------|--------|
-| NM-29 | Vuln | Few-shot | Instruct | 50% | 1.048 | 18 | ✅ Complete (Dec 25) |
-| NM-30 | Vuln | Zero-shot | Instruct | TBD | TBD | TBD | 🟡 In Progress |
-| NM-31 | Vuln | Few-shot | Thinking | - | - | - | ⏳ Pending |
-| NM-32 | Vuln | Zero-shot | Thinking | - | - | - | ⏳ Pending |
-| NM-45 | Code | Few-shot | Instruct | - | - | - | ⏳ Pending |
-| NM-46 | Code | Zero-shot | Instruct | - | - | - | ⏳ Pending |
-| NM-47 | Code | Few-shot | Thinking | - | - | - | ⏳ Pending |
-| NM-48 | Code | Zero-shot | Thinking | - | - | - | ⏳ Pending |
+| ID | Task | Prompting | Mode | Accuracy | Energy (kg CO2) | Sessions | Extraction Failures | Status |
+|----|------|-----------|------|----------|-----------------|----------|---------------------|--------|
+| NM-29 | Vuln | Few-shot | Instruct | 50% | 1.048 | 18 | 17/384 (4.4%) | ✅ Complete |
+| NM-30 | Vuln | Zero-shot | Instruct | 50% | 0.807 | 26 | 25/384 (6.5%) | ✅ Complete |
+| NM-31 | Vuln | Few-shot | Thinking | 50% | 1.143 | 35 | 34/384 (8.9%) | ✅ Complete |
+| NM-32 | Vuln | Zero-shot | Thinking | 50% | 1.377 | 40 | 39/384 (10.2%) | ✅ Complete |
+| NM-45 | Code | Few-shot | Instruct | 96.34% | 0.542 | 1 | - | ✅ Complete |
+| NM-46 | Code | Zero-shot | Instruct | 98.78% | 0.815 | 1 | - | ✅ Complete |
+| NM-47 | Code | Few-shot | Thinking | 92.68% | 0.886 | 5 | - | ✅ Complete |
+| NM-48 | Code | Zero-shot | Thinking | 87.80% | 0.873 | 4 | - | ✅ Complete |
 
 **Key Observations**:
 1. **Context Overflow Issues**: MA experiments frequently hit 64K context limit due to 4-agent multi-turn conversations
 2. **Skip/Resume**: Context overflow samples skipped via resume mechanism (option 2), properly logged with `vuln=-1`
-3. **Sessions**: MA experiments require multiple resume sessions (e.g., NM-29 had 18 sessions due to context overflows)
+3. **Sessions**: MA experiments require multiple resume sessions (18-40 sessions due to context overflows)
 4. **Energy**: MA experiments consume more energy due to multi-turn agent coordination overhead
+5. **Extraction Failures**: 4.4%-10.2% of samples fail extraction; Thinking mode has higher failure rate than Instruct
+6. **Extraction Bug Fix (Dec 29, 2025)**: Fixed JSON extraction logic to handle Nemotron's markdown-wrapped JSON responses (commit c8793c6). Original responses preserved in `_corrected.jsonl` files with re-evaluated predictions.
+7. **Rerun Verification (Jan 3, 2026)**: Full rerun of all 4 MA Vuln experiments confirmed 100% reproducibility. Results archived in `results/rq2_nm8b_ma_rerun_20260103/`
 
 ---
 
@@ -551,14 +555,14 @@ Analysis performed in `/notebooks/`:
 
 ---
 
-**Last Updated**: 2025-12-25
-**Total Experiments**: 89 (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 25 Cross-Architecture Nemotron)
+**Last Updated**: 2026-01-03
+**Total Experiments**: 96 (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron)
   - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
   - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)
-  - **Cross-Architecture Nemotron SA (8B+49B)**: 8 vulnerability detection + 8 code generation
+  - **Cross-Architecture Nemotron SA (8B+49B)**: 8 vulnerability detection + 8 code generation ✅
   - **Cross-Architecture Nemotron DA (8B)**: 4 vulnerability detection + 4 code generation ✅
-  - **Cross-Architecture Nemotron MA (8B)**: 1 vulnerability detection complete, 1 in progress, 6 pending
-**Total Samples Processed**: ~49,000 (89 experiments × ~550 avg samples)
+  - **Cross-Architecture Nemotron MA (8B)**: 4 vulnerability detection + 4 code generation ✅
+**Total Samples Processed**: ~52,800 (96 experiments × ~550 avg samples)
 **Hardware Used**: Mars RTX A5000 + RunPod H100
 **Models Evaluated**: 6 (Qwen3 4B/30B × Instruct/Thinking + Nemotron-Nano-8B + Nemotron-Super-49B)
 **Agent Architectures**: 3 (Single-Agent, Dual-Agent, Multi-Agent)
