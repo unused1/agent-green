@@ -1,0 +1,181 @@
+{
+  "total_emissions": 1.9762904527405847,
+  "sessions": 35,
+  "session_history": [
+    {
+      "timestamp": "2026-01-02T16:33:41.452862",
+      "emissions_kg_co2": 0.09483559895498367,
+      "samples_processed": 386
+    },
+    {
+      "timestamp": "2026-01-02T16:43:26.263716",
+      "emissions_kg_co2": 0.027672276428981218,
+      "samples_processed": 360
+    },
+    {
+      "timestamp": "2026-01-02T17:01:26.260893",
+      "emissions_kg_co2": 0.050708381621203245,
+      "samples_processed": 359
+    },
+    {
+      "timestamp": "2026-01-02T17:28:34.545572",
+      "emissions_kg_co2": 0.07737235498725807,
+      "samples_processed": 351
+    },
+    {
+      "timestamp": "2026-01-02T17:41:27.246690",
+      "emissions_kg_co2": 0.03635768999760571,
+      "samples_processed": 338
+    },
+    {
+      "timestamp": "2026-01-02T17:54:32.049610",
+      "emissions_kg_co2": 0.037160533054746564,
+      "samples_processed": 333
+    },
+    {
+      "timestamp": "2026-01-02T18:06:56.128895",
+      "emissions_kg_co2": 0.03519939813797062,
+      "samples_processed": 329
+    },
+    {
+      "timestamp": "2026-01-02T18:18:29.485142",
+      "emissions_kg_co2": 0.03282997483819754,
+      "samples_processed": 325
+    },
+    {
+      "timestamp": "2026-01-02T18:32:10.141230",
+      "emissions_kg_co2": 0.03876186577052452,
+      "samples_processed": 322
+    },
+    {
+      "timestamp": "2026-01-02T19:18:42.547127",
+      "emissions_kg_co2": 0.13131497791414784,
+      "samples_processed": 316
+    },
+    {
+      "timestamp": "2026-01-02T19:36:04.221029",
+      "emissions_kg_co2": 0.048813925443936486,
+      "samples_processed": 266
+    },
+    {
+      "timestamp": "2026-01-02T19:52:47.217784",
+      "emissions_kg_co2": 0.04720402274096038,
+      "samples_processed": 255
+    },
+    {
+      "timestamp": "2026-01-02T20:05:51.920236",
+      "emissions_kg_co2": 0.036822380052905536,
+      "samples_processed": 251
+    },
+    {
+      "timestamp": "2026-01-02T20:16:46.908408",
+      "emissions_kg_co2": 0.03093213485280779,
+      "samples_processed": 246
+    },
+    {
+      "timestamp": "2026-01-02T20:28:57.466922",
+      "emissions_kg_co2": 0.03443596935796788,
+      "samples_processed": 245
+    },
+    {
+      "timestamp": "2026-01-02T20:41:45.684407",
+      "emissions_kg_co2": 0.036148230568780686,
+      "samples_processed": 241
+    },
+    {
+      "timestamp": "2026-01-02T21:04:13.117026",
+      "emissions_kg_co2": 0.06405156877079328,
+      "samples_processed": 234
+    },
+    {
+      "timestamp": "2026-01-02T21:29:59.710288",
+      "emissions_kg_co2": 0.07345548898385762,
+      "samples_processed": 227
+    },
+    {
+      "timestamp": "2026-01-02T21:43:07.537924",
+      "emissions_kg_co2": 0.03724335716496311,
+      "samples_processed": 219
+    },
+    {
+      "timestamp": "2026-01-02T22:06:07.824055",
+      "emissions_kg_co2": 0.06480743065859504,
+      "samples_processed": 214
+    },
+    {
+      "timestamp": "2026-01-02T22:17:01.185420",
+      "emissions_kg_co2": 0.030725333378042667,
+      "samples_processed": 202
+    },
+    {
+      "timestamp": "2026-01-02T22:29:17.474978",
+      "emissions_kg_co2": 0.03423542881356305,
+      "samples_processed": 201
+    },
+    {
+      "timestamp": "2026-01-02T23:08:13.015989",
+      "emissions_kg_co2": 0.10677835772814681,
+      "samples_processed": 199
+    },
+    {
+      "timestamp": "2026-01-02T23:59:41.874020",
+      "emissions_kg_co2": 0.1413560848014365,
+      "samples_processed": 178
+    },
+    {
+      "timestamp": "2026-01-03T00:28:49.221803",
+      "emissions_kg_co2": 0.08301194467075115,
+      "samples_processed": 156
+    },
+    {
+      "timestamp": "2026-01-03T00:54:46.025645",
+      "emissions_kg_co2": 0.07386912233035452,
+      "samples_processed": 139
+    },
+    {
+      "timestamp": "2026-01-03T01:15:51.982352",
+      "emissions_kg_co2": 0.058194907394325965,
+      "samples_processed": 127
+    },
+    {
+      "timestamp": "2026-01-03T01:26:59.472012",
+      "emissions_kg_co2": 0.031240641081565036,
+      "samples_processed": 104
+    },
+    {
+      "timestamp": "2026-01-03T01:48:20.369800",
+      "emissions_kg_co2": 0.05963764198120954,
+      "samples_processed": 103
+    },
+    {
+      "timestamp": "2026-01-03T02:13:36.667695",
+      "emissions_kg_co2": 0.07075523797280577,
+      "samples_processed": 85
+    },
+    {
+      "timestamp": "2026-01-03T02:36:37.979335",
+      "emissions_kg_co2": 0.0643368495355344,
+      "samples_processed": 71
+    },
+    {
+      "timestamp": "2026-01-03T03:10:24.017942",
+      "emissions_kg_co2": 0.09323041262571753,
+      "samples_processed": 58
+    },
+    {
+      "timestamp": "2026-01-03T03:23:19.818268",
+      "emissions_kg_co2": 0.03629644422236442,
+      "samples_processed": 17
+    },
+    {
+      "timestamp": "2026-01-03T03:34:20.419721",
+      "emissions_kg_co2": 0.03095630602128265,
+      "samples_processed": 12
+    },
+    {
+      "timestamp": "2026-01-03T03:43:49.040431",
+      "emissions_kg_co2": 0.025538179882297916,
+      "samples_processed": 11
+    }
+  ]
+}
