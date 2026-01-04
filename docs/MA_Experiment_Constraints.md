@@ -194,6 +194,216 @@ scripts/rerun_skipped_samples.py
 
 ---
 
+## Cross-Model Comparison: Skip Rates
+
+### Skip Rates by Model and Architecture
+
+| Model | Architecture | Experiment Type | Skip Rate | Notes |
+|-------|--------------|-----------------|-----------|-------|
+| **Nemotron 8B** | MA | Vuln Detection | 4.4-10.2% | Highest skip rates |
+| **Nemotron 49B** | MA | Vuln Detection | 0.3-1.6% | Much lower |
+| **Nemotron 8B/49B** | DA/SA | Vuln Detection | 0.8-3.6% | Lower than MA |
+| **Qwen3 4B/30B** | All | All | 0% | No skipped samples |
+
+### Key Observations
+1. Context overflow is primarily a **Nemotron 8B MA** issue
+2. Larger models (49B) have lower skip rates, possibly due to more efficient tokenization or shorter responses
+3. Qwen3 experiments completed without context overflow issues
+4. Multi-Agent has higher skip rates than Dual-Agent/Single-Agent due to more conversation turns
+
+---
+
+## Proposed Approach for Research Validity
+
+> **Status**: Pending discussion with research supervisors
+
+### Challenge
+How to handle skipped samples without introducing bias or threatening research validity?
+
+### Options Considered
+
+| Option | Approach | Description |
+|--------|----------|-------------|
+| **Option 1** | Document as Limitation | Keep 64K results as-is, document skip rates as known limitation |
+| **Option 2** | Merge Reruns | Re-run failed samples with 128K, merge into primary results |
+| **Option 3** | Two-Part Presentation | Primary (64K) + Supplementary (128K) reported separately |
+| **Option 4** | Full Re-run | Re-run ALL experiments with 128K context |
+
+---
+
+### Option 1: Document as Limitation (Conservative)
+
+**Approach**: Keep all results from 64K experiments as-is. Document skip rates as a known limitation.
+
+**Pros**:
+- Simple, no additional experiments needed
+- Consistent experimental conditions across all samples
+- Common practice in ML research
+
+**Cons**:
+- 4-10% of samples excluded from analysis
+- Potential selection bias unexplored (are skipped samples different?)
+- Reviewers may question missing data
+
+**When to choose**: If skip rates are deemed acceptable and bias analysis shows no systematic differences.
+
+---
+
+### Option 2: Merge Reruns into Primary Results
+
+**Approach**: Re-run failed samples with 128K context, then replace placeholder records (`vuln=-1`) with successful results in the primary dataset.
+
+**Pros**:
+- Higher sample coverage (potentially 100%)
+- Single unified result set
+
+**Cons**:
+- **Threat to validity**: Different samples run under different conditions
+- Mixed experimental setup (some 64K, some 128K)
+- Energy consumption not comparable across samples
+- Reviewers may criticize inconsistent methodology
+
+**When to choose**: Generally not recommended due to validity concerns.
+
+---
+
+### Option 3: Two-Part Results Presentation (Recommended)
+
+**Approach**: Keep primary results (64K) separate from supplementary recovery results (128K). Present both transparently.
+
+**Pros**:
+- **Maintains internal validity**: Primary results have consistent conditions
+- **Transparent**: Limitations clearly documented, not hidden
+- **Enables analysis**: Can compare skipped vs completed samples
+- **Sensitivity check**: Shows whether conclusions change with recovered samples
+- Reviewers can see full picture
+
+**Cons**:
+- More complex presentation in thesis/paper
+- Requires additional experiments for recovery
+- Two sets of results to explain
+
+**When to choose**: When transparency and research rigor are priorities.
+
+---
+
+### Option 4: Full Re-run with 128K Context
+
+**Approach**: Re-run ALL Nemotron experiments (not just failed samples) with 128K context from scratch.
+
+**Pros**:
+- Consistent conditions across all samples
+- Maximum sample coverage
+- Clean, unified dataset
+
+**Cons**:
+- **Expensive**: ~$50-100 in compute costs
+- **Time-consuming**: Days of GPU time
+- Changes energy consumption baseline (128K uses more memory/energy)
+- May not be necessary if skip rate is acceptable
+
+**When to choose**: If budget allows and consistent 128K conditions are preferred over 64K.
+
+---
+
+### Recommended: Option 3 (Two-Part Presentation)
+
+#### Part 1: Primary Results (64K Context - Consistent Conditions)
+- All experiments evaluated under identical 64K context limit
+- Skip rates clearly reported per experiment (Table in Section "Observed Failure Rates")
+- Accuracy calculated on completed samples only
+- This maintains internal validity with consistent experimental conditions
+
+#### Part 2: Supplementary Analysis (128K Context - Recovery)
+- Re-run **only** the skipped samples with extended context (128K) and timeout
+- Keep results in separate folder: `results/context_overflow_recovery/`
+- Report:
+  - Recovery rate (how many previously-skipped samples now complete)
+  - Predictions for recovered samples
+  - Comparison with primary results
+
+#### Part 3: Combined Sensitivity Analysis
+- Compare characteristics of skipped vs completed samples:
+  - Function length distribution
+  - Vulnerability rate (are skipped samples more/less likely to be vulnerable?)
+  - Project types and CWE categories
+- Answer: "Does including recovered samples change the conclusions?"
+- Statistical comparison of patterns (e.g., Thinking vs Instruct mode)
+
+### Proposed File Structure
+
+```
+results/
+├── rq2_cross_architecture/              # Primary Results (64K)
+│   └── nemotron_8b_vuln_MA-*/
+│       └── *_detailed_results.jsonl      # Original, vuln=-1 for skipped
+│
+├── context_overflow_recovery/            # Supplementary (128K)
+│   ├── nemotron_8b_vuln_MA-few_instruct/
+│   │   └── recovered_samples.jsonl       # Only recovered samples
+│   ├── nemotron_8b_vuln_MA-zero_instruct/
+│   ├── nemotron_8b_vuln_MA-few_think/
+│   └── nemotron_8b_vuln_MA-zero_think/
+│
+└── analysis/
+    └── sensitivity_analysis/
+        ├── skipped_vs_completed_comparison.csv
+        └── combined_accuracy_analysis.csv
+```
+
+### Advantages of This Approach
+1. **Transparency**: Clear separation of primary and supplementary results
+2. **No hidden limitations**: Skip rates documented, not masked
+3. **Research questions addressed**:
+   - Do skipped samples have different characteristics?
+   - Does recovery change conclusions?
+4. **Maintains validity**: Primary results have consistent conditions
+5. **Enables sensitivity analysis**: Can quantify impact of missing samples
+
+### Estimated Effort for Full Recovery
+- **Samples to recover**: 17 + 25 + 34 + 39 = 115 samples (some overlap)
+- **Unique samples**: ~80-100 (estimated after deduplication)
+- **Time**: ~1-2 hours per experiment (based on preliminary test)
+- **Cost**: ~$10-15 RunPod compute
+
+---
+
+## Discussion Points for Supervisors
+
+### Questions to Resolve
+
+1. **Is the proposed two-part presentation acceptable for the thesis/paper?**
+   - Primary results (64K) as main findings
+   - Supplementary analysis (128K) as sensitivity check
+
+2. **Should we re-run ALL Nemotron experiments with 128K for consistency?**
+   - Pro: Consistent conditions across all samples
+   - Con: Higher cost, changes energy consumption baseline
+
+3. **How to handle the timeout issue?**
+   - Some samples fail due to timeout, not context
+   - Should we increase timeout or document as separate limitation?
+
+4. **Is the skip rate (4-10%) acceptable for publication?**
+   - Common practice: Document and exclude from accuracy calculation
+   - Alternative: Report accuracy with and without skipped samples
+
+5. **Should we analyze bias in skipped samples before proceeding?**
+   - Check if skipped samples have different vulnerability rates
+   - This would inform whether recovery is necessary
+
+---
+
+## Next Steps (Pending Approval)
+
+1. [ ] Discuss approach with supervisors
+2. [ ] If approved: Extend `rerun_skipped_samples.py` for all 4 MA experiments
+3. [ ] Run recovery experiments with 128K context
+4. [ ] Create analysis script for comparing primary vs recovered samples
+5. [ ] Update thesis/paper with two-part results presentation
+
+---
+
 ## References
 
 - Commit c8793c6: Extraction bug fix for markdown-wrapped JSON
