@@ -17,6 +17,10 @@ conda_envs/
 __pycache__/
 *.py[cod]
 
+# Node.js (not used in this Python project)
+node_modules/
+package-lock.json
+
 
 # Distribution / packaging
 .Python
