@@ -330,8 +330,8 @@ rq2_cross_architecture/
 
 **Nemotron-8B Multi-Agent Experiments (Dec 25, 2025 - Jan 3, 2026)**:
 
-| ID | Task | Prompting | Mode | Accuracy | Energy (kg CO2) | Sessions | Extraction Failures | Status |
-|----|------|-----------|------|----------|-----------------|----------|---------------------|--------|
+| ID | Task | Prompting | Mode | Accuracy | Energy (kg CO2) | Sessions | Context Overflow Skips | Status |
+|----|------|-----------|------|----------|-----------------|----------|------------------------|--------|
 | NM-29 | Vuln | Few-shot | Instruct | 50% | 1.048 | 18 | 17/384 (4.4%) | ✅ Complete |
 | NM-30 | Vuln | Zero-shot | Instruct | 50% | 0.807 | 26 | 25/384 (6.5%) | ✅ Complete |
 | NM-31 | Vuln | Few-shot | Thinking | 50% | 1.143 | 35 | 34/384 (8.9%) | ✅ Complete |
@@ -343,12 +343,11 @@ rq2_cross_architecture/
 
 **Key Observations**:
 1. **Context Overflow Issues**: MA experiments frequently hit 64K context limit due to 4-agent multi-turn conversations
-2. **Skip/Resume**: Context overflow samples skipped via resume mechanism (option 2), properly logged with `vuln=-1`
-3. **Sessions**: MA experiments require multiple resume sessions (18-40 sessions due to context overflows)
+2. **Context Overflow Skips**: When a sample causes context overflow, the experiment crashes. On resume, the `auto_resume_ma_vuln.sh` script automatically skips the problematic sample (option 2) and writes a placeholder record with `skipped=true`, `error=USER_SKIP`, `vuln=-1`. Thinking mode has higher skip rate (8.9-10.2%) than Instruct mode (4.4-6.5%) due to longer reasoning outputs.
+3. **Sessions**: MA experiments require multiple resume sessions (18-40 sessions due to context overflows). Each session = one crash/restart cycle.
 4. **Energy**: MA experiments consume more energy due to multi-turn agent coordination overhead
-5. **Extraction Failures**: 4.4%-10.2% of samples fail extraction; Thinking mode has higher failure rate than Instruct
-6. **Extraction Bug Fix (Dec 29, 2025)**: Fixed JSON extraction logic to handle Nemotron's markdown-wrapped JSON responses (commit c8793c6). Original responses preserved in `_corrected.jsonl` files with re-evaluated predictions.
-7. **Rerun Verification (Jan 3, 2026)**: Full rerun of all 4 MA Vuln experiments confirmed 100% reproducibility. Results archived in `results/rq2_nm8b_ma_rerun_20260103/`
+5. **Extraction Bug Fix (Dec 29, 2025)**: Fixed JSON extraction logic to handle Nemotron's markdown-wrapped JSON responses (commit c8793c6). Original responses preserved in `_corrected.jsonl` files with re-evaluated predictions.
+6. **Rerun Verification (Jan 3, 2026)**: Full rerun of all 4 MA Vuln experiments confirmed 100% reproducibility. Results archived in `results/rq2_nm8b_ma_rerun_20260103/`
 
 ---
 
