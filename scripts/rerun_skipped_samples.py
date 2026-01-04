@@ -255,11 +255,18 @@ def main():
     print(f"  ENABLE_REASONING={os.environ['ENABLE_REASONING']}")
     print()
 
+    # Clear sys.argv before importing config (it uses argparse)
+    original_argv = sys.argv.copy()
+    sys.argv = [sys.argv[0]]  # Keep only script name
+
     # Import after setting environment
     import config_nemotron as config
     from codecarbon import OfflineEmissionsTracker
     from agent_utils_vuln import create_agent
     from multi_agent_vuln_detection_four_agents import extract_vulnerability_decision
+
+    # Restore sys.argv
+    sys.argv = original_argv
 
     # Load samples from dataset
     print("Loading samples from dataset...")

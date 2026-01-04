@@ -1,0 +1,12 @@
+{
+  "experiment": "few-instruct",
+  "prompting": "few_shot",
+  "thinking": false,
+  "total_samples": 3,
+  "successful": 2,
+  "failed": 1,
+  "success_rate": 0.6666666666666666,
+  "emissions_kg_co2": 0.2211323024473248,
+  "output_file": "/workspace/agent-green/results/context_overflow_test/rerun_few_instruct_20260104-042043.jsonl",
+  "timestamp": "2026-01-04T05:36:54.165298"
+}
