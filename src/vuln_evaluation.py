@@ -41,6 +41,36 @@ def normalize_vulnerability_strict(prediction):
     except (ValueError, TypeError):
         return 0  # Default to not vulnerable
 
+
+def normalize_vulnerability_penalize_failures(prediction, ground_truth):
+    """
+    Penalize failed samples by treating them as incorrect predictions.
+
+    This ensures energy-accuracy consistency: if energy was spent attempting
+    to process a sample (even if it crashed), the metrics should reflect
+    this as a system failure.
+
+    Args:
+        prediction: Model prediction (0, 1, or -1 for failed/skipped)
+        ground_truth: Actual label (0 or 1)
+
+    Returns:
+        int: Normalized prediction (opposite of ground_truth if failed)
+
+    Rationale:
+        - vuln=-1 means the pipeline failed to produce a prediction
+        - Setting to opposite of ground_truth guarantees it's counted as wrong
+        - This aligns with energy consumption (energy was spent on failed attempts)
+    """
+    if prediction is None:
+        return 1 - ground_truth  # Opposite = guaranteed wrong
+
+    pred_int = int(prediction)
+    if pred_int == -1:
+        return 1 - ground_truth  # Opposite = guaranteed wrong
+
+    return pred_int
+
 def load_ground_truth_vulnerability(file_path):
     """Load ground truth vulnerability labels from JSONL file"""
     ground_truth = {}

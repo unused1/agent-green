@@ -167,8 +167,18 @@ def find_all_emissions_files(base_dir: str) -> list[dict]:
         print(f"Results directory not found: {results_dir}")
         return emissions_files
 
+    # Directories to exclude (reruns for verification, not primary results)
+    exclude_dirs = {
+        "rq2_nm8b_ma_rerun_20260103",  # Rerun to verify Nemotron 8B skip rates
+        "context_overflow_test",        # 128K context test (not primary results)
+    }
+
     # Find all emissions.csv files recursively
     for emissions_file in results_dir.rglob("emissions.csv"):
+        # Skip excluded directories
+        if any(excl in emissions_file.parts for excl in exclude_dirs):
+            continue
+
         file_path = str(emissions_file)
 
         # Determine source directory type
