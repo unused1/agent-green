@@ -143,7 +143,7 @@ def infer_config_from_path(file_path: str) -> dict:
         info["task"] = "vulnerability_detection"
 
     # Mode
-    if "_thinking" in path_str or "thinking" in path_str:
+    if "_thinking" in path_str or "thinking" in path_str or "_think" in path_str:
         info["mode"] = "thinking"
     elif "_instruct" in path_str or "baseline" in path_str or "instruct" in path_str:
         info["mode"] = "instruct"
