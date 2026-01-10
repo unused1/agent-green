@@ -1,7 +1,7 @@
 # RQ1 Setup Summary
 
 ## Overview
-You can now run RQ1 vulnerability detection experiments with Qwen3 model in **reasoning mode (thinking enabled)** vs **baseline mode (thinking disabled)** using the **same base model** for fair comparison.
+RQ1 vulnerability detection experiments can be run with Qwen3 model in **reasoning mode (thinking enabled)** vs **baseline mode (thinking disabled)** using the **same base model** for fair comparison.
 
 ## What Was Done
 
@@ -56,7 +56,7 @@ You can now run RQ1 vulnerability detection experiments with Qwen3 model in **re
 
 ## Key Innovation: Same Model, Different Modes
 
-Unlike comparing different models entirely, you can use:
+Unlike comparing different models entirely, this setup uses:
 - **qwen3:4b-thinking** - Reasoning enabled (generates internal thoughts)
 - **qwen3:4b** - Reasoning disabled (direct answers)
 

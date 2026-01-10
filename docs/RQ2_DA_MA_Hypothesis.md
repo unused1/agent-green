@@ -5,7 +5,7 @@ Hypotheses/ Explanation on why Multi-Agent Systems (MAS) and "Thinking" models u
 
 ## **Part 1: Validation of Existing Hypotheses**
 
-Your original four hypotheses are strongly supported by the literature.
+The original four hypotheses are strongly supported by the literature.
 
 ### **H1. Cognitive Interference (The "Interrupted Thought")**
 
@@ -45,7 +45,7 @@ Additionally, reasoning models trained with RLHF to be cautious often fall into 
 
 ## **Part 2: New Hypotheses Derived from Literature**
 
-These are new potential explanations extracted from the papers that you should add to your analysis plan.
+These are new potential explanations extracted from the papers to add to the analysis plan.
 
 ### **H5. Edge-Level Error Cascades (The "Telephone Game")**
 
@@ -54,21 +54,21 @@ These are new potential explanations extracted from the papers that you should a
 
   * **Signal Corruption:** An intermediate value or code snippet is malformed by Agent A, and Agent B accepts it as truth.  
   * **Referential Drift:** Agents use the same variable name/term to refer to different things across turns.  
-* **How to verify:** Look for instances in your logs where Agent B executes a task based on a slightly incorrect summary provided by Agent A, rather than looking at the raw data.
+* **How to verify:** Look for instances in the logs where Agent B executes a task based on a slightly incorrect summary provided by Agent A, rather than looking at the raw data.
 
 ### **H6. Fault Localization Granularity Mismatch**
 
 * **Theory:** MAS agents often operate at the wrong level of abstraction (e.g., File level vs. Symbol level), leading to edits in the wrong place. Single agents often ingest the whole file, avoiding this segmentation error.  
 * **Evidence:** Meng et al. 10 found that **"Code Symbol-level" localization** (identifying the specific function/class) is the highest correlate with repair success. MAS agents often stop at "File-level" or hallucinate line numbers because they are communicating via summaries.
 
-* **How to verify:** Check your RQ2 logs. Did the MAS correctly identify the file but fail to edit the specific function?
+* **How to verify:** Check RQ2 logs. Did the MAS correctly identify the file but fail to edit the specific function?
 
 ### **H7. Reproduction Validity Gap (False Positive Validation)**
 
 * **Theory:** The "Verifier" agent in a MAS often writes a bad reproduction script that passes *even if the bug is still present*. This leads the system to "think" it fixed the bug when it didn't.  
 * **Evidence:** Meng et al. 11 note that the quality of "Reproduction Scripts" is the critical bottleneck. If the script doesn't accurately trigger the bug, the agent's self-correction loop is broken.
 
-* **How to verify:** Look at cases where your MAS claimed "Success" but the ground truth evaluation said "Fail." Examine the test script the agent wrote—was it a valid test?
+* **How to verify:** Look at cases where the MAS claimed "Success" but the ground truth evaluation said "Fail." Examine the test script the agent wrote—was it a valid test?
 
 ### **H8. Capability Gap (Role Mismatch)**
 

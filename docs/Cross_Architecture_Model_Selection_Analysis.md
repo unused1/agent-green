@@ -42,7 +42,7 @@ We evaluated three primary candidates to serve as the "Cross-Architecture" valid
 ### Option 1: DeepSeek-R1-Distill-Llama (The "Safe Bet")
 *Models: 8B & 70B (Llama-3.1/3.3 base) — Both are **Dense** architecture (all parameters active)*
 
-This option provides the cleanest "apples-to-apples" comparison for your existing Qwen3 experiments.
+This option provides the cleanest "apples-to-apples" comparison for the existing Qwen3 experiments.
 
 *   **Pros**:
     *   **Perfect Experimental Match**: Replicates the binary "Thinking On/Off" variable exactly as used in Qwen3.
@@ -51,7 +51,7 @@ This option provides the cleanest "apples-to-apples" comparison for your existin
 *   **Cons**:
     *   **Size Mismatch**: Compares Qwen3-4B (4B) vs DS-8B (8B), and Qwen3-30B (30B) vs DS-70B (70B).
     *   **Architecture Type Mismatch (70B)**: Qwen3-30B-A3B is **MoE** (3B active per token), while DS-70B is **Dense** (70B active) — **23× more active parameters**.
-    *   **Quantization Required**: The 70B model requires INT8 quantization to fit on your H100.
+    *   **Quantization Required**: The 70B model requires INT8 quantization to fit on H100.
 *   **Scientific Implication**: High internal validity for 8B comparison (both dense, similar precision). The 70B comparison has multiple confounds (MoE vs Dense, size, precision) that must be acknowledged. **8B provides cleaner validation signal.**
 
 ### Option 2: GPT-OSS-120B (The "Novelty Bet")
@@ -78,7 +78,7 @@ The most transparent model, but fatally flawed for this specific 32B replication
     *   **Perfect Size Match**: 7B and 32B sizes match Qwen exactly.
 *   **Cons**:
     *   **FATAL FLAW**: **No 32B Instruct Model**. AI2 only released `OLMo-3-32B-Think` and `OLMo-3-32B-Base`. There is no "Non-Thinking" instruct equivalent at 32B.
-*   **Scientific Implication**: You cannot perform the "Think vs No-Think" comparison at the 32B scale. This makes it unsuitable for the full replication study.
+*   **Scientific Implication**: The "Think vs No-Think" comparison cannot be performed at the 32B scale. This makes it unsuitable for the full replication study.
 
 ---
 
@@ -96,17 +96,17 @@ The most transparent model, but fatally flawed for this specific 32B replication
 
 Using Unsloth introduces specific considerations for research validity:
 
-#### Scenario A: Inference Only (Your Use Case)
-If you use Unsloth solely to **load and run** the models (e.g., for faster inference or 4-bit loading):
+#### Scenario A: Inference Only
+If using Unsloth solely to **load and run** the models (e.g., for faster inference or 4-bit loading):
 *   **Validity Threat**: **Low**.
 *   **Reasoning**: Unsloth's inference optimizations (kernel fusion) are mathematically precise or within negligible floating-point error.
 *   **Quantization Note**: If you use Unsloth to load models in 4-bit (GGUF/bnb), you **MUST** report this. 4-bit quantization can degrade reasoning performance more than 8-bit.
     *   *Recommendation*: Use **8-bit (INT8)** or **FP16** if possible. Avoid 4-bit for "Thinking" models unless necessary.
 
 #### Scenario B: Fine-Tuning (LoRA/QLoRA)
-If you use Unsloth to **fine-tune** models:
+If using Unsloth to **fine-tune** models:
 *   **Validity Threat**: **High**.
-*   **Reasoning**: This modifies the model weights. You are no longer testing the "DeepSeek" model; you are testing "DeepSeek + Your Fine-Tune."
+*   **Reasoning**: This modifies the model weights. The experiment would no longer test the "DeepSeek" model but rather "DeepSeek + Fine-Tune."
 *   **Recommendation**: **DO NOT fine-tune** for this replication study. Use the base/instruct weights as-is.
 
 ### 3.3 Final Recommendation on Unsloth

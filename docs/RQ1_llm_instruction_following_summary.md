@@ -5,7 +5,7 @@
 
 ## Overview
 
-This document synthesizes findings from four recent papers examining the instruction-following capabilities of Large Language Models (LLMs), particularly when reasoning is involved. These findings have significant implications for your IS718 research on Software Quality Assurance tasks with LLMs.
+This document synthesizes findings from four recent papers examining the instruction-following capabilities of Large Language Models (LLMs), particularly when reasoning is involved. These findings have significant implications for IS718 research on Software Quality Assurance tasks with LLMs.
 
 ---
 
@@ -96,14 +96,14 @@ Three distinct patterns emerged based on model characteristics:
 
 ---
 
-## Implications for Your IS718 Research
+## Implications for IS718 Research
 
 ### 1. **Performance vs. Faithfulness Trade-off**
-Your hypothesis about weak correlation between predictive performance and explanation faithfulness aligns with these findings. Models achieving high accuracy on SQA tasks may have poor instruction adherence in their reasoning traces.
+The hypothesis about weak correlation between predictive performance and explanation faithfulness aligns with these findings. Models achieving high accuracy on SQA tasks may have poor instruction adherence in their reasoning traces.
 
 ### 2. **Ensemble Method Considerations**
 - Multi-turn reasoning and cross-validation techniques may help, but fundamental instruction-following limitations persist
-- Your finding that simple majority voting underperforms best individuals may be related to these instruction-following failures during reasoning
+- The finding that simple majority voting underperforms best individuals may be related to these instruction-following failures during reasoning
 
 ### 3. **Model Selection Strategy**
 - **Specialized vs. General Models**: The trade-off between reasoning depth and instruction adherence suggests that specialized coding models may not uniformly outperform general models
@@ -138,13 +138,13 @@ Your hypothesis about weak correlation between predictive performance and explan
 
 ## Conclusion
 
-These papers reveal a fundamental tension in current LLMs: **as reasoning capabilities scale up, controllability and instruction adherence often degrade**. This has direct implications for your Software Quality Assurance research:
+These papers reveal a fundamental tension in current LLMs: **as reasoning capabilities scale up, controllability and instruction adherence often degrade**. This has direct implications for Software Quality Assurance research:
 
 1. **Faithfulness concerns are validated**: Poor instruction following during reasoning suggests explanations may not reflect actual computational processes
 2. **Ensemble methods need refinement**: Simple voting may aggregate instruction-following failures
 3. **Context matters**: The effectiveness of reasoning-enhanced models depends heavily on task complexity and instruction density
 
-Your research can contribute by:
+This research can contribute by:
 - Quantifying this trade-off specifically for SQA tasks
 - Developing SQA-specific mitigation strategies
 - Creating benchmarks that measure both performance and reasoning faithfulness simultaneously
