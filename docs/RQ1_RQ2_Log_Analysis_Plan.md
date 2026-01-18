@@ -355,21 +355,70 @@ Prompts are defined in `src/config.py`:
 
 ---
 
-## 9. Next Actions
+## 9. Experiment Progress
 
-### Immediate
+### Qwen3-4B Experiments (Completed: 10/12)
+
+| # | Agent | Prompting | Mode | Accuracy | F1 | Energy (kg CO2) | Status |
+|---|-------|-----------|------|----------|-----|-----------------|--------|
+| 1 | SA | Zero-shot | Instruct | 24.9% | 5.2% | 0.00095 | ✅ |
+| 2 | SA | Few-shot | Instruct | 22.3% | 6.3% | 0.00114 | ✅ |
+| 3 | SA | Zero-shot | Thinking | 3.6% | 6.3% | 0.489 | ✅ |
+| 4 | SA | Few-shot | Thinking | 3.4% | 6.0% | 0.506 | ✅ |
+| 5 | DA | Zero-shot | Instruct | 17.4% | 5.5% | 0.108 | ✅ |
+| 6 | DA | Few-shot | Instruct | 21.0% | 5.4% | 0.109 | ✅ |
+| 7 | DA | Zero-shot | Thinking | 38.4% | 7.1% | 1.480 | ✅ |
+| 8 | DA | Few-shot | Thinking | 52.7% | 6.2% | 1.383 | ✅ |
+| 9 | MA | Zero-shot | Instruct | **66.2%** | 14.7% | 0.104 | ✅ |
+| 10 | MA | Few-shot | Instruct | 40.0% | 8.1% | 0.103 | ✅ |
+| 11 | MA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
+| 12 | MA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+
+### Qwen3-30B Experiments (Completed: 6/12)
+
+| # | Agent | Prompting | Mode | Accuracy | F1 | Energy (kg CO2) | Status |
+|---|-------|-----------|------|----------|-----|-----------------|--------|
+| 13 | SA | Zero-shot | Instruct | 9.9% | 5.4% | 0.00179 | ✅ |
+| 14 | SA | Few-shot | Instruct | 20.5% | 7.3% | 0.00182 | ✅ |
+| 15 | SA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
+| 16 | SA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+| 17 | DA | Zero-shot | Instruct | 10.1% | 5.5% | 0.108 | ✅ |
+| 18 | DA | Few-shot | Instruct | 14.5% | 6.3% | 0.110 | ✅ |
+| 19 | DA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
+| 20 | DA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+| 21 | MA | Zero-shot | Instruct | 24.2% | 5.2% | 0.111 | ✅ |
+| 22 | MA | Few-shot | Instruct | 22.9% | 5.1% | 0.111 | ✅ |
+| 23 | MA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
+| 24 | MA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+
+### Key Findings (Preliminary)
+
+1. **MA-zero Instruct (4B) achieves best accuracy (66.2%)** - Multi-agent critic significantly improves classification
+2. **DA architecture rescues Thinking models** - SA Thinking: 3-4% → DA Thinking: 38-53% accuracy
+3. **Thinking mode consumes ~500-1500x more energy** than Instruct for similar tasks
+4. **30B consistently underperforms 4B** - Larger model over-predicts anomalies (high FP rate across all architectures)
+5. **Few-shot helps DA Thinking** - DA-few Thinking (52.7%) outperforms DA-zero Thinking (38.4%)
+
+---
+
+## 10. Next Actions
+
+### Completed
 
 1. ✅ Pull upstream changes (scripts available)
 2. ✅ Update experiment plan (this document)
-3. ⬜ Submit budget request for SGD 380
-4. ⬜ Pilot run with 50 sessions to validate estimates
+3. ✅ Pilot run with 50 sessions to validate estimates
+4. ✅ Run Phase I SA experiments (4B and 30B Instruct)
+5. ✅ Run Phase I SA Thinking experiments (4B only; 30B deferred)
+6. ✅ Run Phase II DA experiments (4B Instruct + Thinking complete; 30B Instruct complete)
+7. ✅ Run Phase II MA Instruct experiments (4B and 30B complete)
 
-### After Budget Approval
+### Pending
 
-5. ⬜ Run Phase I experiments (8 SA experiments)
-6. ⬜ Analyze Phase I results
-7. ⬜ Run Phase II experiments (16 DA/MA experiments)
-8. ⬜ Final analysis and documentation
+8. ⏳ Run Phase II MA Thinking experiments (4B: 2 experiments)
+9. ⏳ Run 30B Thinking experiments (SA: 2, DA: 2, MA: 2 = 6 experiments)
+10. ⬜ Analyze results and document findings
+11. ⬜ Compare with vulnerability detection and code generation results
 
 ---
 
@@ -377,5 +426,6 @@ Prompts are defined in `src/config.py`:
 
 - **Created**: 2026-01-10
 - **Updated**: 2026-01-17 (Revised to focus on Qwen3 models only per supervisor guidance)
+- **Updated**: 2026-01-18 (Added experiment progress tracking, preliminary findings)
 - **Author**: Log Analysis Planning Session
-- **Status**: Ready for budget approval
+- **Status**: Experiments in progress

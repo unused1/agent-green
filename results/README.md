@@ -365,16 +365,22 @@ rq2_cross_architecture/
 **Sub-directories**:
 ```
 runpod_log_analysis/
-├── SA-zero_Qwen3-4B-Instruct/   # Single-Agent Zero-shot Instruct
-├── SA-few_Qwen3-4B-Instruct/    # Single-Agent Few-shot Instruct
-├── SA-zero_Qwen3-4B-Thinking/   # Single-Agent Zero-shot Thinking
-├── SA-few_Qwen3-4B-Thinking/    # Single-Agent Few-shot Thinking
-├── NA-zero_Qwen3-4B-Instruct/   # No-Agent Zero-shot Instruct
-├── NA-few_Qwen3-4B-Instruct/    # No-Agent Few-shot Instruct
-├── DA-zero_Qwen3-4B-Instruct/   # Dual-Agent Zero-shot Instruct
-├── DA-few_Qwen3-4B-Instruct/    # Dual-Agent Few-shot Instruct
-├── MA-zero_Qwen3-4B-Instruct/   # Multi-Agent Zero-shot Instruct
-└── MA-few_Qwen3-4B-Instruct/    # Multi-Agent Few-shot Instruct
+├── SA-zero_Qwen3-4B-Instruct/   # ✅ Single-Agent Zero-shot Instruct
+├── SA-few_Qwen3-4B-Instruct/    # ✅ Single-Agent Few-shot Instruct
+├── SA-zero_Qwen3-4B-Thinking/   # ✅ Single-Agent Zero-shot Thinking
+├── SA-few_Qwen3-4B-Thinking/    # ✅ Single-Agent Few-shot Thinking
+├── DA-zero_Qwen3-4B-Instruct/   # ✅ Dual-Agent Zero-shot Instruct
+├── DA-few_Qwen3-4B-Instruct/    # ✅ Dual-Agent Few-shot Instruct
+├── DA-zero_Qwen3-4B-Thinking/   # ✅ Dual-Agent Zero-shot Thinking
+├── DA-few_Qwen3-4B-Thinking/    # ✅ Dual-Agent Few-shot Thinking
+├── MA-zero_Qwen3-4B-Instruct/   # ✅ Multi-Agent Zero-shot Instruct
+├── MA-few_Qwen3-4B-Instruct/    # ✅ Multi-Agent Few-shot Instruct
+├── SA-zero_Qwen3-30B-Instruct/  # ✅ Single-Agent Zero-shot Instruct (30B)
+├── SA-few_Qwen3-30B-Instruct/   # ✅ Single-Agent Few-shot Instruct (30B)
+├── DA-zero_Qwen3-30B-Instruct/  # ✅ Dual-Agent Zero-shot Instruct (30B)
+├── DA-few_Qwen3-30B-Instruct/   # ✅ Dual-Agent Few-shot Instruct (30B)
+├── MA-zero_Qwen3-30B-Instruct/  # ✅ Multi-Agent Zero-shot Instruct (30B)
+└── MA-few_Qwen3-30B-Instruct/   # ✅ Multi-Agent Few-shot Instruct (30B)
 ```
 
 **Experiments (Qwen3-4B)**:
@@ -383,14 +389,40 @@ runpod_log_analysis/
 |--------|-----------|-------|----------|-----|-------------------|--------|
 | SA | Zero-shot | Instruct | 24.9% | 5.2% | 0.00095 | ✅ |
 | SA | Few-shot | Instruct | 22.3% | 6.3% | 0.00114 | ✅ |
-| SA | Zero-shot | Thinking | TBD | TBD | TBD | 🔄 In Progress |
-| SA | Few-shot | Thinking | TBD | TBD | TBD | ⏳ Pending |
-| NA | Zero-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
-| NA | Few-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
-| DA | Zero-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
-| DA | Few-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
-| MA | Zero-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
-| MA | Few-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
+| SA | Zero-shot | Thinking | 3.6% | 6.3% | 0.489 | ✅ |
+| SA | Few-shot | Thinking | 3.4% | 6.0% | 0.506 | ✅ |
+| DA | Zero-shot | Instruct | 17.4% | 5.5% | 0.108 | ✅ |
+| DA | Few-shot | Instruct | 21.0% | 5.4% | 0.109 | ✅ |
+| DA | Zero-shot | Thinking | 38.4% | 7.1% | 1.480 | ✅ |
+| DA | Few-shot | Thinking | 52.7% | 6.2% | 1.383 | ✅ |
+| MA | Zero-shot | Instruct | **66.2%** | 14.7% | 0.104 | ✅ |
+| MA | Few-shot | Instruct | 40.0% | 8.1% | 0.103 | ✅ |
+| MA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
+| MA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+
+**Experiments (Qwen3-30B)**:
+
+| Design | Prompting | Model | Accuracy | F1 | Emissions (kg CO2) | Status |
+|--------|-----------|-------|----------|-----|-------------------|--------|
+| SA | Zero-shot | Instruct | 9.9% | 5.4% | 0.00179 | ✅ |
+| SA | Few-shot | Instruct | 20.5% | 7.3% | 0.00182 | ✅ |
+| SA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
+| SA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+| DA | Zero-shot | Instruct | 10.1% | 5.5% | 0.108 | ✅ |
+| DA | Few-shot | Instruct | 14.5% | 6.3% | 0.110 | ✅ |
+| DA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
+| DA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+| MA | Zero-shot | Instruct | 24.2% | 5.2% | 0.111 | ✅ |
+| MA | Few-shot | Instruct | 22.9% | 5.1% | 0.111 | ✅ |
+| MA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
+| MA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+
+**Preliminary Findings**:
+1. **MA-zero Instruct (4B) achieves best accuracy (66.2%)** - Critic agent improves classification
+2. **DA architecture rescues Thinking models** - SA Thinking: 3-4% → DA Thinking: 38-53% accuracy
+3. **Thinking mode uses ~500-1500x more energy** than Instruct for similar tasks
+4. **30B consistently underperforms 4B** - Larger model over-predicts anomalies (high FP rate across all architectures)
+5. **Few-shot helps DA Thinking** - DA-few Thinking (52.7%) outperforms DA-zero Thinking (38.4%)
 
 **Agent Architectures**:
 - **NA (No-Agent)**: Direct LLM call without agent framework
@@ -617,14 +649,15 @@ Analysis performed in `/notebooks/`:
 ---
 
 **Last Updated**: 2026-01-18
-**Total Experiments**: 96+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + RQ3 Log Analysis in progress)
+**Total Experiments**: 110+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + 24 RQ3 Log Analysis)
   - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
   - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)
   - **Cross-Architecture Nemotron SA (8B+49B)**: 8 vulnerability detection + 8 code generation ✅
   - **Cross-Architecture Nemotron DA (8B)**: 4 vulnerability detection + 4 code generation ✅
   - **Cross-Architecture Nemotron MA (8B)**: 4 vulnerability detection + 4 code generation ✅
-  - **RQ3 Log Analysis (Qwen3 4B)**: 10 log anomaly detection experiments (NA/SA/DA/MA × zero/few-shot) 🔄
-**Total Samples Processed**: ~52,800+ (96 experiments × ~550 avg samples + 385 log sessions per RQ3 experiment)
+  - **RQ3 Log Analysis (Qwen3 4B)**: 12 experiments (SA/DA/MA × zero/few × Instruct/Thinking) - 10 complete, 2 pending
+  - **RQ3 Log Analysis (Qwen3 30B)**: 12 experiments - 6 complete (all Instruct), 6 pending (all Thinking)
+**Total Samples Processed**: ~56,000+ (96 vuln/code experiments × ~550 avg + 14 log experiments × 385 sessions)
 **Hardware Used**: Mars RTX A5000 + RunPod H100
 **Models Evaluated**: 6 (Qwen3 4B/30B × Instruct/Thinking + Nemotron-Nano-8B + Nemotron-Super-49B)
 **Agent Architectures**: 4 (No-Agent, Single-Agent, Dual-Agent, Multi-Agent)
