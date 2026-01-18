@@ -1,0 +1,11 @@
+{
+  "total_emissions": 0.0017912776608123033,
+  "sessions": 1,
+  "session_history": [
+    {
+      "timestamp": "2026-01-18T11:21:15.649524",
+      "emissions_kg_co2": 0.0017912776608123033,
+      "samples_processed": 385
+    }
+  ]
+}

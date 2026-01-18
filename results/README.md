@@ -15,6 +15,7 @@ results/
 ├── runpod_rq2_pod1-8/       # Phase 4: RQ2 Multi-Agent experiments (Nov 15-17, 2025)
 ├── rq2_cross_architecture/  # Phase 5-6: Cross-architecture validation with Nemotron 8B+49B (Dec 9-Jan 2026)
 ├── rq2_nm8b_ma_rerun_20260103/ # Rerun verification for Nemotron 8B MA Vuln experiments (Jan 3, 2026)
+├── runpod_log_analysis/     # Phase 7: RQ3 Log Analysis experiments (Jan 2026)
 ├── analysis/                # Analysis outputs from Jupyter notebooks (Phase 1-2)
 ├── analysis_prompt_comparison/ # Prompt comparison analysis outputs
 ├── analysis_phase2a/        # Phase 2a analysis outputs
@@ -351,6 +352,59 @@ rq2_cross_architecture/
 
 ---
 
+### **Phase 7: RQ3 Log Analysis Experiments (Jan 18, 2026)**
+
+**Purpose**: Evaluate LLM-based log anomaly detection on HDFS logs with different agent architectures
+
+**Hardware**: RunPod (NVIDIA H100 80GB HBM3)
+
+**Dataset**: HDFS Log Sessions (385 sessions, binary anomaly labels)
+
+**Directory**: `results/runpod_log_analysis/`
+
+**Sub-directories**:
+```
+runpod_log_analysis/
+├── SA-zero_Qwen3-4B-Instruct/   # Single-Agent Zero-shot Instruct
+├── SA-few_Qwen3-4B-Instruct/    # Single-Agent Few-shot Instruct
+├── SA-zero_Qwen3-4B-Thinking/   # Single-Agent Zero-shot Thinking
+├── SA-few_Qwen3-4B-Thinking/    # Single-Agent Few-shot Thinking
+├── NA-zero_Qwen3-4B-Instruct/   # No-Agent Zero-shot Instruct
+├── NA-few_Qwen3-4B-Instruct/    # No-Agent Few-shot Instruct
+├── DA-zero_Qwen3-4B-Instruct/   # Dual-Agent Zero-shot Instruct
+├── DA-few_Qwen3-4B-Instruct/    # Dual-Agent Few-shot Instruct
+├── MA-zero_Qwen3-4B-Instruct/   # Multi-Agent Zero-shot Instruct
+└── MA-few_Qwen3-4B-Instruct/    # Multi-Agent Few-shot Instruct
+```
+
+**Experiments (Qwen3-4B)**:
+
+| Design | Prompting | Model | Accuracy | F1 | Emissions (kg CO2) | Status |
+|--------|-----------|-------|----------|-----|-------------------|--------|
+| SA | Zero-shot | Instruct | 24.9% | 5.2% | 0.00095 | ✅ |
+| SA | Few-shot | Instruct | 22.3% | 6.3% | 0.00114 | ✅ |
+| SA | Zero-shot | Thinking | TBD | TBD | TBD | 🔄 In Progress |
+| SA | Few-shot | Thinking | TBD | TBD | TBD | ⏳ Pending |
+| NA | Zero-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
+| NA | Few-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
+| DA | Zero-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
+| DA | Few-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
+| MA | Zero-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
+| MA | Few-shot | Instruct | TBD | TBD | TBD | ⏳ Pending |
+
+**Agent Architectures**:
+- **NA (No-Agent)**: Direct LLM call without agent framework
+- **SA (Single-Agent)**: Single agent with AutoGen framework
+- **DA (Dual-Agent)**: Parser agent + Anomaly detector agent
+- **MA (Multi-Agent)**: User proxy + Parser + Anomaly detector + Critic agents
+
+**Key Features**:
+- Resume capability for interrupted experiments
+- Incremental result saving after each session
+- Energy tracking across resume sessions
+
+---
+
 ## Data Organization
 
 ### File Naming Convention
@@ -432,6 +486,14 @@ results/
 - **Samples**: 164 Python programming problems
 - **Source**: `data/HumanEval.jsonl`
 - **Metric**: Pass@1 (percentage solved correctly on first attempt)
+
+### Log Analysis (RQ3)
+- **Dataset**: HDFS Log Sessions
+- **Samples**: 385 log sessions (sampled from HDFS_2k dataset)
+- **Source**: `data/HDFS_385_sampled_sessions/`
+- **Ground Truth**: `data/HDFS_anomaly_label_385_session_sampled.csv`
+- **Task**: Binary classification (normal vs anomalous log session)
+- **Metrics**: Accuracy, Precision, Recall, F1 Score
 
 ---
 
@@ -554,14 +616,16 @@ Analysis performed in `/notebooks/`:
 
 ---
 
-**Last Updated**: 2026-01-03
-**Total Experiments**: 96 (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron)
+**Last Updated**: 2026-01-18
+**Total Experiments**: 96+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + RQ3 Log Analysis in progress)
   - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
   - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)
   - **Cross-Architecture Nemotron SA (8B+49B)**: 8 vulnerability detection + 8 code generation ✅
   - **Cross-Architecture Nemotron DA (8B)**: 4 vulnerability detection + 4 code generation ✅
   - **Cross-Architecture Nemotron MA (8B)**: 4 vulnerability detection + 4 code generation ✅
-**Total Samples Processed**: ~52,800 (96 experiments × ~550 avg samples)
+  - **RQ3 Log Analysis (Qwen3 4B)**: 10 log anomaly detection experiments (NA/SA/DA/MA × zero/few-shot) 🔄
+**Total Samples Processed**: ~52,800+ (96 experiments × ~550 avg samples + 385 log sessions per RQ3 experiment)
 **Hardware Used**: Mars RTX A5000 + RunPod H100
 **Models Evaluated**: 6 (Qwen3 4B/30B × Instruct/Thinking + Nemotron-Nano-8B + Nemotron-Super-49B)
-**Agent Architectures**: 3 (Single-Agent, Dual-Agent, Multi-Agent)
+**Agent Architectures**: 4 (No-Agent, Single-Agent, Dual-Agent, Multi-Agent)
+**Tasks**: 3 (Vulnerability Detection, Code Generation, Log Analysis)

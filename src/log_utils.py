@@ -1,7 +1,9 @@
 import os
 import csv
 import re
+import json
 from datetime import datetime
+from collections import Counter
 from typing import List, Optional, Dict, Any, Tuple
 
 
@@ -122,6 +124,10 @@ def normalize_template(text: str) -> str:
     ]
     for pattern in explanation_patterns:
         text = re.sub(pattern, "", text, flags=re.IGNORECASE | re.DOTALL)
+
+    # Keep only the part before any explanatory "Note:" or similar
+    text = re.split(r"\bNote:|This template|Thus,|Therefore,|The template reflects", text, maxsplit=1, flags=re.IGNORECASE)[0]
+
     return _clean_text(text)
 
 def normalize_template_v1(text: str) -> str:
@@ -198,7 +204,7 @@ def generate_filenames(design: str, llm_model: str, base_dir: str = ".", suffixe
 def save_templates(parsed_templates: List[str], llm_config: Dict[str, Any], design: str, output_dir: str = "templates_output") -> Tuple[str, str]:
     """Save raw and normalized templates to files."""
     os.makedirs(output_dir, exist_ok=True)
-    model = llm_config["config_list"][0]["model"].replace(":", "-")
+    model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     raw_filename = f"{output_dir}/{design}_{model}_{timestamp}_raw.txt"
     normalized_filename = f"{output_dir}/{design}_{model}_{timestamp}_normalized.txt"
@@ -220,6 +226,7 @@ def extract_last_template_from_history(history: List[Dict[str, Any]], agent_name
         if msg['name'] == agent_name and TEMPLATE_PATTERN.search(msg['content'].strip()):
             return msg['content'].strip()
     return None
+
 
 def extract_last_template_from_history_loose(history: List[Dict[str, Any]], agent_name: str = 'log_parser_agent') -> Optional[str]:
     """Extract last non-empty message from agent history."""
@@ -249,3 +256,101 @@ def extract_event_templates(csv_file_path: str) -> List[str]:
             if event_template:
                 event_templates.append(event_template.strip())
     return event_templates
+
+def read_log_sessions(input_dir):
+    """
+    Reads all .log files under input_dir and returns a list of dicts with block_id and log content.
+    Each .log file corresponds to one HDFS block session.
+    """
+    sessions = []
+    for fname in sorted(os.listdir(input_dir)):
+        if fname.endswith(".log"):
+            block_id = fname.replace(".log", "")
+            file_path = os.path.join(input_dir, fname)
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+            sessions.append({
+                "block_id": block_id,
+                "content": content
+            })
+    print(f"[INFO] Loaded {len(sessions)} log sessions from {input_dir}")
+    return sessions
+
+def save_parsed_sessions(sessions, out_dir, exp_name):
+    """
+    Saves parsed log sessions to a JSON file for reproducibility.
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, f"{exp_name}_parsed_sessions.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(sessions, f, indent=2)
+    print(f"[INFO] Saved parsed sessions to {out_path}")
+    return out_path
+
+
+def get_log_analysis_gt(gt_file_path):
+    """
+    Loads ground truth CSV file with BlockId, Label.
+    Returns a dict {block_id: "0"/"1"}.
+    """
+    gt = {}
+    with open(gt_file_path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            label = row["Label"].strip().lower()
+            gt[row["BlockId"]] = "1" if label == "anomaly" else "0"
+    print(f"[INFO] Loaded ground truth for {len(gt)} block IDs from {gt_file_path}")
+    return gt
+
+def save_log_analysis_results(results, normalize_fn, exp_name, llm_config, out_dir="results"):
+    """
+    Saves raw and normalized anomaly detection results.
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    raw_path = os.path.join(out_dir, f"{exp_name}_{model}_{timestamp}_raw.txt")
+    normalized_path = os.path.join(out_dir, f"{exp_name}_{model}_{timestamp}_normalized.txt")
+
+    normalized = []
+    with open(raw_path, "w", encoding="utf-8") as fr, open(normalized_path, "w", encoding="utf-8") as fn:
+        for item in results:
+            block_id, raw_output = item["block_id"], item["raw_output"]
+            #print(f"[DEBUG] Block ID: {block_id}, Raw Output: {raw_output}")
+            normalized_label = normalize_fn(raw_output)
+            #print(f"[DEBUG] Block ID: {block_id}, Normalized Label: {normalized_label}")
+            normalized.append({"block_id": block_id, "normalized": normalized_label})
+            fr.write(f"{block_id}\t{raw_output.strip()}\n")
+            fn.write(f"{block_id}\t{normalized_label}\n")
+
+    print(f"[INFO] Saved raw results to {raw_path}")
+    print(f"[INFO] Saved normalized results to {normalized_path}")
+    return normalized
+
+
+def normalize_log_analysis_result(text):
+    """
+    Normalize LLM outputs to 0 or 1.
+    Removes extra explanations and keeps only a valid binary digit.
+    """
+    if text is None:
+        return "0"
+
+    # Clean unwanted formatting
+    text = str(text).strip()
+    text = re.sub(r"```[a-z]*|```", "", text)
+    text = re.sub(r"[^\d]", " ", text)
+
+    # Extract the first 0 or 1
+    match = re.search(r"\b[01]\b", text)
+    if match:
+        return match.group(0)
+
+    # Fallback: interpret words
+    if re.search(r"anomal", text, re.I):
+        return "1"
+    if re.search(r"normal", text, re.I):
+        return "0"
+    print("Could not determine label, defaulting to 0")
+    return "0"  # default to normal if uncertain

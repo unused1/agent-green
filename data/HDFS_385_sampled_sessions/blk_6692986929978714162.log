@@ -1,0 +1,19 @@
+081111 064336 22385 INFO dfs.DataNode$DataXceiver: Receiving block blk_6692986929978714162 src: /10.251.71.146:41225 dest: /10.251.71.146:50010
+081111 064336 22410 INFO dfs.DataNode$DataXceiver: Receiving block blk_6692986929978714162 src: /10.251.71.146:36133 dest: /10.251.71.146:50010
+081111 064336 22641 INFO dfs.DataNode$DataXceiver: Receiving block blk_6692986929978714162 src: /10.251.38.214:60224 dest: /10.251.38.214:50010
+081111 064336 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt5/_temporary/_task_200811101024_0012_m_001859_0/part-01859. blk_6692986929978714162
+081111 064406 22386 INFO dfs.DataNode$PacketResponder: PacketResponder 2 for block blk_6692986929978714162 terminating
+081111 064406 22386 INFO dfs.DataNode$PacketResponder: Received block blk_6692986929978714162 of size 67108864 from /10.251.71.146
+081111 064406 22411 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_6692986929978714162 terminating
+081111 064406 22411 INFO dfs.DataNode$PacketResponder: Received block blk_6692986929978714162 of size 67108864 from /10.251.71.146
+081111 064406 22642 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_6692986929978714162 terminating
+081111 064406 22642 INFO dfs.DataNode$PacketResponder: Received block blk_6692986929978714162 of size 67108864 from /10.251.38.214
+081111 064406 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.71.146:50010 is added to blk_6692986929978714162 size 67108864
+081111 064406 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.38.214:50010 is added to blk_6692986929978714162 size 67108864
+081111 064406 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.193.175:50010 is added to blk_6692986929978714162 size 67108864
+081111 065225 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_6692986929978714162 is added to invalidSet of 10.251.193.175:50010
+081111 065225 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_6692986929978714162 is added to invalidSet of 10.251.38.214:50010
+081111 065225 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_6692986929978714162 is added to invalidSet of 10.251.71.146:50010
+081111 065446 19 INFO dfs.FSDataset: Deleting block blk_6692986929978714162 file /mnt/hadoop/dfs/data/current/subdir62/blk_6692986929978714162
+081111 065516 19 INFO dfs.FSDataset: Deleting block blk_6692986929978714162 file /mnt/hadoop/dfs/data/current/subdir7/blk_6692986929978714162
+081111 065532 19 INFO dfs.FSDataset: Deleting block blk_6692986929978714162 file /mnt/hadoop/dfs/data/current/subdir0/blk_6692986929978714162

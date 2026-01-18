@@ -1,10 +1,14 @@
+import os
 
-# Directory paths
-PROJECT_ROOT = '/home/user/Desktop/agent-green'
+# ========================================================================================
+# DIRECTORY PATHS
+# ========================================================================================
+
+PROJECT_ROOT = os.getenv('PROJECT_ROOT', '/home/user/Desktop/agent-green')
 LOG_DIR = f'{PROJECT_ROOT}/logs'
 DATA_DIR = f'{PROJECT_ROOT}/data'
 WORK_DIR = f'{PROJECT_ROOT}/tests/work_dir'
-RESULT_DIR = f'{PROJECT_ROOT}/results'
+RESULT_DIR = os.getenv('RESULTS_DIR', f'{PROJECT_ROOT}/results')
 PLOT_DIR = f'{PROJECT_ROOT}/plots'
 
 IN_FILE = "mlcq_cleaned_and_pruned_dataset_385.csv"
@@ -23,27 +27,65 @@ TASK = "log-parsing"
 DESIGN = "DA-few"  # options: "SA-zero", "NA-few", "DA-few", "MA-zero", etc.
 """
 
-VULN_DATASET = f"{PROJECT_ROOT}/vuln_database/VulTrial_386_samples_balanced.jsonl"
-HUMANEVAL_DATASET = f"{PROJECT_ROOT}/vuln_database/HumanEval.jsonl"
+# ========================================================================================
+# DATASETS
+# ========================================================================================
 
+VULN_DATASET = os.getenv('VULN_DATASET', f"{PROJECT_ROOT}/vuln_database/VulTrial_386_samples_balanced.jsonl")
+HUMANEVAL_DATASET = os.getenv('HUMANEVAL_DATASET', f"{PROJECT_ROOT}/vuln_database/HumanEval.jsonl")
 
-# Model/LLM settings
-LLM_SERVICE = "ollama"
-#LLM_MODEL = "qwen3:4b-thinking"  
-LLM_MODEL = "qwen3:4b-instruct" 
-TEMPERATURE = 0.0
+# ========================================================================================
+# QWEN3 MODEL CONFIGURATION (matching config_nemotron.py pattern)
+# ========================================================================================
+
+# Environment-based configuration
+USE_RUNPOD = os.getenv('USE_RUNPOD', 'false').lower() == 'true'
+ENABLE_REASONING = os.getenv('ENABLE_REASONING', 'false').lower() == 'true'
+
+# Model endpoints (from .env.runpod)
+REASONING_ENDPOINT = os.getenv('REASONING_ENDPOINT', 'http://localhost:8000/v1')
+BASELINE_ENDPOINT = os.getenv('BASELINE_ENDPOINT', 'http://localhost:8000/v1')
+REASONING_MODEL = os.getenv('REASONING_MODEL', 'Qwen/Qwen3-4B-Thinking-2507')
+BASELINE_MODEL = os.getenv('BASELINE_MODEL', 'Qwen/Qwen3-4B-Instruct-2507')
+REASONING_API_KEY = os.getenv('REASONING_API_KEY', 'dummy-key')
+BASELINE_API_KEY = os.getenv('BASELINE_API_KEY', 'dummy-key')
+
+# Temperature
+TEMPERATURE = float(os.getenv('TEMPERATURE', '0.0'))
+
+# Select model based on reasoning mode and RunPod usage
+if USE_RUNPOD:
+    if ENABLE_REASONING:
+        LLM_MODEL = REASONING_MODEL
+        LLM_ENDPOINT = REASONING_ENDPOINT
+        LLM_API_KEY = REASONING_API_KEY
+    else:
+        LLM_MODEL = BASELINE_MODEL
+        LLM_ENDPOINT = BASELINE_ENDPOINT
+        LLM_API_KEY = BASELINE_API_KEY
+    LLM_SERVICE = 'openai'  # vLLM uses OpenAI-compatible API
+else:
+    # Local Ollama setup
+    LLM_MODEL = os.getenv('LLM_MODEL', 'qwen3:4b-instruct')
+    LLM_ENDPOINT = os.getenv('LLM_API_BASE', 'http://localhost:11434')
+    LLM_API_KEY = 'dummy-key'
+    LLM_SERVICE = 'ollama'
+
+# Build config_list based on service type
+_config_entry = {
+    "model": LLM_MODEL,
+    "base_url": LLM_ENDPOINT,
+    "api_type": LLM_SERVICE,
+    "api_key": LLM_API_KEY,
+}
+
+# num_ctx is Ollama-specific, not supported by OpenAI/vLLM
+if LLM_SERVICE == 'ollama':
+    _config_entry["num_ctx"] = 262144
 
 LLM_CONFIG = {
     "cache_seed": None,
-    "config_list": [
-        {
-            "model": LLM_MODEL,
-            "api_base": "http://localhost:11434",
-            "api_type": LLM_SERVICE,
-            "num_ctx": 262144,
-            #"num_ctx": 131072,
-        }
-    ],
+    "config_list": [_config_entry],
     "temperature": TEMPERATURE
 }
 
@@ -1641,5 +1683,3 @@ Let's think step-by-step."""
 
 # Alias for backward compatibility
 CODE_GENERATION_TASK_PROMPT = SINGLE_AGENT_TASK_CODE_GENERATION
-
-

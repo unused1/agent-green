@@ -9,7 +9,8 @@ elif _model_family == 'nemotron':
     import config_nemotron as config
 else:
     import config
-from autogen import AssistantAgent, ConversableAgent, GroupChat, GroupChatManager, LocalCommandLineCodeExecutor, register_function
+from autogen import AssistantAgent, ConversableAgent, GroupChat, GroupChatManager, register_function
+from autogen.coding import LocalCommandLineCodeExecutor
 
 # --- Generic Agent Creation ---
 def create_agent(agent_type, name, llm_config=None, sys_prompt=None, description=None):

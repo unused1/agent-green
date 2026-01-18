@@ -49,7 +49,7 @@ ssh root@ssh.runpod.io -p <YOUR_PORT> -i ~/.ssh/id_ed25519
 pip install hf_transfer --break-system-packages
 
 # Install experiment dependencies
-pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn --break-system-packages
+pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn python-Levenshtein --break-system-packages
 
 pip install vllm --break-system-packages
 ```
@@ -172,7 +172,102 @@ I'll create an updated config in the next step.
 
 ## Step 5: Run Experiments on RunPod
 
-### 5.1 Running Experiments Inside Pods (CRITICAL Environment Variables)
+### 5.0 Running Log Analysis Experiments (RQ1/RQ2)
+
+#### 5.0.1 Setup Environment File
+Upload `.env.qwen3-4b-log` to the pod as `.env`:
+```bash
+# From local machine
+scp -P <PORT> -i ~/.ssh/runpod_ed25519 \
+  /path/to/agent-green/.env.qwen3-4b-log \
+  root@<IP>:/workspace/agent-green/.env
+```
+
+Or create `.env` on the pod:
+```bash
+cd /workspace/agent-green
+cat > .env << 'EOF'
+# Qwen3-4B Log Analysis Environment Variables
+PROJECT_ROOT=/workspace/agent-green
+USE_RUNPOD=true
+LLM_SERVICE=openai
+LLM_API_BASE=http://localhost:8000/v1
+OPENAI_API_KEY=dummy-key
+BASELINE_MODEL=Qwen/Qwen3-4B-Instruct-2507
+BASELINE_ENDPOINT=http://localhost:8000/v1
+BASELINE_API_KEY=dummy-key
+REASONING_MODEL=Qwen/Qwen3-4B-Thinking-2507
+REASONING_ENDPOINT=http://localhost:8000/v1
+REASONING_API_KEY=dummy-key
+ENABLE_REASONING=false
+EOF
+```
+
+#### 5.0.2 Source Environment and Run Experiments
+```bash
+cd /workspace/agent-green
+
+# Source environment variables (IMPORTANT: use set -a to export all variables)
+set -a && source .env && set +a
+
+# Verify variables are set
+echo "USE_RUNPOD=$USE_RUNPOD, ENABLE_REASONING=$ENABLE_REASONING"
+```
+
+**For Qwen3-4B-Instruct (Zero-shot):**
+```bash
+# Ensure ENABLE_REASONING=false for Instruct model
+export ENABLE_REASONING=false
+
+# Run full (385 sessions)
+python src/single_agent_log_analysis.py --shot zero
+```
+
+**For Qwen3-4B-Thinking (Zero-shot):**
+```bash
+# Switch to Thinking model
+export ENABLE_REASONING=true
+
+# Restart vLLM with Thinking model first, then:
+python src/single_agent_log_analysis.py --shot zero
+```
+
+**For Few-shot variants:**
+```bash
+python src/single_agent_log_analysis.py --shot few
+```
+
+#### 5.0.3 Resume Capability
+The script saves progress incrementally and can resume from interruptions:
+```bash
+# If interrupted, simply run the same command again
+python src/single_agent_log_analysis.py --shot zero
+
+# The script will:
+# - Detect existing results in results/log-analysis_SA-zero_*.jsonl
+# - Skip already-processed sessions
+# - Continue from where it left off
+```
+
+**Environment Variables Explained:**
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `PROJECT_ROOT` | `/workspace/agent-green` | Sets correct paths for data/results |
+| `USE_RUNPOD` | `true` | Switches to OpenAI-compatible API (vLLM) |
+| `ENABLE_REASONING` | `false` / `true` | Selects Instruct or Thinking model |
+| `LLM_MODEL` | `Qwen/Qwen3-4B-Instruct-2507` | HuggingFace model identifier |
+| `LLM_API_BASE` | `http://localhost:8000/v1` | vLLM endpoint |
+| `OPENAI_API_KEY` | `dummy-key` | Required by OpenAI client (vLLM ignores it) |
+
+**Correct Model Names for Log Analysis:**
+| Short Name | HuggingFace Model ID |
+|------------|---------------------|
+| Qwen3-4B-Instruct | `Qwen/Qwen3-4B-Instruct-2507` |
+| Qwen3-4B-Thinking | `Qwen/Qwen3-4B-Thinking-2507` |
+| Qwen3-30B-A3B-Instruct | `Qwen/Qwen3-30B-A3B-Instruct-2507` |
+| Qwen3-30B-A3B-Thinking | `Qwen/Qwen3-30B-A3B-Thinking-2507` |
+
+### 5.1 Running Vulnerability Detection Experiments (CRITICAL Environment Variables)
 
 **When running experiments directly on RunPod pods**, you MUST set these environment variables:
 

@@ -1,0 +1,26 @@
+081110 115308 10356 INFO dfs.DataNode$DataXceiver: Receiving block blk_8665625400886625462 src: /10.251.42.84:55645 dest: /10.251.42.84:50010
+081110 115308 10589 INFO dfs.DataNode$DataXceiver: Receiving block blk_8665625400886625462 src: /10.251.39.242:58739 dest: /10.251.39.242:50010
+081110 115308 10660 INFO dfs.DataNode$DataXceiver: Receiving block blk_8665625400886625462 src: /10.251.39.242:42972 dest: /10.251.39.242:50010
+081110 115308 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt2/_temporary/_task_200811101024_0002_m_000648_0/part-00648. blk_8665625400886625462
+081110 115351 10357 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_8665625400886625462 terminating
+081110 115351 10357 INFO dfs.DataNode$PacketResponder: Received block blk_8665625400886625462 of size 67108864 from /10.251.42.84
+081110 115351 10590 INFO dfs.DataNode$PacketResponder: PacketResponder 2 for block blk_8665625400886625462 terminating
+081110 115351 10590 INFO dfs.DataNode$PacketResponder: Received block blk_8665625400886625462 of size 67108864 from /10.251.39.242
+081110 115351 10661 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_8665625400886625462 terminating
+081110 115351 10661 INFO dfs.DataNode$PacketResponder: Received block blk_8665625400886625462 of size 67108864 from /10.251.39.242
+081110 115351 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.250.15.198:50010 is added to blk_8665625400886625462 size 67108864
+081110 115351 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.42.84:50010 is added to blk_8665625400886625462 size 67108864
+081110 115351 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.39.242:50010 is added to blk_8665625400886625462 size 67108864
+081110 173335 13633 INFO dfs.DataNode$DataXceiver: 10.250.15.198:50010 Served block blk_8665625400886625462 to /10.250.15.198
+081110 173436 13772 INFO dfs.DataNode$DataXceiver: 10.251.39.242:50010 Served block blk_8665625400886625462 to /10.251.106.10
+081110 173632 13900 WARN dfs.DataNode$DataXceiver: 10.251.42.84:50010:Got exception while serving blk_8665625400886625462 to /10.251.91.84:
+081111 003050 17172 INFO dfs.DataNode$DataXceiver: 10.250.15.198:50010 Served block blk_8665625400886625462 to /10.250.15.198
+081111 003118 17317 INFO dfs.DataNode$DataXceiver: 10.251.42.84:50010 Served block blk_8665625400886625462 to /10.251.106.10
+081111 003332 17273 WARN dfs.DataNode$DataXceiver: 10.251.39.242:50010:Got exception while serving blk_8665625400886625462 to /10.251.91.84:
+081111 012302 13 INFO dfs.DataBlockScanner: Verification succeeded for blk_8665625400886625462
+081111 023018 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_8665625400886625462 is added to invalidSet of 10.250.15.198:50010
+081111 023018 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_8665625400886625462 is added to invalidSet of 10.251.39.242:50010
+081111 023018 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_8665625400886625462 is added to invalidSet of 10.251.42.84:50010
+081111 023259 19 INFO dfs.FSDataset: Deleting block blk_8665625400886625462 file /mnt/hadoop/dfs/data/current/subdir45/blk_8665625400886625462
+081111 023303 19 INFO dfs.FSDataset: Deleting block blk_8665625400886625462 file /mnt/hadoop/dfs/data/current/subdir41/blk_8665625400886625462
+081111 023323 18 INFO dfs.FSDataset: Deleting block blk_8665625400886625462 file /mnt/hadoop/dfs/data/current/subdir34/blk_8665625400886625462

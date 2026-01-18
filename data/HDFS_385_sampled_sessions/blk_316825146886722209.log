@@ -1,0 +1,2 @@
+081109 233238 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/sortrand/_temporary/_task_200811092030_0002_r_000007_0/part-00007. blk_316825146886722209
+081109 233238 3975 INFO dfs.DataNode$DataXceiver: Receiving block blk_316825146886722209 src: /10.250.10.6:33637 dest: /10.250.10.6:50010

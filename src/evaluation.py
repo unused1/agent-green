@@ -114,3 +114,110 @@ def evaluate_and_save(normalize_fn, parsed_templates, ground_truth_file_path, ex
     save_per_line_metrics(results, exp_name)
     save_summary_metrics(results, exp_name)
     return results
+
+
+# --- Log Analysis Evaluation ---
+def evaluate_and_save_log_analysis(gt, predictions, exp_name, result_dir):
+    """
+    Evaluate log analysis (anomaly detection) predictions against ground truth.
+
+    Args:
+        gt: dict {block_id: "0"/"1"} ground truth labels
+        predictions: list of {"block_id": ..., "normalized": "0"/"1"}
+        exp_name: experiment name for file naming
+        result_dir: directory to save results
+
+    Returns:
+        dict with evaluation metrics
+    """
+    # Build prediction dict
+    pred_dict = {item["block_id"]: item["normalized"] for item in predictions}
+
+    # Align predictions with ground truth
+    tp, tn, fp, fn = 0, 0, 0, 0
+    per_session_results = []
+
+    for block_id, gt_label in gt.items():
+        pred_label = pred_dict.get(block_id, "0")  # default to normal if missing
+
+        gt_int = int(gt_label)
+        pred_int = int(pred_label)
+
+        if gt_int == 1 and pred_int == 1:
+            tp += 1
+            result = "TP"
+        elif gt_int == 0 and pred_int == 0:
+            tn += 1
+            result = "TN"
+        elif gt_int == 0 and pred_int == 1:
+            fp += 1
+            result = "FP"
+        else:  # gt_int == 1 and pred_int == 0
+            fn += 1
+            result = "FN"
+
+        per_session_results.append({
+            "block_id": block_id,
+            "ground_truth": gt_label,
+            "prediction": pred_label,
+            "result": result
+        })
+
+    # Calculate metrics
+    total = tp + tn + fp + fn
+    accuracy = (tp + tn) / total if total > 0 else 0
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+
+    # Print summary
+    print("\n" + "=" * 50)
+    print("Log Analysis Evaluation Summary")
+    print("=" * 50)
+    print(f"Total Sessions: {total}")
+    print(f"  True Positives (TP):  {tp}")
+    print(f"  True Negatives (TN):  {tn}")
+    print(f"  False Positives (FP): {fp}")
+    print(f"  False Negatives (FN): {fn}")
+    print("-" * 50)
+    print(f"Accuracy:  {accuracy:.4f} ({accuracy*100:.2f}%)")
+    print(f"Precision: {precision:.4f}")
+    print(f"Recall:    {recall:.4f}")
+    print(f"F1 Score:  {f1:.4f}")
+    print("=" * 50 + "\n")
+
+    # Save per-session results
+    os.makedirs(result_dir, exist_ok=True)
+    per_session_path = os.path.join(result_dir, f"{exp_name}_per_session_metrics.csv")
+    df_per_session = pd.DataFrame(per_session_results)
+    df_per_session.to_csv(per_session_path, index=False)
+    print(f"Per-session metrics saved to: {per_session_path}")
+
+    # Save summary metrics
+    summary_path = os.path.join(result_dir, f"{exp_name}_summary_metrics.csv")
+    summary_df = pd.DataFrame([{
+        "Total": total,
+        "TP": tp,
+        "TN": tn,
+        "FP": fp,
+        "FN": fn,
+        "Accuracy": accuracy,
+        "Precision": precision,
+        "Recall": recall,
+        "F1": f1
+    }])
+    summary_df.to_csv(summary_path, index=False)
+    print(f"Summary metrics saved to: {summary_path}")
+
+    return {
+        "total": total,
+        "tp": tp,
+        "tn": tn,
+        "fp": fp,
+        "fn": fn,
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "per_session": per_session_results
+    }
