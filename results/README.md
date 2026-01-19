@@ -377,6 +377,8 @@ runpod_log_analysis/
 ├── MA-few_Qwen3-4B-Instruct/    # ✅ Multi-Agent Few-shot Instruct
 ├── SA-zero_Qwen3-30B-Instruct/  # ✅ Single-Agent Zero-shot Instruct (30B)
 ├── SA-few_Qwen3-30B-Instruct/   # ✅ Single-Agent Few-shot Instruct (30B)
+├── SA-zero_Qwen3-30B-Thinking/  # ✅ Single-Agent Zero-shot Thinking (30B)
+├── SA-few_Qwen3-30B-Thinking/   # ✅ Single-Agent Few-shot Thinking (30B)
 ├── DA-zero_Qwen3-30B-Instruct/  # ✅ Dual-Agent Zero-shot Instruct (30B)
 ├── DA-few_Qwen3-30B-Instruct/   # ✅ Dual-Agent Few-shot Instruct (30B)
 ├── MA-zero_Qwen3-30B-Instruct/  # ✅ Multi-Agent Zero-shot Instruct (30B)
@@ -406,8 +408,8 @@ runpod_log_analysis/
 |--------|-----------|-------|----------|-----|-------------------|--------|
 | SA | Zero-shot | Instruct | 9.9% | 5.4% | 0.00179 | ✅ |
 | SA | Few-shot | Instruct | 20.5% | 7.3% | 0.00182 | ✅ |
-| SA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
-| SA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+| SA | Zero-shot | Thinking | 3.9% | 5.6% | 0.431 | ✅ |
+| SA | Few-shot | Thinking | 56.1% | 2.3% | 0.391 | ✅ |
 | DA | Zero-shot | Instruct | 10.1% | 5.5% | 0.108 | ✅ |
 | DA | Few-shot | Instruct | 14.5% | 6.3% | 0.110 | ✅ |
 | DA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
@@ -422,7 +424,8 @@ runpod_log_analysis/
 2. **DA architecture rescues Thinking models** - SA Thinking: 3-4% → DA Thinking: 38-53% accuracy
 3. **Thinking mode uses ~500-1500x more energy** than Instruct for similar tasks
 4. **30B consistently underperforms 4B** - Larger model over-predicts anomalies (high FP rate across all architectures)
-5. **Few-shot helps DA Thinking** - DA-few Thinking (52.7%) outperforms DA-zero Thinking (38.4%)
+5. **Few-shot dramatically helps 30B SA Thinking** - SA-few Thinking (56.1%) vs SA-zero Thinking (3.9%)
+6. **Few-shot helps DA Thinking** - DA-few Thinking (52.7%) outperforms DA-zero Thinking (38.4%)
 
 **Agent Architectures**:
 - **NA (No-Agent)**: Direct LLM call without agent framework
@@ -656,7 +659,7 @@ Analysis performed in `/notebooks/`:
   - **Cross-Architecture Nemotron DA (8B)**: 4 vulnerability detection + 4 code generation ✅
   - **Cross-Architecture Nemotron MA (8B)**: 4 vulnerability detection + 4 code generation ✅
   - **RQ3 Log Analysis (Qwen3 4B)**: 12 experiments (SA/DA/MA × zero/few × Instruct/Thinking) - 10 complete, 2 pending
-  - **RQ3 Log Analysis (Qwen3 30B)**: 12 experiments - 6 complete (all Instruct), 6 pending (all Thinking)
+  - **RQ3 Log Analysis (Qwen3 30B)**: 12 experiments - 8 complete (all Instruct + SA Thinking), 4 pending (DA/MA Thinking)
 **Total Samples Processed**: ~56,000+ (96 vuln/code experiments × ~550 avg + 14 log experiments × 385 sessions)
 **Hardware Used**: Mars RTX A5000 + RunPod H100
 **Models Evaluated**: 6 (Qwen3 4B/30B × Instruct/Thinking + Nemotron-Nano-8B + Nemotron-Super-49B)
