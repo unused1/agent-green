@@ -25,6 +25,7 @@ import os
 import sys
 import json
 import argparse
+import time
 from datetime import datetime
 from openai import OpenAI
 
@@ -60,6 +61,39 @@ def load_processed_indices(resume_file):
                     continue
         print(f"Loaded {len(processed)} already-processed samples from {resume_file}")
     return processed
+
+
+# Rate limiting configuration
+MAX_RETRIES = 5
+BASE_DELAY = 2  # seconds
+REQUEST_DELAY = 0.5  # delay between successful requests
+
+
+def call_api_with_retry(client, model, messages, temperature, max_tokens):
+    """Call API with exponential backoff retry for rate limits."""
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            # Small delay between requests to avoid hitting rate limits
+            time.sleep(REQUEST_DELAY)
+            return response
+        except Exception as e:
+            error_str = str(e).lower()
+            # Check for rate limit errors (429) or server overload (503)
+            if '429' in str(e) or 'rate' in error_str or '503' in str(e) or 'overload' in error_str:
+                delay = BASE_DELAY * (2 ** attempt)  # Exponential backoff
+                print(f"\n  [Rate limited, waiting {delay}s before retry {attempt+1}/{MAX_RETRIES}]", end="")
+                time.sleep(delay)
+            else:
+                # Non-rate-limit error, don't retry
+                raise e
+    # All retries exhausted
+    raise Exception(f"Max retries ({MAX_RETRIES}) exceeded due to rate limiting")
 
 # ========================================================================================
 # DATA LOADING
@@ -202,8 +236,9 @@ def run_vulnerability_detection(samples, client, model, sys_prompt, task_templat
         task_content = task_template.format(code=sample['func'])
 
         try:
-            # Call OpenRouter API
-            response = client.chat.completions.create(
+            # Call OpenRouter API with retry logic
+            response = call_api_with_retry(
+                client=client,
                 model=model,
                 messages=[
                     {"role": "system", "content": sys_prompt},
