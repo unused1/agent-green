@@ -375,14 +375,20 @@ runpod_log_analysis/
 ├── DA-few_Qwen3-4B-Thinking/    # ✅ Dual-Agent Few-shot Thinking
 ├── MA-zero_Qwen3-4B-Instruct/   # ✅ Multi-Agent Zero-shot Instruct
 ├── MA-few_Qwen3-4B-Instruct/    # ✅ Multi-Agent Few-shot Instruct
+├── MA-zero_Qwen3-4B-Thinking/   # ✅ Multi-Agent Zero-shot Thinking
+├── MA-few_Qwen3-4B-Thinking/    # ✅ Multi-Agent Few-shot Thinking
 ├── SA-zero_Qwen3-30B-Instruct/  # ✅ Single-Agent Zero-shot Instruct (30B)
 ├── SA-few_Qwen3-30B-Instruct/   # ✅ Single-Agent Few-shot Instruct (30B)
 ├── SA-zero_Qwen3-30B-Thinking/  # ✅ Single-Agent Zero-shot Thinking (30B)
 ├── SA-few_Qwen3-30B-Thinking/   # ✅ Single-Agent Few-shot Thinking (30B)
 ├── DA-zero_Qwen3-30B-Instruct/  # ✅ Dual-Agent Zero-shot Instruct (30B)
 ├── DA-few_Qwen3-30B-Instruct/   # ✅ Dual-Agent Few-shot Instruct (30B)
+├── DA-zero_Qwen3-30B-Thinking/  # ✅ Dual-Agent Zero-shot Thinking (30B)
+├── DA-few_Qwen3-30B-Thinking/   # ✅ Dual-Agent Few-shot Thinking (30B)
 ├── MA-zero_Qwen3-30B-Instruct/  # ✅ Multi-Agent Zero-shot Instruct (30B)
-└── MA-few_Qwen3-30B-Instruct/   # ✅ Multi-Agent Few-shot Instruct (30B)
+├── MA-few_Qwen3-30B-Instruct/   # ✅ Multi-Agent Few-shot Instruct (30B)
+├── MA-zero_Qwen3-30B-Thinking/  # ✅ Multi-Agent Zero-shot Thinking (30B)
+└── MA-few_Qwen3-30B-Thinking/   # ✅ Multi-Agent Few-shot Thinking (30B)
 ```
 
 **Experiments (Qwen3-4B)**:
@@ -399,8 +405,8 @@ runpod_log_analysis/
 | DA | Few-shot | Thinking | 52.7% | 6.2% | 1.383 | ✅ |
 | MA | Zero-shot | Instruct | **66.2%** | 14.7% | 0.104 | ✅ |
 | MA | Few-shot | Instruct | 40.0% | 8.1% | 0.103 | ✅ |
-| MA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
-| MA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+| MA | Zero-shot | Thinking | 80.8% | 2.6% | 0.517 | ✅ |
+| MA | Few-shot | Thinking | **94.3%** | 0.0% | 0.725 | ✅ |
 
 **Experiments (Qwen3-30B)**:
 
@@ -412,20 +418,22 @@ runpod_log_analysis/
 | SA | Few-shot | Thinking | 56.1% | 2.3% | 0.391 | ✅ |
 | DA | Zero-shot | Instruct | 10.1% | 5.5% | 0.108 | ✅ |
 | DA | Few-shot | Instruct | 14.5% | 6.3% | 0.110 | ✅ |
-| DA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
-| DA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+| DA | Zero-shot | Thinking | 19.5% | 3.7% | 0.630 | ✅ |
+| DA | Few-shot | Thinking | 31.9% | 5.1% | 0.696 | ✅ |
 | MA | Zero-shot | Instruct | 24.2% | 5.2% | 0.111 | ✅ |
 | MA | Few-shot | Instruct | 22.9% | 5.1% | 0.111 | ✅ |
-| MA | Zero-shot | Thinking | - | - | - | ⏳ Pending |
-| MA | Few-shot | Thinking | - | - | - | ⏳ Pending |
+| MA | Zero-shot | Thinking | 19.7% | 3.7% | 0.730 | ✅ |
+| MA | Few-shot | Thinking | 31.9% | 5.1% | 0.791 | ✅ |
 
-**Preliminary Findings**:
-1. **MA-zero Instruct (4B) achieves best accuracy (66.2%)** - Critic agent improves classification
-2. **DA architecture rescues Thinking models** - SA Thinking: 3-4% → DA Thinking: 38-53% accuracy
-3. **Thinking mode uses ~500-1500x more energy** than Instruct for similar tasks
-4. **30B consistently underperforms 4B** - Larger model over-predicts anomalies (high FP rate across all architectures)
-5. **Few-shot dramatically helps 30B SA Thinking** - SA-few Thinking (56.1%) vs SA-zero Thinking (3.9%)
-6. **Few-shot helps DA Thinking** - DA-few Thinking (52.7%) outperforms DA-zero Thinking (38.4%)
+**Key Findings**:
+1. **MA-few Thinking (4B) achieves best accuracy (94.3%)** - Combination of multi-agent deliberation and thinking mode
+2. **MA-zero Thinking (4B) second best (80.8%)** - Strong performance even without examples
+3. **MA-zero Instruct (4B) achieves best F1 (14.7%)** - Balanced precision-recall trade-off
+4. **DA architecture rescues Thinking models (4B)** - SA Thinking: 3-4% → DA Thinking: 38-53% accuracy
+5. **Thinking mode uses ~5-7x more energy** than Instruct in MA architecture
+6. **30B consistently underperforms 4B** - Larger model over-predicts anomalies (high FP rate across all architectures)
+7. **Few-shot helps DA/MA Thinking (30B)** - MA-few Thinking (31.9%) outperforms MA-zero Thinking (19.7%)
+8. **4B MA Thinking with few-shot achieves high accuracy but zero F1** - Predicts almost everything as normal (high TN, low TP)
 
 **Agent Architectures**:
 - **NA (No-Agent)**: Direct LLM call without agent framework
@@ -651,15 +659,15 @@ Analysis performed in `/notebooks/`:
 
 ---
 
-**Last Updated**: 2026-01-18
+**Last Updated**: 2026-01-24
 **Total Experiments**: 110+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + 24 RQ3 Log Analysis)
   - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
   - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)
   - **Cross-Architecture Nemotron SA (8B+49B)**: 8 vulnerability detection + 8 code generation ✅
   - **Cross-Architecture Nemotron DA (8B)**: 4 vulnerability detection + 4 code generation ✅
   - **Cross-Architecture Nemotron MA (8B)**: 4 vulnerability detection + 4 code generation ✅
-  - **RQ3 Log Analysis (Qwen3 4B)**: 12 experiments (SA/DA/MA × zero/few × Instruct/Thinking) - 10 complete, 2 pending
-  - **RQ3 Log Analysis (Qwen3 30B)**: 12 experiments - 8 complete (all Instruct + SA Thinking), 4 pending (DA/MA Thinking)
+  - **RQ1/RQ2 Log Analysis (Qwen3 4B)**: 12 experiments (SA/DA/MA × zero/few × Instruct/Thinking) ✅
+  - **RQ1/RQ2 Log Analysis (Qwen3 30B)**: 12 experiments ✅
 **Total Samples Processed**: ~56,000+ (96 vuln/code experiments × ~550 avg + 14 log experiments × 385 sessions)
 **Hardware Used**: Mars RTX A5000 + RunPod H100
 **Models Evaluated**: 6 (Qwen3 4B/30B × Instruct/Thinking + Nemotron-Nano-8B + Nemotron-Super-49B)

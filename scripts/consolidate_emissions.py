@@ -17,6 +17,7 @@ Supported experiment sources:
 - results/runpod_codegen/ (Qwen3 4B/30B code generation on RunPod)
 - results/runpod_rerun/ (Qwen3 4B/30B vuln detection reruns on RunPod)
 - results/runpod_rq2_pod1-8/ (Qwen3 DA/MA experiments on RunPod)
+- results/runpod_log_analysis/ (Log analysis SA/DA/MA experiments on RunPod)
 
 Usage:
     python scripts/consolidate_emissions.py [--output results/consolidated_emissions.csv]
@@ -47,15 +48,20 @@ def parse_model_from_project_name(project_name: str) -> dict:
         return info
 
     # Parse design type (SA, DA, MA)
-    if project_name.startswith("DA-"):
+    # Handle both direct prefix (DA-, MA-) and log-analysis prefix (log-analysis_DA-, etc.)
+    if project_name.startswith("DA-") or "_DA-" in project_name:
         info["design"] = "DA"
-    elif project_name.startswith("MA-"):
+    elif project_name.startswith("MA-") or "_MA-" in project_name:
         info["design"] = "MA"
+    elif project_name.startswith("SA-") or "_SA-" in project_name:
+        info["design"] = "SA"
     else:
         info["design"] = "SA"
 
     # Parse task
-    if "vuln" in project_name.lower():
+    if "log-analysis" in project_name.lower():
+        info["task"] = "log_analysis"
+    elif "vuln" in project_name.lower():
         info["task"] = "vulnerability_detection"
     elif "code" in project_name.lower():
         info["task"] = "code_generation"
@@ -131,7 +137,9 @@ def infer_config_from_path(file_path: str) -> dict:
         info["parameters_b"] = 8
 
     # Task - check explicit markers first
-    if "_vuln_" in path_str or "vuln" in path_str:
+    if "runpod_log_analysis" in path_str or "log-analysis" in path_str:
+        info["task"] = "log_analysis"
+    elif "_vuln_" in path_str or "vuln" in path_str:
         info["task"] = "vulnerability_detection"
     elif "_code_" in path_str or "codegen" in path_str:
         info["task"] = "code_generation"
@@ -186,7 +194,9 @@ def find_all_emissions_files(base_dir: str) -> list[dict]:
         parts = relative_path.parts
 
         source_type = "unknown"
-        if "rq2_cross_architecture" in parts:
+        if "runpod_log_analysis" in parts:
+            source_type = "runpod_log_analysis"
+        elif "rq2_cross_architecture" in parts:
             source_type = "rq2_cross_architecture"
         elif "mars_rerun" in parts:
             source_type = "mars_rerun"
@@ -396,6 +406,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
         "rq2_cross_architecture": 3,
         "runpod_codegen": 4,
         "runpod_rerun": 5,
+        "runpod_log_analysis": 6,
     }
 
     # Add priority column

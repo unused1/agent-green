@@ -106,12 +106,54 @@ nohup python3 -m vllm.entrypoints.openai.api_server \
 tail -f /workspace/vllm_thinking.log
 ```
 
+#### For 4B Baseline Model (Instruct - Non-Reasoning)
+```bash
+# Start vLLM server with 4B model
+cd /workspace/agent-green
+nohup python3 -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-4B \
+  --served-model-name "Qwen/Qwen3-4B-Instruct-2507" \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --dtype auto \
+  --max-model-len 40960 \
+  --gpu-memory-utilization 0.9 \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
+  > /workspace/vllm_instruct.log 2>&1 &
+
+# Monitor startup
+tail -f /workspace/vllm_instruct.log
+```
+
+#### For 4B Reasoning Model (Thinking)
+```bash
+# Start vLLM server with 4B Thinking model
+cd /workspace/agent-green
+nohup python3 -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen3-4B \
+  --served-model-name "Qwen/Qwen3-4B-Thinking-2507" \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --dtype auto \
+  --max-model-len 40960 \
+  --gpu-memory-utilization 0.9 \
+  --enable-auto-tool-choice \
+  --tool-call-parser hermes \
+  > /workspace/vllm_thinking.log 2>&1 &
+
+# Monitor startup
+tail -f /workspace/vllm_thinking.log
+```
+
 **Important Notes**:
 - Port 8000 is standard vLLM API port
 - `--served-model-name` ensures vLLM serves the model with the correct HuggingFace name
-- `--max-model-len 65536` handles long thinking traces (H100 80GB can support this)
+- **Max model length varies by model size:**
+  - **30B models**: `--max-model-len 65536` (64K context)
+  - **4B models**: `--max-model-len 40960` (40K context - model limit)
 - `--gpu-memory-utilization 0.9` uses 90% of GPU VRAM for optimal performance
-- Model downloads automatically from HuggingFace (~5-10 minutes first time)
+- Model downloads automatically from HuggingFace (~5-10 minutes for 4B, ~15-20 minutes for 30B)
 
 **Verify Server is Running**:
 ```bash

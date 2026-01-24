@@ -5,9 +5,10 @@ Consolidate performance metrics from multiple experiments into a single aggregat
 This script:
 1. Finds all *_summary_vulnerability_metrics.csv files (vulnerability detection)
 2. Finds all *_evaluation.json files (code generation)
-3. Parses experiment configuration from directory structure and filenames
-4. Handles deduplication preferring newer/rerun data
-5. Outputs a consolidated CSV file
+3. Finds all *_summary_metrics.csv files in runpod_log_analysis/ (log analysis)
+4. Parses experiment configuration from directory structure and filenames
+5. Handles deduplication preferring newer/rerun data
+6. Outputs a consolidated CSV file
 
 Supported experiment sources:
 - results/rq2_cross_architecture/nemotron_* (Nemotron 8B and 49B)
@@ -17,6 +18,7 @@ Supported experiment sources:
 - results/runpod_codegen/ (Qwen3 4B/30B code generation on RunPod)
 - results/runpod_rerun/ (Qwen3 4B/30B vuln detection reruns on RunPod)
 - results/runpod_rq2_pod1-8/ (Qwen3 DA/MA experiments on RunPod)
+- results/runpod_log_analysis/ (Log analysis SA/DA/MA experiments on RunPod)
 
 Usage:
     python scripts/consolidate_performance.py [--output results/consolidated_performance.csv]
@@ -116,7 +118,9 @@ def infer_config_from_path(file_path: str) -> dict:
         info["parameters_b"] = 8
 
     # Task detection
-    if "_vuln_" in path_str or "/vuln" in path_str:
+    if "runpod_log_analysis" in path_str or "log-analysis" in path_str:
+        info["task"] = "log_analysis"
+    elif "_vuln_" in path_str or "/vuln" in path_str:
         info["task"] = "vulnerability_detection"
     elif "_code_" in path_str or "codegen" in path_str:
         info["task"] = "code_generation"
@@ -158,7 +162,9 @@ def get_source_type(file_path: str) -> str:
     """Determine source type from file path."""
     path_str = str(file_path)
 
-    if "rq2_cross_architecture" in path_str:
+    if "runpod_log_analysis" in path_str:
+        return "runpod_log_analysis"
+    elif "rq2_cross_architecture" in path_str:
         return "rq2_cross_architecture"
     elif "mars_rerun" in path_str:
         return "mars_rerun"
@@ -238,6 +244,78 @@ def find_code_eval_files(base_dir: str) -> list[dict]:
         })
 
     return files
+
+
+def find_log_analysis_files(base_dir: str) -> list[dict]:
+    """Find all log analysis summary files."""
+    results_dir = Path(base_dir) / "results" / "runpod_log_analysis"
+    files = []
+
+    if not results_dir.exists():
+        return files
+
+    # Find summary_metrics.csv files (not vulnerability_metrics.csv)
+    for csv_file in results_dir.rglob("*_summary_metrics.csv"):
+        # Skip vulnerability metrics files
+        if "_vulnerability_metrics" in csv_file.name:
+            continue
+
+        files.append({
+            "file_path": str(csv_file),
+            "source_type": "runpod_log_analysis",
+            "source_dir": str(csv_file.parent),
+            "task": "log_analysis",
+        })
+
+    return files
+
+
+def parse_log_analysis_dir_name(dir_name: str) -> dict:
+    """Parse experiment config from log analysis directory name like 'SA-zero_Qwen3-4B-Instruct'."""
+    info = {
+        "model": None,
+        "model_family": None,
+        "parameters_b": None,
+        "mode": None,
+        "design": "SA",
+        "prompting": None,
+    }
+
+    # Parse design type
+    if dir_name.startswith("DA-") or "_DA-" in dir_name:
+        info["design"] = "DA"
+    elif dir_name.startswith("MA-") or "_MA-" in dir_name:
+        info["design"] = "MA"
+    elif dir_name.startswith("SA-") or "_SA-" in dir_name:
+        info["design"] = "SA"
+
+    # Parse prompting strategy
+    if "zero" in dir_name.lower():
+        info["prompting"] = "zero-shot"
+    elif "few" in dir_name.lower():
+        info["prompting"] = "few-shot"
+
+    # Parse model
+    if "Qwen3-30B" in dir_name:
+        info["model_family"] = "Qwen"
+        info["parameters_b"] = 30
+        if "Thinking" in dir_name:
+            info["model"] = "Qwen3-30B-A3B-Thinking"
+            info["mode"] = "thinking"
+        elif "Instruct" in dir_name:
+            info["model"] = "Qwen3-30B-A3B-Instruct"
+            info["mode"] = "instruct"
+    elif "Qwen3-4B" in dir_name:
+        info["model_family"] = "Qwen"
+        info["parameters_b"] = 4
+        if "Thinking" in dir_name:
+            info["model"] = "Qwen3-4B-Thinking"
+            info["mode"] = "thinking"
+        elif "Instruct" in dir_name:
+            info["model"] = "Qwen3-4B-Instruct"
+            info["mode"] = "instruct"
+
+    return info
 
 
 def load_vuln_metrics(file_info: dict) -> dict | None:
@@ -363,6 +441,70 @@ def load_code_metrics(file_info: dict) -> dict | None:
         return None
 
 
+def load_log_analysis_metrics(file_info: dict) -> dict | None:
+    """Load log analysis metrics from CSV."""
+    file_path = file_info["file_path"]
+    source_dir = Path(file_path).parent
+
+    try:
+        df = pd.read_csv(file_path)
+        if df.empty:
+            return None
+
+        row = df.iloc[0]
+
+        # Parse config from directory name (e.g., "SA-zero_Qwen3-4B-Instruct")
+        dir_name = source_dir.name
+        parsed_config = parse_log_analysis_dir_name(dir_name)
+
+        # Calculate correct predictions
+        tp = row.get("TP", 0)
+        tn = row.get("TN", 0)
+        fp = row.get("FP", 0)
+        fn = row.get("FN", 0)
+        correct = tp + tn
+
+        result = {
+            # Lineage
+            "source_file": file_path,
+            "source_type": file_info["source_type"],
+
+            # Experiment config
+            "model": parsed_config["model"],
+            "model_family": parsed_config["model_family"],
+            "parameters_b": parsed_config["parameters_b"],
+            "design": parsed_config["design"],
+            "task": "log_analysis",
+            "mode": parsed_config["mode"],
+            "prompting": parsed_config["prompting"],
+            "thinking_enabled": parsed_config["mode"] == "thinking",
+
+            # Log analysis metrics (same format as vulnerability detection)
+            "accuracy": row.get("Accuracy"),
+            "precision": row.get("Precision"),
+            "recall": row.get("Recall"),
+            "f1_score": row.get("F1"),
+            "true_positives": tp,
+            "true_negatives": tn,
+            "false_positives": fp,
+            "false_negatives": fn,
+            "total_samples": row.get("Total"),
+            "correct_predictions": correct,
+            "skipped_samples": 0,
+
+            # Code generation metrics (not applicable)
+            "pass_at_1": None,
+            "passed_samples": None,
+            "failed_samples": None,
+        }
+
+        return result
+
+    except Exception as e:
+        print(f"  Error reading {file_path}: {e}")
+        return None
+
+
 def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
     """
     Deduplicate performance records in two stages:
@@ -469,9 +611,11 @@ def consolidate_performance(base_dir: str, output_file: str, deduplicate: bool =
     # Find all result files
     vuln_files = find_vuln_summary_files(base_dir)
     code_files = find_code_eval_files(base_dir)
+    log_files = find_log_analysis_files(base_dir)
 
     print(f"Found {len(vuln_files)} vulnerability detection summary files")
     print(f"Found {len(code_files)} code generation evaluation files")
+    print(f"Found {len(log_files)} log analysis summary files")
 
     # Filter out MARS if requested
     if exclude_mars:
@@ -481,7 +625,7 @@ def consolidate_performance(base_dir: str, output_file: str, deduplicate: bool =
         print(f"After excluding MARS: {len(vuln_files)} vuln, {len(code_files)} code files")
 
     # Report by source
-    all_files = vuln_files + code_files
+    all_files = vuln_files + code_files + log_files
     by_source = {}
     for f in all_files:
         src = f["source_type"]
@@ -502,6 +646,12 @@ def consolidate_performance(base_dir: str, output_file: str, deduplicate: bool =
     print("\nLoading code generation metrics...")
     for file_info in code_files:
         record = load_code_metrics(file_info)
+        if record:
+            all_records.append(record)
+
+    print("\nLoading log analysis metrics...")
+    for file_info in log_files:
+        record = load_log_analysis_metrics(file_info)
         if record:
             all_records.append(record)
 
@@ -565,6 +715,7 @@ def consolidate_performance(base_dir: str, output_file: str, deduplicate: bool =
     # Summary metrics by task
     vuln_df = df[df["task"] == "vulnerability_detection"]
     code_df = df[df["task"] == "code_generation"]
+    log_df = df[df["task"] == "log_analysis"]
 
     if not vuln_df.empty:
         print(f"\nVulnerability Detection Summary:")
@@ -577,6 +728,12 @@ def consolidate_performance(base_dir: str, output_file: str, deduplicate: bool =
         print(f"  Mean Pass@1: {code_df['pass_at_1'].mean():.4f}")
         print(f"  Total Passed: {code_df['passed_samples'].sum():.0f}")
         print(f"  Total Failed: {code_df['failed_samples'].sum():.0f}")
+
+    if not log_df.empty:
+        print(f"\nLog Analysis Summary:")
+        print(f"  Mean Accuracy: {log_df['accuracy'].mean():.4f}")
+        print(f"  Mean F1 Score: {log_df['f1_score'].mean():.4f}")
+        print(f"  Experiments: {len(log_df)}")
 
     return df
 
