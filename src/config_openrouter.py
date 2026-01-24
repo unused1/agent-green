@@ -23,7 +23,7 @@ RESULT_DIR = os.getenv('RESULTS_DIR', f'{PROJECT_ROOT}/results')
 # DATASETS
 # ========================================================================================
 
-VULN_DATASET = os.getenv('VULN_DATASET', f"{PROJECT_ROOT}/data/VulTrial_386_samples_balanced.jsonl")
+VULN_DATASET = os.getenv('VULN_DATASET', f"{PROJECT_ROOT}/vuln_database/VulTrial_386_samples_balanced.jsonl")
 
 # ========================================================================================
 # OPENROUTER CONFIGURATION

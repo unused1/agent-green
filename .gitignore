@@ -7,6 +7,8 @@
 .env.mars.codegen
 .env.runpod.codegen
 .env.runpod.vuln
+.env.openrouter-*
+.env.qwen3-*
 
 config/config.ini
 config/.codecarbon.config
