@@ -16,6 +16,9 @@ Usage:
     # Run with Opus 4.5
     set -a && source .env.openrouter-opus && set +a
     python src/single_agent_vuln_openrouter.py --shot few
+
+    # Resume interrupted experiment
+    python src/single_agent_vuln_openrouter.py --shot zero --resume results/sota_comparison/SA-zero_Claude-Sonnet-4.5/vuln_SA-zero_Claude-Sonnet-4.5_20260124-123456_detailed_results.jsonl
 """
 
 import os
@@ -38,7 +41,25 @@ def parse_args():
     parser = argparse.ArgumentParser(description='SOTA Vulnerability Detection via OpenRouter')
     parser.add_argument('--shot', type=str, choices=['zero', 'few'], required=True,
                         help='Prompting strategy: zero-shot or few-shot')
+    parser.add_argument('--resume', type=str, default=None,
+                        help='Path to detailed_results.jsonl file to resume from')
     return parser.parse_args()
+
+
+def load_processed_indices(resume_file):
+    """Load already-processed sample indices from a results file."""
+    processed = set()
+    if resume_file and os.path.exists(resume_file):
+        with open(resume_file, 'r') as f:
+            for line in f:
+                try:
+                    result = json.loads(line.strip())
+                    if result.get('idx') is not None:
+                        processed.add(result['idx'])
+                except json.JSONDecodeError:
+                    continue
+        print(f"Loaded {len(processed)} already-processed samples from {resume_file}")
+    return processed
 
 # ========================================================================================
 # DATA LOADING
@@ -129,24 +150,53 @@ def parse_vulnerability_response(response_text):
 # INFERENCE
 # ========================================================================================
 
-def run_vulnerability_detection(samples, client, model, sys_prompt, task_template, result_dir, exp_name):
+def run_vulnerability_detection(samples, client, model, sys_prompt, task_template, result_dir, exp_name, resume_file=None):
     """Run vulnerability detection on all samples."""
 
     # Setup result files
-    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
-    summary_file = os.path.join(result_dir, f"{exp_name}_summary_metrics.csv")
+    if resume_file:
+        detailed_file = resume_file
+        # Extract exp_name from resume file for summary
+        summary_file = resume_file.replace('_detailed_results.jsonl', '_summary_metrics.csv')
+    else:
+        detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
+        summary_file = os.path.join(result_dir, f"{exp_name}_summary_metrics.csv")
+
+    # Load already-processed samples if resuming
+    processed_indices = load_processed_indices(resume_file)
 
     results = []
 
     # Metrics
     tp, tn, fp, fn = 0, 0, 0, 0
 
-    print(f"\nProcessing {len(samples)} samples...")
+    # Count metrics from already-processed samples
+    if resume_file and os.path.exists(resume_file):
+        with open(resume_file, 'r') as f:
+            for line in f:
+                try:
+                    result = json.loads(line.strip())
+                    gt = result.get('ground_truth')
+                    pred = result.get('prediction')
+                    if gt is not None and pred is not None:
+                        if pred == 1 and gt == 1:
+                            tp += 1
+                        elif pred == 0 and gt == 0:
+                            tn += 1
+                        elif pred == 1 and gt == 0:
+                            fp += 1
+                        else:
+                            fn += 1
+                except json.JSONDecodeError:
+                    continue
+
+    remaining = [s for s in samples if s['idx'] not in processed_indices]
+    print(f"\nProcessing {len(remaining)} samples ({len(processed_indices)} already done)...")
     print(f"Model: {model}")
     print(f"Results: {detailed_file}\n")
 
-    for i, sample in enumerate(samples):
-        print(f"Processing {sample['idx']} ({i+1}/{len(samples)})", end=" ")
+    for i, sample in enumerate(remaining):
+        print(f"Processing {sample['idx']} ({len(processed_indices) + i + 1}/{len(samples)})", end=" ")
 
         # Prepare prompt
         task_content = task_template.format(code=sample['func'])
@@ -300,7 +350,8 @@ def main():
         sys_prompt=sys_prompt,
         task_template=task_template,
         result_dir=result_dir,
-        exp_name=exp_name
+        exp_name=exp_name,
+        resume_file=args.resume
     )
 
     print(f"\nExperiment complete!")
