@@ -1,0 +1,21 @@
+Model,Params (B),Mode,Prompting,Accuracy (%),Precision (%),Recall (%),F1 (%)
+Claude-Opus-4.5,200,thinking,few-shot,55.96,53.61,88.6,66.8
+Claude-Sonnet-4.5,70,instruct,few-shot,51.04,50.56,93.26,65.57
+Nemotron-Super-49B,49,thinking,zero-shot,53.63,52.3,82.38,63.98
+Claude-Sonnet-4.5,70,instruct,zero-shot,49.74,49.85,88.08,63.67
+Nemotron-Super-49B,49,thinking,few-shot,55.21,53.43,77.49,63.25
+Qwen3-4B-Thinking,4,thinking,few-shot,52.59,51.98,67.88,58.88
+Claude-Opus-4.5,200,thinking,zero-shot,53.63,52.99,64.25,58.08
+Nemotron-Super-49B,49,instruct,few-shot,54.4,53.78,62.69,57.89
+Qwen3-30B-A3B-Thinking,30,thinking,few-shot,50.26,50.21,62.18,55.56
+Qwen3-30B-A3B-Thinking,30,thinking,zero-shot,52.59,52.36,57.51,54.81
+Qwen3-30B-A3B-Instruct,30,instruct,few-shot,56.22,56.74,52.33,54.45
+Nemotron-Super-49B,49,instruct,zero-shot,54.66,54.89,52.33,53.58
+Qwen3-30B-A3B-Instruct,30,instruct,zero-shot,54.15,54.71,48.19,51.24
+Qwen3-4B-Thinking,4,thinking,zero-shot,50.26,50.26,50.78,50.52
+Nemotron-Nano-8B,8,instruct,few-shot,50.78,50.84,47.15,48.92
+Nemotron-Nano-8B,8,thinking,few-shot,48.96,48.85,44.04,46.32
+Qwen3-4B-Instruct,4,instruct,few-shot,52.33,54.37,29.02,37.84
+Qwen3-4B-Instruct,4,instruct,zero-shot,53.11,59.38,19.69,29.57
+Nemotron-Nano-8B,8,instruct,zero-shot,50.78,52.46,16.58,25.2
+Nemotron-Nano-8B,8,thinking,zero-shot,50.52,52.5,10.88,18.03
