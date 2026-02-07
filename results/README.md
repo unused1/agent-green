@@ -12,6 +12,7 @@ results/
 ├── runpod_rerun/            # Phase 2b: 30B+4B vuln detection re-runs (Nov 2-8, 2025)
 ├── mars_codegen/            # Phase 3a: Code generation on Mars 4B (Nov 6-7, 2025)
 ├── runpod_codegen/          # Phase 3b: Code generation on RunPod 4B+30B (Nov 7, 2025)
+├── runpod_codegen_rerun/    # Phase 3c: Qwen3 code generation reruns with reasoning (Feb 7, 2026)
 ├── runpod_rq2_pod1-8/       # Phase 4: RQ2 Multi-Agent experiments (Nov 15-17, 2025)
 ├── rq2_cross_architecture/  # Phase 5-6: Cross-architecture validation with Nemotron 8B+49B (Dec 9-Jan 2026)
 ├── rq2_nm8b_ma_rerun_20260103/ # Rerun verification for Nemotron 8B MA Vuln experiments (Jan 3, 2026)
@@ -163,6 +164,36 @@ results/
 **Key Findings**:
 - Larger models for code generation comparison
 - H100 hardware performance evaluation
+
+---
+
+### **Phase 3c: Code Generation Reruns with Reasoning (Feb 7, 2026)**
+
+**Purpose**: Rerun Qwen3 SA Thinking codegen experiments to recover thinking content lost in original runs due to a script versioning issue (see `docs/RQ3_Baseline_Sampling.md` Section 6)
+
+**Hardware**: RunPod (NVIDIA H100 80GB HBM3)
+
+**Dataset**: HumanEval (164 Python programming problems)
+
+**Directory**: `results/runpod_codegen_rerun/`
+
+**Experiments**:
+| Experiment | Model | Samples | Pass@1 | Status |
+|------------|-------|---------|--------|--------|
+| SA Zero-shot | Qwen3-4B-Thinking | 164 | 98.78% (162/164) | ✅ |
+| SA Few-shot | Qwen3-4B-Thinking | 164 | 97.56% (160/164) | ✅ |
+| SA Zero-shot | Qwen3-30B-Thinking | 164 | 98.17% (161/164) | ✅ |
+| SA Few-shot | Qwen3-30B-Thinking | 164 | 96.95% (159/164) | ✅ |
+
+**Key Findings**:
+- All rerun results contain the `reasoning` field with full thinking content (`</think>` tags present)
+- Pass@1 scores show minor variation from original runs (within vLLM non-determinism)
+- Original results in `runpod_codegen/` are preserved; reruns supersede them in consolidated files via deduplication priority
+
+**Notes**:
+- These reruns serve exclusively for RQ3 thinking content recovery (explanation baseline sampling)
+- Original (Nov 2025) result files in `runpod_codegen/` lack the `reasoning` field because the script did not yet save it
+- The corrected script (post-commit `bb54a9e`, Nov 22, 2025) saves `result['reasoning'] = response_text`
 
 ---
 
@@ -659,8 +690,8 @@ Analysis performed in `/notebooks/`:
 
 ---
 
-**Last Updated**: 2026-01-24
-**Total Experiments**: 110+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + 24 RQ3 Log Analysis)
+**Last Updated**: 2026-02-07
+**Total Experiments**: 120+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + 24 RQ3 Log Analysis + 4 Codegen Reruns)
   - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
   - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)
   - **Cross-Architecture Nemotron SA (8B+49B)**: 8 vulnerability detection + 8 code generation ✅

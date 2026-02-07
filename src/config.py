@@ -1582,7 +1582,7 @@ Provide the FINAL IMPLEMENTATION."""
 
 
 # =======================================================================
-# RQ3: EXPLANATION PROMPTING (Explain-Before Strategy)
+# RQ3: EXPLANATION PROMPTING (Explain-Before)
 # =======================================================================
 
 # --- Vulnerability Detection: Explain-Before Prompts ---

@@ -16,6 +16,7 @@ Supported experiment sources:
 - results/mars_codegen/ (Qwen3 4B code generation on MARS)
 - results/runpod/ (Qwen3 4B vuln detection on RunPod)
 - results/runpod_codegen/ (Qwen3 4B/30B code generation on RunPod)
+- results/runpod_codegen_rerun/ (Qwen3 4B/30B code generation reruns with reasoning on RunPod)
 - results/runpod_rerun/ (Qwen3 4B/30B vuln detection reruns on RunPod)
 - results/runpod_rq2_pod1-8/ (Qwen3 DA/MA experiments on RunPod)
 - results/runpod_log_analysis/ (Log analysis SA/DA/MA experiments on RunPod)
@@ -172,6 +173,8 @@ def get_source_type(file_path: str) -> str:
         return "mars_codegen"
     elif "mars" in path_str and "rerun" not in path_str:
         return "mars"
+    elif "runpod_codegen_rerun" in path_str:
+        return "runpod_codegen_rerun"
     elif "runpod_codegen" in path_str:
         return "runpod_codegen"
     elif "runpod_rerun" in path_str:
@@ -512,14 +515,15 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
     2. Within-source: keep record with best performance (F1 for vuln, pass@1 for code)
 
     Priority order (higher = preferred):
-    1. runpod_rerun (newest reruns)
-    2. runpod_codegen (code generation reruns)
-    3. rq2_cross_architecture (Nemotron experiments)
-    4. runpod_rq2 (RQ2 DA/MA experiments)
-    5. mars_rerun (MARS reruns)
-    6. mars_codegen (MARS code gen)
-    7. runpod (original)
-    8. mars (original, oldest)
+    1. runpod_codegen_rerun (codegen reruns with reasoning)
+    2. runpod_rerun (vuln detection reruns)
+    3. runpod_codegen (code generation originals)
+    4. rq2_cross_architecture (Nemotron experiments)
+    5. runpod_rq2 (RQ2 DA/MA experiments)
+    6. mars_rerun (MARS reruns)
+    7. mars_codegen (MARS code gen)
+    8. runpod (original)
+    9. mars (original, oldest)
     """
     source_priority = {
         "mars": 1,
@@ -530,6 +534,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
         "rq2_cross_architecture": 6,
         "runpod_codegen": 7,
         "runpod_rerun": 8,
+        "runpod_codegen_rerun": 9,
     }
 
     df = df.copy()

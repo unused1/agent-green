@@ -15,6 +15,7 @@ Supported experiment sources:
 - results/mars_codegen/ (Qwen3 4B code generation on MARS)
 - results/runpod/ (Qwen3 4B vuln detection on RunPod)
 - results/runpod_codegen/ (Qwen3 4B/30B code generation on RunPod)
+- results/runpod_codegen_rerun/ (Qwen3 4B/30B code generation reruns with reasoning on RunPod)
 - results/runpod_rerun/ (Qwen3 4B/30B vuln detection reruns on RunPod)
 - results/runpod_rq2_pod1-8/ (Qwen3 DA/MA experiments on RunPod)
 - results/runpod_log_analysis/ (Log analysis SA/DA/MA experiments on RunPod)
@@ -202,6 +203,8 @@ def find_all_emissions_files(base_dir: str) -> list[dict]:
             source_type = "mars_rerun"
         elif "mars_codegen" in parts:
             source_type = "mars_codegen"
+        elif "runpod_codegen_rerun" in parts:
+            source_type = "runpod_codegen_rerun"
         elif "runpod_codegen" in parts:
             source_type = "runpod_codegen"
         elif "runpod_rerun" in parts:
@@ -393,11 +396,12 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
     Deduplicate emission records, preferring newer/rerun data over older.
 
     Priority order (higher = preferred):
-    1. runpod_rerun (newest reruns)
-    2. runpod_codegen (code generation reruns)
-    3. rq2_cross_architecture (Nemotron experiments)
-    4. runpod_rq2 (RQ2 DA/MA experiments)
-    5. runpod (original, oldest)
+    1. runpod_codegen_rerun (codegen reruns with reasoning)
+    2. runpod_rerun (vuln detection reruns)
+    3. runpod_codegen (code generation originals)
+    4. rq2_cross_architecture (Nemotron experiments)
+    5. runpod_rq2 (RQ2 DA/MA experiments)
+    6. runpod (original, oldest)
     """
     # Define source priority (higher number = higher priority)
     source_priority = {
@@ -407,6 +411,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
         "runpod_codegen": 4,
         "runpod_rerun": 5,
         "runpod_log_analysis": 6,
+        "runpod_codegen_rerun": 7,
     }
 
     # Add priority column

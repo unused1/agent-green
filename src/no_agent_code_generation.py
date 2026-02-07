@@ -121,7 +121,8 @@ def run_inference_with_emissions(code_samples, llm_config, exp_name, result_dir)
     detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
     
     model_name = llm_config["config_list"][0]["model"]
-    api_base = llm_config["config_list"][0]["api_base"]
+    # Support both api_base (legacy) and base_url (new AutoGen/OpenAI)
+    api_base = llm_config["config_list"][0].get("base_url") or llm_config["config_list"][0].get("api_base")
     
     tracker = OfflineEmissionsTracker(
         project_name=exp_name, 
