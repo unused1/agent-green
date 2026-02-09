@@ -688,9 +688,15 @@ Analysis performed in `/notebooks/`:
    - Resolution: Added toggle application to all 7 experiment scripts
    - Status: All 8 experiments re-run with fix applied (Dec 9-10, 2025)
 
+6. **Vulnerability Think-Tag Parsing Bug (Fixed Feb 9, 2026)**:
+   - Issue: Vuln prediction parsers searched entire model output (including `<think>...</think>` blocks) for keywords, causing false positives when reasoning mentioned vulnerability terms but the final answer was "not vulnerable"
+   - Affected: 25 JSONL files across SA/DA/MA designs (3,019 predictions changed)
+   - Resolution: Fixed via `scripts/fix_vuln_think_tag_parsing.py`; all 54 evaluation files regenerated; consolidated metrics and RQ3 baseline samples updated
+   - Status: Fix applied, all downstream metrics and analyses updated
+
 ---
 
-**Last Updated**: 2026-02-07
+**Last Updated**: 2026-02-10
 **Total Experiments**: 120+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + 24 RQ3 Log Analysis + 4 Codegen Reruns)
   - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
   - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)

@@ -520,10 +520,11 @@ def main():
     for task_samples in by_task.values():
         compute_truncation_flags(task_samples)
 
-    # Write CSV
+    # Write CSV (RFC 4180 — Google Sheets handles multi-line quoted fields natively)
     print(f"\nWriting {len(all_samples)} samples to {OUTPUT_CSV}")
     with open(OUTPUT_CSV, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS, extrasaction="ignore")
+        writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS, extrasaction="ignore",
+                                quoting=csv.QUOTE_ALL)
         writer.writeheader()
         for s in all_samples:
             # Fill empty rater columns
