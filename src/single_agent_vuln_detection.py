@@ -326,7 +326,9 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
             # Updated response parsing for YES/NO format
             if res is not None and "content" in res:
                 response_text = res["content"].strip()
-                response_lower = response_text.lower()
+                # Strip think block — parse only the response after </think>
+                parse_text = response_text.split("</think>", 1)[1].strip() if "</think>" in response_text else response_text
+                response_lower = parse_text.lower()
                 
                 # Parse YES/NO responses (looking for your specific format)
                 if "(1) yes" in response_lower or "yes:" in response_lower or "vulnerability detected" in response_lower:

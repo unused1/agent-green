@@ -1,0 +1,8 @@
+{
+  "total_samples": 164,
+  "successful_extractions": 145,
+  "failed_extractions": 1,
+  "prompt_type": "zero_shot",
+  "emissions_kg_co2": 0.07647656924794397,
+  "total_emissions": 0.07647656924794397
+}

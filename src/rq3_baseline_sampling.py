@@ -64,6 +64,7 @@ CSV_COLUMNS = [
     "explanation_text",
     "explanation_length_chars",
     "has_think_close_tag",
+    "response_text",
     "truncation_flag",
     # Human rater columns (empty for now)
     "usefulness_score",
@@ -200,7 +201,9 @@ def parse_vuln_prediction(reasoning):
     Mirrors parse_vulnerability_response() in single_agent_vuln_openrouter.py.
     Returns: 1 (vulnerable) or 0 (not vulnerable)
     """
-    response_lower = reasoning.lower()
+    # Strip think block — parse only the response after </think>
+    parse_text = reasoning.split("</think>", 1)[1].strip() if "</think>" in reasoning else reasoning
+    response_lower = parse_text.lower()
 
     # Explicit YES answers (vulnerable = 1)
     if any(p in response_lower for p in [
@@ -233,20 +236,30 @@ def parse_vuln_prediction(reasoning):
 def extract_thinking_block(text):
     """
     Extract the <think>...</think> block from model output.
-    Returns the thinking content (without tags) if present, else the full text.
+    Returns the thinking content (with tags preserved) if present, else the full text.
     """
     # Try to find content between <think> and </think>
     match = re.search(r"<think>(.*?)</think>", text, re.DOTALL)
     if match:
-        return match.group(1).strip()
+        return match.group(0).strip()
 
     # Some outputs have </think> but no <think> (opening tag stripped)
     match = re.search(r"^(.*?)</think>", text, re.DOTALL)
     if match:
-        return match.group(1).strip()
+        return match.group(0).strip()
 
     # No think tags — return full text as the explanation
     return text.strip()
+
+
+def extract_response_block(text):
+    """
+    Extract the model's final response after the </think> tag.
+    Returns the content after </think> if present, else empty string.
+    """
+    if "</think>" in text:
+        return text.split("</think>", 1)[1].strip()
+    return ""
 
 
 # ---------------------------------------------------------------------------
@@ -274,6 +287,7 @@ def load_codegen_correct(stratum):
                 explanation = extract_thinking_block(reasoning) if reasoning else ""
                 if not explanation:
                     continue  # Skip entries with no explanation
+                response = extract_response_block(reasoning)
                 entries.append(dict(
                     entry_id=entry["task_id"],
                     ground_truth="passed",
@@ -281,6 +295,7 @@ def load_codegen_correct(stratum):
                     is_correct=True,
                     explanation_text=explanation,
                     has_think_close_tag="</think>" in reasoning,
+                    response_text=response,
                 ))
 
     return entries
@@ -299,6 +314,7 @@ def load_vuln_correct(stratum):
                 explanation = extract_thinking_block(reasoning)
                 if len(explanation) < MIN_EXPLANATION_LENGTH:
                     continue  # Skip non-responses (e.g., "No response from agent")
+                response = extract_response_block(reasoning)
                 entries.append(dict(
                     entry_id=str(entry["idx"]),
                     ground_truth=gt,
@@ -306,6 +322,7 @@ def load_vuln_correct(stratum):
                     is_correct=True,
                     explanation_text=explanation,
                     has_think_close_tag="</think>" in reasoning,
+                    response_text=response,
                 ))
 
     return entries
@@ -337,6 +354,7 @@ def load_log_correct(stratum):
                 explanation = extract_thinking_block(raw_output)
                 if not explanation:
                     continue
+                response = extract_response_block(raw_output)
                 entries.append(dict(
                     entry_id=block_id,
                     ground_truth=correct_blocks[block_id]["ground_truth"],
@@ -344,6 +362,7 @@ def load_log_correct(stratum):
                     is_correct=True,
                     explanation_text=explanation,
                     has_think_close_tag="</think>" in raw_output,
+                    response_text=response,
                 ))
 
     return entries

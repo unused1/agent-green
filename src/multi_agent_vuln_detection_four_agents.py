@@ -216,8 +216,11 @@ def extract_vulnerability_decision(review_board_response):
     import re
 
     try:
+        # Step 0: Strip think block — parse only the response after </think>
+        clean_response = review_board_response.split("</think>", 1)[1].strip() if "</think>" in review_board_response else review_board_response
+
         # Step 1: Strip markdown code blocks (handles Nemotron's format)
-        text = re.sub(r'```(?:json)?\s*', '', review_board_response)
+        text = re.sub(r'```(?:json)?\s*', '', clean_response)
         text = re.sub(r'```\s*', '', text)
 
         # Step 2: Extract JSON array from response
@@ -283,8 +286,8 @@ def extract_vulnerability_decision(review_board_response):
         return (1 if has_vulnerability else 0), reasoning
 
     except Exception as e:
-        # Fallback: keyword matching (but exclude overly broad terms)
-        text = review_board_response.lower()
+        # Fallback: keyword matching on cleaned response (but exclude overly broad terms)
+        text = clean_response.lower()
         if any(k in text for k in ['confirmed vulnerability', 'critical vulnerability', 'exploitable']):
             return 1, review_board_response
         if any(k in text for k in ['no vulnerability', 'not vulnerable', 'safe', 'mitigated', 'resolved']):

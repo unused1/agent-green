@@ -1,0 +1,8 @@
+                precision    recall  f1-score   support
+
+Not Vulnerable       0.60      0.31      0.41       191
+    Vulnerable       0.54      0.79      0.64       193
+
+      accuracy                           0.55       384
+     macro avg       0.57      0.55      0.52       384
+  weighted avg       0.57      0.55      0.52       384

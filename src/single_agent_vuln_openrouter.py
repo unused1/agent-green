@@ -136,7 +136,9 @@ def parse_vulnerability_response(response_text):
             decision: 1 (vulnerable) or 0 (not vulnerable)
             reasoning: str containing the full response
     """
-    response_lower = response_text.lower()
+    # Strip think block — parse only the response after </think>
+    parse_text = response_text.split("</think>", 1)[1].strip() if "</think>" in response_text else response_text
+    response_lower = parse_text.lower()
 
     # Check for explicit YES answers
     if any(pattern in response_lower for pattern in [

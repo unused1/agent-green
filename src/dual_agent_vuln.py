@@ -63,7 +63,8 @@ def append_result(result, detailed_file, csv_file, header_fields):
 def extract_vulnerability_decision(response):
     """Extract (1=vulnerable, 0=safe) and reasoning text."""
     try:
-        text = response.strip()
+        # Strip think block — parse only the response after </think>
+        text = response.split("</think>", 1)[1].strip() if "</think>" in response else response.strip()
         if text.startswith("{") or text.startswith("["):
             data = json.loads(text)
             if isinstance(data, dict):

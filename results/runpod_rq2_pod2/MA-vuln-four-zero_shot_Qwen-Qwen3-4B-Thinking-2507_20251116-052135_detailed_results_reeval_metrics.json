@@ -1,0 +1,31 @@
+{
+  "original_file": "results/runpod_rq2_pod2/MA-vuln-four-zero_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-052135_detailed_results.jsonl",
+  "corrected_file": "results/runpod_rq2_pod2/MA-vuln-four-zero_shot_Qwen-Qwen3-4B-Thinking-2507_20251116-052135_detailed_results_corrected.jsonl",
+  "timestamp": "2025-12-30T01:15:23.638963",
+  "total_samples": 378,
+  "ground_truth": {
+    "vuln": 192,
+    "safe": 186
+  },
+  "original": {
+    "vuln_predictions": 375,
+    "accuracy": 0.5,
+    "distribution": {
+      "1": 375,
+      "0": 3
+    }
+  },
+  "corrected": {
+    "vuln_predictions": 100,
+    "accuracy": 0.4708994708994709,
+    "distribution": {
+      "0": 278,
+      "1": 100
+    }
+  },
+  "changes": 275,
+  "parse_stats": {
+    "parsed": 18,
+    "fallback": 360
+  }
+}

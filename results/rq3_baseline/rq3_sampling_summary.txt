@@ -8,42 +8,42 @@ Target per stratum: 10
 --- code_generation (80 samples) ---
   Nemotron-Nano-8B / few-shot:
     Sampled: 10 / 151 available
-    Explanation length (chars): min=3656, max=18501, mean=9300, median=6763
+    Explanation length (chars): min=3673, max=18518, mean=9317, median=6780
     Has </think> tag: 10/10
     Truncation flags: 0/10
   Nemotron-Nano-8B / zero-shot:
     Sampled: 10 / 150 available
-    Explanation length (chars): min=1485, max=9842, mean=4805, median=4802
+    Explanation length (chars): min=1502, max=9859, mean=4822, median=4818
     Has </think> tag: 10/10
     Truncation flags: 2/10
   Nemotron-Super-49B / few-shot:
     Sampled: 10 / 152 available
-    Explanation length (chars): min=3932, max=31194, mean=10656, median=7948
+    Explanation length (chars): min=3948, max=31210, mean=10672, median=7964
     Has </think> tag: 10/10
     Truncation flags: 0/10
   Nemotron-Super-49B / zero-shot:
     Sampled: 10 / 123 available
-    Explanation length (chars): min=2370, max=22225, mean=7109, median=5763
+    Explanation length (chars): min=2370, max=22241, mean=7121, median=5779
     Has </think> tag: 7/10
     Truncation flags: 3/10
   Qwen3-30B-A3B-Thinking / few-shot:
     Sampled: 10 / 159 available
-    Explanation length (chars): min=2804, max=9937, mean=6019, median=5203
+    Explanation length (chars): min=2813, max=9946, mean=6028, median=5212
     Has </think> tag: 10/10
     Truncation flags: 1/10
   Qwen3-30B-A3B-Thinking / zero-shot:
     Sampled: 10 / 161 available
-    Explanation length (chars): min=1247, max=21807, mean=9266, median=7974
+    Explanation length (chars): min=1256, max=21816, mean=9276, median=7984
     Has </think> tag: 10/10
     Truncation flags: 1/10
   Qwen3-4B-Thinking / few-shot:
     Sampled: 10 / 160 available
-    Explanation length (chars): min=1629, max=24839, mean=9089, median=7920
+    Explanation length (chars): min=1638, max=24848, mean=9098, median=7928
     Has </think> tag: 10/10
     Truncation flags: 1/10
   Qwen3-4B-Thinking / zero-shot:
     Sampled: 10 / 162 available
-    Explanation length (chars): min=3088, max=31367, mean=12332, median=9812
+    Explanation length (chars): min=3097, max=31376, mean=12341, median=9821
     Has </think> tag: 10/10
     Truncation flags: 0/10
 
@@ -59,57 +59,57 @@ Target per stratum: 10
     Has </think> tag: 0/10
     Truncation flags: 5/10
   Nemotron-Super-49B / few-shot:
-    Sampled: 10 / 210 available
-    Explanation length (chars): min=2091, max=20625, mean=9264, median=7642
+    Sampled: 10 / 212 available
+    Explanation length (chars): min=2395, max=27346, mean=12802, median=12264
     Has </think> tag: 10/10
     Truncation flags: 0/10
   Nemotron-Super-49B / zero-shot:
-    Sampled: 10 / 207 available
-    Explanation length (chars): min=4837, max=31846, mean=13369, median=11218
+    Sampled: 10 / 216 available
+    Explanation length (chars): min=6001, max=37502, mean=16683, median=15300
     Has </think> tag: 10/10
     Truncation flags: 0/10
   Qwen3-30B-A3B-Thinking / few-shot:
-    Sampled: 10 / 194 available
-    Explanation length (chars): min=8038, max=25291, mean=13004, median=10620
+    Sampled: 10 / 206 available
+    Explanation length (chars): min=7342, max=25813, mean=15498, median=17198
     Has </think> tag: 10/10
     Truncation flags: 0/10
   Qwen3-30B-A3B-Thinking / zero-shot:
-    Sampled: 10 / 202 available
-    Explanation length (chars): min=10318, max=26725, mean=17156, median=17032
+    Sampled: 10 / 211 available
+    Explanation length (chars): min=6141, max=29365, mean=14887, median=12626
     Has </think> tag: 10/10
     Truncation flags: 0/10
   Qwen3-4B-Thinking / few-shot:
-    Sampled: 10 / 201 available
-    Explanation length (chars): min=8181, max=29598, mean=17191, median=15948
-    Has </think> tag: 10/10
+    Sampled: 10 / 200 available
+    Explanation length (chars): min=10625, max=241918, mean=39846, median=16504
+    Has </think> tag: 9/10
     Truncation flags: 0/10
   Qwen3-4B-Thinking / zero-shot:
-    Sampled: 10 / 193 available
-    Explanation length (chars): min=10114, max=29376, mean=18233, median=15264
+    Sampled: 10 / 197 available
+    Explanation length (chars): min=8847, max=36844, mean=20351, median=18223
     Has </think> tag: 10/10
     Truncation flags: 0/10
 
 --- log_analysis (40 samples) ---
   Qwen3-30B-A3B-Thinking / few-shot:
     Sampled: 10 / 213 available
-    Explanation length (chars): min=4448, max=12434, mean=7762, median=7178
+    Explanation length (chars): min=4457, max=12443, mean=7770, median=7188
     Has </think> tag: 10/10
     Truncation flags: 2/10
   Qwen3-30B-A3B-Thinking / zero-shot:
     Sampled: 10 / 12 available
-    Explanation length (chars): min=4728, max=22556, mean=12288, median=11140
+    Explanation length (chars): min=4737, max=22565, mean=12297, median=11150
     Has </think> tag: 10/10
     Truncation flags: 1/10
   Qwen3-4B-Thinking / few-shot:
     Sampled: 10 / 10 available
-    Explanation length (chars): min=10590, max=38687, mean=18595, median=18630
+    Explanation length (chars): min=10599, max=38696, mean=18604, median=18638
     Has </think> tag: 10/10
     Truncation flags: 0/10
   Qwen3-4B-Thinking / zero-shot:
     Sampled: 10 / 11 available
-    Explanation length (chars): min=3300, max=30614, mean=15775, median=16158
+    Explanation length (chars): min=3309, max=30623, mean=15784, median=16166
     Has </think> tag: 10/10
     Truncation flags: 1/10
 
 --- Overall explanation length distribution ---
-  min=1247, max=38687, mean=10786, median=8695
+  min=1256, max=241918, mean=12385, median=9170

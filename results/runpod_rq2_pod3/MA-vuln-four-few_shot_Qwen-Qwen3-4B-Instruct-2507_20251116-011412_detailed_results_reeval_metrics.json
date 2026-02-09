@@ -1,0 +1,31 @@
+{
+  "original_file": "results/runpod_rq2_pod3/MA-vuln-four-few_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-011412_detailed_results.jsonl",
+  "corrected_file": "results/runpod_rq2_pod3/MA-vuln-four-few_shot_Qwen-Qwen3-4B-Instruct-2507_20251116-011412_detailed_results_corrected.jsonl",
+  "timestamp": "2025-12-30T01:15:23.668683",
+  "total_samples": 386,
+  "ground_truth": {
+    "vuln": 193,
+    "safe": 193
+  },
+  "original": {
+    "vuln_predictions": 44,
+    "accuracy": 0.5,
+    "distribution": {
+      "0": 342,
+      "1": 44
+    }
+  },
+  "corrected": {
+    "vuln_predictions": 301,
+    "accuracy": 0.49740932642487046,
+    "distribution": {
+      "1": 301,
+      "0": 85
+    }
+  },
+  "changes": 271,
+  "parse_stats": {
+    "parsed": 385,
+    "fallback": 1
+  }
+}
