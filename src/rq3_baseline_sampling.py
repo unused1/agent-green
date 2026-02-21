@@ -1,22 +1,22 @@
 """
-RQ3 Baseline Sampling: Explanation Usefulness & Faithfulness from Existing Results
+RQ3 Phase A Baseline Sampling: Vulnerability Detection Explanation Quality
 
-Produces a stratified random sample of correct predictions from SA thinking-model
-results across all 3 SE tasks (code generation, vulnerability detection, log
-analysis). Each sample includes the model's explanation text for subsequent human
-rater review of usefulness and faithfulness.
+Produces a stratified random sample of correct vulnerability-detection predictions
+from SA results across both Thinking and Instruct model modes. Each sample includes
+the model's explanation/response text for subsequent human rater evaluation of
+completeness, clarity, actionability, and informativeness.
 
-Sampling design (20 strata, 200 samples):
-  - Code Generation: All 4 thinking models × 2 prompting
-    8 strata × 10 = 80 samples
-    (Qwen codegen rerun 2026-02-07 recovered missing thinking content)
-  - Vulnerability Detection: All 4 thinking models × 2 prompting
-    8 strata × 10 = 80 samples
-  - Log Analysis: Qwen 4B + 30B × 2 prompting
-    4 strata × 10 = 40 samples  (4B strata have 10-11 available)
+Sampling design (16 strata, 48 samples):
+  - 4 models × 2 modes (Thinking / Instruct) × 2 prompting (zero / few-shot)
+  - 3 samples per stratum
+
+Models:
+  - Qwen3-4B, Qwen3-30B-A3B, Nemotron-Nano-8B, Nemotron-Super-49B
 
 Output:
-  - results/rq3_baseline/rq3_baseline_samples.csv
+  - results/rq3_baseline/rq3_baseline_samples.csv  (full metadata, for analysis)
+  - results/rq3_baseline/rq3_baseline_samples_vulnerability_detection.csv  (same)
+  - results/rq3_baseline/rq3_phase_a_rater_sheet.csv  (blinded, randomized, for raters)
   - results/rq3_baseline/rq3_sampling_summary.txt
 
 See docs/RQ3_Baseline_Sampling.md for full methodology documentation.
@@ -38,23 +38,23 @@ from statistics import mean, median
 # ---------------------------------------------------------------------------
 
 RANDOM_SEED = 42
-SAMPLES_PER_STRATUM = 10
+SAMPLES_PER_STRATUM = 3
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = PROJECT_ROOT / "results" / "rq3_baseline"
 OUTPUT_CSV = OUTPUT_DIR / "rq3_baseline_samples.csv"
+OUTPUT_VULN_CSV = OUTPUT_DIR / "rq3_baseline_samples_vulnerability_detection.csv"
+OUTPUT_RATER_CSV = OUTPUT_DIR / "rq3_phase_a_rater_sheet.csv"
 OUTPUT_SUMMARY = OUTPUT_DIR / "rq3_sampling_summary.txt"
 
-# Ground truth for log analysis
-LOG_GT_PATH = PROJECT_ROOT / "data" / "HDFS_anomaly_label_385_session_sampled.csv"
-
-# Minimum explanation length (chars) to filter out non-responses like "No response from agent"
-MIN_EXPLANATION_LENGTH = 100
+# Ground truth dataset (for source code lookup)
+VULN_GT_PATH = PROJECT_ROOT / "vuln_database" / "VulTrial_386_samples_balanced.jsonl"
 
 # CSV columns for output
 CSV_COLUMNS = [
     "sample_id",
     "task",
     "model",
+    "mode",
     "parameters_b",
     "prompting",
     "entry_id",
@@ -67,8 +67,26 @@ CSV_COLUMNS = [
     "response_text",
     "truncation_flag",
     # Human rater columns (empty for now)
-    "usefulness_score",
-    "faithfulness_score",
+    "completeness_score",
+    "clarity_score",
+    "actionability_score",
+    "informativeness_score",
+    "rater_notes",
+]
+
+# Rater-facing CSV columns (blinded — no model/mode/prompting)
+RATER_COLUMNS = [
+    "sample_id",
+    "source_code",
+    "ground_truth_label",
+    "cwe",
+    "cve_desc",
+    "response_text",
+    # Rater fills these in
+    "completeness_score",
+    "clarity_score",
+    "actionability_score",
+    "informativeness_score",
     "rater_notes",
 ]
 
@@ -77,7 +95,7 @@ CSV_COLUMNS = [
 # ---------------------------------------------------------------------------
 
 # Each stratum is a dict with keys:
-#   task, model, parameters_b, prompting, results_jsonl, eval_json (codegen only)
+#   task, model, mode, parameters_b, prompting, results_jsonl
 
 def _find_single(pattern, label):
     """Glob for exactly one file matching pattern; raise if not found."""
@@ -89,103 +107,81 @@ def _find_single(pattern, label):
 
 
 def build_strata():
-    """Build the list of strata to sample from."""
+    """Build the list of 16 vulnerability-detection strata (4 models × 2 modes × 2 prompting)."""
     strata = []
 
-    # ----- Code Generation -----
-    # Qwen models (rerun 2026-02-07 with reasoning field)
-    qwen_code_files = [
-        ("results/runpod_codegen_rerun/SA-few_Qwen-Qwen3-4B-Thinking-2507_*_detailed_results.jsonl",
-         "results/runpod_codegen_rerun/SA-few_Qwen-Qwen3-4B-Thinking-2507_*_detailed_results_evaluation.json",
-         "Qwen3-4B-Thinking", 4, "few-shot"),
-        ("results/runpod_codegen_rerun/SA-zero_Qwen-Qwen3-4B-Thinking-2507_*_detailed_results.jsonl",
-         "results/runpod_codegen_rerun/SA-zero_Qwen-Qwen3-4B-Thinking-2507_*_detailed_results_evaluation.json",
-         "Qwen3-4B-Thinking", 4, "zero-shot"),
-        ("results/runpod_codegen_rerun/SA-few_Qwen-Qwen3-30B-A3B-Thinking-2507_*_detailed_results.jsonl",
-         "results/runpod_codegen_rerun/SA-few_Qwen-Qwen3-30B-A3B-Thinking-2507_*_detailed_results_evaluation.json",
-         "Qwen3-30B-A3B-Thinking", 30, "few-shot"),
-        ("results/runpod_codegen_rerun/SA-zero_Qwen-Qwen3-30B-A3B-Thinking-2507_*_detailed_results.jsonl",
-         "results/runpod_codegen_rerun/SA-zero_Qwen-Qwen3-30B-A3B-Thinking-2507_*_detailed_results_evaluation.json",
-         "Qwen3-30B-A3B-Thinking", 30, "zero-shot"),
-    ]
-    for jsonl_pat, eval_pat, model, params, prompting in qwen_code_files:
-        jsonl = _find_single(jsonl_pat, f"codegen {model} {prompting}")
-        evaljson = _find_single(eval_pat, f"codegen eval {model} {prompting}")
-        if jsonl and evaljson:
-            strata.append(dict(
-                task="code_generation", model=model, parameters_b=params,
-                prompting=prompting, results_jsonl=jsonl, eval_json=evaljson,
-            ))
-
-    # Nemotron models
-    nemotron_code_dirs = [
-        ("nemotron_8b_code_SA-few_thinking", "Nemotron-Nano-8B", 8, "few-shot"),
-        ("nemotron_8b_code_SA-zero_thinking", "Nemotron-Nano-8B", 8, "zero-shot"),
-        ("nemotron_49b_code_SA-few_thinking", "Nemotron-Super-49B", 49, "few-shot"),
-        ("nemotron_49b_code_SA-zero_thinking", "Nemotron-Super-49B", 49, "zero-shot"),
-    ]
-    for dirname, model, params, prompting in nemotron_code_dirs:
-        base = f"results/rq2_cross_architecture/{dirname}"
-        jsonl = _find_single(f"{base}/*_detailed_results.jsonl", f"codegen {dirname}")
-        evaljson = _find_single(f"{base}/*_evaluation.json", f"codegen eval {dirname}")
-        if jsonl and evaljson:
-            strata.append(dict(
-                task="code_generation", model=model, parameters_b=params,
-                prompting=prompting, results_jsonl=jsonl, eval_json=evaljson,
-            ))
-
-    # ----- Vulnerability Detection -----
-    # Qwen models (runpod_rerun for few-shot reruns, runpod for original zero-shot)
-    qwen_vuln_files = [
+    # ----- Vulnerability Detection: Thinking mode -----
+    # Qwen Thinking models
+    qwen_vuln_thinking = [
         ("results/runpod_rerun/Sa-few_Qwen-Qwen3-4B-Thinking-2507_*_detailed_results.jsonl",
-         "Qwen3-4B-Thinking", 4, "few-shot"),
+         "Qwen3-4B", 4, "few-shot"),
         ("results/runpod_rerun/Sa-zero_Qwen-Qwen3-4B-Thinking-2507_*_detailed_results.jsonl",
-         "Qwen3-4B-Thinking", 4, "zero-shot"),
+         "Qwen3-4B", 4, "zero-shot"),
         ("results/runpod_rerun/Sa-few_Qwen-Qwen3-30B-A3B-Thinking-2507_*_detailed_results.jsonl",
-         "Qwen3-30B-A3B-Thinking", 30, "few-shot"),
+         "Qwen3-30B-A3B", 30, "few-shot"),
         # Qwen3-30B zero-shot is in the original runpod dir (rerun only covered few-shot)
         ("results/runpod/thinking_zero_20251020_215332/Sa-zero_Qwen-Qwen3-30B-A3B-Thinking-2507_*_detailed_results.jsonl",
-         "Qwen3-30B-A3B-Thinking", 30, "zero-shot"),
+         "Qwen3-30B-A3B", 30, "zero-shot"),
     ]
-    for pattern, model, params, prompting in qwen_vuln_files:
-        jsonl = _find_single(pattern, f"vuln {model} {prompting}")
+    for pattern, model, params, prompting in qwen_vuln_thinking:
+        jsonl = _find_single(pattern, f"vuln thinking {model} {prompting}")
         if jsonl:
             strata.append(dict(
-                task="vulnerability_detection", model=model, parameters_b=params,
-                prompting=prompting, results_jsonl=jsonl,
+                task="vulnerability_detection", model=model, mode="thinking",
+                parameters_b=params, prompting=prompting, results_jsonl=jsonl,
             ))
 
-    # Nemotron models (rq2_cross_architecture)
-    nemotron_vuln_dirs = [
+    # Nemotron Thinking models
+    nemotron_vuln_thinking = [
         ("nemotron_8b_vuln_SA-few_thinking", "Nemotron-Nano-8B", 8, "few-shot"),
         ("nemotron_8b_vuln_SA-zero_thinking", "Nemotron-Nano-8B", 8, "zero-shot"),
         ("nemotron_49b_vuln_SA-few_thinking", "Nemotron-Super-49B", 49, "few-shot"),
         ("nemotron_49b_vuln_SA-zero_thinking", "Nemotron-Super-49B", 49, "zero-shot"),
     ]
-    for dirname, model, params, prompting in nemotron_vuln_dirs:
+    for dirname, model, params, prompting in nemotron_vuln_thinking:
         base = f"results/rq2_cross_architecture/{dirname}"
-        jsonl = _find_single(f"{base}/*_detailed_results.jsonl", f"vuln {dirname}")
+        jsonl = _find_single(f"{base}/*_detailed_results.jsonl", f"vuln thinking {dirname}")
         if jsonl:
             strata.append(dict(
-                task="vulnerability_detection", model=model, parameters_b=params,
-                prompting=prompting, results_jsonl=jsonl,
+                task="vulnerability_detection", model=model, mode="thinking",
+                parameters_b=params, prompting=prompting, results_jsonl=jsonl,
             ))
 
-    # ----- Log Analysis (Qwen 4B + 30B only) -----
-    log_dirs = [
-        ("SA-zero_Qwen3-4B-Thinking", "Qwen3-4B-Thinking", 4, "zero-shot"),
-        ("SA-few_Qwen3-4B-Thinking", "Qwen3-4B-Thinking", 4, "few-shot"),
-        ("SA-zero_Qwen3-30B-Thinking", "Qwen3-30B-A3B-Thinking", 30, "zero-shot"),
-        ("SA-few_Qwen3-30B-Thinking", "Qwen3-30B-A3B-Thinking", 30, "few-shot"),
+    # ----- Vulnerability Detection: Instruct mode -----
+    # Qwen Instruct models
+    qwen_vuln_instruct = [
+        ("results/runpod_rerun/Sa-zero_Qwen-Qwen3-4B-Instruct-2507_*_detailed_results.jsonl",
+         "Qwen3-4B", 4, "zero-shot"),
+        ("results/runpod_rerun/Sa-few_Qwen-Qwen3-4B-Instruct-2507_*_detailed_results.jsonl",
+         "Qwen3-4B", 4, "few-shot"),
+        # Qwen3-30B Instruct zero-shot is in the original runpod dir
+        ("results/runpod/instruct_zero_20251020_194844/Sa-zero_Qwen-Qwen3-30B-A3B-Instruct-2507_*_detailed_results.jsonl",
+         "Qwen3-30B-A3B", 30, "zero-shot"),
+        ("results/runpod_rerun/Sa-few_Qwen-Qwen3-30B-A3B-Instruct-2507_*_detailed_results.jsonl",
+         "Qwen3-30B-A3B", 30, "few-shot"),
     ]
-    for dirname, model, params, prompting in log_dirs:
-        base = f"results/runpod_log_analysis/{dirname}"
-        jsonl = _find_single(f"{base}/*_detailed_results.jsonl", f"log {dirname}")
-        metrics_csv = _find_single(f"{base}/*_per_session_metrics.csv", f"log metrics {dirname}")
-        if jsonl and metrics_csv:
+    for pattern, model, params, prompting in qwen_vuln_instruct:
+        jsonl = _find_single(pattern, f"vuln instruct {model} {prompting}")
+        if jsonl:
             strata.append(dict(
-                task="log_analysis", model=model, parameters_b=params,
-                prompting=prompting, results_jsonl=jsonl, metrics_csv=metrics_csv,
+                task="vulnerability_detection", model=model, mode="instruct",
+                parameters_b=params, prompting=prompting, results_jsonl=jsonl,
+            ))
+
+    # Nemotron Instruct models
+    nemotron_vuln_instruct = [
+        ("nemotron_8b_vuln_SA-zero_instruct", "Nemotron-Nano-8B", 8, "zero-shot"),
+        ("nemotron_8b_vuln_SA-few_instruct", "Nemotron-Nano-8B", 8, "few-shot"),
+        ("nemotron_49b_vuln_SA-zero_instruct", "Nemotron-Super-49B", 49, "zero-shot"),
+        ("nemotron_49b_vuln_SA-few_instruct", "Nemotron-Super-49B", 49, "few-shot"),
+    ]
+    for dirname, model, params, prompting in nemotron_vuln_instruct:
+        base = f"results/rq2_cross_architecture/{dirname}"
+        jsonl = _find_single(f"{base}/*_detailed_results.jsonl", f"vuln instruct {dirname}")
+        if jsonl:
+            strata.append(dict(
+                task="vulnerability_detection", model=model, mode="instruct",
+                parameters_b=params, prompting=prompting, results_jsonl=jsonl,
             ))
 
     return strata
@@ -263,46 +259,16 @@ def extract_response_block(text):
 
 
 # ---------------------------------------------------------------------------
-# Loading and filtering functions
+# Loading and filtering
 # ---------------------------------------------------------------------------
 
-def load_codegen_correct(stratum):
-    """Load correct code generation entries (passed test cases)."""
-    # Load evaluation results to get pass/fail per task_id
-    with open(stratum["eval_json"]) as f:
-        eval_data = json.load(f)
-
-    passed_ids = set()
-    for r in eval_data["per_sample_results"]:
-        if r["passed"]:
-            passed_ids.add(r["task_id"])
-
-    # Load detailed results to get reasoning text
-    entries = []
-    with open(stratum["results_jsonl"]) as f:
-        for line in f:
-            entry = json.loads(line)
-            if entry["task_id"] in passed_ids:
-                reasoning = entry.get("reasoning", "")
-                explanation = extract_thinking_block(reasoning) if reasoning else ""
-                if not explanation:
-                    continue  # Skip entries with no explanation
-                response = extract_response_block(reasoning)
-                entries.append(dict(
-                    entry_id=entry["task_id"],
-                    ground_truth="passed",
-                    prediction="passed",
-                    is_correct=True,
-                    explanation_text=explanation,
-                    has_think_close_tag="</think>" in reasoning,
-                    response_text=response,
-                ))
-
-    return entries
-
-
 def load_vuln_correct(stratum):
-    """Load correct vulnerability detection entries (prediction == ground_truth)."""
+    """Load correct vulnerability detection entries (prediction == ground_truth).
+
+    For Thinking mode: explanation_text = thinking block, response_text = post-think response.
+    For Instruct mode: explanation_text = "" (no think block), response_text = full reasoning.
+    """
+    mode = stratum["mode"]
     entries = []
     with open(stratum["results_jsonl"]) as f:
         for line in f:
@@ -311,10 +277,18 @@ def load_vuln_correct(stratum):
             pred = parse_vuln_prediction(entry["reasoning"])
             if pred == gt:
                 reasoning = entry["reasoning"]
-                explanation = extract_thinking_block(reasoning)
-                if len(explanation) < MIN_EXPLANATION_LENGTH:
-                    continue  # Skip non-responses (e.g., "No response from agent")
-                response = extract_response_block(reasoning)
+                if mode == "thinking":
+                    explanation = extract_thinking_block(reasoning)
+                    response = extract_response_block(reasoning)
+                    # Some thinking models (e.g. Nemotron-Nano-8B) emit no
+                    # <think> tags — the full output is the response.
+                    if not response:
+                        response = reasoning.strip()
+                else:
+                    # Instruct mode: no think block; full output is the response
+                    explanation = ""
+                    response = reasoning.strip()
+
                 entries.append(dict(
                     entry_id=str(entry["idx"]),
                     ground_truth=gt,
@@ -322,46 +296,6 @@ def load_vuln_correct(stratum):
                     is_correct=True,
                     explanation_text=explanation,
                     has_think_close_tag="</think>" in reasoning,
-                    response_text=response,
-                ))
-
-    return entries
-
-
-def load_log_correct(stratum):
-    """Load correct log analysis entries using pre-computed per_session_metrics."""
-    # Load per-session metrics to identify TP and TN
-    correct_blocks = {}
-    with open(stratum["metrics_csv"]) as f:
-        for row in csv.DictReader(f):
-            if row["result"] in ("TP", "TN"):
-                correct_blocks[row["block_id"]] = dict(
-                    ground_truth=int(row["ground_truth"]),
-                    prediction=int(row["prediction"]),
-                )
-
-    # Load detailed results to get raw_output
-    entries = []
-    with open(stratum["results_jsonl"]) as f:
-        for line in f:
-            entry = json.loads(line)
-            block_id = entry["block_id"]
-            if block_id in correct_blocks:
-                raw_output = entry["raw_output"]
-                # Skip entries with no actual model output (e.g., "NONE")
-                if not raw_output or raw_output.strip().upper() == "NONE":
-                    continue
-                explanation = extract_thinking_block(raw_output)
-                if not explanation:
-                    continue
-                response = extract_response_block(raw_output)
-                entries.append(dict(
-                    entry_id=block_id,
-                    ground_truth=correct_blocks[block_id]["ground_truth"],
-                    prediction=correct_blocks[block_id]["prediction"],
-                    is_correct=True,
-                    explanation_text=explanation,
-                    has_think_close_tag="</think>" in raw_output,
                     response_text=response,
                 ))
 
@@ -387,19 +321,13 @@ def compute_truncation_flags(entries):
 
 def sample_stratum(stratum, rng):
     """Load correct entries for a stratum, sample, and return records."""
-    task = stratum["task"]
-    loaders = {
-        "code_generation": load_codegen_correct,
-        "vulnerability_detection": load_vuln_correct,
-        "log_analysis": load_log_correct,
-    }
-    correct_entries = loaders[task](stratum)
+    correct_entries = load_vuln_correct(stratum)
 
     n_available = len(correct_entries)
     n_sample = min(SAMPLES_PER_STRATUM, n_available)
 
     if n_available == 0:
-        label = f"{task}/{stratum['model']}/{stratum['prompting']}"
+        label = f"{stratum['model']}/{stratum['mode']}/{stratum['prompting']}"
         print(f"  WARNING: 0 correct entries for {label}, skipping")
         return [], n_available
 
@@ -407,8 +335,9 @@ def sample_stratum(stratum, rng):
 
     # Enrich with stratum metadata and explanation length
     for entry in sampled:
-        entry["task"] = task
+        entry["task"] = stratum["task"]
         entry["model"] = stratum["model"]
+        entry["mode"] = stratum["mode"]
         entry["parameters_b"] = stratum["parameters_b"]
         entry["prompting"] = stratum["prompting"]
         entry["explanation_length_chars"] = len(entry["explanation_text"])
@@ -424,59 +353,119 @@ def generate_summary(all_samples, stratum_info):
     """Generate a text summary of sampling statistics."""
     lines = []
     lines.append("=" * 72)
-    lines.append("RQ3 Baseline Sampling Summary")
+    lines.append("RQ3 Phase A Baseline Sampling Summary")
     lines.append("=" * 72)
     lines.append(f"Total samples: {len(all_samples)}")
     lines.append(f"Random seed: {RANDOM_SEED}")
     lines.append(f"Target per stratum: {SAMPLES_PER_STRATUM}")
     lines.append("")
 
-    # Per-task summary
-    by_task = defaultdict(list)
-    for s in all_samples:
-        by_task[s["task"]].append(s)
+    task_samples = all_samples  # All are vulnerability_detection
+    lines.append(f"--- vulnerability_detection ({len(task_samples)} samples) ---")
 
-    for task in ["code_generation", "vulnerability_detection", "log_analysis"]:
-        task_samples = by_task.get(task, [])
-        lines.append(f"--- {task} ({len(task_samples)} samples) ---")
+    # Per-stratum
+    by_stratum = defaultdict(list)
+    for s in task_samples:
+        key = f"{s['model']} / {s['mode']} / {s['prompting']}"
+        by_stratum[key].append(s)
 
-        # Per-stratum
-        by_stratum = defaultdict(list)
-        for s in task_samples:
-            key = f"{s['model']} / {s['prompting']}"
-            by_stratum[key].append(s)
+    for key in sorted(by_stratum.keys()):
+        samples = by_stratum[key]
+        lengths = [s["explanation_length_chars"] for s in samples]
+        trunc = sum(1 for s in samples if s.get("truncation_flag"))
+        think_close = sum(1 for s in samples if s["has_think_close_tag"])
 
-        for key in sorted(by_stratum.keys()):
-            samples = by_stratum[key]
-            lengths = [s["explanation_length_chars"] for s in samples]
-            trunc = sum(1 for s in samples if s.get("truncation_flag"))
-            think_close = sum(1 for s in samples if s["has_think_close_tag"])
+        # Find available count from stratum_info
+        avail = "?"
+        for si in stratum_info:
+            si_key = f"{si['model']} / {si['mode']} / {si['prompting']}"
+            if si_key == key:
+                avail = si["available"]
+                break
 
-            # Find available count from stratum_info
-            avail = "?"
-            for si in stratum_info:
-                si_key = f"{si['model']} / {si['prompting']}"
-                if si_key == key and si["task"] == task:
-                    avail = si["available"]
-                    break
+        lines.append(f"  {key}:")
+        lines.append(f"    Sampled: {len(samples)} / {avail} available")
+        lines.append(f"    Explanation length (chars): "
+                     f"min={min(lengths)}, max={max(lengths)}, "
+                     f"mean={mean(lengths):.0f}, median={median(lengths):.0f}")
+        lines.append(f"    Has </think> tag: {think_close}/{len(samples)}")
+        lines.append(f"    Truncation flags: {trunc}/{len(samples)}")
 
-            lines.append(f"  {key}:")
-            lines.append(f"    Sampled: {len(samples)} / {avail} available")
-            lines.append(f"    Explanation length (chars): "
-                         f"min={min(lengths)}, max={max(lengths)}, "
-                         f"mean={mean(lengths):.0f}, median={median(lengths):.0f}")
-            lines.append(f"    Has </think> tag: {think_close}/{len(samples)}")
-            lines.append(f"    Truncation flags: {trunc}/{len(samples)}")
+    lines.append("")
 
-        lines.append("")
+    # Overall length distribution (only meaningful for Thinking strata)
+    thinking_samples = [s for s in all_samples if s["mode"] == "thinking"]
+    if thinking_samples:
+        thinking_lengths = [s["explanation_length_chars"] for s in thinking_samples]
+        lines.append("--- Thinking mode explanation length distribution ---")
+        lines.append(f"  min={min(thinking_lengths)}, max={max(thinking_lengths)}, "
+                     f"mean={mean(thinking_lengths):.0f}, median={median(thinking_lengths):.0f}")
+    lines.append("")
 
-    # Overall length distribution
-    all_lengths = [s["explanation_length_chars"] for s in all_samples]
-    lines.append("--- Overall explanation length distribution ---")
-    lines.append(f"  min={min(all_lengths)}, max={max(all_lengths)}, "
-                 f"mean={mean(all_lengths):.0f}, median={median(all_lengths):.0f}")
+    # Response text length distribution (all modes)
+    resp_lengths = [len(s["response_text"]) for s in all_samples]
+    lines.append("--- Overall response_text length distribution ---")
+    lines.append(f"  min={min(resp_lengths)}, max={max(resp_lengths)}, "
+                 f"mean={mean(resp_lengths):.0f}, median={median(resp_lengths):.0f}")
 
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Rater CSV generation
+# ---------------------------------------------------------------------------
+
+def load_vuln_ground_truth():
+    """Load vulnerability ground truth dataset to get source code and metadata by idx."""
+    gt_by_idx = {}
+    with open(VULN_GT_PATH) as f:
+        for line in f:
+            entry = json.loads(line)
+            gt_by_idx[str(entry["idx"])] = dict(
+                func=entry["func"],
+                cwe=", ".join(entry["cwe"]) if isinstance(entry["cwe"], list) else str(entry["cwe"]),
+                cve_desc=entry.get("cve_desc", ""),
+            )
+    return gt_by_idx
+
+
+def generate_rater_csv(all_samples, rng):
+    """Generate a blinded, randomized CSV for human raters.
+
+    Includes source code and vulnerability metadata for context.
+    Excludes model identity, mode, prompting, and other internal metadata.
+    """
+    gt_data = load_vuln_ground_truth()
+
+    # Build rater rows with source code enrichment
+    rater_rows = []
+    for s in all_samples:
+        gt_entry = gt_data.get(s["entry_id"], {})
+        gt_label = "vulnerable" if s["ground_truth"] == 1 else "safe"
+        rater_rows.append(dict(
+            sample_id=s["sample_id"],
+            source_code=gt_entry.get("func", ""),
+            ground_truth_label=gt_label,
+            cwe=gt_entry.get("cwe", "") if s["ground_truth"] == 1 else "",
+            cve_desc=gt_entry.get("cve_desc", "") if s["ground_truth"] == 1 else "",
+            response_text=s["response_text"],
+            completeness_score="",
+            clarity_score="",
+            actionability_score="",
+            informativeness_score="",
+            rater_notes="",
+        ))
+
+    # Randomize row order (deterministic with seeded RNG)
+    rng.shuffle(rater_rows)
+
+    print(f"Writing {len(rater_rows)} rater samples to {OUTPUT_RATER_CSV}")
+    with open(OUTPUT_RATER_CSV, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=RATER_COLUMNS, extrasaction="ignore",
+                                quoting=csv.QUOTE_ALL)
+        writer.writeheader()
+        for row in rater_rows:
+            writer.writerow(row)
 
 
 # ---------------------------------------------------------------------------
@@ -496,15 +485,15 @@ def main():
     sample_id = 1
 
     for stratum in strata:
-        label = f"{stratum['task']} / {stratum['model']} / {stratum['prompting']}"
+        label = f"{stratum['task']} / {stratum['model']} / {stratum['mode']} / {stratum['prompting']}"
         print(f"Sampling: {label}")
         sampled, n_available = sample_stratum(stratum, rng)
         print(f"  {len(sampled)} sampled from {n_available} correct entries")
 
         stratum_info.append(dict(
             task=stratum["task"], model=stratum["model"],
-            prompting=stratum["prompting"], available=n_available,
-            sampled=len(sampled),
+            mode=stratum["mode"], prompting=stratum["prompting"],
+            available=n_available, sampled=len(sampled),
         ))
 
         for entry in sampled:
@@ -513,14 +502,10 @@ def main():
 
         all_samples.extend(sampled)
 
-    # Compute truncation flags per task (10th percentile within each task)
-    by_task = defaultdict(list)
-    for s in all_samples:
-        by_task[s["task"]].append(s)
-    for task_samples in by_task.values():
-        compute_truncation_flags(task_samples)
+    # Compute truncation flags (10th percentile across all samples)
+    compute_truncation_flags(all_samples)
 
-    # Write CSV (RFC 4180 — Google Sheets handles multi-line quoted fields natively)
+    # Write main CSV (RFC 4180 — Google Sheets handles multi-line quoted fields natively)
     print(f"\nWriting {len(all_samples)} samples to {OUTPUT_CSV}")
     with open(OUTPUT_CSV, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS, extrasaction="ignore",
@@ -528,10 +513,25 @@ def main():
         writer.writeheader()
         for s in all_samples:
             # Fill empty rater columns
-            s.setdefault("usefulness_score", "")
-            s.setdefault("faithfulness_score", "")
+            s.setdefault("completeness_score", "")
+            s.setdefault("clarity_score", "")
+            s.setdefault("actionability_score", "")
+            s.setdefault("informativeness_score", "")
             s.setdefault("rater_notes", "")
             writer.writerow(s)
+
+    # Write task-specific CSV (identical content — vuln only)
+    print(f"Writing {len(all_samples)} samples to {OUTPUT_VULN_CSV}")
+    with open(OUTPUT_VULN_CSV, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_COLUMNS, extrasaction="ignore",
+                                quoting=csv.QUOTE_ALL)
+        writer.writeheader()
+        for s in all_samples:
+            writer.writerow(s)
+
+    # Write rater-facing CSV (blinded, randomized, with source code)
+    rater_rng = random.Random(RANDOM_SEED + 1)  # Separate seed for shuffle
+    generate_rater_csv(all_samples, rater_rng)
 
     # Write summary
     summary = generate_summary(all_samples, stratum_info)
@@ -546,20 +546,37 @@ def main():
     print("VERIFICATION CHECKS")
     print("=" * 72)
 
-    # Check for duplicates within strata (same entry_id in same model/prompting is a bug)
-    ids = [(s["task"], s["model"], s["prompting"], s["entry_id"]) for s in all_samples]
+    # Check for duplicates within strata (same entry_id in same model/mode/prompting is a bug)
+    ids = [(s["model"], s["mode"], s["prompting"], s["entry_id"]) for s in all_samples]
     dupes = len(ids) - len(set(ids))
     print(f"Duplicate entries (within strata): {dupes}")
 
-    # Check for empty explanations
-    empty = sum(1 for s in all_samples if not s["explanation_text"].strip())
-    print(f"Empty explanations: {empty}")
+    # Check for empty response_text (this is what raters evaluate)
+    empty_resp = sum(1 for s in all_samples if not s["response_text"].strip())
+    print(f"Empty response_text: {empty_resp}")
 
     # Check all is_correct
     all_correct = all(s["is_correct"] for s in all_samples)
     print(f"All is_correct=True: {all_correct}")
 
-    if dupes > 0 or empty > 0 or not all_correct:
+    # Check strata count
+    strata_keys = set((s["model"], s["mode"], s["prompting"]) for s in all_samples)
+    print(f"Strata represented: {len(strata_keys)} / 16")
+
+    # Check total sample count
+    print(f"Total samples: {len(all_samples)} (expected 48)")
+
+    # Check mode column present
+    has_mode = all("mode" in s for s in all_samples)
+    print(f"All samples have 'mode' field: {has_mode}")
+
+    # Check explanation_text empty for Instruct, populated for Thinking
+    instruct_empty = all(s["explanation_text"] == "" for s in all_samples if s["mode"] == "instruct")
+    thinking_populated = all(s["explanation_text"] != "" for s in all_samples if s["mode"] == "thinking")
+    print(f"Instruct explanation_text all empty: {instruct_empty}")
+    print(f"Thinking explanation_text all populated: {thinking_populated}")
+
+    if dupes > 0 or empty_resp > 0 or not all_correct:
         print("WARNING: Verification issues found!")
         return 1
 
