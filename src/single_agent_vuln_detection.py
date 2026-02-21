@@ -330,16 +330,18 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
                 parse_text = response_text.split("</think>", 1)[1].strip() if "</think>" in response_text else response_text
                 response_lower = parse_text.lower()
                 
-                # Parse YES/NO responses (looking for your specific format)
-                if "(1) yes" in response_lower or "yes:" in response_lower or "vulnerability detected" in response_lower:
-                    result['vuln'] = 1
-                    result['reasoning'] = response_text
-                elif "(2) no" in response_lower or "no:" in response_lower or "no security vulnerability" in response_lower:
+                # Parse YES/NO responses — NO checked FIRST to avoid "no vulnerability
+                # detected" matching the YES substring "vulnerability detected"
+                # (Fixed 2026-02-22: reorder + reduce broad fallback keywords)
+                if "(2) no" in response_lower or "no:" in response_lower or "no security vulnerability" in response_lower or "no vulnerability" in response_lower:
                     result['vuln'] = 0
                     result['reasoning'] = response_text
+                elif "(1) yes" in response_lower or "yes:" in response_lower or "vulnerability detected" in response_lower:
+                    result['vuln'] = 1
+                    result['reasoning'] = response_text
                 else:
-                    # Fallback: look for more general keywords
-                    if any(keyword in response_lower for keyword in ['vulnerable', 'security risk', 'exploit', 'attack']):
+                    # Fallback: only strong positive indicators
+                    if any(keyword in response_lower for keyword in ['is vulnerable', 'contains a vulnerability', 'security vulnerability exists', 'can be exploited']):
                         result['vuln'] = 1
                     else:
                         result['vuln'] = 0  # Default to not vulnerable for unclear responses

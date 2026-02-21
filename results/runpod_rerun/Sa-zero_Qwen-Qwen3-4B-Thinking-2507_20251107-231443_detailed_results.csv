@@ -1810,7 +1810,7 @@ The code is vulnerable due to the **potential array bounds violation** in the lo
 **Result: (1) YES: Vulnerability detected.**",['CWE-476'],CVE-2021-4043,NULL Pointer Dereference in GitHub repository gpac/gpac prior to 1.1.0.
 483469,mongo,a5e2f9b0a236462a6d1ca129583c617f111367b4,https://github.com/mongodb/mongo,https://github.com/mongodb/mongo/commit/a5e2f9b0a236462a6d1ca129583c617f111367b4,"SERVER-59071 Treat '$sample' as unsharded when connecting directly to shards
 
-(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",0,1,"I need to analyze this code to determine if it's vulnerable to any security issues. As a security expert skilled in static program analysis, I'll look for potential vulnerabilities like buffer overflows, memory leaks, insecure data handling, race conditions, or other security flaws.
+(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",0,0,"I need to analyze this code to determine if it's vulnerable to any security issues. As a security expert skilled in static program analysis, I'll look for potential vulnerabilities like buffer overflows, memory leaks, insecure data handling, race conditions, or other security flaws.
 
 Let me go through the code step by step:
 
@@ -4715,7 +4715,7 @@ Therefore, the answer is NO - there are no vulnerabilities in this code.
 
 (2) NO: No vulnerability.",['CWE-119'],CVE-2017-15670,"The GNU C Library (aka glibc or libc6) before 2.27 contains an off-by-one error leading to a heap-based buffer overflow in the glob function in glob.c, related to the processing of home directories using the ~ operator followed by a long string."
 259619,libjpeg,187035b9726710b4fe11d565c7808975c930895d,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/187035b9726710b4fe11d565c7808975c930895d,"The code now checks for consistency of the MCU sizes across
-hierarchical levels, and fails in case they are different.",0,1,"First, I need to analyze this code for vulnerabilities. I'm a security expert skilled in static program analysis, so I should look for common vulnerabilities like buffer overflows, use-after-free, null pointer dereferences, integer overflows, etc.
+hierarchical levels, and fails in case they are different.",0,0,"First, I need to analyze this code for vulnerabilities. I'm a security expert skilled in static program analysis, so I should look for common vulnerabilities like buffer overflows, use-after-free, null pointer dereferences, integer overflows, etc.
 
 The code is from a function called `HierarchicalBitmapRequester::PrepareForEncoding` in what seems like an image processing library, given the context of `m_pFrame`, `m_ucCount`, `m_ulPixelWidth`, `m_ulPixelHeight`, and classes like `DownsamplerBase`.
 
@@ -10235,7 +10235,7 @@ Reviewed-by: Rich Salz <rsalz@openssl.org>
 
 Conflicts:
 	ssl/ssl.h
-	ssl/ssl_err.c",0,1,"We are analyzing the function `ssl3_get_new_session_ticket` in OpenSSL to see if it has a vulnerability.
+	ssl/ssl_err.c",0,0,"We are analyzing the function `ssl3_get_new_session_ticket` in OpenSSL to see if it has a vulnerability.
 
 The function is part of the SSL 3 protocol for handling new session tickets (a mechanism for session resumption).
 
@@ -17231,7 +17231,7 @@ My analysis shows no vulnerabilities.
 225547,tensorflow,a1e1511dde36b3f8aa27a6ec630838e7ea40e091,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a1e1511dde36b3f8aa27a6ec630838e7ea40e091,"[lite] Update TfLiteIntArrayCreate to return size_t
 
 PiperOrigin-RevId: 416439896
-Change-Id: I847f69b68d1ddaff4b1e925a09b8b69c1756653b",0,1,"First, I need to analyze this code for vulnerabilities. The function is `TfLiteIntArrayGetSizeInBytes`, which seems to be part of TensorFlow Lite, a machine learning framework. The function calculates the size in bytes for an array of integers.
+Change-Id: I847f69b68d1ddaff4b1e925a09b8b69c1756653b",0,0,"First, I need to analyze this code for vulnerabilities. The function is `TfLiteIntArrayGetSizeInBytes`, which seems to be part of TensorFlow Lite, a machine learning framework. The function calculates the size in bytes for an array of integers.
 
 Here's the code:
 
@@ -18429,7 +18429,7 @@ I evaluated common security vulnerabilities in static program analysis, such as:
 The code is **not vulnerable** (NO). It correctly handles division by zero for integer types, validates tensor sizes early, and avoids common security pitfalls. There are no exploitable vulnerabilities in this snippet.
 
 (2) NO: No vulnerability.",['CWE-369'],CVE-2021-37683,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of division in TFLite is [vulnerable to a division by 0 error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/div.cc). There is no check that the divisor tensor does not contain zero elements. We have patched the issue in GitHub commit 1e206baedf8bef0334cca3eb92bab134ef525a28. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-511472,server,b3c3291f0b7c1623cb20663f7cf31b7f749768bc,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/b3c3291f0b7c1623cb20663f7cf31b7f749768bc,MDEV-24176 fixup: GCC -Wmaybe-uninitialized,0,1,"I need to analyze this code to determine if it has any security vulnerabilities. Let me go through the code step by step and look for potential issues.
+511472,server,b3c3291f0b7c1623cb20663f7cf31b7f749768bc,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/b3c3291f0b7c1623cb20663f7cf31b7f749768bc,MDEV-24176 fixup: GCC -Wmaybe-uninitialized,0,0,"I need to analyze this code to determine if it has any security vulnerabilities. Let me go through the code step by step and look for potential issues.
 
 First, let me understand what this function does. It's called `open_table` and it's part of MySQL's storage engine code. It's responsible for opening a table for a query execution. The function takes a `THD` (thread handle), a `TABLE_LIST` (table list), and an `Open_table_context` (context for opening tables) as parameters.
 
@@ -36814,7 +36814,7 @@ I don't see any actual vulnerabilities in the code. The code is well-structured,
 After thorough analysis, I don't detect any vulnerabilities in this code.
 
 (2) NO: No vulnerability.",['CWE-20'],CVE-2021-41133,"Flatpak is a system for building, distributing, and running sandboxed desktop applications on Linux. In versions prior to 1.10.4 and 1.12.0, Flatpak apps with direct access to AF_UNIX sockets such as those used by Wayland, Pipewire or pipewire-pulse can trick portals and other host-OS services into treating the Flatpak app as though it was an ordinary, non-sandboxed host-OS process. They can do this by manipulating the VFS using recent mount-related syscalls that are not blocked by Flatpak's denylist seccomp filter, in order to substitute a crafted `/.flatpak-info` or make that file disappear entirely. Flatpak apps that act as clients for AF_UNIX sockets such as those used by Wayland, Pipewire or pipewire-pulse can escalate the privileges that the corresponding services will believe the Flatpak app has. Note that protocols that operate entirely over the D-Bus session bus (user bus), system bus or accessibility bus are not affected by this. This is due to the use of a proxy process `xdg-dbus-proxy`, whose VFS cannot be manipulated by the Flatpak app, when interacting with these buses. Patches exist for versions 1.10.4 and 1.12.0, and as of time of publication, a patch for version 1.8.2 is being planned. There are no workarounds aside from upgrading to a patched version."
-421378,mujs,f5b3c703e18725e380b83427004632e744f85a6f,https://github.com/ccxvii/mujs,https://github.com/ccxvii/mujs/commit/f5b3c703e18725e380b83427004632e744f85a6f,Issue #161: Cope with empty programs in mujs-pp.,0,1,"First, I need to analyze this code for vulnerabilities. The code is a function called `jsP_dumpsyntax` in what seems to be a JavaScript parser or compiler context. It takes three parameters: `js_State *J`, `js_Ast *prog`, and `int dominify`.
+421378,mujs,f5b3c703e18725e380b83427004632e744f85a6f,https://github.com/ccxvii/mujs,https://github.com/ccxvii/mujs/commit/f5b3c703e18725e380b83427004632e744f85a6f,Issue #161: Cope with empty programs in mujs-pp.,0,0,"First, I need to analyze this code for vulnerabilities. The code is a function called `jsP_dumpsyntax` in what seems to be a JavaScript parser or compiler context. It takes three parameters: `js_State *J`, `js_Ast *prog`, and `int dominify`.
 
 The function does the following:
 
@@ -62941,7 +62941,7 @@ After a thorough analysis of the provided code, I have identified no vulnerabili
 267917,tensorflow,704866eabe03a9aeda044ec91a8d0c83fc1ebdbe,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/704866eabe03a9aeda044ec91a8d0c83fc1ebdbe,"Fix overflow CHECK issue with `tf.raw_ops.UnsortedSegmentJoin`.
 
 PiperOrigin-RevId: 370766155
-Change-Id: I33e7c6626224e1060a8a4ab51ad5d861c6d4c63e",0,1,"We are given a code snippet from a TensorFlow kernel (Compute function) that processes input tensors and produces an output tensor.
+Change-Id: I33e7c6626224e1060a8a4ab51ad5d861c6d4c63e",0,0,"We are given a code snippet from a TensorFlow kernel (Compute function) that processes input tensors and produces an output tensor.
 
 The goal is to determine if this code has a vulnerability (YES) or not (NO).
 
@@ -68413,7 +68413,7 @@ I examined common security vulnerabilities in static analysis, focusing on:
 The code is **not vulnerable** to security issues. It follows TFLite's best practices for safe tensor handling, has robust error checking, and does not contain any exploitable flaws that could lead to crashes, information leaks, or other security compromises.
 
 **Result: (2) NO: No vulnerability.**",['CWE-369'],CVE-2021-37683,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of division in TFLite is [vulnerable to a division by 0 error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/div.cc). There is no check that the divisor tensor does not contain zero elements. We have patched the issue in GitHub commit 1e206baedf8bef0334cca3eb92bab134ef525a28. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-214003,libvncserver,7b1ef0ffc4815cab9a96c7278394152bdc89dc4d,https://github.com/LibVNC/libvncserver,https://github.com/LibVNC/libvncserver/commit/7b1ef0ffc4815cab9a96c7278394152bdc89dc4d,LibVNCClient: really fix #250,1,1,"We are given a function `HandleCoRREBPP` that processes RRE (Reduced Redundancy Encoding) data from an RFB (Remote Frame Buffer) server.
+214003,libvncserver,7b1ef0ffc4815cab9a96c7278394152bdc89dc4d,https://github.com/LibVNC/libvncserver,https://github.com/LibVNC/libvncserver/commit/7b1ef0ffc4815cab9a96c7278394152bdc89dc4d,LibVNCClient: really fix #250,1,0,"We are given a function `HandleCoRREBPP` that processes RRE (Reduced Redundancy Encoding) data from an RFB (Remote Frame Buffer) server.
 
 Let's break down the function step by step:
 
@@ -74922,7 +74922,7 @@ converted to unsigned anyway.
 
 Signed-off-by: Kevin Wolf <kwolf@redhat.com>
 Reviewed-by: Max Reitz <mreitz@redhat.com>
-Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>",1,1,"We are analyzing a function `parallels_open` from a block driver for a virtual disk format (Parallels).
+Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>",1,0,"We are analyzing a function `parallels_open` from a block driver for a virtual disk format (Parallels).
 
 The function does the following:
 1. Sets `bs->read_only = 1` (no write support).
@@ -92871,7 +92871,7 @@ After a thorough static analysis of the provided code, I conclude that the code 
 197998,tensorflow,704866eabe03a9aeda044ec91a8d0c83fc1ebdbe,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/704866eabe03a9aeda044ec91a8d0c83fc1ebdbe,"Fix overflow CHECK issue with `tf.raw_ops.UnsortedSegmentJoin`.
 
 PiperOrigin-RevId: 370766155
-Change-Id: I33e7c6626224e1060a8a4ab51ad5d861c6d4c63e",1,1,"First, I need to analyze this code for vulnerabilities using static program analysis. The code is part of a TensorFlow OpKernelContext function called `Compute` in an operation that processes segment IDs and inputs.
+Change-Id: I33e7c6626224e1060a8a4ab51ad5d861c6d4c63e",1,0,"First, I need to analyze this code for vulnerabilities using static program analysis. The code is part of a TensorFlow OpKernelContext function called `Compute` in an operation that processes segment IDs and inputs.
 
 The key parts I should look for are:
 
@@ -96115,7 +96115,7 @@ After analyzing the provided code for the `cgroup_release_agent_write` function,
 
 * red fixes
 
-* remove magic number",1,1,"First, the user is asking me to analyze a piece of code for vulnerabilities. The code is from a class called `UserTerminalRouter` with a method `getInfoForId`. It takes a string `id` as a parameter and returns a `TerminalUserInfo` object.
+* remove magic number",1,0,"First, the user is asking me to analyze a piece of code for vulnerabilities. The code is from a class called `UserTerminalRouter` with a method `getInfoForId`. It takes a string `id` as a parameter and returns a `TerminalUserInfo` object.
 
 Here's the code:
 
@@ -110510,7 +110510,7 @@ Final answer: NO",['CWE-787'],CVE-2021-45936,wolfSSL wolfMQTT 1.9 has a heap-bas
 each attribute a potential name and value.
 
 Fixes Issues #0000617 http://bugs.librdf.org/mantis/view.php?id=617
-and #0000618 http://bugs.librdf.org/mantis/view.php?id=618",1,1,"I need to analyze this C code for potential security vulnerabilities. As a security expert skilled in static program analysis, I'll go through the code carefully to identify any issues that could lead to vulnerabilities.
+and #0000618 http://bugs.librdf.org/mantis/view.php?id=618",1,0,"I need to analyze this C code for potential security vulnerabilities. As a security expert skilled in static program analysis, I'll go through the code carefully to identify any issues that could lead to vulnerabilities.
 
 First, let me understand what this function does. It appears to be part of an XML writer for some library (likely RaptorXML, based on the naming conventions). The function `raptor_xml_writer_start_element_common` is responsible for writing the start of an XML element.
 
@@ -119336,7 +119336,7 @@ This is due to not checking that `GetVariableInput` returns non-null tensor.
 Also fix a potential null pointer exception in `GetVariableInput`.
 
 PiperOrigin-RevId: 385160147
-Change-Id: Iadf3f0705b036a9014d27caa5a8bbd91f4c4c401",1,1,"First, the task is to analyze this code for vulnerabilities. I'm a security expert skilled in static program analysis, so I need to look for potential security issues.
+Change-Id: Iadf3f0705b036a9014d27caa5a8bbd91f4c4c401",1,0,"First, the task is to analyze this code for vulnerabilities. I'm a security expert skilled in static program analysis, so I need to look for potential security issues.
 
 The code is:
 
@@ -123335,7 +123335,7 @@ The code contains a **buffer overflow vulnerability** due to an incorrect bound 
 The vulnerability is **confirmed** because the code passes an invalid (huge) bound to `uni_utf8_get_char_n`, allowing arbitrary memory reads beyond the buffer. This is a **buffer overflow vulnerability** that can be exploited to crash the program or execute arbitrary code.
 
 **Result**: (1) YES: Vulnerability detected.",['CWE-835'],CVE-2020-7046,"lib-smtp in submission-login and lmtp in Dovecot 2.3.9 before 2.3.9.3 mishandles truncated UTF-8 data in command parameters, as demonstrated by the unauthenticated triggering of a submission-login infinite loop."
-195264,pcre2,d4fa336fbcc388f89095b184ba6d99422cfc676c,https://github.com/PCRE2Project/pcre2,https://github.com/PCRE2Project/pcre2/commit/d4fa336fbcc388f89095b184ba6d99422cfc676c,Fix incorrect value reading in JIT.,1,1,"I need to analyze this code to determine if it has any security vulnerabilities. As a security expert skilled in static program analysis, I'll go through the code carefully to look for potential issues.
+195264,pcre2,d4fa336fbcc388f89095b184ba6d99422cfc676c,https://github.com/PCRE2Project/pcre2,https://github.com/PCRE2Project/pcre2/commit/d4fa336fbcc388f89095b184ba6d99422cfc676c,Fix incorrect value reading in JIT.,1,0,"I need to analyze this code to determine if it has any security vulnerabilities. As a security expert skilled in static program analysis, I'll go through the code carefully to look for potential issues.
 
 First, let me understand what this code does. It appears to be part of a regular expression compiler for PCRE2 (Perl Compatible Regular Expressions), specifically handling the compilation of character classes (xclass matching paths).
 
@@ -125086,7 +125086,7 @@ After a thorough static analysis of the provided code, I have identified no secu
 **Conclusion**: The code demonstrates robust memory management, proper bounds checking, and comprehensive error handling. There are no exploitable security vulnerabilities (e.g., buffer overflows, use-after-free, or information leaks) present in this static analysis.
 
 (2) NO: No vulnerability.",['CWE-401'],CVE-2022-23578,"Tensorflow is an Open Source Machine Learning Framework. If a graph node is invalid, TensorFlow can leak memory in the implementation of `ImmutableExecutorState::Initialize`. Here, we set `item->kernel` to `nullptr` but it is a simple `OpKernel*` pointer so the memory that was previously allocated to it would leak. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-195017,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,1,1,"First, I need to analyze this code for vulnerabilities. The code is in C and seems to be part of a media file processing library, probably related to ISO Base Media File Format (ISOM) as indicated by the types like GF_ISOM_BOX_TYPE_HMHD.
+195017,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,1,0,"First, I need to analyze this code for vulnerabilities. The code is in C and seems to be part of a media file processing library, probably related to ISO Base Media File Format (ISOM) as indicated by the types like GF_ISOM_BOX_TYPE_HMHD.
 
 The function is `GetHintFormat` which takes a `GF_TrackBox *trak` and returns a `u32` (unsigned 32-bit integer).
 

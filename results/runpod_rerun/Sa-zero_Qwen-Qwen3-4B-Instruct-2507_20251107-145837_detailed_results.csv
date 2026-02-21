@@ -1587,7 +1587,7 @@ Therefore, **no actual vulnerability** in terms of memory safety.
 ---
 
 **Answer: (2) NO** ✅",['CWE-191'],CVE-2021-21897,A code execution vulnerability exists in the DL_Dxf::handleLWPolylineData functionality of Ribbonsoft dxflib 3.17.0. A specially-crafted .dxf file can lead to a heap buffer overflow. An attacker can provide a malicious file to trigger this vulnerability.
-372352,Singular,5f28fbf066626fa9c4a8f0e6408c0bb362fb386c,https://github.com/Singular/Singular,https://github.com/Singular/Singular/commit/5f28fbf066626fa9c4a8f0e6408c0bb362fb386c,use mkstemp for sdb,0,1,"Let's analyze the provided code step by step to determine whether it contains a vulnerability.
+372352,Singular,5f28fbf066626fa9c4a8f0e6408c0bb362fb386c,https://github.com/Singular/Singular,https://github.com/Singular/Singular/commit/5f28fbf066626fa9c4a8f0e6408c0bb362fb386c,use mkstemp for sdb,0,0,"Let's analyze the provided code step by step to determine whether it contains a vulnerability.
 
 ---
 
@@ -8270,7 +8270,7 @@ Let’s evaluate possible vulnerabilities:
 **(2) NO: No vulnerability.** ✅
 
 The code is secure and properly handles division by zero in a safe and predictable manner. There is no exploitable vulnerability.",['CWE-369'],CVE-2021-37683,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of division in TFLite is [vulnerable to a division by 0 error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/div.cc). There is no check that the divisor tensor does not contain zero elements. We have patched the issue in GitHub commit 1e206baedf8bef0334cca3eb92bab134ef525a28. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-511472,server,b3c3291f0b7c1623cb20663f7cf31b7f749768bc,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/b3c3291f0b7c1623cb20663f7cf31b7f749768bc,MDEV-24176 fixup: GCC -Wmaybe-uninitialized,0,1,"We are asked to analyze the provided C++ code (from MySQL's storage engine) and determine whether it contains a **security vulnerability**.
+511472,server,b3c3291f0b7c1623cb20663f7cf31b7f749768bc,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/b3c3291f0b7c1623cb20663f7cf31b7f749768bc,MDEV-24176 fixup: GCC -Wmaybe-uninitialized,0,0,"We are asked to analyze the provided C++ code (from MySQL's storage engine) and determine whether it contains a **security vulnerability**.
 
 We must decide between:
 
@@ -9684,7 +9684,7 @@ All checks and protections are in place.
 
 ### ✅ Final Answer:
 **(2) NO: No vulnerability.**",['CWE-703'],CVE-2021-24029,"A packet of death scenario is possible in mvfst via a specially crafted message during a QUIC session, which causes a crash via a failed assertion. Per QUIC specification, this particular message should be treated as a connection error. This issue affects mvfst versions prior to commit a67083ff4b8dcbb7ee2839da6338032030d712b0 and proxygen versions prior to v2021.03.15.00."
-232287,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,0,1,"Let's analyze the provided code step-by-step to determine whether it contains a **security vulnerability**.
+232287,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,0,0,"Let's analyze the provided code step-by-step to determine whether it contains a **security vulnerability**.
 
 ---
 
@@ -18334,7 +18334,7 @@ The code is safe from common security vulnerabilities like buffer overflows, for
 264715,tensorflow,7731e8dfbe4a56773be5dc94d631611211156659,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/7731e8dfbe4a56773be5dc94d631611211156659,"Don't constant-fold DT_RESOURCE constants.
 
 PiperOrigin-RevId: 391803952
-Change-Id: I0ea3ec31d3e7dfda0f03b4027a237f08d00a3091",0,1,"Let's analyze the provided code step by step to determine whether it contains a **security vulnerability**.
+Change-Id: I0ea3ec31d3e7dfda0f03b4027a237f08d00a3091",0,0,"Let's analyze the provided code step by step to determine whether it contains a **security vulnerability**.
 
 ---
 
@@ -25966,7 +25966,7 @@ Even though there may be **bugs in logic or behavior**, they do not constitute *
 ---
 
 **Answer: (2) NO: No vulnerability.** ✅",['CWE-787'],CVE-2022-0714,Heap-based Buffer Overflow in GitHub repository vim/vim prior to 8.2.4436.
-261220,wolfMQTT,84d4b53122e0fa0280c7872350b89d5777dabbb2,https://github.com/wolfSSL/wolfMQTT,https://github.com/wolfSSL/wolfMQTT/commit/84d4b53122e0fa0280c7872350b89d5777dabbb2,Fix wolfmqtt-fuzzer: Null-dereference WRITE in MqttProps_Free,0,1,"Let's analyze the provided C code step-by-step to determine whether it contains a **security vulnerability**.
+261220,wolfMQTT,84d4b53122e0fa0280c7872350b89d5777dabbb2,https://github.com/wolfSSL/wolfMQTT,https://github.com/wolfSSL/wolfMQTT/commit/84d4b53122e0fa0280c7872350b89d5777dabbb2,Fix wolfmqtt-fuzzer: Null-dereference WRITE in MqttProps_Free,0,0,"Let's analyze the provided C code step-by-step to determine whether it contains a **security vulnerability**.
 
 ---
 
@@ -26868,7 +26868,7 @@ Therefore, **this code is vulnerable**.
 We are cleaning up the memory in `decode` and then we are using an `OP_REQUIRES` to check an invariant on the `decode` data.
 
 PiperOrigin-RevId: 409299145
-Change-Id: I4eb93aaca52483eb202e89b78df07fbb2f6cb254",0,1,"We are asked to analyze the provided C++ code for potential vulnerabilities. Let's go step-by-step to determine whether a vulnerability is present.
+Change-Id: I4eb93aaca52483eb202e89b78df07fbb2f6cb254",0,0,"We are asked to analyze the provided C++ code for potential vulnerabilities. Let's go step-by-step to determine whether a vulnerability is present.
 
 ---
 
@@ -31541,7 +31541,7 @@ Change-Id: Ic358e6bf0559e011539974d453fc7aa18b427e9c",1,0,No response from agent
 197826,tensorflow,7731e8dfbe4a56773be5dc94d631611211156659,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/7731e8dfbe4a56773be5dc94d631611211156659,"Don't constant-fold DT_RESOURCE constants.
 
 PiperOrigin-RevId: 391803952
-Change-Id: I0ea3ec31d3e7dfda0f03b4027a237f08d00a3091",1,1,"Let's analyze the provided code step by step to determine whether it contains a **security vulnerability**.
+Change-Id: I0ea3ec31d3e7dfda0f03b4027a237f08d00a3091",1,0,"Let's analyze the provided code step by step to determine whether it contains a **security vulnerability**.
 
 ---
 
@@ -50942,7 +50942,7 @@ There is no evidence of a vulnerability.
 
 ### Final Answer:
 (2) NO: No vulnerability.",['CWE-415'],CVE-2022-34494,rpmsg_virtio_add_ctrl_dev in drivers/rpmsg/virtio_rpmsg_bus.c in the Linux kernel before 5.18.4 has a double free.
-197565,wolfMQTT,84d4b53122e0fa0280c7872350b89d5777dabbb2,https://github.com/wolfSSL/wolfMQTT,https://github.com/wolfSSL/wolfMQTT/commit/84d4b53122e0fa0280c7872350b89d5777dabbb2,Fix wolfmqtt-fuzzer: Null-dereference WRITE in MqttProps_Free,1,1,"Let's analyze the provided C code step-by-step to determine whether it contains a **security vulnerability**.
+197565,wolfMQTT,84d4b53122e0fa0280c7872350b89d5777dabbb2,https://github.com/wolfSSL/wolfMQTT,https://github.com/wolfSSL/wolfMQTT/commit/84d4b53122e0fa0280c7872350b89d5777dabbb2,Fix wolfmqtt-fuzzer: Null-dereference WRITE in MqttProps_Free,1,0,"Let's analyze the provided C code step-by-step to determine whether it contains a **security vulnerability**.
 
 ---
 
@@ -60498,7 +60498,7 @@ The code is a safe, well-structured compiler pass for shape simplification with 
 
 **Answer: (2) NO**",['CWE-754'],CVE-2022-23593,"Tensorflow is an Open Source Machine Learning Framework. The `simplifyBroadcast` function in the MLIR-TFRT infrastructure in TensorFlow is vulnerable to a segfault (hence, denial of service), if called with scalar shapes. If all shapes are scalar, then `maxRank` is 0, so we build an empty `SmallVector`. The fix will be included in TensorFlow 2.8.0. This is the only affected version."
 195095,e2guardian,eae46a7e2a57103aadca903c4a24cca94dc502a2,https://github.com/e2guardian/e2guardian,https://github.com/e2guardian/e2guardian/commit/eae46a7e2a57103aadca903c4a24cca94dc502a2,"Fix bug #707 cert hostnames not being checked
-- only happened when openssl v1.1 is used",1,1,"Let's analyze the provided C++ code step-by-step to determine whether it contains a **security vulnerability**.
+- only happened when openssl v1.1 is used",1,0,"Let's analyze the provided C++ code step-by-step to determine whether it contains a **security vulnerability**.
 
 ---
 
@@ -60651,7 +60651,7 @@ This makes the SSL connection **insecure by default** and exposes the client to 
 > 🚨 The use of `SSL_set_options(ssl, SSL_OP_ALL)` introduces a serious security vulnerability.",['CWE-295'],CVE-2021-44273,"e2guardian v5.4.x <= v5.4.3r is affected by missing SSL certificate validation in the SSL MITM engine. In standalone mode (i.e., acting as a proxy or a transparent proxy), with SSL MITM enabled, e2guardian, if built with OpenSSL v1.1.x, did not validate hostnames in certificates of the web servers that it connected to, and thus was itself vulnerable to MITM attacks."
 195220,tmate-ssh-server,1c020d1f5ca462f5b150b46a027aaa1bbe3c9596,https://github.com/tmate-io/tmate-ssh-server,https://github.com/tmate-io/tmate-ssh-server/commit/1c020d1f5ca462f5b150b46a027aaa1bbe3c9596,"Harden /tmp/tmate directory
 
-Suggested by Matthias Gerstner",1,1,"Let's analyze the provided C code step by step to determine whether it contains a **security vulnerability**.
+Suggested by Matthias Gerstner",1,0,"Let's analyze the provided C code step by step to determine whether it contains a **security vulnerability**.
 
 ---
 

@@ -694,9 +694,16 @@ Analysis performed in `/notebooks/`:
    - Resolution: Fixed via `scripts/fix_vuln_think_tag_parsing.py`; all 54 evaluation files regenerated; consolidated metrics and RQ3 baseline samples updated
    - Status: Fix applied, all downstream metrics and analyses updated
 
+7. **Vulnerability Keyword Parser False Positives (Fixed Feb 22, 2026)**:
+   - Issue: SA vuln prediction parser had two bugs: (a) YES patterns checked before NO, causing "no vulnerability detected" to match "vulnerability detected"; (b) broad generic fallback keywords ("buffer overflow", "memory leak", etc.) matched in negative contexts
+   - Affected: SA vuln JSONL files (1,021 predictions changed across 37 files, Instruct mode most impacted)
+   - Impact on RQ3: All 16 strata in Phase A rater set affected (pool size changes propagated through seeded RNG); 42 of 48 samples replaced
+   - Resolution: Fixed parser in 4 source files; re-parsed via `scripts/fix_vuln_keyword_parsing.py`; evaluation, consolidation, and RQ3 baseline re-generated
+   - Status: Fix applied, all downstream metrics and analyses updated
+
 ---
 
-**Last Updated**: 2026-02-10
+**Last Updated**: 2026-02-22
 **Total Experiments**: 120+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + 24 RQ3 Log Analysis + 4 Codegen Reruns)
   - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
   - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)

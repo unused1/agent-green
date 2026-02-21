@@ -45,7 +45,7 @@ However, to provide a more thorough analysis, I would need more context about th
 251946,tensorflow,15691e456c7dc9bd6be203b09765b063bf4a380c,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/15691e456c7dc9bd6be203b09765b063bf4a380c,"Prevent dereferencing of null pointers in TFLite's `add.cc`.
 
 PiperOrigin-RevId: 387244946
-Change-Id: I56094233327fbd8439b92e1dbb1262176e00eeb9",0,1,"(2) NO: No vulnerability.
+Change-Id: I56094233327fbd8439b92e1dbb1262176e00eeb9",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -97,7 +97,7 @@ Here's a brief explanation of why I decided this way:
 3. **No Known Vulnerabilities**: Based on the code provided, there are no obvious vulnerabilities such as buffer overflows, race conditions, or use of uninitialized variables that could lead to a security breach. The code uses standard and safe practices for handling file descriptors, memory allocation, and signal handling.
 
 4. **Assumptions**: The analysis assumes that the code is part of a well-tested and maintained system. If the code is part of a larger, poorly maintained system, there could be vulnerabilities introduced by other parts of the system that this function interacts with. However, based solely on the code provided, no vulnerabilities are detected.",['CWE-20'],CVE-2011-1678,"smbfs in Samba 3.5.8 and earlier attempts to use (1) mount.cifs to append to the /etc/mtab file and (2) umount.cifs to append to the /etc/mtab.tmp file without first checking whether resource limits would interfere, which allows local users to trigger corruption of the /etc/mtab file via a process with a small RLIMIT_FSIZE value, a related issue to CVE-2011-1089."
-226029,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,0,1,"(2) NO: No vulnerability.
+226029,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,0,0,"(2) NO: No vulnerability.
 
 Here's the step-by-step analysis:
 
@@ -270,7 +270,7 @@ Suggested-by: Michael Hanselmann <public@hansmi.ch>
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 Reviewed-by: Michael Hanselmann <public@hansmi.ch>
 Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
-Message-id: 20190108102301.1957-1-kraxel@redhat.com",0,1,"(2) NO: No vulnerability.
+Message-id: 20190108102301.1957-1-kraxel@redhat.com",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -450,7 +450,7 @@ In summary, the provided code does not contain any obvious vulnerabilities. It f
 
 Ensure that if the capability length specified is enough data.
 
-Signed-off-by: Donald Sharp <sharpd@nvidia.com>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Donald Sharp <sharpd@nvidia.com>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -494,7 +494,7 @@ Based on this analysis, the function does not contain any obvious vulnerabilitie
 296226,vim,37f47958b8a2a44abc60614271d9537e7f14e51a,https://github.com/vim/vim,https://github.com/vim/vim/commit/37f47958b8a2a44abc60614271d9537e7f14e51a,"patch 8.2.4253: using freed memory when substitute with function call
 
 Problem:    Using freed memory when substitute uses a recursive function call.
-Solution:   Make a copy of the substitute text.",0,1,"Based on the provided code, I would respond with:
+Solution:   Make a copy of the substitute text.",0,0,"Based on the provided code, I would respond with:
 
 (2) NO: No vulnerability detected.
 
@@ -633,7 +633,7 @@ While there might be edge cases or specific scenarios where vulnerabilities coul
 313850,vim,395bd1f6d3edc9f7edb5d1f2d7deaf5a9e3ab93c,https://github.com/vim/vim,https://github.com/vim/vim/commit/395bd1f6d3edc9f7edb5d1f2d7deaf5a9e3ab93c,"patch 8.2.4956: reading past end of line with ""gf"" in Visual block mode
 
 Problem:    Reading past end of line with ""gf"" in Visual block mode.
-Solution:   Do not include the NUL in the length.",0,1,"(2) NO: No vulnerability.
+Solution:   Do not include the NUL in the length.",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -833,7 +833,7 @@ Required by virtio 1.
 
 Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
 Reviewed-by: Amit Shah <amit.shah@redhat.com>
-Reviewed-by: Jason Wang <jasowang@redhat.com>",0,1,"(2) NO: No vulnerability.
+Reviewed-by: Jason Wang <jasowang@redhat.com>",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -984,7 +984,7 @@ Here's a brief explanation of why I decided against a vulnerability:
 439114,ImageMagick6,210474b2fac6a661bfa7ed563213920e93e76395,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/210474b2fac6a661bfa7ed563213920e93e76395,Fix ultra rare but potential memory-leak,0,0,"(2) NO: No vulnerability.
 
 The provided code is a part of the ImageMagick library, which is a widely-used and well-tested image processing software. The code appears to be a correct implementation of the `ReadBMPImage` function, which reads BMP image files. The function includes various checks and error handling, such as assertions, exception handling, and checks for invalid image headers. Given the extensive testing and the fact that ImageMagick is a well-established and widely-used library, it is unlikely that this code contains any vulnerabilities. However, if you are concerned about specific security issues, it would be best to consult the ImageMagick documentation and the latest security advisories.",['CWE-401'],CVE-2019-13133,ImageMagick before 7.0.8-50 has a memory leak vulnerability in the function ReadBMPImage in coders/bmp.c.
-447053,exiv2,6e3855aed7ba8bb4731fc4087ca7f9078b2f3d97,https://github.com/Exiv2/exiv2,https://github.com/Exiv2/exiv2/commit/6e3855aed7ba8bb4731fc4087ca7f9078b2f3d97,Fix https://github.com/Exiv2/exiv2/issues/55,0,1,"(2) NO: No vulnerability.
+447053,exiv2,6e3855aed7ba8bb4731fc4087ca7f9078b2f3d97,https://github.com/Exiv2/exiv2,https://github.com/Exiv2/exiv2/commit/6e3855aed7ba8bb4731fc4087ca7f9078b2f3d97,Fix https://github.com/Exiv2/exiv2/issues/55,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -1253,7 +1253,7 @@ Change-Id: I1d8a9d0d8988ed5e08be8b9f2004ce1b4cd11b7c",0,0,"(2) NO: No vulnerabil
 247290,tensorflow,9e62869465573cb2d9b5053f1fa02a81fce21d69,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/9e62869465573cb2d9b5053f1fa02a81fce21d69,"Add more validation to `RequantizationRangePerChannel`.
 
 PiperOrigin-RevId: 387693946
-Change-Id: Ife8dcbdb021bec4787eef6a4361dd08f17c14bd6",0,1,"(2) NO: No vulnerability.
+Change-Id: Ife8dcbdb021bec4787eef6a4361dd08f17c14bd6",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -1293,7 +1293,7 @@ Here's a step-by-step analysis:
 Given the provided code, no security vulnerabilities (like memory corruption, buffer overflows, or undefined behavior due to null pointer dereferences) are detected. However, the code could be improved for resource management and robustness.",['CWE-416'],CVE-2020-15569,PlayerGeneric.cpp in MilkyTracker through 1.02.00 has a use-after-free in the PlayerGeneric destructor.
 220442,mruby,27d1e0132a0804581dca28df042e7047fd27eaa8,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/27d1e0132a0804581dca28df042e7047fd27eaa8,"array.c: fix `mrb_ary_shift_m` initialization bug.
 
-The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",0,1,"(2) NO: No vulnerability.
+The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -1340,7 +1340,7 @@ The provided code is a part of the `mount` command's implementation in a Linux k
 225547,tensorflow,a1e1511dde36b3f8aa27a6ec630838e7ea40e091,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a1e1511dde36b3f8aa27a6ec630838e7ea40e091,"[lite] Update TfLiteIntArrayCreate to return size_t
 
 PiperOrigin-RevId: 416439896
-Change-Id: I847f69b68d1ddaff4b1e925a09b8b69c1756653b",0,1,"(2) NO: No vulnerability.
+Change-Id: I847f69b68d1ddaff4b1e925a09b8b69c1756653b",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -1540,7 +1540,7 @@ Change-Id: Iad2ec40d43f5fd7ea016c20283356c12d5ddeab1",0,0,"(2) NO: No vulnerabil
 - **Documentation:** Add comments to explain the purpose of the `Compute` function, the `relax_constraints_` flag, and the `AllocatorAttributes` settings for better code readability.
 - **Code Duplication:** The `Copy` function is used multiple times, but its implementation is not shown. Ensure that the `Copy` function is correctly implemented and safe for all use cases.
 - **Code Complexity:** The code is complex and could benefit from refactoring to improve readability and maintainability. For example, the reuse and fallback logic could be simplified or encapsulated into helper functions.",['CWE-908'],CVE-2022-23573,"Tensorflow is an Open Source Machine Learning Framework. The implementation of `AssignOp` can result in copying uninitialized data to a new tensor. This later results in undefined behavior. The implementation has a check that the left hand side of the assignment is initialized (to minimize number of allocations), but does not check that the right hand side is also initialized. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-252437,tinyexr,a685e3332f61cd4e59324bf3f669d36973d64270,https://github.com/syoyo/tinyexr,https://github.com/syoyo/tinyexr/commit/a685e3332f61cd4e59324bf3f669d36973d64270,Make line_no with too large value(2**20) invalid. Fixes #124,0,1,"(2) NO: No vulnerability.
+252437,tinyexr,a685e3332f61cd4e59324bf3f669d36973d64270,https://github.com/syoyo/tinyexr,https://github.com/syoyo/tinyexr/commit/a685e3332f61cd4e59324bf3f669d36973d64270,Make line_no with too large value(2**20) invalid. Fixes #124,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -2285,7 +2285,7 @@ non-compliant clients).
 Fixes: 26455d45 (server: protocol: Implement Block Status ""base:allocation"".)",0,0,"(2) NO: No vulnerability.
 
 The provided code is a part of the `nbd` (Network Block Device) driver in Linux, specifically the part that handles the ""New Style"" options for the NBD protocol. After a thorough analysis, no vulnerabilities were identified in this code snippet. The code appears to follow standard protocol specifications and best practices for handling network block device connections and option negotiation. It includes proper error handling, input validation, and checks for edge cases, such as maximum data lengths and TLS requirements. Therefore, this code snippet is not considered vulnerable.",['CWE-924'],CVE-2021-3716,"A flaw was found in nbdkit due to to improperly caching plaintext state across the STARTTLS encryption boundary. A MitM attacker could use this flaw to inject a plaintext NBD_OPT_STRUCTURED_REPLY before proxying everything else a client sends to the server, potentially leading the client to terminate the NBD session. The highest threat from this vulnerability is to system availability."
-445881,file-roller,b147281293a8307808475e102a14857055f81631,https://git.gnome.org/browse/file-roller,https://git.gnome.org/browse/file-roller/commit/?id=b147281293a8307808475e102a14857055f81631,libarchive: sanitize filenames before extracting,0,1,"(2) NO: No vulnerability.
+445881,file-roller,b147281293a8307808475e102a14857055f81631,https://git.gnome.org/browse/file-roller,https://git.gnome.org/browse/file-roller/commit/?id=b147281293a8307808475e102a14857055f81631,libarchive: sanitize filenames before extracting,0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -2402,7 +2402,7 @@ Fixes: 89c8a4984fc9 (""KVM: SVM: Enable Virtual VMLOAD VMSAVE feature"")
 
 Suggested-by: Paolo Bonzini <pbonzini@redhat.com>
 Signed-off-by: Maxim Levitsky <mlevitsk@redhat.com>
-Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -2426,7 +2426,7 @@ Therefore, based on the analysis, there is no clear vulnerability detected in th
 346415,vim,4748c4bd64610cf943a431d215bb1aad51f8d0b4,https://github.com/vim/vim,https://github.com/vim/vim/commit/4748c4bd64610cf943a431d215bb1aad51f8d0b4,"patch 8.2.4974: "":so"" command may read after end of buffer
 
 Problem:    "":so"" command may read after end of buffer.
-Solution:   Compute length of text properly.",0,1,"(2) NO: No vulnerability.
+Solution:   Compute length of text properly.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -2560,7 +2560,7 @@ Cc: stable@vger.kernel.org
 Fixes: f28cd2af22a0 (""openvswitch: fix flow actions reallocation"")
 Signed-off-by: Paolo Valerio <pvalerio@redhat.com>
 Acked-by: Eelco Chaudron <echaudro@redhat.com>
-Signed-off-by: David S. Miller <davem@davemloft.net>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: David S. Miller <davem@davemloft.net>",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -3248,7 +3248,7 @@ However, to provide a more thorough analysis, I would need to review the code in
 264715,tensorflow,7731e8dfbe4a56773be5dc94d631611211156659,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/7731e8dfbe4a56773be5dc94d631611211156659,"Don't constant-fold DT_RESOURCE constants.
 
 PiperOrigin-RevId: 391803952
-Change-Id: I0ea3ec31d3e7dfda0f03b4027a237f08d00a3091",0,1,"(2) NO: No vulnerability.
+Change-Id: I0ea3ec31d3e7dfda0f03b4027a237f08d00a3091",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -3589,7 +3589,7 @@ Since all potential security issues (buffer overflow, invalid input, and null po
 However, to provide a more thorough analysis, I would recommend reviewing the implementation of `dlpar_add_slot` to ensure it does not have any vulnerabilities. For example, if `dlpar_add_slot` does not properly validate or handle the input string, it could lead to a buffer overflow or other issues. Additionally, if `dlpar_add_slot` is not properly integrated with other components, it could lead to unintended behavior or security issues.",['CWE-120'],CVE-2021-28972,"In drivers/pci/hotplug/rpadlpar_sysfs.c in the Linux kernel through 5.11.8, the RPA PCI Hotplug driver has a user-tolerable buffer overflow when writing a new device name to the driver from userspace, allowing userspace to write data to the kernel stack frame directly. This occurs because add_slot_store and remove_slot_store mishandle drc_name '\0' termination, aka CID-cc7a0bb058b8."
 509510,server,9e39d0ae44595dbd1570805d97c9c874778a6be8,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/9e39d0ae44595dbd1570805d97c9c874778a6be8,"MDEV-25787 Bug report: crash on SELECT DISTINCT thousands_blob_fields
 
-fix a debug assert to account for not opened temp tables",0,1,"(2) NO: No vulnerability.
+fix a debug assert to account for not opened temp tables",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -3778,7 +3778,7 @@ Reported-by: syzbot+cdbd40e0c3ca02cae3b7@syzkaller.appspotmail.com
 Signed-off-by: Haimin Zhang <tcs_kernel@tencent.com>
 Acked-by: Jon Maloy <jmaloy@redhat.com>
 Link: https://lore.kernel.org/r/1640918123-14547-1-git-send-email-tcs.kernel@gmail.com
-Signed-off-by: Jakub Kicinski <kuba@kernel.org>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Jakub Kicinski <kuba@kernel.org>",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -3867,7 +3867,7 @@ Fix the integer overflow by changing elem_size to u64 from u32.
 Fixes: 557c0c6e7df8 (""bpf: convert stackmap to pre-allocation"")
 Signed-off-by: Tatsuhiko Yasumatsu <th.yasumatsu@gmail.com>
 Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
-Link: https://lore.kernel.org/bpf/20210930135545.173698-1-th.yasumatsu@gmail.com",0,1,"(2) NO: No vulnerability.
+Link: https://lore.kernel.org/bpf/20210930135545.173698-1-th.yasumatsu@gmail.com",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -3939,7 +3939,7 @@ Outside of debug mode, `DCHECK` is a no-op.
 A better alternative is to report an error to the log buffer and continue. This should happen both in debug mode and in prod mode.
 
 PiperOrigin-RevId: 408375925
-Change-Id: Id5b3e19c73f3fbe0cc4bba26ca44ff9607bb6356",0,1,"(2) NO: No vulnerability.
+Change-Id: Id5b3e19c73f3fbe0cc4bba26ca44ff9607bb6356",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -4021,7 +4021,7 @@ Here's a step-by-step analysis:
 4. **No Known Exploitation Paths**: Based on the provided code, there are no obvious exploitation paths or vulnerabilities such as buffer overflows, use of uninitialized variables, or other common web vulnerabilities. The code is designed to be robust and safe, assuming that the inputs are valid and the system is properly configured.
 
 5. **Assumptions**: The analysis assumes that the code is part of a well-designed and secure system, with proper input validation, memory management, and error handling in place. The code itself does not contain any known vulnerabilities that would compromise the security of the system it operates on. However, it is always recommended to conduct thorough security audits and reviews, especially for critical systems or codebases.",['CWE-476'],CVE-2021-37647,"TensorFlow is an end-to-end open source platform for machine learning. When a user does not supply arguments that determine a valid sparse tensor, `tf.raw_ops.SparseTensorSliceDataset` implementation can be made to dereference a null pointer. The [implementation](https://github.com/tensorflow/tensorflow/blob/8d72537c6abf5a44103b57b9c2e22c14f5f49698/tensorflow/core/kernels/data/sparse_tensor_slice_dataset_op.cc#L240-L251) has some argument validation but fails to consider the case when either `indices` or `values` are provided for an empty sparse tensor when the other is not. If `indices` is empty, then [code that performs validation](https://github.com/tensorflow/tensorflow/blob/8d72537c6abf5a44103b57b9c2e22c14f5f49698/tensorflow/core/kernels/data/sparse_tensor_slice_dataset_op.cc#L260-L261) (i.e., checking that the indices are monotonically increasing) results in a null pointer dereference. If `indices` as provided by the user is empty, then `indices` in the C++ code above is backed by an empty `std::vector`, hence calling `indices->dim_size(0)` results in null pointer dereferencing (same as calling `std::vector::at()` on an empty vector). We have patched the issue in GitHub commit 02cc160e29d20631de3859c6653184e3f876b9d7. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-398518,rizin,aa6917772d2f32e5a7daab25a46c72df0b5ea406,https://github.com/rizinorg/rizin,https://github.com/rizinorg/rizin/commit/aa6917772d2f32e5a7daab25a46c72df0b5ea406,Fix oob write for dwarf with abbrev with count 0 (Fix #2083) (#2086),0,1,"(2) NO: No vulnerability.
+398518,rizin,aa6917772d2f32e5a7daab25a46c72df0b5ea406,https://github.com/rizinorg/rizin,https://github.com/rizinorg/rizin/commit/aa6917772d2f32e5a7daab25a46c72df0b5ea406,Fix oob write for dwarf with abbrev with count 0 (Fix #2083) (#2086),0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -4042,7 +4042,7 @@ Here's a step-by-step analysis:
 337374,vim,8e4b76da1d7e987d43ca960dfbc372d1c617466f,https://github.com/vim/vim,https://github.com/vim/vim/commit/8e4b76da1d7e987d43ca960dfbc372d1c617466f,"patch 8.2.4901: NULL pointer access when using invalid pattern
 
 Problem:    NULL pointer access when using invalid pattern.
-Solution:   Check for failed regexp program.",0,1,"(2) NO: No vulnerability.
+Solution:   Check for failed regexp program.",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -4073,7 +4073,7 @@ Fixes: d87f1a1cb7b6 (""vhost: support inflight info sharing"")
 Cc: stable@dpdk.org
 
 Signed-off-by: David Marchand <david.marchand@redhat.com>
-Reviewed-by: Maxime Coquelin <maxime.coquelin@redhat.com>",0,1,"(2) NO: No vulnerability.
+Reviewed-by: Maxime Coquelin <maxime.coquelin@redhat.com>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4510,7 +4510,7 @@ In summary, based on the code's complexity, the lack of interaction with externa
 - **Input Validation**: Validate `timeout_ms` and `wait_packet_id` to ensure they are within expected ranges.
 - **Semaphore Locking**: Implement proper semaphore locking/unlocking logic to prevent deadlocks.
 - **Code Readability**: Improve code readability by using descriptive variable names and comments. For example, `packet_type` could be renamed to `packet_type` for clarity.",['CWE-787'],CVE-2021-45936,wolfSSL wolfMQTT 1.9 has a heap-based buffer overflow in MqttDecode_Disconnect (called from MqttClient_DecodePacket and MqttClient_WaitType).
-219912,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,0,1,"(2) NO: No vulnerability.
+219912,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -4916,7 +4916,7 @@ restored.
 
 The fix is to erase fields for the spare memory from the saved frame.
 
-This closes #469 issue on Github.",0,1,"(2) NO: No vulnerability.
+This closes #469 issue on Github.",0,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -5240,7 +5240,7 @@ Here's a step-by-step analysis:
    - The function's logic is straightforward and follows best practices for method removal in Ruby.
 
 Therefore, based on the analysis, there is no identified vulnerability in the provided code.",['CWE-787'],CVE-2022-1286,heap-buffer-overflow in mrb_vm_exec in mruby/mruby in GitHub repository mruby/mruby prior to 3.2. Possible arbitrary code execution if being exploited.
-274814,pjproject,450baca94f475345542c6953832650c390889202,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/450baca94f475345542c6953832650c390889202,Merge pull request from GHSA-26j7-ww69-c4qj,0,1,"(2) NO: No vulnerability.
+274814,pjproject,450baca94f475345542c6953832650c390889202,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/450baca94f475345542c6953832650c390889202,Merge pull request from GHSA-26j7-ww69-c4qj,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -5456,7 +5456,7 @@ However, to ensure the code's security, it's recommended to perform a thorough r
 - **Attachment Type**: Verify that the attachment type is appropriate for the DMA buffer.
 - **DMA Device Access**: Ensure the DMA device is properly configured and accessed safely.
 - **Kernel Version and Updates**: Check if the code is compatible with the latest kernel versions and if there are any known updates or patches that address potential issues.",['CWE-401'],CVE-2019-19069,"A memory leak in the fastrpc_dma_buf_attach() function in drivers/misc/fastrpc.c in the Linux kernel before 5.3.9 allows attackers to cause a denial of service (memory consumption) by triggering dma_get_sgtable() failures, aka CID-fc739a058d99."
-195409,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,1,1,"(2) NO: No vulnerability.
+195409,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -5569,7 +5569,7 @@ kmsg snip:
 Fixes: 5d069dbe8aaf (""fuse: fix bad inode"")
 Cc: stable@vger.kernel.org # 5.10+
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>",1,0,"(2) NO: No vulnerability.
 
 Here's the step-by-step analysis:
 
@@ -5747,7 +5747,7 @@ Suggested-by: Al Viro <viro@zeniv.linux.org.uk>
 Reported-by: Qualys Security Advisory <qsa@qualys.com>
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 Cc: stable@kernel.org
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",1,0,"(2) NO: No vulnerability.
 
 Here's the step-by-step analysis:
 
@@ -5826,7 +5826,7 @@ The provided code is part of a Vim9 command modifier parser. After a thorough an
 195385,flatpak,65cbfac982cb1c83993a9e19aa424daee8e9f042,https://github.com/flatpak/flatpak,https://github.com/flatpak/flatpak/commit/65cbfac982cb1c83993a9e19aa424daee8e9f042,"Ensure that bundles have metadata on install
 
 If we have a bundle without metadata we wouldn't properly present
-the permissions in the transaction.",1,1,"(2) NO: No vulnerability.
+the permissions in the transaction.",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -5861,7 +5861,7 @@ In doing so I have also added checks for '.' and for names that
 are shorter than they should be (names in the file system should
 not have '\0' terminators).
 
-Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -6134,7 +6134,7 @@ Cc: Jiri Pirko <jiri@mellanox.com>
 Cc: Cong Wang <xiyou.wangcong@gmail.com>
 Reported-by: syzbot <syzkaller@googlegroups.com>
 Link: https://lore.kernel.org/r/20220131172018.3704490-1-eric.dumazet@gmail.com
-Signed-off-by: Jakub Kicinski <kuba@kernel.org>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Jakub Kicinski <kuba@kernel.org>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -6159,7 +6159,7 @@ Signed-off-by: Jakub Kicinski <kuba@kernel.org>",1,1,"(2) NO: No vulnerability.
 **No Vulnerability Detected:**
 
 Based on the analysis, the provided code does not contain any obvious vulnerabilities. The code follows best practices for error handling, data validation, resource management, and concurrency. However, a thorough security audit by a professional would be recommended to ensure there are no overlooked vulnerabilities.",['CWE-416'],CVE-2022-1055,A use-after-free exists in the Linux Kernel in tc_new_tfilter that could allow a local attacker to gain privilege escalation. The exploit requires unprivileged user namespaces. We recommend upgrading past commit 04c2a47ffb13c29778e2a14e414ad4cb5a5db4b5
-217551,elfspirit,c5b0f5a9a24f2451bbeda4751d67633bc375e608,https://github.com/liyansong2018/elfspirit,https://github.com/liyansong2018/elfspirit/commit/c5b0f5a9a24f2451bbeda4751d67633bc375e608,Fix #1 about out-of-bounds,1,1,"(2) NO: No vulnerability.
+217551,elfspirit,c5b0f5a9a24f2451bbeda4751d67633bc375e608,https://github.com/liyansong2018/elfspirit,https://github.com/liyansong2018/elfspirit/commit/c5b0f5a9a24f2451bbeda4751d67633bc375e608,Fix #1 about out-of-bounds,1,0,"(2) NO: No vulnerability.
 
 The provided code is a static program analyzer for ELF (Executable Format) files, commonly used in Linux and Unix systems. It is designed to extract and display information about the ELF file, such as its header, sections, and dynamic links. The code does not contain any security vulnerabilities or exploits that could be used to compromise the system or access sensitive data. The code is structured to follow best practices for program analysis, including proper error handling and memory management. Therefore, there is no vulnerability detected in this code.",['CWE-125'],CVE-2022-21711,"elfspirit is an ELF static analysis and injection framework that parses, manipulates, and camouflages ELF files. When analyzing the ELF file format in versions prior to 1.1, there is an out-of-bounds read bug, which can lead to application crashes or information leakage. By constructing a special format ELF file, the information of any address can be leaked. elfspirit version 1.1 contains a patch for this issue."
 211126,libmobi,612562bc1ea38f1708b044e7a079c47a05b1291d,https://github.com/bfabiszewski/libmobi,https://github.com/bfabiszewski/libmobi/commit/612562bc1ea38f1708b044e7a079c47a05b1291d,Fix: index entry label not being zero-terminated with corrupt input,1,0,"(2) NO: No vulnerability.
@@ -6243,7 +6243,7 @@ Outside of debug mode, `DCHECK` is a no-op.
 A better alternative is to report an error to the log buffer and continue. This should happen both in debug mode and in prod mode.
 
 PiperOrigin-RevId: 408375925
-Change-Id: Id5b3e19c73f3fbe0cc4bba26ca44ff9607bb6356",1,1,"(2) NO: No vulnerability.
+Change-Id: Id5b3e19c73f3fbe0cc4bba26ca44ff9607bb6356",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -8772,7 +8772,7 @@ Since there are no obvious security issues, buffer overflows, or other vulnerabi
 200895,vim,d6c67629ed05aae436164eec474832daf8ba7420,https://github.com/vim/vim,https://github.com/vim/vim/commit/d6c67629ed05aae436164eec474832daf8ba7420,"patch 9.0.0260: using freed memory when using 'quickfixtextfunc' recursively
 
 Problem:    Using freed memory when using 'quickfixtextfunc' recursively.
-Solution:   Do not allow for recursion.",1,1,"(2) NO: No vulnerability.
+Solution:   Do not allow for recursion.",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -8834,7 +8834,7 @@ Here's a step-by-step analysis:
 In summary, the provided code does not contain any obvious vulnerabilities. It includes proper null checks, data type validation, and error handling, which are essential for preventing potential issues. The code is designed to handle different scenarios for tensor content and data types, and it includes logging for debugging purposes. Therefore, no vulnerability has been detected in this code snippet.",['CWE-617'],CVE-2022-23571,"Tensorflow is an Open Source Machine Learning Framework. When decoding a tensor from protobuf, a TensorFlow process can encounter cases where a `CHECK` assertion is invalidated based on user controlled arguments, if the tensors have an invalid `dtype` and 0 elements or an invalid shape. This allows attackers to cause denial of services in TensorFlow processes. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
 198452,tensorflow,a989426ee1346693cc015792f11d715f6944f2b8,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a989426ee1346693cc015792f11d715f6944f2b8,"Improve to cover scale value greater than one
 
-PiperOrigin-RevId: 433050921",1,1,"(2) NO: No vulnerability.
+PiperOrigin-RevId: 433050921",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -9109,7 +9109,7 @@ Reviewed-by: Maxime Coquelin <maxime.coquelin@redhat.com>",1,0,"(2) NO: No vulne
 216126,openssl,cca1cd9a3447dd067503e4a85ebd1679ee78a48e,https://github.com/openssl/openssl,https://github.com/openssl/openssl/commit/cca1cd9a3447dd067503e4a85ebd1679ee78a48e,"Submitted by: Tomas Hoger <thoger@redhat.com>
 
 Fix for CVE-2010-0433 where some kerberos enabled versions of OpenSSL
-could be crashed if the relevant tables were not present (e.g. chrooted).",1,1,"(2) NO: No vulnerability.
+could be crashed if the relevant tables were not present (e.g. chrooted).",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -9330,7 +9330,7 @@ Here's a brief explanation of why I decided this way:
 195056,tensorflow,8c6f391a2282684a25cbfec7687bd5d35261a209,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/8c6f391a2282684a25cbfec7687bd5d35261a209,"[lite] Add check for bias_size is zero to avoid division by zero. This shouldn't happen for properly converted models. Just safety check
 
 PiperOrigin-RevId: 416383645
-Change-Id: If8e508bf696ae8ecfb927e69c139a8ccf7fe60cb",1,1,"(2) NO: No vulnerability.
+Change-Id: If8e508bf696ae8ecfb927e69c139a8ccf7fe60cb",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -9373,7 +9373,7 @@ Solution:   Compute length of text properly.",1,0,"(2) NO: No vulnerability.
 197395,tensorflow,4071d8e2f6c45c1955a811fee757ca2adbe462c1,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/4071d8e2f6c45c1955a811fee757ca2adbe462c1,"Fix FPE issue with `tf.raw_ops.Reverse`.
 
 PiperOrigin-RevId: 371176973
-Change-Id: Ic6d483bfc95313ec2299c2d1c956cfe96c96626c",1,1,"(2) NO: No vulnerability.
+Change-Id: Ic6d483bfc95313ec2299c2d1c956cfe96c96626c",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -9549,7 +9549,7 @@ The provided code does not contain any obvious vulnerabilities such as null poin
 - Add neighbor value check in stl_remove_degenerate
 
 Fixes https://github.com/admesh/admesh/issues/28
-Merges https://github.com/admesh/admesh/pull/55",1,1,"(2) NO: No vulnerability.
+Merges https://github.com/admesh/admesh/pull/55",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -9783,7 +9783,7 @@ Here's a step-by-step analysis:
    - **Data Corruption**: If the function fails to properly update or delete states, it could lead to data corruption. The function uses a copy of the current state to ensure data consistency.
 
 In summary, the provided code does not contain any obvious vulnerabilities. However, it could be improved for better robustness and error handling.",['CWE-125'],CVE-2017-11600,"net/xfrm/xfrm_policy.c in the Linux kernel through 4.12.3, when CONFIG_XFRM_MIGRATE is enabled, does not ensure that the dir value of xfrm_userpolicy_id is XFRM_POLICY_MAX or less, which allows local users to cause a denial of service (out-of-bounds access) or possibly have unspecified other impact via an XFRM_MSG_MIGRATE xfrm Netlink message."
-195691,mruby,a4d97934d51cb88954cc49161dc1d151f64afb6b,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/a4d97934d51cb88954cc49161dc1d151f64afb6b,vm.c: check if target_class is NULL (when prepended).,1,1,"Based on the provided code, I cannot definitively identify a vulnerability without more context or specific attack vectors. However, I can provide some general observations and potential areas to consider:
+195691,mruby,a4d97934d51cb88954cc49161dc1d151f64afb6b,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/a4d97934d51cb88954cc49161dc1d151f64afb6b,vm.c: check if target_class is NULL (when prepended).,1,0,"Based on the provided code, I cannot definitively identify a vulnerability without more context or specific attack vectors. However, I can provide some general observations and potential areas to consider:
 
 1. **Error Handling**: The code has several error checks, such as `mrb_assert`, `mrb_gc_arena_save`, and `mrb_gc_arena_restore`. These are generally good practices to prevent memory leaks and ensure data integrity. However, the error handling could be more comprehensive, especially in cases like `OP_ERR` where an exception is thrown without a clear recovery path.
 
@@ -12679,7 +12679,7 @@ Tested-by: Tabitha Sable <tabitha.c.sable@gmail.com>
 Fixes: 81a6a5cdd2c5 (""Task Control Groups: automatic userspace notification of idle cgroups"")
 Cc: stable@vger.kernel.org # v2.6.24+
 Signed-off-by: ""Eric W. Biederman"" <ebiederm@xmission.com>
-Signed-off-by: Tejun Heo <tj@kernel.org>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Tejun Heo <tj@kernel.org>",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -12825,7 +12825,7 @@ is not empty after the encryption handshake.
 
 Our thanks to Jacob Champion for reporting this problem.
 
-Security: CVE-2021-23222",1,1,"(2) NO: No vulnerability detected.
+Security: CVE-2021-23222",1,0,"(2) NO: No vulnerability detected.
 
 The provided code is a part of the `PQconnectPoll` function, which is a function used in the `libpq` library for PostgreSQL. This function is designed to establish a connection to a PostgreSQL server and handle various connection states, including connection setup, authentication, and error handling. 
 
@@ -12949,7 +12949,7 @@ Here's a step-by-step analysis:
 Added more input validation to avoid nullptr dereferencing and array index
 out of bounds issues.
 
-PiperOrigin-RevId: 446192704",1,1,"(2) NO: No vulnerability.
+PiperOrigin-RevId: 446192704",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -12977,7 +12977,7 @@ If this function is part of a larger system, consider adding additional checks f
 202276,vim,57df9e8a9f9ae1aafdde9b86b10ad907627a87dc,https://github.com/vim/vim,https://github.com/vim/vim/commit/57df9e8a9f9ae1aafdde9b86b10ad907627a87dc,"patch 8.2.4151: reading beyond the end of a line
 
 Problem:    Reading beyond the end of a line.
-Solution:   For block insert only use the offset for correcting the length.",1,1,"(2) NO: No vulnerability.
+Solution:   For block insert only use the offset for correcting the length.",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -13288,7 +13288,7 @@ However, to ensure the code's security, it's recommended to perform a thorough s
 Check that indices are non-negative. Fix several identical code sites.
 Clean up grammar in error message.
 
-PiperOrigin-RevId: 445442017",1,1,"(2) NO: No vulnerability.
+PiperOrigin-RevId: 445442017",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -13389,7 +13389,7 @@ In summary, the code is well-structured, includes error checking, and uses safe 
 * This is a logic fix, but not the fully safe as changes in the code
   can result on UAF again, to properly protect r2 from crashing we
   need to break the ABI and add refcounting to RRegItem, which can't
-  happen in 5.6.x because of abi-compat rules",1,1,"(2) NO: No vulnerability.
+  happen in 5.6.x because of abi-compat rules",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -13547,7 +13547,7 @@ Here's a step-by-step analysis:
 - Memory corruption or buffer overflows (the code does not have any operations that could lead to these issues, such as direct memory manipulation or use of uninitialized memory)
 - Cryptographic issues (the code does not involve any encryption, decryption, or key management)
 - Vulnerabilities related to specific frameworks or libraries (the code is written in C++ and does not use any specific frameworks or libraries that could introduce vulnerabilities)",['CWE-476'],CVE-2022-23577,"Tensorflow is an Open Source Machine Learning Framework. The implementation of `GetInitOp` is vulnerable to a crash caused by dereferencing a null pointer. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-210050,lua,1f3c6f4534c6411313361697d98d1145a1f030fa,https://github.com/lua/lua,https://github.com/lua/lua/commit/1f3c6f4534c6411313361697d98d1145a1f030fa,Bug: Lua can generate wrong code when _ENV is <const>,1,1,"(2) NO: No vulnerability.
+210050,lua,1f3c6f4534c6411313361697d98d1145a1f030fa,https://github.com/lua/lua,https://github.com/lua/lua/commit/1f3c6f4534c6411313361697d98d1145a1f030fa,Bug: Lua can generate wrong code when _ENV is <const>,1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -13829,7 +13829,7 @@ Fixes: c486682ae1e2 (""rpmsg: virtio: Register the rpmsg_char device"")
 Signed-off-by: Hangyu Hua <hbh25y@gmail.com>
 Tested-by: Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>
 Link: https://lore.kernel.org/r/20220426060536.15594-3-hbh25y@gmail.com
-Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -13851,7 +13851,7 @@ Here's a step-by-step analysis:
    - The function calls `rpmsg_ctrldev_register_device(rpdev_ctrl)`. If this call fails (`err` is non-zero), the function frees the allocated memory and returns an error pointer. This is correct, as it ensures that the registration is only successful if no errors occur.
 
 **No Vulnerability Detected**: The code follows standard kernel programming practices, uses safe memory allocation and deallocation, and properly handles error conditions. There are no obvious security vulnerabilities in the provided code snippet. However, a more thorough analysis would require reviewing the context in which this code is used and the surrounding codebase for potential issues or edge cases.",['CWE-415'],CVE-2022-34494,rpmsg_virtio_add_ctrl_dev in drivers/rpmsg/virtio_rpmsg_bus.c in the Linux kernel before 5.18.4 has a double free.
-197565,wolfMQTT,84d4b53122e0fa0280c7872350b89d5777dabbb2,https://github.com/wolfSSL/wolfMQTT,https://github.com/wolfSSL/wolfMQTT/commit/84d4b53122e0fa0280c7872350b89d5777dabbb2,Fix wolfmqtt-fuzzer: Null-dereference WRITE in MqttProps_Free,1,1,"(2) NO: No vulnerability.
+197565,wolfMQTT,84d4b53122e0fa0280c7872350b89d5777dabbb2,https://github.com/wolfSSL/wolfMQTT,https://github.com/wolfSSL/wolfMQTT/commit/84d4b53122e0fa0280c7872350b89d5777dabbb2,Fix wolfmqtt-fuzzer: Null-dereference WRITE in MqttProps_Free,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -13981,7 +13981,7 @@ Reviewed-by: Rich Salz <rsalz@openssl.org>
 
 Conflicts:
 	ssl/ssl.h
-	ssl/ssl_err.c",1,1,"(2) NO: No vulnerability.
+	ssl/ssl_err.c",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -14082,7 +14082,7 @@ Required by virtio 1.
 
 Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
 Reviewed-by: Amit Shah <amit.shah@redhat.com>
-Reviewed-by: Jason Wang <jasowang@redhat.com>",1,1,"(2) NO: No vulnerability.
+Reviewed-by: Jason Wang <jasowang@redhat.com>",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -14242,7 +14242,7 @@ index argument.
 
 The fix is to verify that from index is valid.
 
-This closes #482 issue on Github.",1,1,"(2) NO: No vulnerability.
+This closes #482 issue on Github.",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Explanation:**
 
@@ -14370,7 +14370,7 @@ Problem:    Reading beyond the end of the line with put command.
 Solution:   Adjust the end mark position.",1,0,"(2) NO: No vulnerability.
 
 The provided code appears to be a part of the `do_put` function in the `vim` editor, which is responsible for inserting text into a buffer. After a thorough analysis, no critical vulnerabilities were identified in the code. The function handles various edge cases, such as inserting text into special registers, handling multi-byte characters, and adjusting the cursor position. The code also includes error handling and checks for potential issues like memory allocation failures. Therefore, the code is not considered vulnerable based on the provided information. However, it's always recommended to review the code and test it in a controlled environment to ensure there are no unforeseen vulnerabilities.",['CWE-787'],CVE-2022-2264,Heap-based Buffer Overflow in GitHub repository vim/vim prior to 9.0.
-195074,gpac,a69b567b8c95c72f9560c873c5ab348be058f340,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/a69b567b8c95c72f9560c873c5ab348be058f340,fixed #1895,1,1,"(2) NO: No vulnerability.
+195074,gpac,a69b567b8c95c72f9560c873c5ab348be058f340,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/a69b567b8c95c72f9560c873c5ab348be058f340,fixed #1895,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -14421,7 +14421,7 @@ Here's a brief explanation of why I decided against it being a vulnerability:
 5. **No Indication of a Security Vulnerability**: The code does not contain any obvious security vulnerabilities such as buffer overflows, use of uninitialized variables, or lack of input validation that could lead to information disclosure or system crashes.
 
 However, to provide a more thorough analysis, I would recommend reviewing the code in the context of the entire system, including any libraries or frameworks it is part of, to ensure there are no other potential issues or vulnerabilities.",['CWE-476'],CVE-2022-23589,"Tensorflow is an Open Source Machine Learning Framework. Under certain scenarios, Grappler component of TensorFlow can trigger a null pointer dereference. There are 2 places where this can occur, for the same malicious alteration of a `SavedModel` file (fixing the first one would trigger the same dereference in the second place). First, during constant folding, the `GraphDef` might not have the required nodes for the binary operation. If a node is missing, the correposning `mul_*child` would be null, and the dereference in the subsequent line would be incorrect. We have a similar issue during `IsIdentityConsumingSwitch`. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-209801,mujs,f5b3c703e18725e380b83427004632e744f85a6f,https://github.com/ccxvii/mujs,https://github.com/ccxvii/mujs/commit/f5b3c703e18725e380b83427004632e744f85a6f,Issue #161: Cope with empty programs in mujs-pp.,1,1,"(2) NO: No vulnerability.
+209801,mujs,f5b3c703e18725e380b83427004632e744f85a6f,https://github.com/ccxvii/mujs,https://github.com/ccxvii/mujs/commit/f5b3c703e18725e380b83427004632e744f85a6f,Issue #161: Cope with empty programs in mujs-pp.,1,0,"(2) NO: No vulnerability.
 
 Here's the step-by-step analysis:
 
@@ -14601,7 +14601,7 @@ provide any bounds checking on its own, so the size is instead checked prior
 to passing unvalidated data to that function.
 
 PiperOrigin-RevId: 392971286
-Change-Id: If2073b36d4d5eedd386329f56729395fd7effee1",1,1,"(2) NO: No vulnerability.
+Change-Id: If2073b36d4d5eedd386329f56729395fd7effee1",1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -14736,7 +14736,7 @@ The provided code appears to be a custom implementation of the Vim editor's `do_
 6. **Security Measures**: The code includes features like `suppress_errthrow` and `force_abort`, which are designed to control the behavior of the program in case of errors or exceptions. These features are intended to prevent the program from crashing or behaving unexpectedly.
 
 In conclusion, while the code is complex and includes features that could potentially be misused, there's no clear indication that it's vulnerable to common attacks like buffer overflows, SQL injection, or cross-site scripting (XSS). Therefore, I would classify this code as safe and not vulnerable.",['CWE-416'],CVE-2022-3099,Use After Free in GitHub repository vim/vim prior to 9.0.0360.
-212934,cyrus-imapd,621f9e41465b521399f691c241181300fab55995,https://github.com/cyrusimap/cyrus-imapd,https://github.com/cyrusimap/cyrus-imapd/commit/621f9e41465b521399f691c241181300fab55995,annotate: don't allow everyone to write shared server entries,1,1,"(2) NO: No vulnerability.
+212934,cyrus-imapd,621f9e41465b521399f691c241181300fab55995,https://github.com/cyrusimap/cyrus-imapd,https://github.com/cyrusimap/cyrus-imapd/commit/621f9e41465b521399f691c241181300fab55995,annotate: don't allow everyone to write shared server entries,1,0,"(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
@@ -15032,7 +15032,7 @@ While there could be potential issues with the use of custom functions like `Mul
 195028,tensorflow,ab51e5b813573dc9f51efa335aebcf2994125ee9,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/ab51e5b813573dc9f51efa335aebcf2994125ee9,"Prevent memory leak in decoding PNG images.
 
 PiperOrigin-RevId: 409300653
-Change-Id: I6182124c545989cef80cefd439b659095920763b",1,1,"(2) NO: No vulnerability.
+Change-Id: I6182124c545989cef80cefd439b659095920763b",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 

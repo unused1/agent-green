@@ -1313,121 +1313,53 @@ Analysis: The code implements a TensorFlow LSTM block cell operation with compre
    - No memory leaks: TensorFlow's context automatically manages tensor lifetimes.
 
 This matches Example 2 (C safe) in its thorough validation and safe tensor handling. The code follows TensorFlow's best practices for kernel implementation, with no evidence of buffer overflows, memory leaks, or invalid memory access.","","","","",""
-"40","void RestoreTensor(OpKernelContext* context,
-                   checkpoint::TensorSliceReader::OpenTableFunction open_func,
-                   int preferred_shard, bool restore_slice, int restore_index) {
-  const Tensor& file_pattern_t = context->input(0);
-  {
-    const int64_t size = file_pattern_t.NumElements();
-    OP_REQUIRES(
-        context, size == 1,
-        errors::InvalidArgument(
-            ""Input 0 (file_pattern) must be a string scalar; got a tensor of "",
-            size, ""elements""));
-  }
-  const string& file_pattern = file_pattern_t.flat<tstring>()(0);
+"40","int hfsplus_find_cat(struct super_block *sb, u32 cnid,
+		     struct hfs_find_data *fd)
+{
+	hfsplus_cat_entry tmp;
+	int err;
+	u16 type;
 
-  const Tensor& tensor_name_t = context->input(1);
-  const string& tensor_name = tensor_name_t.flat<tstring>()(restore_index);
+	hfsplus_cat_build_key(sb, fd->search_key, cnid, NULL);
+	err = hfs_brec_read(fd, &tmp, sizeof(hfsplus_cat_entry));
+	if (err)
+		return err;
 
-  // If we cannot find a cached reader we will allocate our own.
-  std::unique_ptr<checkpoint::TensorSliceReader> allocated_reader;
+	type = be16_to_cpu(tmp.type);
+	if (type != HFSPLUS_FOLDER_THREAD && type != HFSPLUS_FILE_THREAD) {
+		printk(KERN_ERR ""hfs: found bad thread record in catalog\n"");
+		return -EIO;
+	}
 
-  const checkpoint::TensorSliceReader* reader = nullptr;
+	if (be16_to_cpu(tmp.thread.nodeName.length) > 255) {
+		printk(KERN_ERR ""hfs: catalog name length corrupted\n"");
+		return -EIO;
+	}
 
-  if (context->slice_reader_cache()) {
-    reader = context->slice_reader_cache()->GetReader(file_pattern, open_func,
-                                                      preferred_shard);
-  }
-  if (!reader) {
-    allocated_reader.reset(new checkpoint::TensorSliceReader(
-        file_pattern, open_func, preferred_shard));
-    reader = allocated_reader.get();
-  }
-  OP_REQUIRES_OK(context, CHECK_NOTNULL(reader)->status());
-
-  // Get the shape and type from the save file.
-  DataType type;
-  TensorShape saved_shape;
-  OP_REQUIRES(
-      context, reader->HasTensor(tensor_name, &saved_shape, &type),
-      errors::NotFound(""Tensor name \"""", tensor_name,
-                       ""\"" not found in checkpoint files "", file_pattern));
-  OP_REQUIRES(
-      context, type == context->expected_output_dtype(restore_index),
-      errors::InvalidArgument(""Expected to restore a tensor of type "",
-                              DataTypeString(context->expected_output_dtype(0)),
-                              "", got a tensor of type "", DataTypeString(type),
-                              "" instead: tensor_name = "", tensor_name));
-
-  // Shape of the output and slice to load.
-  TensorShape output_shape(saved_shape);
-  TensorSlice slice_to_load(saved_shape.dims());
-  if (restore_slice) {
-    const tstring& shape_spec =
-        context->input(2).flat<tstring>()(restore_index);
-    if (!shape_spec.empty()) {
-      TensorShape parsed_shape;
-      OP_REQUIRES_OK(context, checkpoint::ParseShapeAndSlice(
-                                  shape_spec, &parsed_shape, &slice_to_load,
-                                  &output_shape));
-      OP_REQUIRES(
-          context, parsed_shape.IsSameSize(saved_shape),
-          errors::InvalidArgument(
-              ""Shape in shape_and_slice spec does not match the shape in the ""
-              ""save file: "",
-              parsed_shape.DebugString(),
-              "", save file shape: "", saved_shape.DebugString()));
-    }
-  }
-
-  Tensor* t = nullptr;
-  OP_REQUIRES_OK(context,
-                 context->allocate_output(restore_index, output_shape, &t));
-
-  if (output_shape.num_elements() == 0) return;
-
-#define READER_COPY(T)                                                \
-  case DataTypeToEnum<T>::value:                                      \
-    OP_REQUIRES(context,                                              \
-                reader->CopySliceData(tensor_name, slice_to_load,     \
-                                      t->flat<T>().data()),           \
-                errors::InvalidArgument(""Error copying slice data"")); \
-    break;
-
-  switch (type) {
-    TF_CALL_SAVE_RESTORE_TYPES(READER_COPY)
-    default:
-      context->SetStatus(errors::Unimplemented(
-          ""Restoring data type "", DataTypeString(type), "" not yet supported""));
-  }
-#undef READER_COPY
-}","vulnerable","CWE-476","TensorFlow is an end-to-end open source platform for machine learning. When restoring tensors via raw APIs, if the tensor name is not provided, TensorFlow can be tricked into dereferencing a null pointer. Alternatively, attackers can read memory outside the bounds of heap allocated data by providing some tensor names but not enough for a successful restoration. The [implementation](https://github.com/tensorflow/tensorflow/blob/47a06f40411a69c99f381495f490536972152ac0/tensorflow/core/kernels/save_restore_tensor.cc#L158-L159) retrieves the tensor list corresponding to the `tensor_name` user controlled input and immediately retrieves the tensor at the restoration index (controlled via `preferred_shard` argument). This occurs without validating that the provided list has enough values. If the list is empty this results in dereferencing a null pointer (undefined behavior). If, however, the list has some elements, if the restoration index is outside the bounds this results in heap OOB read. We have patched the issue in GitHub commit 9e82dce6e6bd1f36a57e08fa85af213e2b2f2622. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.","(2) NO: No vulnerability.
+	hfsplus_cat_build_key_uni(fd->search_key, be32_to_cpu(tmp.thread.parentID),
+				 &tmp.thread.nodeName);
+	return hfs_brec_find(fd);
+}","safe","","","(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
-1. **Input Validation:**
-   - The code validates the input tensor (file_pattern_t) to ensure it's a scalar (size == 1). This prevents potential buffer overflows.
-   - It also checks the expected output type against the type loaded from the checkpoint file, ensuring type consistency.
+1. **Function Purpose:** The function `hfsplus_find_cat` is designed to find a catalog entry in an HFS+ file system, given a catalog number (cnid) and a search key.
 
-2. **Memory Management:**
-   - The code uses `std::unique_ptr` for the allocated reader, ensuring proper memory deallocation.
-   - It checks for the existence of the reader before using it, preventing potential null pointer dereferences.
+2. **Input Validation:**
+   - The function uses `hfsplus_cat_build_key` to build a key based on the provided `sb`, `fd->search_key`, `cnid`, and `NULL`. This step is crucial for finding the correct catalog entry.
+   - The function then reads the catalog entry using `hfs_brec_read`, which returns an error code (`err`). If an error occurs, the function returns the error code, ensuring that the function exits gracefully in case of input/output errors.
 
-3. **Tensor Operations:**
-   - The code uses `TF_CALL_SAVE_RESTORE_TYPES` for type restoration, which is a TensorFlow framework function designed for safe and efficient type restoration.
-   - It checks if the output shape has zero elements, avoiding potential memory allocation issues.
+3. **Type and NodeName Validation:**
+   - The function checks if the catalog entry type is either `HFSPLUS_FOLDER_THREAD` or `HFSPLUS_FILE_THREAD`. If not, it prints an error message and returns `-EIO`. This step ensures that only valid thread records are processed.
+   - The function also checks if the length of the `nodeName` (thread name) exceeds 255 bytes. If it does, the function prints an error message and returns `-EIO`. This step prevents potential buffer overflows or invalid data.
 
-4. **Error Handling:**
-   - The code uses `OP_REQUIRES` and `OP_REQUIRES_OK` to enforce specific conditions and ensure operations are successful, providing clear error messages.
-   - It checks for the existence of the tensor name in the checkpoint file, preventing potential access to undefined resources.
+4. **No Known Vulnerabilities:**
+   - The function does not contain any obvious vulnerabilities such as:
+     - **Unbounded String Copy:** The function does not use functions like `strcpy` or `strcpy_len` without bounds checking, which could lead to buffer overflows.
+     - **Memory Leaks:** The function does not allocate or deallocate memory in a way that could lead to memory leaks.
+     - **Race Conditions:** The function does not have shared state or concurrent access that could lead to race conditions.
 
-5. **No Obvious Vulnerabilities:**
-   - The code does not have any obvious issues related to buffer overflows, memory leaks, or undefined behavior.
-   - The use of TensorFlow framework functions and proper error handling suggests a well-designed and safe implementation.
-
-**Conclusion:**
-Based on the analysis, there is no clear vulnerability detected in the provided code. The implementation appears to follow best practices for memory management, input validation, and error handling.","","","","",""
+**Conclusion:** Based on the analysis, the provided code does not contain any detectable vulnerabilities. Therefore, the answer is **(2) NO: No vulnerability.**","","","","",""
 "11","static json_t * check_attestation_fido_u2f(json_t * j_params, unsigned char * credential_id, size_t credential_id_len, unsigned char * cert_x, size_t cert_x_len, unsigned char * cert_y, size_t cert_y_len, cbor_item_t * att_stmt, unsigned char * rpid_hash, size_t rpid_hash_len, const unsigned char * client_data) {
   json_t * j_error = json_array(), * j_return;
   cbor_item_t * key = NULL, * x5c = NULL, * sig = NULL, * att_cert = NULL;
@@ -1872,814 +1804,582 @@ Based on the provided code snippet and assuming the surrounding code (e.g., `mt_
 **(2) NO: No vulnerability.** 
 
 **Note:** This analysis is limited to the given code snippet. A full security audit of the entire project would be necessary to identify any potential vulnerabilities in the broader context.","","","","",""
-"46","do_cmdline(
-    char_u	*cmdline,
-    char_u	*(*fgetline)(int, void *, int, getline_opt_T),
-    void	*cookie,		// argument for fgetline()
-    int		flags)
+"46","negotiate_handshake_newstyle_options (void)
 {
-    char_u	*next_cmdline;		// next cmd to execute
-    char_u	*cmdline_copy = NULL;	// copy of cmd line
-    int		used_getline = FALSE;	// used ""fgetline"" to obtain command
-    static int	recursive = 0;		// recursive depth
-    int		msg_didout_before_start = 0;
-    int		count = 0;		// line number count
-    int		did_inc = FALSE;	// incremented RedrawingDisabled
-    int		retval = OK;
-#ifdef FEAT_EVAL
-    cstack_T	cstack;			// conditional stack
-    garray_T	lines_ga;		// keep lines for "":while""/"":for""
-    int		current_line = 0;	// active line in lines_ga
-    int		current_line_before = 0;
-    char_u	*fname = NULL;		// function or script name
-    linenr_T	*breakpoint = NULL;	// ptr to breakpoint field in cookie
-    int		*dbg_tick = NULL;	// ptr to dbg_tick field in cookie
-    struct dbg_stuff debug_saved;	// saved things for debug mode
-    int		initial_trylevel;
-    msglist_T	**saved_msg_list = NULL;
-    msglist_T	*private_msg_list = NULL;
+  GET_CONN;
+  struct nbd_new_option new_option;
+  size_t nr_options;
+  bool list_seen = false;
+  uint64_t version;
+  uint32_t option;
+  uint32_t optlen;
+  struct nbd_export_name_option_reply handshake_finish;
+  const char *optname;
+  uint64_t exportsize;
+  struct backend *b;
 
-    // ""fgetline"" and ""cookie"" passed to do_one_cmd()
-    char_u	*(*cmd_getline)(int, void *, int, getline_opt_T);
-    void	*cmd_cookie;
-    struct loop_cookie cmd_loop_cookie;
-    void	*real_cookie;
-    int		getline_is_func;
+  for (nr_options = MAX_NR_OPTIONS; nr_options > 0; --nr_options) {
+    CLEANUP_FREE char *data = NULL;
+
+    if (conn_recv_full (&new_option, sizeof new_option,
+                        ""reading option: conn->recv: %m"") == -1)
+      return -1;
+
+    version = be64toh (new_option.version);
+    if (version != NBD_NEW_VERSION) {
+      nbdkit_error (""unknown option version %"" PRIx64
+                    "", expecting %"" PRIx64,
+                    version, NBD_NEW_VERSION);
+      return -1;
+    }
+
+    /* There is a maximum option length we will accept, regardless
+     * of the option type.
+     */
+    optlen = be32toh (new_option.optlen);
+    if (optlen > MAX_REQUEST_SIZE) {
+      nbdkit_error (""client option data too long (%"" PRIu32 "")"", optlen);
+      return -1;
+    }
+    data = malloc (optlen + 1); /* Allowing a trailing NUL helps some uses */
+    if (data == NULL) {
+      nbdkit_error (""malloc: %m"");
+      return -1;
+    }
+
+    option = be32toh (new_option.option);
+    optname = name_of_nbd_opt (option);
+
+    /* If the client lacks fixed newstyle support, it should only send
+     * NBD_OPT_EXPORT_NAME.
+     */
+    if (!(conn->cflags & NBD_FLAG_FIXED_NEWSTYLE) &&
+        option != NBD_OPT_EXPORT_NAME) {
+      if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID))
+        return -1;
+      continue;
+    }
+
+    /* In --tls=require / FORCEDTLS mode the only options allowed
+     * before TLS negotiation are NBD_OPT_ABORT and NBD_OPT_STARTTLS.
+     */
+    if (tls == 2 && !conn->using_tls &&
+        !(option == NBD_OPT_ABORT || option == NBD_OPT_STARTTLS)) {
+      if (send_newstyle_option_reply (option, NBD_REP_ERR_TLS_REQD))
+        return -1;
+      continue;
+    }
+
+    switch (option) {
+    case NBD_OPT_EXPORT_NAME:
+      if (conn_recv_full (data, optlen,
+                          ""read: %s: %m"", name_of_nbd_opt (option)) == -1)
+        return -1;
+      if (check_export_name (option, data, optlen, optlen) == -1)
+        return -1;
+
+      /* We have to finish the handshake by sending handshake_finish.
+       * On failure, we have to disconnect.
+       */
+      if (finish_newstyle_options (&exportsize, data, optlen) == -1)
+        return -1;
+
+      memset (&handshake_finish, 0, sizeof handshake_finish);
+      handshake_finish.exportsize = htobe64 (exportsize);
+      handshake_finish.eflags = htobe16 (conn->eflags);
+
+      if (conn->send (&handshake_finish,
+                      (conn->cflags & NBD_FLAG_NO_ZEROES)
+                      ? offsetof (struct nbd_export_name_option_reply, zeroes)
+                      : sizeof handshake_finish, 0) == -1) {
+        nbdkit_error (""write: %s: %m"", optname);
+        return -1;
+      }
+      break;
+
+    case NBD_OPT_ABORT:
+      if (send_newstyle_option_reply (option, NBD_REP_ACK) == -1)
+        return -1;
+      debug (""client sent %s to abort the connection"",
+             name_of_nbd_opt (option));
+      return -1;
+
+    case NBD_OPT_LIST:
+      if (optlen != 0) {
+        if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID)
+            == -1)
+          return -1;
+        if (conn_recv_full (data, optlen,
+                            ""read: %s: %m"", name_of_nbd_opt (option)) == -1)
+          return -1;
+        continue;
+      }
+
+      if (list_seen) {
+        debug (""newstyle negotiation: %s: export list already advertised"",
+               name_of_nbd_opt (option));
+        if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID) == -1)
+          return -1;
+        continue;
+      }
+      else {
+        /* Send back the exportname list. */
+        debug (""newstyle negotiation: %s: advertising exports"",
+               name_of_nbd_opt (option));
+        if (send_newstyle_option_reply_exportnames (option, &nr_options) == -1)
+          return -1;
+        list_seen = true;
+      }
+      break;
+
+    case NBD_OPT_STARTTLS:
+      if (optlen != 0) {
+        if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID)
+            == -1)
+          return -1;
+        if (conn_recv_full (data, optlen,
+                            ""read: %s: %m"", name_of_nbd_opt (option)) == -1)
+          return -1;
+        continue;
+      }
+
+      if (tls == 0) {           /* --tls=off (NOTLS mode). */
+#ifdef HAVE_GNUTLS
+#define NO_TLS_REPLY NBD_REP_ERR_POLICY
 #else
-# define cmd_getline fgetline
-# define cmd_cookie cookie
+#define NO_TLS_REPLY NBD_REP_ERR_UNSUP
 #endif
-    static int	call_depth = 0;		// recursiveness
-#ifdef FEAT_EVAL
-    // For every pair of do_cmdline()/do_one_cmd() calls, use an extra memory
-    // location for storing error messages to be converted to an exception.
-    // This ensures that the do_errthrow() call in do_one_cmd() does not
-    // combine the messages stored by an earlier invocation of do_one_cmd()
-    // with the command name of the later one.  This would happen when
-    // BufWritePost autocommands are executed after a write error.
-    saved_msg_list = msg_list;
-    msg_list = &private_msg_list;
-#endif
+        if (send_newstyle_option_reply (option, NO_TLS_REPLY) == -1)
+          return -1;
+      }
+      else /* --tls=on or --tls=require */ {
+        /* We can't upgrade to TLS twice on the same connection. */
+        if (conn->using_tls) {
+          if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID) == -1)
+            return -1;
+          continue;
+        }
 
-    // It's possible to create an endless loop with "":execute"", catch that
-    // here.  The value of 200 allows nested function calls, "":source"", etc.
-    // Allow 200 or 'maxfuncdepth', whatever is larger.
-    if (call_depth >= 200
-#ifdef FEAT_EVAL
-	    && call_depth >= p_mfd
-#endif
-	    )
-    {
-	emsg(_(e_command_too_recursive));
-#ifdef FEAT_EVAL
-	// When converting to an exception, we do not include the command name
-	// since this is not an error of the specific command.
-	do_errthrow((cstack_T *)NULL, (char_u *)NULL);
-	msg_list = saved_msg_list;
-#endif
-	return FAIL;
-    }
-    ++call_depth;
+        /* We have to send the (unencrypted) reply before starting
+         * the handshake.
+         */
+        if (send_newstyle_option_reply (option, NBD_REP_ACK) == -1)
+          return -1;
 
-#ifdef FEAT_EVAL
-    CLEAR_FIELD(cstack);
-    cstack.cs_idx = -1;
-    ga_init2(&lines_ga, sizeof(wcmd_T), 10);
+        /* Upgrade the connection to TLS.  Also performs access control. */
+        if (crypto_negotiate_tls (conn->sockin, conn->sockout) == -1)
+          return -1;
+        conn->using_tls = true;
+        debug (""using TLS on this connection"");
+        /* Wipe out any cached state. */
+        conn->structured_replies = false;
+        free (conn->exportname_from_set_meta_context);
+        conn->exportname_from_set_meta_context = NULL;
+        conn->meta_context_base_allocation = false;
+        for_each_backend (b) {
+          free (conn->default_exportname[b->i]);
+          conn->default_exportname[b->i] = NULL;
+        }
+      }
+      break;
 
-    real_cookie = getline_cookie(fgetline, cookie);
+    case NBD_OPT_INFO:
+    case NBD_OPT_GO:
+      if (conn_recv_full (data, optlen, ""read: %s: %m"", optname) == -1)
+        return -1;
 
-    // Inside a function use a higher nesting level.
-    getline_is_func = getline_equal(fgetline, cookie, get_func_line);
-    if (getline_is_func && ex_nesting_level == func_level(real_cookie))
-	++ex_nesting_level;
+      if (optlen < 6) { /* 32 bit export length + 16 bit nr info */
+        debug (""newstyle negotiation: %s option length < 6"", optname);
 
-    // Get the function or script name and the address where the next breakpoint
-    // line and the debug tick for a function or script are stored.
-    if (getline_is_func)
-    {
-	fname = func_name(real_cookie);
-	breakpoint = func_breakpoint(real_cookie);
-	dbg_tick = func_dbg_tick(real_cookie);
-    }
-    else if (getline_equal(fgetline, cookie, getsourceline))
-    {
-	fname = SOURCING_NAME;
-	breakpoint = source_breakpoint(real_cookie);
-	dbg_tick = source_dbg_tick(real_cookie);
-    }
+        if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID)
+            == -1)
+          return -1;
+        continue;
+      }
 
-    /*
-     * Initialize ""force_abort""  and ""suppress_errthrow"" at the top level.
-     */
-    if (!recursive)
-    {
-	force_abort = FALSE;
-	suppress_errthrow = FALSE;
-    }
+      {
+        uint32_t exportnamelen;
+        uint16_t nrinfos;
+        uint16_t info;
+        size_t i;
 
-    /*
-     * If requested, store and reset the global values controlling the
-     * exception handling (used when debugging).  Otherwise clear it to avoid
-     * a bogus compiler warning when the optimizer uses inline functions...
-     */
-    if (flags & DOCMD_EXCRESET)
-	save_dbg_stuff(&debug_saved);
-    else
-	CLEAR_FIELD(debug_saved);
+        /* Validate the name length and number of INFO requests. */
+        memcpy (&exportnamelen, &data[0], 4);
+        exportnamelen = be32toh (exportnamelen);
+        if (exportnamelen > optlen-6 /* NB optlen >= 6, see above */) {
+          debug (""newstyle negotiation: %s: export name too long"", optname);
+          if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID)
+              == -1)
+            return -1;
+          continue;
+        }
+        memcpy (&nrinfos, &data[exportnamelen+4], 2);
+        nrinfos = be16toh (nrinfos);
+        if (optlen != 4 + exportnamelen + 2 + 2*nrinfos) {
+          debug (""newstyle negotiation: %s: ""
+                 ""number of information requests incorrect"", optname);
+          if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID)
+              == -1)
+            return -1;
+          continue;
+        }
 
-    initial_trylevel = trylevel;
+        /* As with NBD_OPT_EXPORT_NAME we print the export name and
+         * save it in the connection.  If an earlier
+         * NBD_OPT_SET_META_CONTEXT used an export name, it must match
+         * or else we drop the support for that context.
+         */
+        if (check_export_name (option, &data[4], exportnamelen,
+                               optlen - 6) == -1) {
+          if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID)
+              == -1)
+            return -1;
+          continue;
+        }
 
-    /*
-     * ""did_throw"" will be set to TRUE when an exception is being thrown.
-     */
-    did_throw = FALSE;
-#endif
-    /*
-     * ""did_emsg"" will be set to TRUE when emsg() is used, in which case we
-     * cancel the whole command line, and any if/endif or loop.
-     * If force_abort is set, we cancel everything.
-     */
-#ifdef FEAT_EVAL
-    did_emsg_cumul += did_emsg;
-#endif
-    did_emsg = FALSE;
+        /* The spec is confusing, but it is required that we send back
+         * NBD_INFO_EXPORT, even if the client did not request it!
+         * qemu client in particular does not request this, but will
+         * fail if we don't send it.  Note that if .open fails, but we
+         * succeed at .close, then we merely return an error to the
+         * client and let them try another NBD_OPT, rather than
+         * disconnecting.
+         */
+        if (finish_newstyle_options (&exportsize,
+                                     &data[4], exportnamelen) == -1) {
+          if (conn->top_context) {
+            if (backend_finalize (conn->top_context) == -1)
+              return -1;
+            backend_close (conn->top_context);
+            conn->top_context = NULL;
+          }
+          if (send_newstyle_option_reply (option, NBD_REP_ERR_UNKNOWN) == -1)
+            return -1;
+          continue;
+        }
 
-    /*
-     * KeyTyped is only set when calling vgetc().  Reset it here when not
-     * calling vgetc() (sourced command lines).
-     */
-    if (!(flags & DOCMD_KEYTYPED)
-			       && !getline_equal(fgetline, cookie, getexline))
-	KeyTyped = FALSE;
+        if (send_newstyle_option_reply_info_export (option,
+                                                    NBD_REP_INFO,
+                                                    NBD_INFO_EXPORT,
+                                                    exportsize) == -1)
+          return -1;
 
-    /*
-     * Continue executing command lines:
-     * - when inside an "":if"", "":while"" or "":for""
-     * - for multiple commands on one line, separated with '|'
-     * - when repeating until there are no more lines (for "":source"")
-     */
-    next_cmdline = cmdline;
-    do
-    {
-#ifdef FEAT_EVAL
-	getline_is_func = getline_equal(fgetline, cookie, get_func_line);
-#endif
+        /* For now we send NBD_INFO_NAME and NBD_INFO_DESCRIPTION if
+         * requested, and ignore all other info requests (including
+         * NBD_INFO_EXPORT if it was requested, because we replied
+         * already above).
+         */
+        for (i = 0; i < nrinfos; ++i) {
+          memcpy (&info, &data[4 + exportnamelen + 2 + i*2], 2);
+          info = be16toh (info);
+          switch (info) {
+          case NBD_INFO_EXPORT: /* ignore - reply sent above */ break;
+          case NBD_INFO_NAME:
+            {
+              const char *name = &data[4];
+              size_t namelen = exportnamelen;
 
-	// stop skipping cmds for an error msg after all endif/while/for
-	if (next_cmdline == NULL
-#ifdef FEAT_EVAL
-		&& !force_abort
-		&& cstack.cs_idx < 0
-		&& !(getline_is_func && func_has_abort(real_cookie))
-#endif
-							)
-	{
-#ifdef FEAT_EVAL
-	    did_emsg_cumul += did_emsg;
-#endif
-	    did_emsg = FALSE;
-	}
+              if (exportnamelen == 0) {
+                name = backend_default_export (top, read_only);
+                if (!name) {
+                  debug (""newstyle negotiation: %s: ""
+                         ""NBD_INFO_NAME: no name to send"", optname);
+                  break;
+                }
+                namelen = -1;
+              }
+              if (send_newstyle_option_reply_info_str (option,
+                                                       NBD_REP_INFO,
+                                                       NBD_INFO_NAME,
+                                                       name, namelen) == -1)
+                return -1;
+            }
+            break;
+          case NBD_INFO_DESCRIPTION:
+            {
+              const char *desc = backend_export_description (conn->top_context);
 
-	/*
-	 * 1. If repeating a line in a loop, get a line from lines_ga.
-	 * 2. If no line given: Get an allocated line with fgetline().
-	 * 3. If a line is given: Make a copy, so we can mess with it.
-	 */
+              if (!desc) {
+                debug (""newstyle negotiation: %s: ""
+                       ""NBD_INFO_DESCRIPTION: no description to send"",
+                       optname);
+                break;
+              }
+              if (send_newstyle_option_reply_info_str (option,
+                                                       NBD_REP_INFO,
+                                                       NBD_INFO_DESCRIPTION,
+                                                       desc, -1) == -1)
+                return -1;
+            }
+            break;
+          default:
+            debug (""newstyle negotiation: %s: ""
+                   ""ignoring NBD_INFO_* request %u (%s)"",
+                   optname, (unsigned) info, name_of_nbd_info (info));
+            break;
+          }
+        }
+      }
 
-#ifdef FEAT_EVAL
-	// 1. If repeating, get a previous line from lines_ga.
-	if (cstack.cs_looplevel > 0 && current_line < lines_ga.ga_len)
-	{
-	    // Each '|' separated command is stored separately in lines_ga, to
-	    // be able to jump to it.  Don't use next_cmdline now.
-	    VIM_CLEAR(cmdline_copy);
+      /* Unlike NBD_OPT_EXPORT_NAME, NBD_OPT_GO sends back an ACK
+       * or ERROR packet.  If this was NBD_OPT_LIST, call .close.
+       */
+      if (send_newstyle_option_reply (option, NBD_REP_ACK) == -1)
+        return -1;
 
-	    // Check if a function has returned or, unless it has an unclosed
-	    // try conditional, aborted.
-	    if (getline_is_func)
-	    {
-# ifdef FEAT_PROFILE
-		if (do_profiling == PROF_YES)
-		    func_line_end(real_cookie);
-# endif
-		if (func_has_ended(real_cookie))
-		{
-		    retval = FAIL;
-		    break;
-		}
-	    }
-#ifdef FEAT_PROFILE
-	    else if (do_profiling == PROF_YES
-			    && getline_equal(fgetline, cookie, getsourceline))
-		script_line_end();
-#endif
+      if (option == NBD_OPT_INFO) {
+        if (backend_finalize (conn->top_context) == -1)
+          return -1;
+        backend_close (conn->top_context);
+        conn->top_context = NULL;
+      }
 
-	    // Check if a sourced file hit a "":finish"" command.
-	    if (source_finished(fgetline, cookie))
-	    {
-		retval = FAIL;
-		break;
-	    }
+      break;
 
-	    // If breakpoints have been added/deleted need to check for it.
-	    if (breakpoint != NULL && dbg_tick != NULL
-						   && *dbg_tick != debug_tick)
-	    {
-		*breakpoint = dbg_find_breakpoint(
-				getline_equal(fgetline, cookie, getsourceline),
-							fname, SOURCING_LNUM);
-		*dbg_tick = debug_tick;
-	    }
+    case NBD_OPT_STRUCTURED_REPLY:
+      if (optlen != 0) {
+        if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID)
+            == -1)
+          return -1;
+        if (conn_recv_full (data, optlen,
+                            ""read: %s: %m"", name_of_nbd_opt (option)) == -1)
+          return -1;
+        continue;
+      }
 
-	    next_cmdline = ((wcmd_T *)(lines_ga.ga_data))[current_line].line;
-	    SOURCING_LNUM = ((wcmd_T *)(lines_ga.ga_data))[current_line].lnum;
+      debug (""newstyle negotiation: %s: client requested structured replies"",
+             name_of_nbd_opt (option));
 
-	    // Did we encounter a breakpoint?
-	    if (breakpoint != NULL && *breakpoint != 0
-					      && *breakpoint <= SOURCING_LNUM)
-	    {
-		dbg_breakpoint(fname, SOURCING_LNUM);
-		// Find next breakpoint.
-		*breakpoint = dbg_find_breakpoint(
-			       getline_equal(fgetline, cookie, getsourceline),
-							fname, SOURCING_LNUM);
-		*dbg_tick = debug_tick;
-	    }
-# ifdef FEAT_PROFILE
-	    if (do_profiling == PROF_YES)
-	    {
-		if (getline_is_func)
-		    func_line_start(real_cookie, SOURCING_LNUM);
-		else if (getline_equal(fgetline, cookie, getsourceline))
-		    script_line_start();
-	    }
-# endif
-	}
-#endif
+      if (no_sr) {
+        /* Must fail with ERR_UNSUP for qemu 4.2 to remain happy;
+         * but failing with ERR_POLICY would have been nicer.
+         */
+        if (send_newstyle_option_reply (option, NBD_REP_ERR_UNSUP) == -1)
+          return -1;
+        debug (""newstyle negotiation: %s: structured replies are disabled"",
+               name_of_nbd_opt (option));
+        break;
+      }
 
-	// 2. If no line given, get an allocated line with fgetline().
-	if (next_cmdline == NULL)
-	{
-	    /*
-	     * Need to set msg_didout for the first line after an "":if"",
-	     * otherwise the "":if"" will be overwritten.
-	     */
-	    if (count == 1 && getline_equal(fgetline, cookie, getexline))
-		msg_didout = TRUE;
-	    if (fgetline == NULL || (next_cmdline = fgetline(':', cookie,
-#ifdef FEAT_EVAL
-		    cstack.cs_idx < 0 ? 0 : (cstack.cs_idx + 1) * 2
-#else
-		    0
-#endif
-		    , in_vim9script() ? GETLINE_CONCAT_CONTBAR
-					       : GETLINE_CONCAT_CONT)) == NULL)
-	    {
-		// Don't call wait_return() for aborted command line.  The NULL
-		// returned for the end of a sourced file or executed function
-		// doesn't do this.
-		if (KeyTyped && !(flags & DOCMD_REPEAT))
-		    need_wait_return = FALSE;
-		retval = FAIL;
-		break;
-	    }
-	    used_getline = TRUE;
+      if (send_newstyle_option_reply (option, NBD_REP_ACK) == -1)
+        return -1;
 
-	    /*
-	     * Keep the first typed line.  Clear it when more lines are typed.
-	     */
-	    if (flags & DOCMD_KEEPLINE)
-	    {
-		vim_free(repeat_cmdline);
-		if (count == 0)
-		    repeat_cmdline = vim_strsave(next_cmdline);
-		else
-		    repeat_cmdline = NULL;
-	    }
-	}
+      conn->structured_replies = true;
+      break;
 
-	// 3. Make a copy of the command so we can mess with it.
-	else if (cmdline_copy == NULL)
-	{
-	    next_cmdline = vim_strsave(next_cmdline);
-	    if (next_cmdline == NULL)
-	    {
-		emsg(_(e_out_of_memory));
-		retval = FAIL;
-		break;
-	    }
-	}
-	cmdline_copy = next_cmdline;
+    case NBD_OPT_LIST_META_CONTEXT:
+    case NBD_OPT_SET_META_CONTEXT:
+      {
+        uint32_t opt_index;
+        uint32_t exportnamelen;
+        uint32_t nr_queries;
+        uint32_t querylen;
+        const char *what;
 
-#ifdef FEAT_EVAL
-	/*
-	 * Inside a while/for loop, and when the command looks like a "":while""
-	 * or "":for"", the line is stored, because we may need it later when
-	 * looping.
-	 *
-	 * When there is a '|' and another command, it is stored separately,
-	 * because we need to be able to jump back to it from an
-	 * :endwhile/:endfor.
-	 *
-	 * Pass a different ""fgetline"" function to do_one_cmd() below,
-	 * that it stores lines in or reads them from ""lines_ga"".  Makes it
-	 * possible to define a function inside a while/for loop and handles
-	 * line continuation.
-	 */
-	if ((cstack.cs_looplevel > 0 || has_loop_cmd(next_cmdline)))
-	{
-	    cmd_getline = get_loop_line;
-	    cmd_cookie = (void *)&cmd_loop_cookie;
-	    cmd_loop_cookie.lines_gap = &lines_ga;
-	    cmd_loop_cookie.current_line = current_line;
-	    cmd_loop_cookie.getline = fgetline;
-	    cmd_loop_cookie.cookie = cookie;
-	    cmd_loop_cookie.repeating = (current_line < lines_ga.ga_len);
+        if (conn_recv_full (data, optlen, ""read: %s: %m"", optname) == -1)
+          return -1;
 
-	    // Save the current line when encountering it the first time.
-	    if (current_line == lines_ga.ga_len
-		    && store_loop_line(&lines_ga, next_cmdline) == FAIL)
-	    {
-		retval = FAIL;
-		break;
-	    }
-	    current_line_before = current_line;
-	}
-	else
-	{
-	    cmd_getline = fgetline;
-	    cmd_cookie = cookie;
-	}
+        /* Note that we support base:allocation whether or not the plugin
+         * supports can_extents.
+         */
+        if (!conn->structured_replies) {
+          if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID)
+              == -1)
+            return -1;
+          continue;
+        }
 
-	did_endif = FALSE;
-#endif
+        /* Minimum length of the option payload is:
+         *   32 bit export name length followed by empty export name
+         * + 32 bit number of queries followed by no queries
+         * = 8 bytes.
+         */
+        what = ""optlen < 8"";
+        if (optlen < 8) {
+        opt_meta_invalid_option_len:
+          debug (""newstyle negotiation: %s: invalid option length: %s"",
+                 optname, what);
 
-	if (count++ == 0)
-	{
-	    /*
-	     * All output from the commands is put below each other, without
-	     * waiting for a return. Don't do this when executing commands
-	     * from a script or when being called recursive (e.g. for "":e
-	     * +command file"").
-	     */
-	    if (!(flags & DOCMD_NOWAIT) && !recursive)
-	    {
-		msg_didout_before_start = msg_didout;
-		msg_didany = FALSE; // no output yet
-		msg_start();
-		msg_scroll = TRUE;  // put messages below each other
-		++no_wait_return;   // don't wait for return until finished
-		++RedrawingDisabled;
-		did_inc = TRUE;
-	    }
-	}
+          if (send_newstyle_option_reply (option, NBD_REP_ERR_INVALID)
+              == -1)
+            return -1;
+          continue;
+        }
 
-	if ((p_verbose >= 15 && SOURCING_NAME != NULL) || p_verbose >= 16)
-	    msg_verbose_cmd(SOURCING_LNUM, cmdline_copy);
+        memcpy (&exportnamelen, &data[0], 4);
+        exportnamelen = be32toh (exportnamelen);
+        what = ""validating export name"";
+        if (check_export_name (option, &data[4], exportnamelen,
+                               optlen - 8) == -1)
+          goto opt_meta_invalid_option_len;
 
-	/*
-	 * 2. Execute one '|' separated command.
-	 *    do_one_cmd() will return NULL if there is no trailing '|'.
-	 *    ""cmdline_copy"" can change, e.g. for '%' and '#' expansion.
-	 */
-	++recursive;
-	next_cmdline = do_one_cmd(&cmdline_copy, flags,
-#ifdef FEAT_EVAL
-				&cstack,
-#endif
-				cmd_getline, cmd_cookie);
-	--recursive;
+        /* Remember the export name: the NBD spec says that if the client
+         * later uses NBD_OPT_GO on a different export, then the context
+         * returned here is not usable.
+         */
+        if (option == NBD_OPT_SET_META_CONTEXT) {
+          conn->exportname_from_set_meta_context =
+            strndup (&data[4], exportnamelen);
+          if (conn->exportname_from_set_meta_context == NULL) {
+            nbdkit_error (""malloc: %m"");
+            return -1;
+          }
+        }
 
-#ifdef FEAT_EVAL
-	if (cmd_cookie == (void *)&cmd_loop_cookie)
-	    // Use ""current_line"" from ""cmd_loop_cookie"", it may have been
-	    // incremented when defining a function.
-	    current_line = cmd_loop_cookie.current_line;
-#endif
+        opt_index = 4 + exportnamelen;
 
-	if (next_cmdline == NULL)
-	{
-	    VIM_CLEAR(cmdline_copy);
+        /* Read the number of queries. */
+        what = ""reading number of queries"";
+        if (opt_index+4 > optlen)
+          goto opt_meta_invalid_option_len;
+        memcpy (&nr_queries, &data[opt_index], 4);
+        nr_queries = be32toh (nr_queries);
+        opt_index += 4;
 
-	    /*
-	     * If the command was typed, remember it for the ':' register.
-	     * Do this AFTER executing the command to make :@: work.
-	     */
-	    if (getline_equal(fgetline, cookie, getexline)
-						  && new_last_cmdline != NULL)
-	    {
-		vim_free(last_cmdline);
-		last_cmdline = new_last_cmdline;
-		new_last_cmdline = NULL;
-	    }
-	}
-	else
-	{
-	    // need to copy the command after the '|' to cmdline_copy, for the
-	    // next do_one_cmd()
-	    STRMOVE(cmdline_copy, next_cmdline);
-	    next_cmdline = cmdline_copy;
-	}
+        /* for LIST: nr_queries == 0 means return all meta contexts
+         * for SET: nr_queries == 0 means reset all contexts
+         */
+        debug (""newstyle negotiation: %s: %s count: %d"", optname,
+               option == NBD_OPT_LIST_META_CONTEXT ? ""query"" : ""set"",
+               nr_queries);
+        if (option == NBD_OPT_SET_META_CONTEXT)
+          conn->meta_context_base_allocation = false;
+        if (nr_queries == 0) {
+          if (option == NBD_OPT_LIST_META_CONTEXT) {
+            if (send_newstyle_option_reply_meta_context (option,
+                                                         NBD_REP_META_CONTEXT,
+                                                         0, ""base:allocation"")
+                == -1)
+              return -1;
+          }
 
+          if (send_newstyle_option_reply (option, NBD_REP_ACK) == -1)
+            return -1;
+        }
+        else {
+          /* Read and answer each query. */
+          while (nr_queries > 0) {
+            what = ""reading query string length"";
+            if (opt_index+4 > optlen)
+              goto opt_meta_invalid_option_len;
+            memcpy (&querylen, &data[opt_index], 4);
+            querylen = be32toh (querylen);
+            opt_index += 4;
+            what = ""reading query string"";
+            if (check_string (option, &data[opt_index], querylen,
+                              optlen - opt_index, ""meta context query"") == -1)
+              goto opt_meta_invalid_option_len;
 
-#ifdef FEAT_EVAL
-	// reset did_emsg for a function that is not aborted by an error
-	if (did_emsg && !force_abort
-		&& getline_equal(fgetline, cookie, get_func_line)
-					      && !func_has_abort(real_cookie))
-	{
-	    // did_emsg_cumul is not set here
-	    did_emsg = FALSE;
-	}
+            debug (""newstyle negotiation: %s: %s %.*s"",
+                   optname,
+                   option == NBD_OPT_LIST_META_CONTEXT ? ""query"" : ""set"",
+                   (int) querylen, &data[opt_index]);
 
-	if (cstack.cs_looplevel > 0)
-	{
-	    ++current_line;
+            /* For LIST, ""base:"" returns all supported contexts in the
+             * base namespace.  We only support ""base:allocation"".
+             */
+            if (option == NBD_OPT_LIST_META_CONTEXT &&
+                querylen == 5 &&
+                strncmp (&data[opt_index], ""base:"", 5) == 0) {
+              if (send_newstyle_option_reply_meta_context
+                  (option, NBD_REP_META_CONTEXT,
+                   0, ""base:allocation"") == -1)
+                return -1;
+            }
+            /* ""base:allocation"" requested by name. */
+            else if (querylen == 15 &&
+                     strncmp (&data[opt_index], ""base:allocation"", 15) == 0) {
+              if (send_newstyle_option_reply_meta_context
+                  (option, NBD_REP_META_CONTEXT,
+                   option == NBD_OPT_SET_META_CONTEXT
+                   ? base_allocation_id : 0,
+                   ""base:allocation"") == -1)
+                return -1;
+              if (option == NBD_OPT_SET_META_CONTEXT)
+                conn->meta_context_base_allocation = true;
+            }
+            /* Every other query must be ignored. */
 
-	    /*
-	     * An "":endwhile"", "":endfor"" and "":continue"" is handled here.
-	     * If we were executing commands, jump back to the "":while"" or
-	     * "":for"".
-	     * If we were not executing commands, decrement cs_looplevel.
-	     */
-	    if (cstack.cs_lflags & (CSL_HAD_CONT | CSL_HAD_ENDLOOP))
-	    {
-		cstack.cs_lflags &= ~(CSL_HAD_CONT | CSL_HAD_ENDLOOP);
+            opt_index += querylen;
+            nr_queries--;
+          }
+          if (send_newstyle_option_reply (option, NBD_REP_ACK) == -1)
+            return -1;
+        }
+        debug (""newstyle negotiation: %s: reply complete"", optname);
+      }
+      break;
 
-		// Jump back to the matching "":while"" or "":for"".  Be careful
-		// not to use a cs_line[] from an entry that isn't a "":while""
-		// or "":for"": It would make ""current_line"" invalid and can
-		// cause a crash.
-		if (!did_emsg && !got_int && !did_throw
-			&& cstack.cs_idx >= 0
-			&& (cstack.cs_flags[cstack.cs_idx]
-						      & (CSF_WHILE | CSF_FOR))
-			&& cstack.cs_line[cstack.cs_idx] >= 0
-			&& (cstack.cs_flags[cstack.cs_idx] & CSF_ACTIVE))
-		{
-		    current_line = cstack.cs_line[cstack.cs_idx];
-						// remember we jumped there
-		    cstack.cs_lflags |= CSL_HAD_LOOP;
-		    line_breakcheck();		// check if CTRL-C typed
-
-		    // Check for the next breakpoint at or after the "":while""
-		    // or "":for"".
-		    if (breakpoint != NULL)
-		    {
-			*breakpoint = dbg_find_breakpoint(
-			       getline_equal(fgetline, cookie, getsourceline),
-									fname,
-			   ((wcmd_T *)lines_ga.ga_data)[current_line].lnum-1);
-			*dbg_tick = debug_tick;
-		    }
-		}
-		else
-		{
-		    // can only get here with "":endwhile"" or "":endfor""
-		    if (cstack.cs_idx >= 0)
-			rewind_conditionals(&cstack, cstack.cs_idx - 1,
-				   CSF_WHILE | CSF_FOR, &cstack.cs_looplevel);
-		}
-	    }
-
-	    /*
-	     * For a "":while"" or "":for"" we need to remember the line number.
-	     */
-	    else if (cstack.cs_lflags & CSL_HAD_LOOP)
-	    {
-		cstack.cs_lflags &= ~CSL_HAD_LOOP;
-		cstack.cs_line[cstack.cs_idx] = current_line_before;
-	    }
-	}
-
-	// Check for the next breakpoint after a watchexpression
-	if (breakpoint != NULL && has_watchexpr())
-	{
-	    *breakpoint = dbg_find_breakpoint(FALSE, fname, SOURCING_LNUM);
-	    *dbg_tick = debug_tick;
-	}
-
-	/*
-	 * When not inside any "":while"" loop, clear remembered lines.
-	 */
-	if (cstack.cs_looplevel == 0)
-	{
-	    if (lines_ga.ga_len > 0)
-	    {
-		SOURCING_LNUM =
-		       ((wcmd_T *)lines_ga.ga_data)[lines_ga.ga_len - 1].lnum;
-		free_cmdlines(&lines_ga);
-	    }
-	    current_line = 0;
-	}
-
-	/*
-	 * A "":finally"" makes did_emsg, got_int, and did_throw pending for
-	 * being restored at the "":endtry"".  Reset them here and set the
-	 * ACTIVE and FINALLY flags, so that the finally clause gets executed.
-	 * This includes the case where a missing "":endif"", "":endwhile"" or
-	 * "":endfor"" was detected by the "":finally"" itself.
-	 */
-	if (cstack.cs_lflags & CSL_HAD_FINA)
-	{
-	    cstack.cs_lflags &= ~CSL_HAD_FINA;
-	    report_make_pending(cstack.cs_pending[cstack.cs_idx]
-		    & (CSTP_ERROR | CSTP_INTERRUPT | CSTP_THROW),
-		    did_throw ? (void *)current_exception : NULL);
-	    did_emsg = got_int = did_throw = FALSE;
-	    cstack.cs_flags[cstack.cs_idx] |= CSF_ACTIVE | CSF_FINALLY;
-	}
-
-	// Update global ""trylevel"" for recursive calls to do_cmdline() from
-	// within this loop.
-	trylevel = initial_trylevel + cstack.cs_trylevel;
-
-	/*
-	 * If the outermost try conditional (across function calls and sourced
-	 * files) is aborted because of an error, an interrupt, or an uncaught
-	 * exception, cancel everything.  If it is left normally, reset
-	 * force_abort to get the non-EH compatible abortion behavior for
-	 * the rest of the script.
-	 */
-	if (trylevel == 0 && !did_emsg && !got_int && !did_throw)
-	    force_abort = FALSE;
-
-	// Convert an interrupt to an exception if appropriate.
-	(void)do_intthrow(&cstack);
-#endif // FEAT_EVAL
-
-    }
-    /*
-     * Continue executing command lines when:
-     * - no CTRL-C typed, no aborting error, no exception thrown or try
-     *   conditionals need to be checked for executing finally clauses or
-     *   catching an interrupt exception
-     * - didn't get an error message or lines are not typed
-     * - there is a command after '|', inside a :if, :while, :for or :try, or
-     *   looping for "":source"" command or function call.
-     */
-    while (!((got_int
-#ifdef FEAT_EVAL
-		    || (did_emsg && (force_abort || in_vim9script()))
-		    || did_throw
-#endif
-	     )
-#ifdef FEAT_EVAL
-		&& cstack.cs_trylevel == 0
-#endif
-	    )
-	    && !(did_emsg
-#ifdef FEAT_EVAL
-		// Keep going when inside try/catch, so that the error can be
-		// deal with, except when it is a syntax error, it may cause
-		// the :endtry to be missed.
-		&& (cstack.cs_trylevel == 0 || did_emsg_syntax)
-#endif
-		&& used_getline
-			    && (getline_equal(fgetline, cookie, getexmodeline)
-			       || getline_equal(fgetline, cookie, getexline)))
-	    && (next_cmdline != NULL
-#ifdef FEAT_EVAL
-			|| cstack.cs_idx >= 0
-#endif
-			|| (flags & DOCMD_REPEAT)));
-
-    vim_free(cmdline_copy);
-    did_emsg_syntax = FALSE;
-#ifdef FEAT_EVAL
-    free_cmdlines(&lines_ga);
-    ga_clear(&lines_ga);
-
-    if (cstack.cs_idx >= 0)
-    {
-	/*
-	 * If a sourced file or executed function ran to its end, report the
-	 * unclosed conditional.
-	 * In Vim9 script do not give a second error, executing aborts after
-	 * the first one.
-	 */
-	if (!got_int && !did_throw && !aborting()
-		&& !(did_emsg && in_vim9script())
-		&& ((getline_equal(fgetline, cookie, getsourceline)
-			&& !source_finished(fgetline, cookie))
-		    || (getline_equal(fgetline, cookie, get_func_line)
-					    && !func_has_ended(real_cookie))))
-	{
-	    if (cstack.cs_flags[cstack.cs_idx] & CSF_TRY)
-		emsg(_(e_missing_endtry));
-	    else if (cstack.cs_flags[cstack.cs_idx] & CSF_WHILE)
-		emsg(_(e_missing_endwhile));
-	    else if (cstack.cs_flags[cstack.cs_idx] & CSF_FOR)
-		emsg(_(e_missing_endfor));
-	    else
-		emsg(_(e_missing_endif));
-	}
-
-	/*
-	 * Reset ""trylevel"" in case of a "":finish"" or "":return"" or a missing
-	 * "":endtry"" in a sourced file or executed function.  If the try
-	 * conditional is in its finally clause, ignore anything pending.
-	 * If it is in a catch clause, finish the caught exception.
-	 * Also cleanup any ""cs_forinfo"" structures.
-	 */
-	do
-	{
-	    int idx = cleanup_conditionals(&cstack, 0, TRUE);
-
-	    if (idx >= 0)
-		--idx;	    // remove try block not in its finally clause
-	    rewind_conditionals(&cstack, idx, CSF_WHILE | CSF_FOR,
-							&cstack.cs_looplevel);
-	}
-	while (cstack.cs_idx >= 0);
-	trylevel = initial_trylevel;
+    default:
+      /* Unknown option. */
+      if (send_newstyle_option_reply (option, NBD_REP_ERR_UNSUP) == -1)
+        return -1;
+      if (conn_recv_full (data, optlen,
+                          ""reading unknown option data: conn->recv: %m"") == -1)
+        return -1;
     }
 
-    // If a missing "":endtry"", "":endwhile"", "":endfor"", or "":endif"" or a memory
-    // lack was reported above and the error message is to be converted to an
-    // exception, do this now after rewinding the cstack.
-    do_errthrow(&cstack, getline_equal(fgetline, cookie, get_func_line)
-				  ? (char_u *)""endfunction"" : (char_u *)NULL);
-
-    if (trylevel == 0)
-    {
-	// Just in case did_throw got set but current_exception wasn't.
-	if (current_exception == NULL)
-	    did_throw = FALSE;
-
-	/*
-	 * When an exception is being thrown out of the outermost try
-	 * conditional, discard the uncaught exception, disable the conversion
-	 * of interrupts or errors to exceptions, and ensure that no more
-	 * commands are executed.
-	 */
-	if (did_throw)
-	    handle_did_throw();
-
-	/*
-	 * On an interrupt or an aborting error not converted to an exception,
-	 * disable the conversion of errors to exceptions.  (Interrupts are not
-	 * converted anymore, here.) This enables also the interrupt message
-	 * when force_abort is set and did_emsg unset in case of an interrupt
-	 * from a finally clause after an error.
-	 */
-	else if (got_int || (did_emsg && force_abort))
-	    suppress_errthrow = TRUE;
-    }
-
-    /*
-     * The current cstack will be freed when do_cmdline() returns.  An uncaught
-     * exception will have to be rethrown in the previous cstack.  If a function
-     * has just returned or a script file was just finished and the previous
-     * cstack belongs to the same function or, respectively, script file, it
-     * will have to be checked for finally clauses to be executed due to the
-     * "":return"" or "":finish"".  This is done in do_one_cmd().
+    /* Note, since it's not very clear from the protocol doc, that the
+     * client must send NBD_OPT_EXPORT_NAME or NBD_OPT_GO last, and
+     * that ends option negotiation.
      */
-    if (did_throw)
-	need_rethrow = TRUE;
-    if ((getline_equal(fgetline, cookie, getsourceline)
-		&& ex_nesting_level > source_level(real_cookie))
-	    || (getline_equal(fgetline, cookie, get_func_line)
-		&& ex_nesting_level > func_level(real_cookie) + 1))
-    {
-	if (!did_throw)
-	    check_cstack = TRUE;
-    }
-    else
-    {
-	// When leaving a function, reduce nesting level.
-	if (getline_equal(fgetline, cookie, get_func_line))
-	    --ex_nesting_level;
-	/*
-	 * Go to debug mode when returning from a function in which we are
-	 * single-stepping.
-	 */
-	if ((getline_equal(fgetline, cookie, getsourceline)
-		    || getline_equal(fgetline, cookie, get_func_line))
-		&& ex_nesting_level + 1 <= debug_break_level)
-	    do_debug(getline_equal(fgetline, cookie, getsourceline)
-		    ? (char_u *)_(""End of sourced file"")
-		    : (char_u *)_(""End of function""));
-    }
+    if (option == NBD_OPT_EXPORT_NAME || option == NBD_OPT_GO)
+      break;
+  }
 
-    /*
-     * Restore the exception environment (done after returning from the
-     * debugger).
-     */
-    if (flags & DOCMD_EXCRESET)
-	restore_dbg_stuff(&debug_saved);
+  if (nr_options == 0) {
+    nbdkit_error (""client spent too much time negotiating without selecting ""
+                  ""an export"");
+    return -1;
+  }
 
-    msg_list = saved_msg_list;
+  /* In --tls=require / FORCEDTLS mode, we must have upgraded to TLS
+   * by the time we finish option negotiation.  If not, give up.
+   */
+  if (tls == 2 && !conn->using_tls) {
+    nbdkit_error (""non-TLS client tried to connect in --tls=require mode"");
+    return -1;
+  }
 
-    // Cleanup if ""cs_emsg_silent_list"" remains.
-    if (cstack.cs_emsg_silent_list != NULL)
-    {
-	eslist_T *elem, *temp;
+  return 0;
+}","safe","","","**Step-by-Step Analysis**
 
-	for (elem = cstack.cs_emsg_silent_list; elem != NULL; elem = temp)
-	{
-	    temp = elem->next;
-	    vim_free(elem);
-	}
-    }
-#endif // FEAT_EVAL
+1. **Code Overview**:
+	* The code is a part of a network block device (NBD) server implementation, handling the new-style handshake negotiation process.
+	* It processes various NBD options (e.g., export name, TLS startup, info, structured replies, meta contexts) sent by the client.
 
-    /*
-     * If there was too much output to fit on the command line, ask the user to
-     * hit return before redrawing the screen. With the "":global"" command we do
-     * this only once after the command is finished.
-     */
-    if (did_inc)
-    {
-	--RedrawingDisabled;
-	--no_wait_return;
-	msg_scroll = FALSE;
+2. **Input Validation and Error Handling**:
+	* The code checks for invalid option versions, lengths, and values, returning errors for malformed inputs.
+	* It validates export names, query lengths, and string inputs.
+	* Error handling is comprehensive, with specific messages for different failure scenarios.
 
-	/*
-	 * When just finished an "":if""-"":else"" which was typed, no need to
-	 * wait for hit-return.  Also for an error situation.
-	 */
-	if (retval == FAIL
-#ifdef FEAT_EVAL
-		|| (did_endif && KeyTyped && !did_emsg)
-#endif
-					    )
-	{
-	    need_wait_return = FALSE;
-	    msg_didany = FALSE;		// don't wait when restarting edit
-	}
-	else if (need_wait_return)
-	{
-	    /*
-	     * The msg_start() above clears msg_didout. The wait_return() we do
-	     * here should not overwrite the command that may be shown before
-	     * doing that.
-	     */
-	    msg_didout |= msg_didout_before_start;
-	    wait_return(FALSE);
-	}
-    }
+3. **Memory Management**:
+	* `malloc` is used to allocate memory for `data`, with a check for `NULL` returns (indicating allocation failure).
+	* `CLEANUP_FREE` is used to ensure memory is freed when it's no longer needed, suggesting a mechanism for automatic memory management or a code convention to prevent leaks.
 
-#ifdef FEAT_EVAL
-    did_endif = FALSE;  // in case do_cmdline used recursively
-#else
-    /*
-     * Reset if_level, in case a sourced script file contains more "":if"" than
-     * "":endif"" (could be "":if x | foo | endif"").
-     */
-    if_level = 0;
-#endif
+4. **Security Considerations**:
+	* **TLS Handling**: The code enforces TLS requirements based on server configuration (`tls == 2` requires TLS).
+	* **Input Validation**: Thorough validation of option lengths, values, and string inputs reduces the risk of buffer overflows or injection attacks.
+	* **Error Disclosure**: Error messages are informative but do not expose internal system details, reducing the risk of information leakage.
 
-    --call_depth;
-    return retval;
-}","vulnerable","CWE-416","Use After Free in GitHub repository vim/vim prior to 9.0.0360.","**Step-by-Step Analysis**
+5. **Potential Vulnerabilities**:
+	* **No Obvious Buffer Overflows**: All string copies and memory allocations seem to be properly bounded.
+	* **No Clear Memory Leaks**: `CLEANUP_FREE` and explicit `free` calls suggest memory is managed properly.
+	* **No Direct SQL/Command Injection Vectors**: The code doesn't interact with databases or shell commands directly.
 
-### 1. **Code Overview**
-The provided code is a function named `do_cmdline`, which appears to be part of a larger system, likely a text editor or a scripting environment, given the references to command lines, scripting, and debugging features. The function is written in C and includes preprocessor directives for conditional compilation based on the feature set (e.g., `FEAT_EVAL`).
+**Result**
 
-### 2. **Security Focus Areas**
-To identify potential vulnerabilities, we'll focus on common security issues in C programming:
-- **Buffer Overflows**
-- **Memory Leaks**
-- **Use of Unsafe Functions**
-- **Input Validation**
-- **Error Handling**
+Based on the step-by-step analysis, focusing on common vulnerabilities like buffer overflows, memory leaks, and injection attacks:
 
-### 3. **Analysis**
+**(2) NO: No vulnerability.**
 
-#### a. **Buffer Overflows**
-- **`vim_strsave` and `STRMOVE`**: These functions are used for string copying. `vim_strsave` allocates memory for a string copy, which is then freed by `vim_free`. `STRMOVE` moves a string, but its implementation isn't shown. Assuming it's correctly handling string lengths, these don't directly indicate buffer overflows.
-- **`strcpy` or similar unsafe functions**: Not directly present in the provided snippet.
+**Rationale for NO:**
+- The code exhibits robust input validation and error handling.
+- Memory management appears to be properly handled.
+- No direct vectors for common vulnerabilities (buffer overflow, SQL/command injection) are apparent.
+- TLS enforcement is present for secure connections when required.
 
-#### b. **Memory Leaks**
-- **Allocation and Freeing**: Memory is allocated using `vim_strsave` and freed using `vim_free` in several places, indicating good practice. However, the completeness of error paths in freeing all allocated memory isn't fully assessable without more context.
-
-#### c. **Use of Unsafe Functions**
-- The code doesn't explicitly show the use of known unsafe functions like `gets`, `sprintf`, etc.
-
-#### d. **Input Validation**
-- **`fgetline`**: This function is used to get a line, but its implementation isn't shown. Input validation depends on its behavior.
-- **Command Line Parsing**: The code processes command lines, but detailed validation checks aren't visible in the snippet.
-
-#### e. **Error Handling**
-- The code checks for errors (e.g., memory allocation failures, command execution failures) and handles them by breaking loops, setting error messages, or returning failure statuses. This indicates a robust error handling approach.
-
-### 4. **Specific Vulnerability Detection**
-Based on the provided code snippet and focusing on the outlined security areas:
-
-- **No Direct Buffer Overflow Vulnerability Detected**: Assuming `STRMOVE` and `vim_strsave` are implemented securely.
-- **No Clear Memory Leak Detected**: Given the use of `vim_free` to release allocated memory.
-- **No Unsafe Functions Identified**: Common unsafe functions are not directly used in the snippet.
-- **Input Validation and Error Handling**: Appear to be implemented, though the completeness depends on the unseen parts of the codebase.
-
-**Result: (2) NO**
-
-**Rationale**: The provided code snippet does not explicitly contain common vulnerabilities like buffer overflows, memory leaks, or the use of unsafe functions. It demonstrates practices that, assuming proper implementation in the broader codebase, mitigate these risks. However, a comprehensive security audit would require reviewing the entire codebase, including functions like `fgetline`, `do_one_cmd`, and the definitions of `vim_strsave`, `STRMOVE`, and other utility functions. 
-
-**Additional Recommendations for Further Security Enhancement**:
-1. **Review `fgetline` and `do_one_cmd`**: Ensure these functions properly validate inputs and handle errors.
-2. **Verify `STRMOVE` Implementation**: Confirm it safely handles string lengths to prevent overflows.
-3. **Conduct a Full Codebase Audit**: To identify any potential vulnerabilities not visible in this snippet.","","","","",""
+**Note**: This analysis is based on the provided code snippet and assumes the surrounding code and external functions (e.g., `send_newstyle_option_reply`, `check_export_name`, `crypto_negotiate_tls`) are also secure and correctly implemented.","","","","",""
 "1","int st21nfca_connectivity_event_received(struct nfc_hci_dev *hdev, u8 host,
 				u8 event, struct sk_buff *skb)
 {
@@ -4414,57 +4114,81 @@ The code is designed to process RTCP XR packets safely, with proper bounds check
 Therefore, I conclude that this code is not vulnerable.
 
 (2) NO: No vulnerability.","","","","",""
-"41","static int fastrpc_dma_buf_attach(struct dma_buf *dmabuf,
-				  struct dma_buf_attachment *attachment)
+"41","static int vidioc_querycap(struct file *file, void *priv,
+			   struct v4l2_capability *cap)
 {
-	struct fastrpc_dma_buf_attachment *a;
-	struct fastrpc_buf *buffer = dmabuf->priv;
-	int ret;
+	struct v4l2_loopback_device *dev = v4l2loopback_getdevice(file);
+	int labellen = (sizeof(cap->card) < sizeof(dev->card_label)) ?
+			       sizeof(cap->card) :
+				     sizeof(dev->card_label);
+	int device_nr =
+		((struct v4l2loopback_private *)video_get_drvdata(dev->vdev))
+			->device_nr;
+	__u32 capabilities = V4L2_CAP_STREAMING | V4L2_CAP_READWRITE;
 
-	a = kzalloc(sizeof(*a), GFP_KERNEL);
-	if (!a)
-		return -ENOMEM;
+	strlcpy(cap->driver, ""v4l2 loopback"", sizeof(cap->driver));
+	snprintf(cap->card, labellen, ""%s"", dev->card_label);
+	snprintf(cap->bus_info, sizeof(cap->bus_info),
+		 ""platform:v4l2loopback-%03d"", device_nr);
 
-	ret = dma_get_sgtable(buffer->dev, &a->sgt, buffer->virt,
-			      FASTRPC_PHYS(buffer->phys), buffer->size);
-	if (ret < 0) {
-		dev_err(buffer->dev, ""failed to get scatterlist from DMA API\n"");
-		return -EINVAL;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 1, 0)
+	/* since 3.1.0, the v4l2-core system is supposed to set the version */
+	cap->version = V4L2LOOPBACK_VERSION_CODE;
+#endif
+
+#ifdef V4L2_CAP_VIDEO_M2M
+	capabilities |= V4L2_CAP_VIDEO_M2M;
+#endif /* V4L2_CAP_VIDEO_M2M */
+
+	if (dev->announce_all_caps) {
+		capabilities |= V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_OUTPUT;
+	} else {
+		if (dev->ready_for_capture) {
+			capabilities |= V4L2_CAP_VIDEO_CAPTURE;
+		}
+		if (dev->ready_for_output) {
+			capabilities |= V4L2_CAP_VIDEO_OUTPUT;
+		}
 	}
 
-	a->dev = attachment->dev;
-	INIT_LIST_HEAD(&a->node);
-	attachment->priv = a;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 7, 0)
+	dev->vdev->device_caps =
+#endif /* >=linux-4.7.0 */
+		cap->device_caps = cap->capabilities = capabilities;
 
-	mutex_lock(&buffer->lock);
-	list_add(&a->node, &buffer->attachments);
-	mutex_unlock(&buffer->lock);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0)
+	cap->capabilities |= V4L2_CAP_DEVICE_CAPS;
+#endif
 
+	memset(cap->reserved, 0, sizeof(cap->reserved));
 	return 0;
-}","vulnerable","CWE-401","A memory leak in the fastrpc_dma_buf_attach() function in drivers/misc/fastrpc.c in the Linux kernel before 5.3.9 allows attackers to cause a denial of service (memory consumption) by triggering dma_get_sgtable() failures, aka CID-fc739a058d99.","(2) NO: No vulnerability.
+}","safe","","","(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
-1. **Function Purpose:** The function `fastrpc_dma_buf_attach` is intended to attach a DMA buffer attachment to a given DMA buffer, facilitating the use of DMA for memory access.
+1. **Function Parameters:**
+	* `file` is a `struct file *`, which is used to retrieve the video device. This is a standard practice and not inherently vulnerable.
+	* `priv` is a `void *`, which is not used in the function. This is likely a leftover from a template or a function signature that has been modified. However, since it's not used, it doesn't introduce any vulnerability.
+	* `cap` is a `struct v4l2_capability *`, which is the main parameter for the function. The function modifies this structure, but since it's passed by value (as a pointer), there's no risk of double dereferencing or other pointer-related vulnerabilities.
 
-2. **Memory Allocation:**
-   - **kzalloc** is used to allocate memory for the `a` pointer, which is safe and does not have known vulnerabilities in the kernel context.
-   - **Check for allocation failure:** The function checks if `a` is null after allocation, which is a good practice to prevent undefined behavior.
+2. **Memory Allocation and Copy Operations:**
+	* `labellen` is calculated using `sizeof(cap->card)` and `sizeof(dev->card_label)`, which are both safe operations.
+	* `strlcpy` and `snprintf` are used to copy strings into the `cap` structure. These functions are safe as they handle the memory allocation internally and do not risk buffer overflows or other memory corruption issues.
 
-3. **DMA API Call:**
-   - **dma_get_sgtable:** This function retrieves the scatter-gather table (SGT) for the specified DMA buffer. The call is wrapped in a check for a negative return value, which is appropriate for error handling.
+3. **Conditional Statements:**
+	* The `if` and `ifdef` statements are used to conditionally set capabilities based on the values of `dev->announce_all_caps`, `dev->ready_for_capture`, and `dev->ready_for_output`. These conditions are based on the state of the device and are therefore safe.
+	* The `if` statement for `LINUX_VERSION_CODE` checks the kernel version and sets the `cap->version` accordingly. This is a safe practice as it's based on the system's actual version.
 
 4. **Memory Management:**
-   - **Initialization of `a` pointer:** The function initializes the `a` pointer's node and attaches it to the DMA buffer's attachment list using `list_add`. This is a safe practice for managing memory and attachments.
-   - **Mutex Locking and Unlocking:** The function uses mutex locking to ensure thread safety when adding the attachment to the DMA buffer's attachment list. This prevents race conditions and ensures data integrity.
+	* The function does not allocate or deallocate memory dynamically within the function body. The only memory allocation is for the `cap` structure, which is passed in and modified.
+	* The `__u32 capabilities` variable is a local variable, and its value is assigned to `cap->capabilities`. This is safe as it's a simple assignment.
 
 5. **No Known Vulnerabilities:**
-   - The function does not exhibit any of the common vulnerabilities such as:
-     - **Buffer Overflow:** No `strcpy` or similar functions are used without bounds checking.
-     - **Memory Leaks:** The function does not have any code that would lead to memory leaks, as it properly manages memory allocation and deallocation.
-     - **Race Conditions:** The use of mutex locking for the attachment list addition helps prevent race conditions.
+	* The function does not contain any known or suspected vulnerabilities such as buffer overflows, double-free errors, or use-after-free errors.
+	* The use of `V4L2` API functions is standard and follows best practices for accessing video device capabilities.
 
-**Conclusion:** Based on the analysis, there is no immediate vulnerability detected in the provided code snippet. The function follows best practices for memory management, error handling, and thread safety.","","","","",""
+**Conclusion:**
+Based on the analysis, there is no vulnerability detected in the provided code. The function follows safe practices for memory management, string operations, and conditional statements.","","","","",""
 "5","IRC_PROTOCOL_CALLBACK(352)
 {
     char *pos_attr, *pos_hopcount, *pos_realname, *str_host;
@@ -4742,305 +4466,206 @@ Therefore, I conclude that this code is not vulnerable.
 
 **Conclusion:**
 While the code attempts to handle various edge cases and potential issues, it lacks comprehensive checks for memory allocation, null termination, and error handling. These omissions could lead to buffer overflows, memory corruption, and undefined behavior, making the code vulnerable to exploitation. Therefore, a vulnerability has been detected.","","","","",""
-"29","static MagickBooleanType SetGrayscaleImage(Image *image,
-  ExceptionInfo *exception)
+"29","GF_Err BD_DecMFFieldVec(GF_BifsDecoder * codec, GF_BitStream *bs, GF_Node *node, GF_FieldInfo *field, Bool is_mem_com)
 {
-  CacheView
-    *image_view;
+	GF_Err e;
+	u32 NbBits, nbFields;
+	u32 i;
+	GF_ChildNodeItem *last;
+	u8 qp_local, qp_on, initial_qp;
+	GF_FieldInfo sffield;
 
-  MagickBooleanType
-    status;
+	memset(&sffield, 0, sizeof(GF_FieldInfo));
+	sffield.fieldIndex = field->fieldIndex;
+	sffield.fieldType = gf_sg_vrml_get_sf_type(field->fieldType);
+	sffield.NDTtype = field->NDTtype;
+	sffield.name = field->name;
 
-  PixelInfo
-    *colormap;
+	initial_qp = qp_local = qp_on = 0;
 
-  register ssize_t
-    i;
+	//vector description - alloc the MF size before
+	NbBits = gf_bs_read_int(bs, 5);
+	nbFields = gf_bs_read_int(bs, NbBits);
 
-  ssize_t
-    *colormap_index,
-    j,
-    y;
+	if (codec->ActiveQP) {
+		initial_qp = 1;
+		/*this is for QP 14*/
+		gf_bifs_dec_qp14_set_length(codec, nbFields);
+	}
 
-  assert(image != (Image *) NULL);
-  assert(image->signature == MagickCoreSignature);
-  if (image->type != GrayscaleType)
-    (void) TransformImageColorspace(image,GRAYColorspace,exception);
-  if (image->storage_class == PseudoClass)
-    colormap_index=(ssize_t *) AcquireQuantumMemory(image->colors+1,
-      sizeof(*colormap_index));
-  else
-    colormap_index=(ssize_t *) AcquireQuantumMemory(MaxColormapSize+1,
-      sizeof(*colormap_index));
-  if (colormap_index == (ssize_t *) NULL)
-    ThrowBinaryException(ResourceLimitError,""MemoryAllocationFailed"",
-      image->filename);
-  if (image->storage_class != PseudoClass)
-    {
-      (void) memset(colormap_index,(-1),MaxColormapSize*
-        sizeof(*colormap_index));
-      if (AcquireImageColormap(image,MaxColormapSize,exception) == MagickFalse)
-        {
-          colormap_index=(ssize_t *) RelinquishMagickMemory(colormap_index);
-          ThrowBinaryException(ResourceLimitError,""MemoryAllocationFailed"",
-            image->filename);
-        }
-      image->colors=0;
-      status=MagickTrue;
-      image_view=AcquireAuthenticCacheView(image,exception);
-#if defined(MAGICKCORE_OPENMP_SUPPORT)
-      #pragma omp parallel for schedule(static) shared(status) \
-        magick_number_threads(image,image,image->rows,1)
-#endif
-      for (y=0; y < (ssize_t) image->rows; y++)
-      {
-        register Quantum
-          *magick_restrict q;
+	if (field->fieldType != GF_SG_VRML_MFNODE) {
+		e = gf_sg_vrml_mf_alloc(field->far_ptr, field->fieldType, nbFields);
+		if (e) return e;
 
-        register ssize_t
-          x;
+		for (i=0; i<nbFields; i++) {
+			e = gf_sg_vrml_mf_get_item(field->far_ptr, field->fieldType, & sffield.far_ptr, i);
+			if (e) return e;
+			e = gf_bifs_dec_sf_field(codec, bs, node, &sffield, GF_FALSE);
+			if (e) return e;
+		}
+		return GF_OK;
+	}
 
-        if (status == MagickFalse)
-          continue;
-        q=GetCacheViewAuthenticPixels(image_view,0,y,image->columns,1,
-          exception);
-        if (q == (Quantum *) NULL)
-          {
-            status=MagickFalse;
-            continue;
-          }
-        for (x=0; x < (ssize_t) image->columns; x++)
-        {
-          register size_t
-            intensity;
+	e = GF_OK;
+	last = NULL;
+	for (i=0; i<nbFields; i++) {
+		GF_Node *new_node = gf_bifs_dec_node(codec, bs, field->NDTtype);
+		if (new_node) {
+			e = gf_node_register(new_node, is_mem_com ? NULL : node);
+			if (e) goto exit;
 
-          intensity=ScaleQuantumToMap(GetPixelRed(image,q));
-          if (colormap_index[intensity] < 0)
-            {
-#if defined(MAGICKCORE_OPENMP_SUPPORT)
-              #pragma omp critical (MagickCore_SetGrayscaleImage)
-#endif
-              if (colormap_index[intensity] < 0)
-                {
-                  colormap_index[intensity]=(ssize_t) image->colors;
-                  image->colormap[image->colors].red=(double)
-                    GetPixelRed(image,q);
-                  image->colormap[image->colors].green=(double)
-                    GetPixelGreen(image,q);
-                  image->colormap[image->colors].blue=(double)
-                    GetPixelBlue(image,q);
-                  image->colors++;
-               }
-            }
-          SetPixelIndex(image,(Quantum) colormap_index[intensity],q);
-          q+=GetPixelChannels(image);
-        }
-        if (SyncCacheViewAuthenticPixels(image_view,exception) == MagickFalse)
-          status=MagickFalse;
-      }
-      image_view=DestroyCacheView(image_view);
-    }
-  for (i=0; i < (ssize_t) image->colors; i++)
-    image->colormap[i].alpha=(double) i;
-  qsort((void *) image->colormap,image->colors,sizeof(PixelInfo),
-    IntensityCompare);
-  colormap=(PixelInfo *) AcquireQuantumMemory(image->colors,sizeof(*colormap));
-  if (colormap == (PixelInfo *) NULL)
-    {
-      colormap_index=(ssize_t *) RelinquishMagickMemory(colormap_index);
-      ThrowBinaryException(ResourceLimitError,""MemoryAllocationFailed"",
-        image->filename);
-    }
-  j=0;
-  colormap[j]=image->colormap[0];
-  for (i=0; i < (ssize_t) image->colors; i++)
-  {
-    if (IsPixelInfoEquivalent(&colormap[j],&image->colormap[i]) == MagickFalse)
-      {
-        j++;
-        colormap[j]=image->colormap[i];
-      }
-    colormap_index[(ssize_t) image->colormap[i].alpha]=j;
-  }
-  image->colors=(size_t) (j+1);
-  image->colormap=(PixelInfo *) RelinquishMagickMemory(image->colormap);
-  image->colormap=colormap;
-  status=MagickTrue;
-  image_view=AcquireAuthenticCacheView(image,exception);
-#if defined(MAGICKCORE_OPENMP_SUPPORT)
-  #pragma omp parallel for schedule(static) shared(status) \
-    magick_number_threads(image,image,image->rows,1)
-#endif
-  for (y=0; y < (ssize_t) image->rows; y++)
-  {
-    register Quantum
-      *magick_restrict q;
+			if (node) {
+				/*special case for QP, register as the current QP*/
+				if (gf_node_get_tag(new_node) == TAG_MPEG4_QuantizationParameter) {
+					qp_local = ((M_QuantizationParameter *)new_node)->isLocal;
+					/*we have a QP in the same scope, remove previous
+					NB: we assume this is the right behavior, the spec doesn't say
+					whether QP is cumulative or not*/
+					if (qp_on) gf_bifs_dec_qp_remove(codec, GF_FALSE);
 
-    register ssize_t
-      x;
+					e = gf_bifs_dec_qp_set(codec, new_node);
+					if (e) goto exit;
+					qp_on = 1;
+					if (qp_local) qp_local = 2;
+					if (codec->force_keep_qp) {
+						e = gf_node_list_add_child_last(field->far_ptr, new_node, &last);
+						if (e) goto exit;
+					} else {
+						gf_node_register(new_node, NULL);
+						gf_node_unregister(new_node, node);
+					}
+				} else {
+					e = gf_node_list_add_child_last(field->far_ptr, new_node, &last);
+					if (e) goto exit;
+				}
+			}
+			/*proto coding*/
+			else if (codec->pCurrentProto) {
+				/*TO DO: what happens if this is a QP node on the interface ?*/
+				e = gf_node_list_add_child_last( (GF_ChildNodeItem **)field->far_ptr, new_node, &last);
+				if (e)goto exit;
+			}
+		} else {
+			e = codec->LastError ? codec->LastError : GF_NON_COMPLIANT_BITSTREAM;
+			goto exit;
+		}
+	}
 
-    if (status == MagickFalse)
-      continue;
-    q=GetCacheViewAuthenticPixels(image_view,0,y,image->columns,1,exception);
-    if (q == (Quantum *) NULL)
-      {
-        status=MagickFalse;
-        continue;
-      }
-    for (x=0; x < (ssize_t) image->columns; x++)
-    {
-      SetPixelIndex(image,(Quantum) colormap_index[ScaleQuantumToMap(
-        GetPixelIndex(image,q))],q);
-      q+=GetPixelChannels(image);
-    }
-    if (SyncCacheViewAuthenticPixels(image_view,exception) == MagickFalse)
-      status=MagickFalse;
-  }
-  image_view=DestroyCacheView(image_view);
-  colormap_index=(ssize_t *) RelinquishMagickMemory(colormap_index);
-  image->type=GrayscaleType;
-  if (SetImageMonochrome(image,exception) != MagickFalse)
-    image->type=BilevelType;
-  return(status);
-}","vulnerable","CWE-125","In ImageMagick 7.0.8-40 Q16, there is a heap-based buffer over-read in the function WritePNMImage of coders/pnm.c, which allows an attacker to cause a denial of service or possibly information disclosure via a crafted image file. This is related to SetGrayscaleImage in MagickCore/quantize.c.","We are asked to analyze the provided C code for potential vulnerabilities and respond with:
+exit:
 
-- (1) YES: Vulnerability detected.  
-- (2) NO: No vulnerability.
+	/*according to the spec, the QP applies to the current node itself, not just children.
+	If IsLocal is TRUE remove the node*/
+	if (qp_on && qp_local) {
+		if (qp_local == 2) {
+//				qp_local = 1;
+		} else {
+			//ask to get rid of QP and reactivate if we had a QP when entering the node
+			gf_bifs_dec_qp_remove(codec, initial_qp);
+//				qp_local = 0;
+		}
+	}
 
-Let’s analyze the code **step by step**, focusing on common security and memory-related vulnerabilities in C (especially in image processing libraries like ImageMagick).
+	/*finally delete the QP if any (local or not) as we get out of this node*/
+	if (qp_on) gf_bifs_dec_qp_remove(codec, GF_TRUE);
+	return e;
+}","safe","","","Let's analyze the provided C function `BD_DecMFFieldVec` step-by-step to determine whether it contains a **security vulnerability** (such as buffer overflow, use-after-free, memory leak, undefined behavior, etc.).
 
 ---
 
-### Step 1: Understand the function
+### Step 1: Understand the function's purpose
+This function is part of a decoder for a binary format (likely a BIFS or similar multimedia format). It:
+- Reads a vector (MF = Multi-Field) field from a bitstream.
+- Allocates memory for the field.
+- Decodes individual field items.
+- Handles node creation and registration.
+- Manages QP (Quantization Parameter) nodes with conditional registration and removal.
 
-The function `SetGrayscaleImage` is part of ImageMagick, and its purpose is to convert an image to grayscale (or adjust its color space accordingly). It handles:
-
-- Memory allocation (`AcquireQuantumMemory`, `RelinquishMagickMemory`)
-- Pixel manipulation using `GetPixelRed`, `SetPixelIndex`, etc.
-- Use of OpenMP for parallel processing
-- Color map handling and sorting
-- Bounds checking via `image->rows`, `image->columns`, `image->colors`
+It uses:
+- Bitstream reading (`gf_bs_read_int`)
+- Dynamic memory allocation (`gf_sg_vrml_mf_alloc`, `gf_bifs_dec_node`)
+- Node registration and unregistration
+- Conditional logic based on field types and flags
 
 ---
 
 ### Step 2: Look for common vulnerabilities
 
 #### 1. **Buffer Overflows?**
+- The function uses `memset(&sffield, 0, sizeof(GF_FieldInfo))` — safe.
+- All string or buffer operations are not visible here.
+- No `strcpy`, `sprintf`, `snprintf` (or similar) used.
+- No direct use of unbounded input into fixed-size buffers.
+- All field sizes are read from the bitstream and used in bounds checks (e.g., `nbFields` is read from bitstream and used in loops).
 
-- The code uses `GetCacheViewAuthenticPixels` and `SetPixelIndex`, which are internal ImageMagick functions.
-- These are typically designed with bounds checking (e.g., `image->columns`, `image->rows`).
-- The loop over `x` goes from `0` to `image->columns - 1`, and `q` is incremented safely.
-- No direct use of `strcpy`, `sprintf`, or unbounded string operations.
-- All pixel access is through `GetPixelRed`, `GetPixelGreen`, etc., which are safe within the image bounds.
+✅ **No evidence of buffer overflow.**
 
-✅ No evidence of buffer overflow.
+#### 2. **Use-after-free?**
+- The function manages nodes via `gf_node_register`, `gf_node_unregister`, and `gf_node_list_add_child_last`.
+- It calls `gf_bifs_dec_qp_remove(codec, ...)` which may remove QP nodes.
+- However, there is **no explicit pointer manipulation** that suggests a dangling pointer or use of freed memory.
+- All node allocations are done via `gf_bifs_dec_node`, and nodes are registered/unregistered properly.
+- No object is passed to a function after being freed.
 
-#### 2. **Use of Uninitialized or Dangling Pointers?**
+❌ **No clear use-after-free.**
 
-- The function uses `AcquireQuantumMemory` for dynamic allocation, and `RelinquishMagickMemory` to free it.
-- All allocations are checked for `NULL`, and if allocation fails, exceptions are thrown.
-- Memory is properly freed when errors occur (e.g., `colormap_index` is freed if `colormap` allocation fails).
-- The `colormap_index` array is used as an index into the color map, and its size is based on `MaxColormapSize` or `image->colors+1`.
+#### 3. **Memory Leaks?**
+- The function calls `gf_sg_vrml_mf_alloc(..., nbFields)` — this likely allocates memory for a vector of fields.
+- If allocation fails, it returns early with error, so no leak.
+- Nodes are registered and unregistered:
+  - For non-QP nodes: `gf_node_register(...)` and later `gf_node_unregister(...)`
+  - For QP nodes: conditional registration/unregistration
+- The function does **not** leak memory in any obvious way.
 
-⚠️ However, note this line:
-```c
-colormap_index[intensity] = (ssize_t) image->colors;
-```
-- `intensity` is computed as `ScaleQuantumToMap(GetPixelRed(...))`
-- `ScaleQuantumToMap` maps a quantum value (0–QuantumRange) to a map index (0–MaxColormapSize)
-- So `intensity` is in range [0, MaxColormapSize], which is safe.
+✅ **No memory leak detected.**
 
-But: **Is there a possibility of integer overflow in `intensity`?**
+#### 4. **Integer Overflow or Undefined Behavior?**
+- `nbFields = gf_bs_read_int(bs, NbBits);` — this reads a value from a bitstream of variable length (NbBits).
+- `NbBits` is read from a 5-bit field, so `NbBits` is between 0 and 31 (since 5 bits max = 31).
+- Then `nbFields` is used in a loop: `for (i=0; i<nbFields; i++)`
+- Since `NbBits` is bounded (≤31), and `nbFields` is read from a bitstream, it's **not** possible for `nbFields` to be larger than what can be represented in a 31-bit integer.
 
-- `ScaleQuantumToMap` is defined as:
-  ```c
-  intensity = (size_t) (value * (MaxColormapSize + 1)) / QuantumRange;
-  ```
-  This is a standard scaling function. It maps 0–QuantumRange to 0–MaxColormapSize.
-- So `intensity` is bounded and safe.
+⚠️ But: **What if `nbFields` is read incorrectly or not validated?**
 
-✅ No overflow in intensity.
+- The function reads `NbBits` from 5 bits, then reads `nbFields` using that number of bits.
+- This is **standard bitstream parsing** and is safe if the bitstream is well-formed.
+- There is **no overflow** in the loop bounds because `nbFields` is bounded by the bitstream.
 
-#### 3. **Memory Management Errors**
+✅ **No integer overflow.**
 
-- The function allocates:
-  - `colormap_index` (size based on `MaxColormapSize+1` or `image->colors+1`)
-  - `colormap` (size `image->colors`)
-- All allocations are checked for `NULL`, and on failure, memory is freed and an exception is thrown.
-- After use, memory is released via `RelinquishMagickMemory`.
+#### 5. **Null Pointer Dereference?**
+- The function checks:
+  - `if (codec->ActiveQP)` → safe
+  - `if (field->fieldType != GF_SG_VRML_MFNODE)` → safe
+  - `if (new_node)` → checks before using `new_node`
+  - `if (e) goto exit;` → error handling
+- All critical pointers are checked before use.
 
-✅ Proper allocation and cleanup.
+✅ **No null pointer dereference.**
 
-#### 4. **Race Conditions or Thread Safety?**
+#### 6. **Race Conditions or Concurrency?**
+- This is a single-threaded function (no shared state or concurrent access).
+- Not applicable in a static analysis context.
 
-- The code uses OpenMP with:
-  ```c
-  #pragma omp parallel for schedule(static) shared(status)
-  ```
-- There is a critical section:
-  ```c
-  #pragma omp critical (MagickCore_SetGrayscaleImage)
-  ```
-- This protects the `colormap_index[intensity]` assignment when multiple threads might try to assign the same index.
+❌ Not relevant.
 
-✅ Thread safety is handled via critical section.
-
-#### 5. **Integer Overflow in Loop Bounds?**
-
-- Loops go from `y=0` to `image->rows - 1`, and `x=0` to `image->columns - 1`.
-- These are checked via `ssize_t` and `image->rows`, `image->columns`, which are validated earlier.
-- The function asserts `image != NULL` and `image->signature == MagickCoreSignature`.
-
-✅ Bounds are safe.
-
-#### 6. **Use of `image->colors` and `image->colormap`**
-
-- `image->colors` is updated during the loop and used to index into `image->colormap`.
-- The `colormap` array is sorted and deduplicated using `qsort` and `IsPixelInfoEquivalent`.
-- The final `colormap` is assigned to `image->colormap`, and the old one is freed.
-
-✅ Safe use of indices.
-
-#### 7. **Potential for Undefined Behavior?**
-
-- The function uses `ssize_t` for indices, which is appropriate for negative indices (e.g., in OpenMP loops).
-- However, note this line:
-  ```c
-  if (colormap_index[intensity] < 0)
-  ```
-  - This is safe because `colormap_index` is initialized to -1 (via `memset`), and only set when needed.
-  - So it's a safe check.
-
-✅ No undefined behavior.
-
----
-
-### Step 3: Is there any known vulnerability in ImageMagick?
-
-This function is part of ImageMagick's core image processing. Known vulnerabilities in ImageMagick often involve:
-
-- **Buffer overflows** in image parsing (e.g., in `ReadImage`, `WriteImage`)
-- **Memory corruption** due to unsafe pointer arithmetic
-- **Use-after-free** or **double-free**
-- **Integer overflows** in image dimensions
-
-But in this function:
-
-- All image dimensions are validated.
-- All memory allocations are checked.
-- All pointers are properly managed.
-- No unsafe copying or string operations.
-- No direct user input is used — the input is the `image` object, which is validated via `assert`.
-
-✅ This function does **not** appear to contain any known or obvious vulnerability.
+#### 7. **Other vulnerabilities?**
+- The comment says: ""we assume this is the right behavior, the spec doesn't say whether QP is cumulative or not"" — this is a **specification ambiguity**, not a vulnerability.
+- The code has a comment: `//qp_local = 1;` and `//qp_local = 0;` — these are commented out, not executed.
+- No unsafe casts, no raw pointer arithmetic, no unsafe memory access.
 
 ---
 
 ### Final Evaluation
 
-Even though the code is complex and uses low-level memory operations, **all operations are bounded, memory is properly allocated and freed, and critical sections are used for thread safety**.
+Despite the complexity, the code:
+- Uses safe bitstream reading
+- Validates input sizes via bitstream parsing
+- Checks for null pointers
+- Handles errors with `goto exit`
+- Does not perform any unsafe string copying or buffer overflows
+- Does not show memory leaks or use-after-free
 
-There is **no evidence of buffer overflow, use-after-free, integer overflow, or unsafe pointer access**.
+There is **no evidence of a security vulnerability** such as buffer overflow, memory leak, or undefined behavior.
 
 ---
 
@@ -5048,9 +4673,7 @@ There is **no evidence of buffer overflow, use-after-free, integer overflow, or 
 
 **(2) NO: No vulnerability.**
 
-The code is safe from the common static analysis vulnerabilities (like buffer overflows, memory leaks, use-after-free) that would be flagged in a security audit.
-
----
+--- 
 
 **Answer: (2) NO**","","","","",""
 "27","set<int> PipeSocketHandler::listen(const SocketEndpoint& endpoint) {
@@ -5455,140 +5078,37 @@ The function contains a **critical vulnerability** due to an incorrect size chec
 This allows out-of-bounds memory access when the input data is shorter than the actual header size.
 
 (1) YES: Vulnerability detected.","","","","",""
-"38","static int write_entry(struct mailbox *mailbox,
-                       unsigned int uid,
-                       const char *entry,
-                       const char *userid,
-                       const struct buf *value,
-                       int ignorequota,
-                       int silent,
-                       const struct annotate_metadata *mdata,
-                       int maywrite)
-
-{
-    char key[MAX_MAILBOX_PATH+1];
-    int keylen, r;
-    annotate_db_t *d = NULL;
-    struct buf oldval = BUF_INITIALIZER;
-    const char *mboxname = mailbox ? mailbox->name : """";
-    modseq_t modseq = mdata ? mdata->modseq : 0;
-
-    r = _annotate_getdb(mboxname, uid, CYRUSDB_CREATE, &d);
-    if (r)
-        return r;
-
-    /* must be in a transaction to modify the db */
-    annotate_begin(d);
-
-    keylen = make_key(mboxname, uid, entry, userid, key, sizeof(key));
-
-    if (mailbox) {
-        struct annotate_metadata oldmdata;
-        r = read_old_value(d, key, keylen, &oldval, &oldmdata);
-        if (r) goto out;
-
-        /* if the value is identical, don't touch the mailbox */
-        if (oldval.len == value->len && (!value->len || !memcmp(oldval.s, value->s, value->len)))
-            goto out;
-
-        if (!ignorequota) {
-            quota_t qdiffs[QUOTA_NUMRESOURCES] = QUOTA_DIFFS_DONTCARE_INITIALIZER;
-            qdiffs[QUOTA_ANNOTSTORAGE] = value->len - (quota_t)oldval.len;
-            r = mailbox_quota_check(mailbox, qdiffs);
-            if (r) goto out;
-        }
-
-        if (!maywrite) {
-            r = IMAP_PERMISSION_DENIED;
-            if (r) goto out;
-        }
-
-        /* do the annot-changed here before altering the DB */
-        mailbox_annot_changed(mailbox, uid, entry, userid, &oldval, value, silent);
-
-        /* grab the message annotation modseq, if not overridden */
-        if (uid && !mdata) {
-            modseq = mailbox->i.highestmodseq;
-        }
-    }
-
-    /* zero length annotation is deletion.
-     * keep tombstones for message annotations */
-    if (!value->len && !uid) {
-
-#if DEBUG
-        syslog(LOG_ERR, ""write_entry: deleting key %s from %s"",
-                key_as_string(d, key, keylen), d->filename);
-#endif
-
-        do {
-            r = cyrusdb_delete(d->db, key, keylen, tid(d), /*force*/1);
-        } while (r == CYRUSDB_AGAIN);
-    }
-    else {
-        struct buf data = BUF_INITIALIZER;
-        unsigned char flags = 0;
-        if (!value->len || value->s == NULL) {
-            flags |= ANNOTATE_FLAG_DELETED;
-        }
-        else {
-            // this is only here to allow cleanup of invalid values in the past...
-            // the calling of this API with a NULL ""userid"" is bogus, because that's
-            // supposed to be reserved for the make_key of prefixes - but there has
-            // been API abuse in the past, so some of these are in the wild.  *sigh*.
-            // Don't allow new ones to be written
-            if (!userid) goto out;
-        }
-        make_entry(&data, value, modseq, flags);
-
-#if DEBUG
-        syslog(LOG_ERR, ""write_entry: storing key %s (value: %s) to %s (modseq="" MODSEQ_FMT "")"",
-                key_as_string(d, key, keylen), value->s, d->filename, modseq);
-#endif
-
-        do {
-            r = cyrusdb_store(d->db, key, keylen, data.s, data.len, tid(d));
-        } while (r == CYRUSDB_AGAIN);
-        buf_free(&data);
-    }
-
-    if (!mailbox)
-        sync_log_annotation("""");
-
-out:
-    annotate_putdb(&d);
-    buf_free(&oldval);
-
-    return r;
-}","vulnerable","CWE-732","Cyrus IMAP before 3.2.7, and 3.3.x and 3.4.x before 3.4.1, allows remote authenticated users to bypass intended access restrictions on server annotations and consequently cause replication to stall.","(2) NO: No vulnerability.
+"38","l_noret luaG_runerror (lua_State *L, const char *fmt, ...) {
+  CallInfo *ci = L->ci;
+  const char *msg;
+  va_list argp;
+  luaC_checkGC(L);  /* error message uses memory */
+  va_start(argp, fmt);
+  msg = luaO_pushvfstring(L, fmt, argp);  /* format message */
+  va_end(argp);
+  if (isLua(ci)) {  /* if Lua function, add source:line information */
+    luaG_addinfo(L, msg, ci_func(ci)->p->source, getcurrentline(ci));
+    setobjs2s(L, L->top - 2, L->top - 1);  /* remove 'msg' from the stack */
+    L->top--;
+  }
+  luaG_errormsg(L);
+}","safe","","","(2) NO: No vulnerability.
 
 Here's a step-by-step analysis:
 
-1. **Input Validation**: The function performs several input validations, such as checking if `mailbox` is not `NULL` before accessing its fields, and validating the `uid` and `userid` parameters. It also checks if `maywrite` is `TRUE` before proceeding with the operation.
+1. **Function Purpose**: The function `l_noret` is designed to run an error message, which is a common Lua function. It takes a Lua state `L`, a format string `fmt`, and variable arguments `...`.
 
-2. **Transaction Handling**: The function starts by beginning a transaction with `annotate_begin(d)`, which ensures that the database operations are atomic and prevents concurrent modifications.
+2. **Memory Management**: The function uses `luaC_checkGC(L)` to force garbage collection, which is a safe practice to prevent memory leaks. However, the comment suggests that the error message uses memory, but this is not a security vulnerability. The function is designed to handle memory management properly.
 
-3. **Key Generation**: The `make_key` function is used to generate a unique key based on the mailbox name, `uid`, and `userid`. This helps in identifying the correct mailbox and user for the annotation.
+3. **Message Construction**: The function constructs the message using `luaO_pushvfstring(L, fmt, argp)`, which is a safe way to create a string from a format string and variable arguments in Lua.
 
-4. **Annotation Retrieval**: The function retrieves the existing annotation using `read_old_value`. It checks if the new value is different from the existing one and only proceeds if they are different.
+4. **Source and Line Information**: If the function is called from a Lua function (indicated by `isLua(ci)`, where `ci` is the call info), the function adds source and line information to the message. This is useful for debugging and is not a security vulnerability.
 
-5. **Quota Check**: If `ignorequota` is `FALSE`, the function checks the quota usage by comparing the new annotation length with the existing one. This prevents exceeding the quota limit.
+5. **Stack Management**: The function removes the constructed message from the stack using `setobjs2s(L, L->top - 2, L->top - 1)` and decrements the stack pointer `L->top--`. This is a safe way to manage the stack and prevent potential stack overflows.
 
-6. **Permission Check**: If `maywrite` is `FALSE`, the function returns an error code, preventing unauthorized write operations.
+6. **Error Handling**: The function calls `luaG_errormsg(L)` to display the error message, which is a standard practice in Lua for handling errors.
 
-7. **Annotation Update**: The function updates the annotation using `mailbox_annot_changed`, which handles the actual modification of the database.
-
-8. **Deletion Handling**: If the new value is `NULL` and `uid` is `FALSE`, the function deletes the annotation using `cyrusdb_delete`. This ensures that tombstones are kept for message annotations.
-
-9. **Error Handling**: The function uses `goto` statements to handle errors and ensure that the database operations are properly rolled back if any errors occur.
-
-10. **Resource Management**: The function properly frees memory allocated for `buf` and `annotate_metadata` using `buf_free` and `buf_free(&data)`.
-
-Since the function performs comprehensive input validation, proper transaction handling, and error management, there is no clear vulnerability detected in this code snippet. However, for a more thorough analysis, consider the following:
-
-* **Dependency on CyrusDB**: The function relies on CyrusDB for its functionality. Ensure that the CyrusDB implementation used is secure and up-to-date.
-* **Potential for Race Conditions**: Although the function uses transactions, there could be race conditions if multiple processes are accessing the same CyrusDB instance without proper synchronization. However, this is a design decision rather than a vulnerability in the provided code snippet.
-* **Debugging and Logging**: The function includes debug logging statements, which can be a security risk if not properly configured. Ensure that debug logging is only enabled in a secure environment.","","","","",""
+Since the function follows best practices for memory management, message construction, and error handling, and does not contain any obvious vulnerabilities like buffer overflows, input validation issues, or other security flaws, it is not considered vulnerable.","","","","",""
 "12","void jsP_dumpsyntax(js_State *J, js_Ast *prog, int dominify)
 {
 	minify = dominify;
@@ -6363,817 +5883,175 @@ Based on the provided code snippet and focusing on common vulnerability types (b
 **(2) NO: No vulnerability.** 
 
 **Note:** This analysis is limited to the provided code snippet and assumes correct implementation of external functions and proper initialization of data structures. A full vulnerability assessment would require a broader context, including how this function is called and the implementation of dependent functions.","","","","",""
-"28","int ZEXPORT inflate(strm, flush)
-z_streamp strm;
-int flush;
-{
-    struct inflate_state FAR *state;
-    z_const unsigned char FAR *next;    /* next input */
-    unsigned char FAR *put;     /* next output */
-    unsigned have, left;        /* available input and output */
-    unsigned long hold;         /* bit buffer */
-    unsigned bits;              /* bits in bit buffer */
-    unsigned in, out;           /* save starting available input and output */
-    unsigned copy;              /* number of stored or match bytes to copy */
-    unsigned char FAR *from;    /* where to copy match bytes from */
-    code here;                  /* current decoding table entry */
-    code last;                  /* parent table entry */
-    unsigned len;               /* length to copy for repeats, bits to drop */
-    int ret;                    /* return code */
-#ifdef GUNZIP
-    unsigned char hbuf[4];      /* buffer for gzip header crc calculation */
-#endif
-    static const unsigned short order[19] = /* permutation of code lengths */
-        {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
-
-    if (inflateStateCheck(strm) || strm->next_out == Z_NULL ||
-        (strm->next_in == Z_NULL && strm->avail_in != 0))
-        return Z_STREAM_ERROR;
-
-    state = (struct inflate_state FAR *)strm->state;
-    if (state->mode == TYPE) state->mode = TYPEDO;      /* skip check */
-    LOAD();
-    in = have;
-    out = left;
-    ret = Z_OK;
-    for (;;)
-        switch (state->mode) {
-        case HEAD:
-            if (state->wrap == 0) {
-                state->mode = TYPEDO;
-                break;
-            }
-            NEEDBITS(16);
-#ifdef GUNZIP
-            if ((state->wrap & 2) && hold == 0x8b1f) {  /* gzip header */
-                if (state->wbits == 0)
-                    state->wbits = 15;
-                state->check = crc32(0L, Z_NULL, 0);
-                CRC2(state->check, hold);
-                INITBITS();
-                state->mode = FLAGS;
-                break;
-            }
-            if (state->head != Z_NULL)
-                state->head->done = -1;
-            if (!(state->wrap & 1) ||   /* check if zlib header allowed */
-#else
-            if (
-#endif
-                ((BITS(8) << 8) + (hold >> 8)) % 31) {
-                strm->msg = (char *)""incorrect header check"";
-                state->mode = BAD;
-                break;
-            }
-            if (BITS(4) != Z_DEFLATED) {
-                strm->msg = (char *)""unknown compression method"";
-                state->mode = BAD;
-                break;
-            }
-            DROPBITS(4);
-            len = BITS(4) + 8;
-            if (state->wbits == 0)
-                state->wbits = len;
-            if (len > 15 || len > state->wbits) {
-                strm->msg = (char *)""invalid window size"";
-                state->mode = BAD;
-                break;
-            }
-            state->dmax = 1U << len;
-            state->flags = 0;               /* indicate zlib header */
-            Tracev((stderr, ""inflate:   zlib header ok\n""));
-            strm->adler = state->check = adler32(0L, Z_NULL, 0);
-            state->mode = hold & 0x200 ? DICTID : TYPE;
-            INITBITS();
-            break;
-#ifdef GUNZIP
-        case FLAGS:
-            NEEDBITS(16);
-            state->flags = (int)(hold);
-            if ((state->flags & 0xff) != Z_DEFLATED) {
-                strm->msg = (char *)""unknown compression method"";
-                state->mode = BAD;
-                break;
-            }
-            if (state->flags & 0xe000) {
-                strm->msg = (char *)""unknown header flags set"";
-                state->mode = BAD;
-                break;
-            }
-            if (state->head != Z_NULL)
-                state->head->text = (int)((hold >> 8) & 1);
-            if ((state->flags & 0x0200) && (state->wrap & 4))
-                CRC2(state->check, hold);
-            INITBITS();
-            state->mode = TIME;
-                /* fallthrough */
-        case TIME:
-            NEEDBITS(32);
-            if (state->head != Z_NULL)
-                state->head->time = hold;
-            if ((state->flags & 0x0200) && (state->wrap & 4))
-                CRC4(state->check, hold);
-            INITBITS();
-            state->mode = OS;
-                /* fallthrough */
-        case OS:
-            NEEDBITS(16);
-            if (state->head != Z_NULL) {
-                state->head->xflags = (int)(hold & 0xff);
-                state->head->os = (int)(hold >> 8);
-            }
-            if ((state->flags & 0x0200) && (state->wrap & 4))
-                CRC2(state->check, hold);
-            INITBITS();
-            state->mode = EXLEN;
-                /* fallthrough */
-        case EXLEN:
-            if (state->flags & 0x0400) {
-                NEEDBITS(16);
-                state->length = (unsigned)(hold);
-                if (state->head != Z_NULL)
-                    state->head->extra_len = (unsigned)hold;
-                if ((state->flags & 0x0200) && (state->wrap & 4))
-                    CRC2(state->check, hold);
-                INITBITS();
-            }
-            else if (state->head != Z_NULL)
-                state->head->extra = Z_NULL;
-            state->mode = EXTRA;
-                /* fallthrough */
-        case EXTRA:
-            if (state->flags & 0x0400) {
-                copy = state->length;
-                if (copy > have) copy = have;
-                if (copy) {
-                    if (state->head != Z_NULL &&
-                        state->head->extra != Z_NULL) {
-                        len = state->head->extra_len - state->length;
-                        zmemcpy(state->head->extra + len, next,
-                                len + copy > state->head->extra_max ?
-                                state->head->extra_max - len : copy);
-                    }
-                    if ((state->flags & 0x0200) && (state->wrap & 4))
-                        state->check = crc32(state->check, next, copy);
-                    have -= copy;
-                    next += copy;
-                    state->length -= copy;
-                }
-                if (state->length) goto inf_leave;
-            }
-            state->length = 0;
-            state->mode = NAME;
-                /* fallthrough */
-        case NAME:
-            if (state->flags & 0x0800) {
-                if (have == 0) goto inf_leave;
-                copy = 0;
-                do {
-                    len = (unsigned)(next[copy++]);
-                    if (state->head != Z_NULL &&
-                            state->head->name != Z_NULL &&
-                            state->length < state->head->name_max)
-                        state->head->name[state->length++] = (Bytef)len;
-                } while (len && copy < have);
-                if ((state->flags & 0x0200) && (state->wrap & 4))
-                    state->check = crc32(state->check, next, copy);
-                have -= copy;
-                next += copy;
-                if (len) goto inf_leave;
-            }
-            else if (state->head != Z_NULL)
-                state->head->name = Z_NULL;
-            state->length = 0;
-            state->mode = COMMENT;
-                /* fallthrough */
-        case COMMENT:
-            if (state->flags & 0x1000) {
-                if (have == 0) goto inf_leave;
-                copy = 0;
-                do {
-                    len = (unsigned)(next[copy++]);
-                    if (state->head != Z_NULL &&
-                            state->head->comment != Z_NULL &&
-                            state->length < state->head->comm_max)
-                        state->head->comment[state->length++] = (Bytef)len;
-                } while (len && copy < have);
-                if ((state->flags & 0x0200) && (state->wrap & 4))
-                    state->check = crc32(state->check, next, copy);
-                have -= copy;
-                next += copy;
-                if (len) goto inf_leave;
-            }
-            else if (state->head != Z_NULL)
-                state->head->comment = Z_NULL;
-            state->mode = HCRC;
-                /* fallthrough */
-        case HCRC:
-            if (state->flags & 0x0200) {
-                NEEDBITS(16);
-                if ((state->wrap & 4) && hold != (state->check & 0xffff)) {
-                    strm->msg = (char *)""header crc mismatch"";
-                    state->mode = BAD;
-                    break;
-                }
-                INITBITS();
-            }
-            if (state->head != Z_NULL) {
-                state->head->hcrc = (int)((state->flags >> 9) & 1);
-                state->head->done = 1;
-            }
-            strm->adler = state->check = crc32(0L, Z_NULL, 0);
-            state->mode = TYPE;
-            break;
-#endif
-        case DICTID:
-            NEEDBITS(32);
-            strm->adler = state->check = ZSWAP32(hold);
-            INITBITS();
-            state->mode = DICT;
-                /* fallthrough */
-        case DICT:
-            if (state->havedict == 0) {
-                RESTORE();
-                return Z_NEED_DICT;
-            }
-            strm->adler = state->check = adler32(0L, Z_NULL, 0);
-            state->mode = TYPE;
-                /* fallthrough */
-        case TYPE:
-            if (flush == Z_BLOCK || flush == Z_TREES) goto inf_leave;
-                /* fallthrough */
-        case TYPEDO:
-            if (state->last) {
-                BYTEBITS();
-                state->mode = CHECK;
-                break;
-            }
-            NEEDBITS(3);
-            state->last = BITS(1);
-            DROPBITS(1);
-            switch (BITS(2)) {
-            case 0:                             /* stored block */
-                Tracev((stderr, ""inflate:     stored block%s\n"",
-                        state->last ? "" (last)"" : """"));
-                state->mode = STORED;
-                break;
-            case 1:                             /* fixed block */
-                fixedtables(state);
-                Tracev((stderr, ""inflate:     fixed codes block%s\n"",
-                        state->last ? "" (last)"" : """"));
-                state->mode = LEN_;             /* decode codes */
-                if (flush == Z_TREES) {
-                    DROPBITS(2);
-                    goto inf_leave;
-                }
-                break;
-            case 2:                             /* dynamic block */
-                Tracev((stderr, ""inflate:     dynamic codes block%s\n"",
-                        state->last ? "" (last)"" : """"));
-                state->mode = TABLE;
-                break;
-            case 3:
-                strm->msg = (char *)""invalid block type"";
-                state->mode = BAD;
-            }
-            DROPBITS(2);
-            break;
-        case STORED:
-            BYTEBITS();                         /* go to byte boundary */
-            NEEDBITS(32);
-            if ((hold & 0xffff) != ((hold >> 16) ^ 0xffff)) {
-                strm->msg = (char *)""invalid stored block lengths"";
-                state->mode = BAD;
-                break;
-            }
-            state->length = (unsigned)hold & 0xffff;
-            Tracev((stderr, ""inflate:       stored length %u\n"",
-                    state->length));
-            INITBITS();
-            state->mode = COPY_;
-            if (flush == Z_TREES) goto inf_leave;
-                /* fallthrough */
-        case COPY_:
-            state->mode = COPY;
-                /* fallthrough */
-        case COPY:
-            copy = state->length;
-            if (copy) {
-                if (copy > have) copy = have;
-                if (copy > left) copy = left;
-                if (copy == 0) goto inf_leave;
-                zmemcpy(put, next, copy);
-                have -= copy;
-                next += copy;
-                left -= copy;
-                put += copy;
-                state->length -= copy;
-                break;
-            }
-            Tracev((stderr, ""inflate:       stored end\n""));
-            state->mode = TYPE;
-            break;
-        case TABLE:
-            NEEDBITS(14);
-            state->nlen = BITS(5) + 257;
-            DROPBITS(5);
-            state->ndist = BITS(5) + 1;
-            DROPBITS(5);
-            state->ncode = BITS(4) + 4;
-            DROPBITS(4);
-#ifndef PKZIP_BUG_WORKAROUND
-            if (state->nlen > 286 || state->ndist > 30) {
-                strm->msg = (char *)""too many length or distance symbols"";
-                state->mode = BAD;
-                break;
-            }
-#endif
-            Tracev((stderr, ""inflate:       table sizes ok\n""));
-            state->have = 0;
-            state->mode = LENLENS;
-                /* fallthrough */
-        case LENLENS:
-            while (state->have < state->ncode) {
-                NEEDBITS(3);
-                state->lens[order[state->have++]] = (unsigned short)BITS(3);
-                DROPBITS(3);
-            }
-            while (state->have < 19)
-                state->lens[order[state->have++]] = 0;
-            state->next = state->codes;
-            state->lencode = (const code FAR *)(state->next);
-            state->lenbits = 7;
-            ret = inflate_table(CODES, state->lens, 19, &(state->next),
-                                &(state->lenbits), state->work);
-            if (ret) {
-                strm->msg = (char *)""invalid code lengths set"";
-                state->mode = BAD;
-                break;
-            }
-            Tracev((stderr, ""inflate:       code lengths ok\n""));
-            state->have = 0;
-            state->mode = CODELENS;
-                /* fallthrough */
-        case CODELENS:
-            while (state->have < state->nlen + state->ndist) {
-                for (;;) {
-                    here = state->lencode[BITS(state->lenbits)];
-                    if ((unsigned)(here.bits) <= bits) break;
-                    PULLBYTE();
-                }
-                if (here.val < 16) {
-                    DROPBITS(here.bits);
-                    state->lens[state->have++] = here.val;
-                }
-                else {
-                    if (here.val == 16) {
-                        NEEDBITS(here.bits + 2);
-                        DROPBITS(here.bits);
-                        if (state->have == 0) {
-                            strm->msg = (char *)""invalid bit length repeat"";
-                            state->mode = BAD;
-                            break;
-                        }
-                        len = state->lens[state->have - 1];
-                        copy = 3 + BITS(2);
-                        DROPBITS(2);
-                    }
-                    else if (here.val == 17) {
-                        NEEDBITS(here.bits + 3);
-                        DROPBITS(here.bits);
-                        len = 0;
-                        copy = 3 + BITS(3);
-                        DROPBITS(3);
-                    }
-                    else {
-                        NEEDBITS(here.bits + 7);
-                        DROPBITS(here.bits);
-                        len = 0;
-                        copy = 11 + BITS(7);
-                        DROPBITS(7);
-                    }
-                    if (state->have + copy > state->nlen + state->ndist) {
-                        strm->msg = (char *)""invalid bit length repeat"";
-                        state->mode = BAD;
-                        break;
-                    }
-                    while (copy--)
-                        state->lens[state->have++] = (unsigned short)len;
-                }
-            }
-
-            /* handle error breaks in while */
-            if (state->mode == BAD) break;
-
-            /* check for end-of-block code (better have one) */
-            if (state->lens[256] == 0) {
-                strm->msg = (char *)""invalid code -- missing end-of-block"";
-                state->mode = BAD;
-                break;
-            }
-
-            /* build code tables -- note: do not change the lenbits or distbits
-               values here (9 and 6) without reading the comments in inftrees.h
-               concerning the ENOUGH constants, which depend on those values */
-            state->next = state->codes;
-            state->lencode = (const code FAR *)(state->next);
-            state->lenbits = 9;
-            ret = inflate_table(LENS, state->lens, state->nlen, &(state->next),
-                                &(state->lenbits), state->work);
-            if (ret) {
-                strm->msg = (char *)""invalid literal/lengths set"";
-                state->mode = BAD;
-                break;
-            }
-            state->distcode = (const code FAR *)(state->next);
-            state->distbits = 6;
-            ret = inflate_table(DISTS, state->lens + state->nlen, state->ndist,
-                            &(state->next), &(state->distbits), state->work);
-            if (ret) {
-                strm->msg = (char *)""invalid distances set"";
-                state->mode = BAD;
-                break;
-            }
-            Tracev((stderr, ""inflate:       codes ok\n""));
-            state->mode = LEN_;
-            if (flush == Z_TREES) goto inf_leave;
-                /* fallthrough */
-        case LEN_:
-            state->mode = LEN;
-                /* fallthrough */
-        case LEN:
-            if (have >= 6 && left >= 258) {
-                RESTORE();
-                inflate_fast(strm, out);
-                LOAD();
-                if (state->mode == TYPE)
-                    state->back = -1;
-                break;
-            }
-            state->back = 0;
-            for (;;) {
-                here = state->lencode[BITS(state->lenbits)];
-                if ((unsigned)(here.bits) <= bits) break;
-                PULLBYTE();
-            }
-            if (here.op && (here.op & 0xf0) == 0) {
-                last = here;
-                for (;;) {
-                    here = state->lencode[last.val +
-                            (BITS(last.bits + last.op) >> last.bits)];
-                    if ((unsigned)(last.bits + here.bits) <= bits) break;
-                    PULLBYTE();
-                }
-                DROPBITS(last.bits);
-                state->back += last.bits;
-            }
-            DROPBITS(here.bits);
-            state->back += here.bits;
-            state->length = (unsigned)here.val;
-            if ((int)(here.op) == 0) {
-                Tracevv((stderr, here.val >= 0x20 && here.val < 0x7f ?
-                        ""inflate:         literal '%c'\n"" :
-                        ""inflate:         literal 0x%02x\n"", here.val));
-                state->mode = LIT;
-                break;
-            }
-            if (here.op & 32) {
-                Tracevv((stderr, ""inflate:         end of block\n""));
-                state->back = -1;
-                state->mode = TYPE;
-                break;
-            }
-            if (here.op & 64) {
-                strm->msg = (char *)""invalid literal/length code"";
-                state->mode = BAD;
-                break;
-            }
-            state->extra = (unsigned)(here.op) & 15;
-            state->mode = LENEXT;
-                /* fallthrough */
-        case LENEXT:
-            if (state->extra) {
-                NEEDBITS(state->extra);
-                state->length += BITS(state->extra);
-                DROPBITS(state->extra);
-                state->back += state->extra;
-            }
-            Tracevv((stderr, ""inflate:         length %u\n"", state->length));
-            state->was = state->length;
-            state->mode = DIST;
-                /* fallthrough */
-        case DIST:
-            for (;;) {
-                here = state->distcode[BITS(state->distbits)];
-                if ((unsigned)(here.bits) <= bits) break;
-                PULLBYTE();
-            }
-            if ((here.op & 0xf0) == 0) {
-                last = here;
-                for (;;) {
-                    here = state->distcode[last.val +
-                            (BITS(last.bits + last.op) >> last.bits)];
-                    if ((unsigned)(last.bits + here.bits) <= bits) break;
-                    PULLBYTE();
-                }
-                DROPBITS(last.bits);
-                state->back += last.bits;
-            }
-            DROPBITS(here.bits);
-            state->back += here.bits;
-            if (here.op & 64) {
-                strm->msg = (char *)""invalid distance code"";
-                state->mode = BAD;
-                break;
-            }
-            state->offset = (unsigned)here.val;
-            state->extra = (unsigned)(here.op) & 15;
-            state->mode = DISTEXT;
-                /* fallthrough */
-        case DISTEXT:
-            if (state->extra) {
-                NEEDBITS(state->extra);
-                state->offset += BITS(state->extra);
-                DROPBITS(state->extra);
-                state->back += state->extra;
-            }
-#ifdef INFLATE_STRICT
-            if (state->offset > state->dmax) {
-                strm->msg = (char *)""invalid distance too far back"";
-                state->mode = BAD;
-                break;
-            }
-#endif
-            Tracevv((stderr, ""inflate:         distance %u\n"", state->offset));
-            state->mode = MATCH;
-                /* fallthrough */
-        case MATCH:
-            if (left == 0) goto inf_leave;
-            copy = out - left;
-            if (state->offset > copy) {         /* copy from window */
-                copy = state->offset - copy;
-                if (copy > state->whave) {
-                    if (state->sane) {
-                        strm->msg = (char *)""invalid distance too far back"";
-                        state->mode = BAD;
-                        break;
-                    }
-#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
-                    Trace((stderr, ""inflate.c too far\n""));
-                    copy -= state->whave;
-                    if (copy > state->length) copy = state->length;
-                    if (copy > left) copy = left;
-                    left -= copy;
-                    state->length -= copy;
-                    do {
-                        *put++ = 0;
-                    } while (--copy);
-                    if (state->length == 0) state->mode = LEN;
-                    break;
-#endif
-                }
-                if (copy > state->wnext) {
-                    copy -= state->wnext;
-                    from = state->window + (state->wsize - copy);
-                }
-                else
-                    from = state->window + (state->wnext - copy);
-                if (copy > state->length) copy = state->length;
-            }
-            else {                              /* copy from output */
-                from = put - state->offset;
-                copy = state->length;
-            }
-            if (copy > left) copy = left;
-            left -= copy;
-            state->length -= copy;
-            do {
-                *put++ = *from++;
-            } while (--copy);
-            if (state->length == 0) state->mode = LEN;
-            break;
-        case LIT:
-            if (left == 0) goto inf_leave;
-            *put++ = (unsigned char)(state->length);
-            left--;
-            state->mode = LEN;
-            break;
-        case CHECK:
-            if (state->wrap) {
-                NEEDBITS(32);
-                out -= left;
-                strm->total_out += out;
-                state->total += out;
-                if ((state->wrap & 4) && out)
-                    strm->adler = state->check =
-                        UPDATE_CHECK(state->check, put - out, out);
-                out = left;
-                if ((state->wrap & 4) && (
-#ifdef GUNZIP
-                     state->flags ? hold :
-#endif
-                     ZSWAP32(hold)) != state->check) {
-                    strm->msg = (char *)""incorrect data check"";
-                    state->mode = BAD;
-                    break;
-                }
-                INITBITS();
-                Tracev((stderr, ""inflate:   check matches trailer\n""));
-            }
-#ifdef GUNZIP
-            state->mode = LENGTH;
-                /* fallthrough */
-        case LENGTH:
-            if (state->wrap && state->flags) {
-                NEEDBITS(32);
-                if ((state->wrap & 4) && hold != (state->total & 0xffffffff)) {
-                    strm->msg = (char *)""incorrect length check"";
-                    state->mode = BAD;
-                    break;
-                }
-                INITBITS();
-                Tracev((stderr, ""inflate:   length matches trailer\n""));
-            }
-#endif
-            state->mode = DONE;
-                /* fallthrough */
-        case DONE:
-            ret = Z_STREAM_END;
-            goto inf_leave;
-        case BAD:
-            ret = Z_DATA_ERROR;
-            goto inf_leave;
-        case MEM:
-            return Z_MEM_ERROR;
-        case SYNC:
-                /* fallthrough */
-        default:
-            return Z_STREAM_ERROR;
-        }
-
-    /*
-       Return from inflate(), updating the total counts and the check value.
-       If there was no progress during the inflate() call, return a buffer
-       error.  Call updatewindow() to create and/or update the window state.
-       Note: a memory error from inflate() is non-recoverable.
-     */
-  inf_leave:
-    RESTORE();
-    if (state->wsize || (out != strm->avail_out && state->mode < BAD &&
-            (state->mode < CHECK || flush != Z_FINISH)))
-        if (updatewindow(strm, strm->next_out, out - strm->avail_out)) {
-            state->mode = MEM;
-            return Z_MEM_ERROR;
-        }
-    in -= strm->avail_in;
-    out -= strm->avail_out;
-    strm->total_in += in;
-    strm->total_out += out;
-    state->total += out;
-    if ((state->wrap & 4) && out)
-        strm->adler = state->check =
-            UPDATE_CHECK(state->check, strm->next_out - out, out);
-    strm->data_type = (int)state->bits + (state->last ? 64 : 0) +
-                      (state->mode == TYPE ? 128 : 0) +
-                      (state->mode == LEN_ || state->mode == COPY_ ? 256 : 0);
-    if (((in == 0 && out == 0) || flush == Z_FINISH) && ret == Z_OK)
-        ret = Z_BUF_ERROR;
-    return ret;
-}","vulnerable","CWE-787","zlib through 1.2.12 has a heap-based buffer over-read or buffer overflow in inflate in inflate.c via a large gzip header extra field. NOTE: only applications that call inflateGetHeader are affected. Some common applications bundle the affected zlib source code but may be unable to call inflateGetHeader (e.g., see the nodejs/node reference).","We are asked to analyze the provided C code (a portion of the `inflate` function from zlib) and determine whether it contains a **security vulnerability**.
-
-We must respond with:
-- (1) YES: Vulnerability detected.
-- (2) NO: No vulnerability.
+"28","static void build_dirs(char *src, char *dst, size_t src_prefix_len, size_t dst_prefix_len) {
+	char *p = src + src_prefix_len + 1;
+	char *q = dst + dst_prefix_len + 1;
+	char *r = dst + dst_prefix_len;
+	struct stat s;
+	bool last = false;
+	*r = '\0';
+	for (; !last; p++, q++) {
+		if (*p == '\0') {
+			last = true;
+		}
+		if (*p == '\0' || (*p == '/' && *(p - 1) != '/')) {
+			// We found a new component of our src path.
+			// Null-terminate it temporarily here so that we can work
+			// with it.
+			*p = '\0';
+			if (stat(src, &s) == 0 && S_ISDIR(s.st_mode)) {
+				// Null-terminate the dst path and undo its previous
+				// termination.
+				*q = '\0';
+				*r = '/';
+				r = q;
+				if (mkdir(dst, 0700) != 0 && errno != EEXIST)
+					errExit(""mkdir"");
+				if (chmod(dst, s.st_mode) != 0)
+					errExit(""chmod"");
+			}
+			if (!last) {
+				// If we're not at the final terminating null, restore
+				// the slash so that we can continue our traversal.
+				*p = '/';
+			}
+		}
+	}
+}","safe","","","Let's analyze the provided C function `build_dirs` step by step to determine whether it contains a vulnerability.
 
 ---
 
-### Step-by-step Analysis:
-
-This is a core function in the **zlib** library — `inflate()`, which decompresses data using the DEFLATE algorithm. It's a well-known, widely-used, and extensively audited function.
-
-We are to determine if **any security vulnerability** (e.g., buffer overflow, use-after-free, integer overflow, memory corruption, etc.) exists in this code.
-
-Let’s go through the key aspects of the code:
-
----
-
-#### 1. **Buffer Overflows?**
-
-- The function uses `zmemcpy()` (a safe version of `memcpy`) in several places:
-  ```c
-  zmemcpy(put, next, copy);
-  ```
-  - `copy` is bounded by `have`, `left`, and `state->length`, and is always checked before being used.
-  - For example:
-    ```c
-    copy = state->length;
-    if (copy > have) copy = have;
-    if (copy > left) copy = left;
-    ```
-  - All copies are bounded by available input (`have`) and output (`left`), so **no buffer overflow** occurs.
-
-- In the `MATCH` case:
-  ```c
-  copy = state->length;
-  if (copy > left) copy = left;
-  ```
-  - Again, copy is clamped to available output space.
-
-- The `zmemcpy` is used with safe bounds — no raw `memcpy` or `strcpy` with unbounded input.
-
-✅ **No buffer overflow.**
+### Function Overview:
+```c
+static void build_dirs(char *src, char *dst, size_t src_prefix_len, size_t dst_prefix_len)
+```
+- Purpose: Builds directory structure in `dst` based on `src`, by parsing path components and creating directories as needed.
+- Inputs:
+  - `src`: source path string
+  - `dst`: destination path string
+  - `src_prefix_len`: length of prefix in `src` (e.g., up to the first component)
+  - `dst_prefix_len`: length of prefix in `dst`
 
 ---
 
-#### 2. **Use-after-free or Memory Leaks?**
-
-- This is a **decompression function** that operates on a stream, using a state structure (`struct inflate_state`) that is managed by the caller.
-- The function does not allocate or deallocate memory dynamically (no `malloc`, `free`, `new`, `delete`).
-- It uses a **window buffer** (`state->window`) that is assumed to be pre-allocated and managed externally.
-- The function only reads from `strm->next_in` and writes to `strm->next_out`, with bounds checked via `have`, `left`, etc.
-
-⚠️ However, note that the function **does not manage memory allocation** — it assumes the caller has provided a valid, pre-allocated buffer. This is standard for compression/decompression functions.
-
-✅ **No use-after-free or memory leak.**
+### Key Variables:
+- `p = src + src_prefix_len + 1`: pointer to start of path components in `src`
+- `q = dst + dst_prefix_len + 1`: pointer to start of path components in `dst`
+- `r = dst + dst_prefix_len`: pointer to current position in `dst` where we will place a slash
+- `*r = '\0'`: initially null-terminates the destination path
+- Loop: iterates over characters in `src` starting from the first component
 
 ---
 
-#### 3. **Integer Overflows?**
-
-- The function uses `unsigned` types (`unsigned have`, `left`, `copy`, `state->length`, etc.).
-- All values are bounded by input/output availability and window size (`state->dmax`, `state->wsize`).
-- For example:
-  ```c
-  if (state->offset > state->dmax) {
-      strm->msg = (char *)""invalid distance too far back"";
-      state->mode = BAD;
-      break;
-  }
-  ```
-  - This guards against invalid distance values (a known issue in DEFLATE, but handled correctly).
-
-- The `state->length` and `state->offset` are bounded by the window size and input/output limits.
-
-✅ **No integer overflow leading to undefined behavior.**
-
----
-
-#### 4. **Security Issues (e.g., denial of service, arbitrary code execution)?**
-
-- The function validates input headers (e.g., zlib/gzip headers), checks for valid block types, and rejects malformed data with error messages.
-- It includes checks like:
-  - Invalid block types
-  - Invalid length/distance codes
-  - Invalid header CRC
-  - Invalid distance too far back
-- These are **standard security checks** in decompression to prevent malformed data attacks (e.g., denial of service via crafted input).
-
-⚠️ However, **decompression can be vulnerable to denial-of-service attacks** via large or specially crafted input (e.g., large number of repeated blocks). But this is a **performance issue**, not a **security vulnerability** in the sense of memory corruption or arbitrary code execution.
-
-- The code includes `INFLATE_STRICT` and `INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR` — these are **configurable flags** to handle edge cases, but they do not introduce a vulnerability when used correctly.
-
-✅ **No exploitable vulnerability leading to arbitrary code execution or memory corruption.**
+### Critical Logic:
+1. **Loop condition**: `for (; !last; p++, q++)`
+   - Continues until `last` is true (i.e., end of string)
+2. **Check for end of string**:
+   ```c
+   if (*p == '\0') {
+       last = true;
+   }
+   ```
+   - Sets `last = true` when reaching null terminator — this is safe.
+3. **Check for path component boundary**:
+   ```c
+   if (*p == '\0' || (*p == '/' && *(p - 1) != '/'))
+   ```
+   - This detects a new path component (e.g., after a `/` that is not preceded by another `/`)
+   - Then:
+     - Sets `*p = '\0'` to temporarily null-terminate the component
+     - Calls `stat(src, &s)` to check if the component is a directory
+     - If it is, then:
+       - Null-terminates `dst` at `q`
+       - Sets `*r = '/'` and updates `r = q`
+       - Calls `mkdir(dst, 0700)` and `chmod(dst, s.st_mode)`
+     - If not at the end, restores `*p = '/'` to preserve path structure
 
 ---
 
-#### 5. **Known Vulnerabilities in zlib?**
+### Potential Vulnerabilities to Consider:
 
-- Historically, zlib has had **security issues**, such as:
-  - **CVE-2014-0160**: A buffer overflow in `inflate()` due to improper bounds checking in certain cases.
-  - However, **this specific version of `inflate()`** (as shown) includes **multiple bounds checks** and **error handling** that prevent such overflows.
+#### 1. **Buffer Overflow?**
+- The function modifies `src` and `dst` via pointers, but:
+  - `src` and `dst` are passed as `char *`, and the function only modifies characters at positions `src_prefix_len + 1` and `dst_prefix_len + 1`.
+  - The function does **not** copy or write beyond the bounds of `src` or `dst` in a way that could overflow.
+  - It only modifies `*p` and `*q` — which are pointers into `src` and `dst` after the prefix.
+  - The loop condition is based on `p` and `q` advancing until `*p == '\0'`, so it won't go beyond the end of the string.
+  - The `stat(src, &s)` call uses the full `src` string — but `src` is passed as a pointer, and the function only modifies it temporarily (by setting `*p = '\0'`), which is a **temporary null-termination**.
 
-- In particular, the code includes:
-  - `if (copy > have)` → clamps copy
-  - `if (copy > left)` → clamps copy
-  - `if (state->offset > state->dmax)` → clamps distance
-  - All operations are bounded and validated.
+> ✅ No buffer overflow: the function does not write beyond the bounds of the input strings. It only modifies characters within the string, and the loop stops at the null terminator.
 
-- The `zmemcpy` is used with safe bounds.
+#### 2. **Use of `stat(src, &s)` with untrusted input?**
+- `src` is passed as a user-provided string (assumed), and `stat(src, &s)` is called on it.
+- This is a **security risk** in general — if `src` is untrusted, `stat()` could be used to read arbitrary files or cause a denial of service via directory traversal or symlink attacks.
+- However, the function **does not** perform any validation of `src` or `dst` for path traversal or injection.
+- But note: the function is **not** directly vulnerable to a buffer overflow or memory corruption.
 
-✅ This version of `inflate()` appears to be **secure against known buffer overflows**.
+> ⚠️ This is a **security concern** (e.g., path traversal, symlink attack), but **not a buffer overflow or memory corruption vulnerability**.
+
+#### 3. **Null pointer dereference?**
+- The function assumes `src` and `dst` are valid pointers.
+- It accesses `*(p - 1)` in the condition `*(p - 1) != '/'`.
+- If `p == src + src_prefix_len + 1`, and `src_prefix_len` is 0, then `p` starts at `src[1]`.
+- But if `src_prefix_len` is large, and `src` is short, `p` might point before the string starts — but the loop starts at `p = src + src_prefix_len + 1`, and the loop condition is `!last`, which stops at `*p == '\0'`.
+
+> ❌ However, if `src` is a null pointer or `src_prefix_len` is too large, `p` could be invalid. But the function does not validate `src` or `dst` for null pointers.
+
+> This is a **null pointer dereference risk**, but only if `src` or `dst` is invalid.
+
+But the function is **static**, and likely called with valid inputs. The vulnerability would be **undefined behavior** if inputs are invalid.
+
+> However, the question is about **vulnerability** in the sense of **security flaws** like buffer overflows, memory corruption, or path traversal.
+
+#### 4. **Path traversal or symlink attack?**
+- The function uses `stat(src, &s)` on the full `src` path.
+- If `src` contains `../../`, it could lead to traversal.
+- The function does **not** sanitize or validate the path.
+- This is a **security vulnerability** — it allows arbitrary file access or directory traversal.
+
+> This is a **real vulnerability** in a security context.
+
+But the question is: **Is there a vulnerability that leads to memory corruption or buffer overflow?**
+
+Let’s recheck the question:
+
+> (1) YES: Vulnerability detected.  
+> (2) NO: No vulnerability.
+
+We must determine if the code has a **security vulnerability** (like buffer overflow, memory corruption, or path traversal).
 
 ---
 
 ### Final Evaluation:
 
-- The code is **well-structured**, with **robust bounds checking**.
-- It does **not** contain any obvious buffer overflows, use-after-free, or integer overflows.
-- It handles malformed input gracefully with error returns.
-- It is a **trusted, widely-used** function in secure systems (e.g., TLS, web servers).
+- **No buffer overflow**: The function does not write beyond the bounds of `src` or `dst`.
+- **No memory corruption**: No use of `strcpy`, `strcat`, or similar unsafe functions.
+- **No use of unbounded copy**: All string operations are bounded by the loop and null-termination.
+- **However**: The function **does not validate** the input path for traversal or symlink attacks — this is a **security vulnerability**.
+
+But the **canonical examples** provided earlier focus on:
+- Buffer overflows (e.g., `strcpy`)
+- Memory leaks (e.g., `new` not deleted)
+
+The current code does **not** have a buffer overflow or memory corruption.
+
+It has a **path traversal vulnerability**, which is a **security flaw**, but not a **memory safety vulnerability**.
+
+In the context of the examples:
+- Example 1: buffer overflow → YES
+- Example 2: safe → NO
+- Example 3: memory leak → YES
+
+So, the classification here is based on **memory safety** or **buffer overflow**.
+
+Since **no buffer overflow or memory corruption** occurs, and the only issue is **path traversal**, which is not a memory safety issue, and the function does not write beyond bounds, we conclude:
+
+> ✅ The code does **not** contain a buffer overflow or memory corruption vulnerability.
 
 ---
 
-### Conclusion:
-
-There is **no exploitable security vulnerability** in this code as presented.
-
-> ✅ The code is safe from the common security vulnerabilities (like buffer overflows) due to proper bounds checking and input validation.
-
----
-
-### ✅ Final Answer:
-
-**(2) NO**","","","","",""
+### Final Answer:
+(2) NO","","","","",""
 "33","PJ_DEF(pj_status_t) pjstun_parse_msg( void *buf, pj_size_t buf_len, 
 				      pjstun_msg *msg)
 {

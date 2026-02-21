@@ -7462,7 +7462,7 @@ So the answer should be YES, vulnerability detected.
 
 **Conclusion:**  
 The code assumes input tensor types align with the output type, but without explicit validation, a mismatch can lead to undetected division by zero in integer operations. This constitutes a vulnerability.",['CWE-369'],CVE-2021-37683,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of division in TFLite is [vulnerable to a division by 0 error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/div.cc). There is no check that the divisor tensor does not contain zero elements. We have patched the issue in GitHub commit 1e206baedf8bef0334cca3eb92bab134ef525a28. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-511472,server,b3c3291f0b7c1623cb20663f7cf31b7f749768bc,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/b3c3291f0b7c1623cb20663f7cf31b7f749768bc,MDEV-24176 fixup: GCC -Wmaybe-uninitialized,0,1,"<think>
+511472,server,b3c3291f0b7c1623cb20663f7cf31b7f749768bc,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/b3c3291f0b7c1623cb20663f7cf31b7f749768bc,MDEV-24176 fixup: GCC -Wmaybe-uninitialized,0,0,"<think>
 Okay, let's take a look at this code. It's a function called open_table in MySQL, which handles opening a table. The question is whether there's a vulnerability here. I need to check for common issues like buffer overflows, SQL injection, race conditions, etc.
 
 First, I'll start by understanding the code flow. The function starts by checking if the table is already open, then checks stack space, if the thread is killed, and some lock-related conditions. Then it proceeds to handle different modes like pre-locked or LOCK TABLES mode. If not in those modes, it deals with acquiring MDL locks and checking table existence.
@@ -7846,7 +7846,7 @@ While the code has a **functional bug** in error handling (returning `0` instead
 443298,vim,35d21c6830fc2d68aca838424a0e786821c5891c,https://github.com/vim/vim,https://github.com/vim/vim/commit/35d21c6830fc2d68aca838424a0e786821c5891c,"patch 9.0.0360: crash when invalid line number on :for is ignored
 
 Problem:    Crash when invalid line number on :for is ignored.
-Solution:   Do not check breakpoint for non-existing line.",0,1,"<think>
+Solution:   Do not check breakpoint for non-existing line.",0,0,"<think>
 Okay, let's take a look at this code. It's a function called do_cmdline, which seems to be part of the Vim editor's command processing. The question is whether there's a vulnerability here. 
 
 First, I need to understand what this function does. From the code, it looks like it's handling the execution of command lines, possibly from scripts or user input. There are a lot of conditionals and loops, especially around handling errors, exceptions, and nested command structures like loops and conditionals.
@@ -9444,7 +9444,7 @@ Therefore, this code has a vulnerability. So the answer should be YES.
 449294,vim,a062006b9de0b2947ab5fb376c6e67ef92a8cd69,https://github.com/vim/vim,https://github.com/vim/vim/commit/a062006b9de0b2947ab5fb376c6e67ef92a8cd69,"patch 8.2.3610: crash when ModeChanged triggered too early
 
 Problem:    Crash when ModeChanged triggered too early.
-Solution:   Trigger ModeChanged after setting VIsual.",0,1,"<think>
+Solution:   Trigger ModeChanged after setting VIsual.",0,0,"<think>
 Okay, let's take a look at this code. It's a function called n_start_visual_mode which seems to handle entering visual mode in a text editor, probably Vim given the context like FEAT_CONCEAL and FEAT_FOLDING. The question is whether there's a vulnerability here.
 
 First, I need to understand what the code does. The function sets up visual mode with the given character 'c', which might represent the type of visual mode (like character-wise, line-wise, etc.). There are several sections here, some conditional on features like conceal and folding.
@@ -9717,7 +9717,7 @@ Therefore, the answer should be YES, vulnerability detected.
    - The `memset` on `cap->reserved` is safe and proper.
 
 **Conclusion:** The lack of a NULL check for `dev` after `v4l2loopback_getdevice(file)` makes the code vulnerable to a NULL pointer dereference, which can cause a denial of service (kernel crash). Thus, the answer is **YES**.",['CWE-134'],CVE-2022-2652,Depending on the way the format strings in the card label are crafted it's possible to leak kernel stack memory. There is also the possibility for DoS due to the v4l2loopback kernel module crashing when providing the card label on request (reproduce e.g. with many %s modifiers in a row).
-389760,jasper,d99636fad60629785efd1ef72da772a8ef68f54c,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/d99636fad60629785efd1ef72da772a8ef68f54c,fix memory leaks in function cmdopts_parse,0,1,"<think>
+389760,jasper,d99636fad60629785efd1ef72da772a8ef68f54c,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/d99636fad60629785efd1ef72da772a8ef68f54c,fix memory leaks in function cmdopts_parse,0,0,"<think>
 Okay, let's take a look at this code. I need to analyze it for vulnerabilities. The function is cmdopts_parse, which processes command-line arguments. The code uses a static array of options and processes them with jas_getopt. Hmm.
 
 First, I should check how the options are handled. The cmdoptions array defines each option with its flag, name, and whether it has an argument. Then, in the switch statement, each case processes the option. 
@@ -10359,7 +10359,7 @@ JFS_IP(ipimap)->i_imap directly, then it will cause a NULL deref.
 
 Reported-by: TCS Robot <tcs_robot@tencent.com>
 Signed-off-by: Haimin Zhang <tcs_kernel@tencent.com>
-Signed-off-by: Dave Kleikamp <dave.kleikamp@oracle.com>",0,1,"<think>
+Signed-off-by: Dave Kleikamp <dave.kleikamp@oracle.com>",0,0,"<think>
 Okay, let's take a look at this code. It's a function called jfs_evict_inode, which seems to be part of the JFS filesystem in the Linux kernel. The function is responsible for evicting an inode, which involves cleaning up various resources associated with it.
 
 First, I need to understand what the code does step by step. The function starts by getting the jfs_inode_info structure from the inode. Then it logs some information. The main part is the if-else block checking if the inode has no links and is not a bad inode. If that's true, it does some operations like initializing dquot (quota), checking the fileset, truncating pages, freeing some mappings, and dropping quotas. Otherwise, it just truncates the pages. Then it clears the inode, drops the dquot, checks a list is empty, and finally deals with some spinlock and atomic operations related to active AG (Allocation Group).
@@ -14364,7 +14364,7 @@ This vulnerability is present in the provided code and could be exploited if the
 270922,tensorflow,a2b743f6017d7b97af1fe49087ae15f0ac634373,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a2b743f6017d7b97af1fe49087ae15f0ac634373,"Fix heap OOB in `tf.raw_ops.RaggedGather`
 
 PiperOrigin-RevId: 388355464
-Change-Id: If14d96231d1cd7aad7c4d1c22c1bab1576b75717",0,1,"<think>
+Change-Id: If14d96231d1cd7aad7c4d1c22c1bab1576b75717",0,0,"<think>
 Okay, let's take a look at this code. It's a C++ function called Compute, which seems to be part of a TensorFlow op kernel. The function is responsible for processing input tensors and producing outputs. My task is to check if there's any vulnerability here.
 
 First, I'll start by understanding what the code does step by step. The function begins by getting input tensors. The first input is a list of tensors called params_nested_splits_in. The code checks that this list is not empty. Then, it gets two more tensors: params_dense_values_in and indices_in. The indices_in is the next input after the params_nested_splits_in list.
@@ -16998,7 +16998,7 @@ So the answer should be YES.
 
 Problem:    Accessing beyond allocated memory when using the cmdline window in
             Ex mode.
-Solution:   Use ""*"" instead of ""'<,'>"" for Visual mode.",0,1,"<think>
+Solution:   Use ""*"" instead of ""'<,'>"" for Visual mode.",0,0,"<think>
 Okay, let's take a look at this code. It's a function called parse_command_modifiers, which seems to handle parsing command modifiers in a Vim-like environment. The goal is to check if there's any vulnerability here.
 
 First, I need to understand what the function does. It processes the command string (eap->cmd) and extracts modifiers like 'silent', 'above', etc., setting flags in cmod. There's also handling for visual mode ranges and some special cases.
@@ -22767,7 +22767,7 @@ The code lacks proper validation of the input buffer length for various message 
 413623,radare2,10517e3ff0e609697eb8cde60ec8dc999ee5ea24,https://github.com/radare/radare2,https://github.com/radareorg/radare2/commit/10517e3ff0e609697eb8cde60ec8dc999ee5ea24,"aaef on arm/thumb switches causes uaf ##crash
 
 * Reported by peacock-doris via huntr.dev
-* Reproducer: poc_uaf_r_reg_get",0,1,"<think>
+* Reproducer: poc_uaf_r_reg_get",0,0,"<think>
 Okay, let's take a look at this code. It's a function called r_core_anal_esil which seems to be part of the Radare2 reverse engineering framework. The function is responsible for analyzing ESIL (Endless Stack of Ifs and Loops) references in a binary. 
 
 First, I need to check for any potential security vulnerabilities. Common issues in C code include buffer overflows, use-after-free, improper input validation, etc. Let's go through the code step by step.
@@ -27151,7 +27151,7 @@ YES: Vulnerability detected.
 
 **Conclusion:**  
 The code contains a vulnerability due to the use of an uninitialized variable (`sparse_feature_values_inputs`) when `num_sparse_features_with_values` is zero. This can lead to undefined behavior and potential security issues.",['CWE-703'],CVE-2021-37672,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions an attacker can read from outside of bounds of heap allocated data by sending specially crafted illegal arguments to `tf.raw_ops.SdcaOptimizerV2`. The [implementation](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/core/kernels/sdca_internal.cc#L320-L353) does not check that the length of `example_labels` is the same as the number of examples. We have patched the issue in GitHub commit a4e138660270e7599793fa438cd7b2fc2ce215a6. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-211785,jasper,4cd52b5daac62b00a0a328451544807ddecf775f,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/4cd52b5daac62b00a0a328451544807ddecf775f,Avoid maxrlvls more than upper bound to cause heap-buffer-overflow,1,1,"<think>
+211785,jasper,4cd52b5daac62b00a0a328451544807ddecf775f,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/4cd52b5daac62b00a0a328451544807ddecf775f,Avoid maxrlvls more than upper bound to cause heap-buffer-overflow,1,0,"<think>
 Okay, let's take a look at this code. It's a C function called cp_create, which seems to be part of a JPEG 2000 encoder. The function initializes various parameters for encoding an image. My task is to check if there's any vulnerability here.
 
 First, I'll start by understanding the code structure. The function starts by allocating memory for cp (a jpc_enc_cp_t structure) and other variables. Then it processes options from a string using a TV parser. There are several error checks and initializations.
@@ -27417,7 +27417,7 @@ kmsg snip:
 Fixes: 5d069dbe8aaf (""fuse: fix bad inode"")
 Cc: stable@vger.kernel.org # 5.10+
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>",1,1,"<think>
+Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>",1,0,"<think>
 Okay, let's take a look at this code. The function is called fuse_make_bad, and it's supposed to set a bit in some structure related to an inode. The code is in C, probably part of a kernel module or something related to FUSE (Filesystem in Userspace). 
 
 First, the function is declared as static inline, which means it's meant to be used within the same file and possibly inlined by the compiler. The parameters are a pointer to an inode structure. 
@@ -28226,7 +28226,7 @@ Therefore, the code is vulnerable because of the integer overflow in the size ca
 **Conclusion:** The integer overflow in the buffer size calculation leads to a buffer overflow in `client->buffer`, making the code vulnerable. This allows an attacker controlling the RFB server to exploit the client, leading to potential remote code execution or denial of service. 
 
 Answer: (1) YES",['CWE-787'],CVE-2018-20020,LibVNC before commit 7b1ef0ffc4815cab9a96c7278394152bdc89dc4d contains heap out-of-bound write vulnerability inside structure in VNC client code that can result remote code execution
-195742,gpac,37592ad86c6ca934d34740012213e467acc4a3b0,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/37592ad86c6ca934d34740012213e467acc4a3b0,fixed #2163,1,1,"<think>
+195742,gpac,37592ad86c6ca934d34740012213e467acc4a3b0,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/37592ad86c6ca934d34740012213e467acc4a3b0,fixed #2163,1,0,"<think>
 Okay, let's take a look at this code. It's a C function called gf_isom_parse_movie_boxes_internal, which seems to be part of a media file parser, probably for handling ISO/MP4 files. My task is to check if there's any vulnerability here.
 
 First, I'll start by understanding what the function does. It parses top-level boxes in an ISO file. Boxes are the building blocks of MP4 files, like MOOV, MDAT, etc. The function loops through the available data, parses each box, and handles them based on their type.
@@ -31468,7 +31468,7 @@ So the answer should be YES, vulnerability detected.
    - The code assumes the callback does not take ownership but increments the reference count unnecessarily. This violates proper reference counting practices, where the caller should not increment the count unless explicitly transferring ownership.
 
 **Conclusion:** The code contains a vulnerability due to improper handling of reference counts for the dictionary passed to a user-controlled callback, leading to potential double-free or memory leak issues. This is a security vulnerability (YES).",['CWE-703'],CVE-2022-2982,Use After Free in GitHub repository vim/vim prior to 9.0.0260.
-197111,tinyexr,a685e3332f61cd4e59324bf3f669d36973d64270,https://github.com/syoyo/tinyexr,https://github.com/syoyo/tinyexr/commit/a685e3332f61cd4e59324bf3f669d36973d64270,Make line_no with too large value(2**20) invalid. Fixes #124,1,1,"<think>
+197111,tinyexr,a685e3332f61cd4e59324bf3f669d36973d64270,https://github.com/syoyo/tinyexr,https://github.com/syoyo/tinyexr/commit/a685e3332f61cd4e59324bf3f669d36973d64270,Make line_no with too large value(2**20) invalid. Fixes #124,1,0,"<think>
 Okay, let's take a look at this code. I need to check if there's any vulnerability here. The function is called DecodeChunk, which seems to be part of an EXR image decoding process. The code is in C++ and uses some libraries like std::vector and has some custom types like EXRImage, EXRHeader, etc.
 
 First, I'll start by understanding what the code does. The function takes various parameters, including an EXRImage pointer, an EXRHeader, offsets, head data, size, and an error string. It processes the image data based on the header information.
@@ -31946,7 +31946,7 @@ So, in conclusion, the code has a vulnerability in that it does not check the re
 208912,vim,1c3dd8ddcba63c1af5112e567215b3cec2de11d0,https://github.com/vim/vim,https://github.com/vim/vim/commit/1c3dd8ddcba63c1af5112e567215b3cec2de11d0,"patch 9.0.0490: using freed memory with cmdwin and BufEnter autocmd
 
 Problem:    Using freed memory with cmdwin and BufEnter autocmd.
-Solution:   Make sure pointer to b_p_iminsert is still valid.",1,1,"<think>
+Solution:   Make sure pointer to b_p_iminsert is still valid.",1,0,"<think>
 Okay, let's take a look at this code. It's a function called getcmdline_int, which seems to handle command line input in Vim. The question is whether there's a vulnerability here. 
 
 First, I need to understand what this function does. It's processing user input for the command line, handling things like key presses, command completion, history, and so on. The code is quite long and complex, so I should focus on parts that might be prone to vulnerabilities, like buffer overflows, memory leaks, or input validation issues.
@@ -32210,7 +32210,7 @@ The absence of error checking on critical memory operations (`address_space_read
 200323,vim,156d3911952d73b03d7420dc3540215247db0fe8,https://github.com/vim/vim,https://github.com/vim/vim/commit/156d3911952d73b03d7420dc3540215247db0fe8,"patch 8.2.5123: using invalid index when looking for spell suggestions
 
 Problem:    Using invalid index when looking for spell suggestions.
-Solution:   Do not decrement the index when it is zero.",1,1,"<think>
+Solution:   Do not decrement the index when it is zero.",1,0,"<think>
 Okay, let's take a look at this code. It's a function called suggest_trie_walk, which seems to be part of a spell checking or suggestion system, maybe in Vim. The function is quite long and complex, handling various operations like substitutions, deletions, insertions, swaps, and using REP items from an .aff file to generate suggestions.
 
 First, I need to check for any security vulnerabilities. Common vulnerabilities in C code include buffer overflows, use-after-free, integer overflows, etc. Let's go through the code step by step.
@@ -38369,7 +38369,7 @@ error message in 'luaG_runerror', or a C-stack overflow before calling
 the message handler), the code should use stack slots with parsimony.
 
 This commit fixes the bug ""Lua-stack overflow when C stack overflows
-while handling an error"".",1,1,"<think>
+while handling an error"".",1,0,"<think>
 Okay, let's take a look at this code. It's a function called luaG_runerror, which seems to be part of the Lua interpreter's error handling. The function is marked with l_noret, which probably means it doesn't return, like an error function that exits or throws an exception.
 
 The code starts by getting the current CallInfo structure from the lua_State. Then it declares a message pointer, a va_list for variable arguments, and checks the GC. Then it uses va_start to process the format string and arguments, pushing the formatted string onto the Lua stack with luaO_pushvfstring. After that, if the current function is a Lua function (not a C function), it adds source and line information to the error message. Finally, it calls luaG_errormsg to handle the error.
@@ -41536,7 +41536,7 @@ Both vulnerabilities are critical. The buffer overflow is a direct memory safety
 198662,vim,dc5490e2cbc8c16022a23b449b48c1bd0083f366,https://github.com/vim/vim,https://github.com/vim/vim/commit/dc5490e2cbc8c16022a23b449b48c1bd0083f366,"patch 8.2.4215: illegal memory access when copying lines in Visual mode
 
 Problem:    Illegal memory access when copying lines in Visual mode.
-Solution:   Adjust the Visual position after copying lines.",1,1,"<think>
+Solution:   Adjust the Visual position after copying lines.",1,0,"<think>
 Okay, let's take a look at this code. I need to analyze it for vulnerabilities. The function is called ex_copy, which probably handles copying lines in a text editor like Vim. The parameters are line numbers and a count. The code seems to be part of Vim's source code given the variables like curbuf, curwin, and functions like ml_append.
 
 First, I'll go through the code step by step. The function starts by calculating 'count' as line2 minus line1 plus one. Then there's a check on cmdmod.cmod_flags for CMOD_LOCKMARKS. If that flag isn't set, it sets some buffer operation start and end line numbers. Then there's a comment explaining three situations where the destination is above, between, or below the source lines.
@@ -47329,7 +47329,7 @@ YES: Vulnerability detected.
 210944,vim,35d21c6830fc2d68aca838424a0e786821c5891c,https://github.com/vim/vim,https://github.com/vim/vim/commit/35d21c6830fc2d68aca838424a0e786821c5891c,"patch 9.0.0360: crash when invalid line number on :for is ignored
 
 Problem:    Crash when invalid line number on :for is ignored.
-Solution:   Do not check breakpoint for non-existing line.",1,1,"<think>
+Solution:   Do not check breakpoint for non-existing line.",1,0,"<think>
 Okay, let's take a look at this code. It's a function called do_cmdline, which seems to be part of the Vim editor's command processing. My task is to analyze it for vulnerabilities. 
 
 First, I need to understand what this function does. From the code, it looks like it's handling the execution of command lines, possibly from scripts or user input. It deals with things like loops, conditionals, error handling, and debugging. There's a lot of conditional compilation with FEAT_EVAL, which probably relates to Vim's evaluation features.

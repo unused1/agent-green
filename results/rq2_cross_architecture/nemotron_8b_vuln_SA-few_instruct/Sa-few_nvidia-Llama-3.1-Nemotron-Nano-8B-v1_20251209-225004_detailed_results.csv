@@ -7,7 +7,7 @@ one beyond the end.
 
 Fixes: 78a861b94959 (""io_uring: add sync cancelation API through io_uring_register()"")
 Reported-by: Luo Likang <luolikang@nsfocus.com>
-Signed-off-by: Jens Axboe <axboe@kernel.dk>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Jens Axboe <axboe@kernel.dk>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -40,7 +40,7 @@ Signed-off-by: Jens Axboe <axboe@kernel.dk>",0,1,"(2) NO: No vulnerability.
 
 - **Code Review:** Ensure that the code is thoroughly reviewed by a team of experienced developers to catch any overlooked edge cases or potential issues.
 - **Documentation:** Provide more detailed comments to explain the purpose of `io_fixed_file_slot` and the use of `array_index_nospec`, especially if this code is part of a larger, more complex system.",['CWE-193'],CVE-2022-3103,off-by-one in io_uring module.
-464942,php-src,2bcbc95f033c31b00595ed39f79c3a99b4ed0501,https://github.com/php/php-src,http://git.php.net/?p=php-src.git;a=commit;h=2bcbc95f033c31b00595ed39f79c3a99b4ed0501,Fix bug #79037 (global buffer-overflow in `mbfl_filt_conv_big5_wchar`),0,1,"(2) NO: No vulnerability.
+464942,php-src,2bcbc95f033c31b00595ed39f79c3a99b4ed0501,https://github.com/php/php-src,http://git.php.net/?p=php-src.git;a=commit;h=2bcbc95f033c31b00595ed39f79c3a99b4ed0501,Fix bug #79037 (global buffer-overflow in `mbfl_filt_conv_big5_wchar`),0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -62,7 +62,7 @@ Signed-off-by: Jens Axboe <axboe@kernel.dk>",0,1,"(2) NO: No vulnerability.
 251946,tensorflow,15691e456c7dc9bd6be203b09765b063bf4a380c,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/15691e456c7dc9bd6be203b09765b063bf4a380c,"Prevent dereferencing of null pointers in TFLite's `add.cc`.
 
 PiperOrigin-RevId: 387244946
-Change-Id: I56094233327fbd8439b92e1dbb1262176e00eeb9",0,1,"(2) NO: No vulnerability.
+Change-Id: I56094233327fbd8439b92e1dbb1262176e00eeb9",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -151,7 +151,7 @@ Based on the analysis, the provided code does not contain any vulnerabilities th
 * If `ptr->entries` is a dynamically allocated array, consider using a smart pointer or a container that manages memory automatically (e.g., `std::unique_ptr`, `std::shared_ptr`, or `std::vector` with its own memory management). This would simplify memory management and prevent potential double-free errors.",['CWE-476'],CVE-2021-4043,NULL Pointer Dereference in GitHub repository gpac/gpac prior to 1.1.0.
 483469,mongo,a5e2f9b0a236462a6d1ca129583c617f111367b4,https://github.com/mongodb/mongo,https://github.com/mongodb/mongo/commit/a5e2f9b0a236462a6d1ca129583c617f111367b4,"SERVER-59071 Treat '$sample' as unsharded when connecting directly to shards
 
-(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",0,1,"(2) NO: No vulnerability.
+(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -210,7 +210,7 @@ Link: https://lore.kernel.org/r/20220217030929.323849-1-haris.iqbal@ionos.com
 Reported-by: Miaoqian Lin <linmq006@gmail.com>
 Signed-off-by: Md Haris Iqbal <haris.iqbal@ionos.com>
 Reviewed-by: Jack Wang <jinpu.wang@ionos.com>
-Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -265,7 +265,7 @@ before using it.
 Fixes: 6ab55ec0a938 (""ALSA: control: Fix an out-of-bounds bug in get_ctl_id_hash()"")
 Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 Link: https://lore.kernel.org/r/YwjgNh/gkG1hH7po@kili
-Signed-off-by: Takashi Iwai <tiwai@suse.de>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Takashi Iwai <tiwai@suse.de>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -311,7 +311,7 @@ Suggested-by: Michael Hanselmann <public@hansmi.ch>
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 Reviewed-by: Michael Hanselmann <public@hansmi.ch>
 Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
-Message-id: 20190108102301.1957-1-kraxel@redhat.com",0,1,"(2) NO: No vulnerability.
+Message-id: 20190108102301.1957-1-kraxel@redhat.com",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -462,7 +462,7 @@ The provided C code implements the `glob` function, which is a standard part of 
 
 Given these safeguards, the provided code does not contain any vulnerabilities that would allow an attacker to compromise the system or access sensitive data.",['CWE-119'],CVE-2017-15670,"The GNU C Library (aka glibc or libc6) before 2.27 contains an off-by-one error leading to a heap-based buffer overflow in the glob function in glob.c, related to the processing of home directories using the ~ operator followed by a long string."
 259619,libjpeg,187035b9726710b4fe11d565c7808975c930895d,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/187035b9726710b4fe11d565c7808975c930895d,"The code now checks for consistency of the MCU sizes across
-hierarchical levels, and fails in case they are different.",0,1,"(2) NO: No vulnerability.
+hierarchical levels, and fails in case they are different.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -563,7 +563,7 @@ The function `dynamicGetbuf` does not contain any obvious vulnerabilities based 
 296226,vim,37f47958b8a2a44abc60614271d9537e7f14e51a,https://github.com/vim/vim,https://github.com/vim/vim/commit/37f47958b8a2a44abc60614271d9537e7f14e51a,"patch 8.2.4253: using freed memory when substitute with function call
 
 Problem:    Using freed memory when substitute uses a recursive function call.
-Solution:   Make a copy of the substitute text.",0,1,"(2) NO: No vulnerability detected.
+Solution:   Make a copy of the substitute text.",0,0,"(2) NO: No vulnerability detected.
 
 The provided code is part of the `substitute` function in the `vim` editor, which is designed to handle various substitution commands. After a thorough analysis, no critical vulnerabilities were found in the code. The function includes proper input validation, bounds checking, and error handling, which are essential for preventing common vulnerabilities such as buffer overflows, memory leaks, and command injection attacks. The code also includes features like the `FEAT_EVAL` flag, which is intended for use with the `vim9script` language and is properly handled with checks and conditions to prevent potential issues. Overall, the code appears to be well-structured and secure for its intended purpose.",['CWE-416'],CVE-2022-0413,Use After Free in GitHub repository vim/vim prior to 8.2.
 500663,libssh,4d8420f3282ed07fc99fc5e930c17df27ef1e9b2,http://git.libssh.org/projects/libssh,http://git.libssh.org/projects/libssh.git/commit/?h=v0-5&id=4d8420f3282ed07fc99fc5e930c17df27ef1e9b2,"sftp: Fix bug in sftp_mkdir not returning on error.
@@ -625,7 +625,7 @@ Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",0,0,"(2) NO: No vulner
 
 * The code does not have any obvious buffer overflows, use-after-free, or other common vulnerabilities.
 * The error handling and memory management practices are generally safe and robust.",['CWE-22'],CVE-2021-40153,"squashfs_opendir in unsquash-1.c in Squashfs-Tools 4.5 stores the filename in the directory entry; this is then used by unsquashfs to create the new file during the unsquash. The filename is not validated for traversal outside of the destination directory, and thus allows writing to locations outside of the destination."
-299319,ImageMagick,389ecc365a7c61404ba078a72c3fa5a3cf1b4101,https://github.com/ImageMagick/ImageMagick,https://github.com/ImageMagick/ImageMagick/commit/389ecc365a7c61404ba078a72c3fa5a3cf1b4101,https://github.com/ImageMagick/ImageMagick/issues/1221,0,1,"(2) NO: No vulnerability.
+299319,ImageMagick,389ecc365a7c61404ba078a72c3fa5a3cf1b4101,https://github.com/ImageMagick/ImageMagick,https://github.com/ImageMagick/ImageMagick/commit/389ecc365a7c61404ba078a72c3fa5a3cf1b4101,https://github.com/ImageMagick/ImageMagick/issues/1221,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -730,7 +730,7 @@ These missing `krb5_data_free` calls are critical to prevent memory leaks and en
 313850,vim,395bd1f6d3edc9f7edb5d1f2d7deaf5a9e3ab93c,https://github.com/vim/vim,https://github.com/vim/vim/commit/395bd1f6d3edc9f7edb5d1f2d7deaf5a9e3ab93c,"patch 8.2.4956: reading past end of line with ""gf"" in Visual block mode
 
 Problem:    Reading past end of line with ""gf"" in Visual block mode.
-Solution:   Do not include the NUL in the length.",0,1,"(2) NO: No vulnerability.
+Solution:   Do not include the NUL in the length.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -766,7 +766,7 @@ were deleted after the upload, but not during the upload.
 
 The bug was introduced in 2009 in version 1.0.23
 
-Spotted by @DroidTest, thanks!",0,1,"(2) NO: No vulnerability detected.
+Spotted by @DroidTest, thanks!",0,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -892,7 +892,7 @@ Reproducer:
 
 Reported-by: Lyu Tao <tao.lyu@epfl.ch>
 Signed-off-by: ChenXiaoSong <chenxiaosong2@huawei.com>
-Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -1057,7 +1057,7 @@ The provided code does not contain any vulnerabilities that could lead to memory
 Passing negative indices is illegal but there was a missing check so that resulted in OOB accesses.
 
 PiperOrigin-RevId: 387208551
-Change-Id: I6b7a8a62d3e7c13a16d81619e5bc23ae2cdbc7fd",0,1,"(2) NO: No vulnerability.
+Change-Id: I6b7a8a62d3e7c13a16d81619e5bc23ae2cdbc7fd",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -1142,7 +1142,7 @@ fbshipit-source-id: ee53875d21e02608c6d870388eecf1464de24ff1",0,0,"(2) NO: No vu
 **No Critical Vulnerabilities Detected:**
 
 The code does not contain any critical vulnerabilities such as buffer overflows, memory leaks, or use of unsafe functions like `strcpy()` or `strchr()`. The input validation, buffer management, and memory management are all handled in a safe and secure manner.",['CWE-119'],CVE-2019-11929,"Insufficient boundary checks when formatting numbers in number_format allows read/write access to out-of-bounds memory, potentially leading to remote code execution. This issue affects HHVM versions prior to 3.30.10, all versions between 4.0.0 and 4.8.5, all versions between 4.9.0 and 4.18.2, and versions 4.19.0, 4.19.1, 4.20.0, 4.20.1, 4.20.2, 4.21.0, 4.22.0, 4.23.0."
-439114,ImageMagick6,210474b2fac6a661bfa7ed563213920e93e76395,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/210474b2fac6a661bfa7ed563213920e93e76395,Fix ultra rare but potential memory-leak,0,1,"(2) NO: No vulnerability detected.
+439114,ImageMagick6,210474b2fac6a661bfa7ed563213920e93e76395,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/210474b2fac6a661bfa7ed563213920e93e76395,Fix ultra rare but potential memory-leak,0,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Explanation:**
 
@@ -1323,7 +1323,7 @@ firmware download routine is finished.
 
 Fixes: 3194c6870158 (""NFC: nfcmrvl: add firmware download support"")
 Signed-off-by: Duoming Zhou <duoming@zju.edu.cn>
-Signed-off-by: David S. Miller <davem@davemloft.net>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: David S. Miller <davem@davemloft.net>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -1574,7 +1574,7 @@ Note that this bug has no relation to mount(2) permissions evaluation
 in suid mode. The way how non-root user specifies paths on command
 line is completely irrelevant for comparison with fstab entries.
 
-Signed-off-by: Karel Zak <kzak@redhat.com>",0,1,"(2) NO: No vulnerability detected.
+Signed-off-by: Karel Zak <kzak@redhat.com>",0,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -1601,7 +1601,7 @@ Signed-off-by: Karel Zak <kzak@redhat.com>",0,1,"(2) NO: No vulnerability detect
 225547,tensorflow,a1e1511dde36b3f8aa27a6ec630838e7ea40e091,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a1e1511dde36b3f8aa27a6ec630838e7ea40e091,"[lite] Update TfLiteIntArrayCreate to return size_t
 
 PiperOrigin-RevId: 416439896
-Change-Id: I847f69b68d1ddaff4b1e925a09b8b69c1756653b",0,1,"(2) NO: No vulnerability.
+Change-Id: I847f69b68d1ddaff4b1e925a09b8b69c1756653b",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -1644,7 +1644,7 @@ Change-Id: Ia4228960b5d2aa44480385f74bdd70d21a3613c3",0,0,"(2) NO: No vulnerabil
 - **Type Errors:** The code checks for unsupported output tensor types and reports an error, preventing unexpected behavior.
 
 Since no vulnerabilities are detected in the provided code, the response is **(2) NO: No vulnerability.**",['CWE-369'],CVE-2021-37683,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of division in TFLite is [vulnerable to a division by 0 error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/div.cc). There is no check that the divisor tensor does not contain zero elements. We have patched the issue in GitHub commit 1e206baedf8bef0334cca3eb92bab134ef525a28. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-511472,server,b3c3291f0b7c1623cb20663f7cf31b7f749768bc,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/b3c3291f0b7c1623cb20663f7cf31b7f749768bc,MDEV-24176 fixup: GCC -Wmaybe-uninitialized,0,1,"(2) NO: No vulnerability detected.
+511472,server,b3c3291f0b7c1623cb20663f7cf31b7f749768bc,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/b3c3291f0b7c1623cb20663f7cf31b7f749768bc,MDEV-24176 fixup: GCC -Wmaybe-uninitialized,0,0,"(2) NO: No vulnerability detected.
 
 The provided C code appears to be a part of a MySQL open_table function, which is designed to open a table in a MySQL database. The code includes various checks and conditions to ensure safe and correct table operations, such as validating inputs, handling different modes (e.g., pre-locked, lock tables), and managing metadata locks. 
 
@@ -1712,7 +1712,7 @@ Cc: stable@vger.kernel.org
 Signed-off-by: Tyrel Datwyler <tyreld@linux.ibm.com>
 [mpe: Reformat change log and add mention of possible stack corruption]
 Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
-Link: https://lore.kernel.org/r/20210315214821.452959-1-tyreld@linux.ibm.com",0,1,"(2) NO: No vulnerability.
+Link: https://lore.kernel.org/r/20210315214821.452959-1-tyreld@linux.ibm.com",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -1735,7 +1735,7 @@ Link: https://lore.kernel.org/r/20210315214821.452959-1-tyreld@linux.ibm.com",0,
 443298,vim,35d21c6830fc2d68aca838424a0e786821c5891c,https://github.com/vim/vim,https://github.com/vim/vim/commit/35d21c6830fc2d68aca838424a0e786821c5891c,"patch 9.0.0360: crash when invalid line number on :for is ignored
 
 Problem:    Crash when invalid line number on :for is ignored.
-Solution:   Do not check breakpoint for non-existing line.",0,1,"(2) NO: No vulnerability detected.
+Solution:   Do not check breakpoint for non-existing line.",0,0,"(2) NO: No vulnerability detected.
 
 The provided code is a complex implementation of the Vim editor's `do_cmdline()` function, which is responsible for executing command-line input. After a thorough analysis, no critical vulnerabilities were identified in the code. Here are some reasons why:
 
@@ -1852,7 +1852,7 @@ Reviewed By: mjoras, lnicco
 
 Differential Revision: D26613890
 
-fbshipit-source-id: 19bb2be2c731808144e1a074ece313fba11f1945",0,1,"(2) NO: No vulnerability.
+fbshipit-source-id: 19bb2be2c731808144e1a074ece313fba11f1945",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -1885,7 +1885,7 @@ fbshipit-source-id: 19bb2be2c731808144e1a074ece313fba11f1945",0,1,"(2) NO: No vu
 
 **Conclusion:**
 Based on the analysis, there is no clear vulnerability detected in the provided code. The code follows best practices for handling ciphers, checks for their availability, and throws exceptions for error conditions.",['CWE-703'],CVE-2021-24029,"A packet of death scenario is possible in mvfst via a specially crafted message during a QUIC session, which causes a crash via a failed assertion. Per QUIC specification, this particular message should be treated as a connection error. This issue affects mvfst versions prior to commit a67083ff4b8dcbb7ee2839da6338032030d712b0 and proxygen versions prior to v2021.03.15.00."
-232287,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,0,1,"(2) NO: No vulnerability.
+232287,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -1921,7 +1921,7 @@ For a more thorough analysis, consider the following:
 - Consider adding more context and documentation for variables like `m_ucCount`, `m_ulWidth`, and `m_lRunIndex`.",['CWE-703'],CVE-2022-32978,There is an assertion failure in SingleComponentLSScan::ParseMCU in singlecomponentlsscan.cpp in libjpeg before 1.64 via an empty JPEG-LS scan.
 273407,tensorflow,803404044ae7a1efac48ba82d74111fce1ddb09a,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/803404044ae7a1efac48ba82d74111fce1ddb09a,"Fix security vulnerability with LSTMBlockCellOp
 
-PiperOrigin-RevId: 446028341",0,1,"(2) NO: No vulnerability.
+PiperOrigin-RevId: 446028341",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -2040,7 +2040,7 @@ While the code is secure, it is recommended to perform regular code reviews to e
 If ConfigProto is not used, then use the default settings which is to allow all devices.
 
 PiperOrigin-RevId: 420391800
-Change-Id: I88161ad7042990aef678e77b597a2fb2c8f815be",0,1,"(2) NO: No vulnerability.
+Change-Id: I88161ad7042990aef678e77b597a2fb2c8f815be",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -2118,7 +2118,7 @@ Change-Id: If8e508bf696ae8ecfb927e69c139a8ccf7fe60cb",0,0,"(2) NO: No vulnerabil
 **Conclusion**: The code does not contain any obvious vulnerabilities such as buffer overflows, memory leaks, or incorrect use of functions that could lead to security issues. The clamping and bias application logic is safe and properly implemented in both Neon and non-Neon code paths.",['CWE-369'],CVE-2022-23557,"Tensorflow is an Open Source Machine Learning Framework. An attacker can craft a TFLite model that would trigger a division by zero in `BiasAndClamp` implementation. There is no check that the `bias_size` is non zero. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
 274865,tensorflow,a989426ee1346693cc015792f11d715f6944f2b8,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a989426ee1346693cc015792f11d715f6944f2b8,"Improve to cover scale value greater than one
 
-PiperOrigin-RevId: 433050921",0,1,"(2) NO: No vulnerability.
+PiperOrigin-RevId: 433050921",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -2138,7 +2138,7 @@ PiperOrigin-RevId: 433050921",0,1,"(2) NO: No vulnerability.
 **Conclusion**: Based on the provided code and the analysis, there is no explicit vulnerability detected in the `ComparisonQuantized` function. The function follows common TFLite practices for handling quantized tensors and performing comparison operations, with proper input handling and memory management assumed. Therefore, the result is **(2) NO: No vulnerability.**",['CWE-703'],CVE-2022-29212,"TensorFlow is an open source platform for machine learning. Prior to versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4, certain TFLite models that were created using TFLite model converter would crash when loaded in the TFLite interpreter. The culprit is that during quantization the scale of values could be greater than 1 but code was always assuming sub-unit scaling. Thus, since code was calling `QuantizeMultiplierSmallerThanOneExp`, the `TFLITE_CHECK_LT` assertion would trigger and abort the process. Versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4 contain a patch for this issue."
 225383,v4l2loopback,e4cd225557486c420f6a34411f98c575effd43dd,https://github.com/umlaeute/v4l2loopback,https://github.com/umlaeute/v4l2loopback/commit/e4cd225557486c420f6a34411f98c575effd43dd,"add explicit format specifier to printf() invocations
 
-CWE-134",0,1,"(2) NO: No vulnerability.
+CWE-134",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -2391,7 +2391,7 @@ Some ops that attempt to extract a resource handle from user input
 can lead to nullptr dereferences.  This returns an error in such
 a case.
 
-PiperOrigin-RevId: 445571938",0,1,"(2) NO: No vulnerability.
+PiperOrigin-RevId: 445571938",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -2979,7 +2979,7 @@ Cc: Dmitry Vyukov <dvyukov@google.com>
 Cc: <stable@kernel.org>
 Cc: syzkaller-bugs <syzkaller-bugs@googlegroups.com>
 Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -3105,7 +3105,7 @@ Avoid get get_order() costs as suggested by Linus Torvalds.
 Fixes: cac2661c53f3 (""esp4: Avoid skb_cow_data whenever possible"")
 Fixes: 03e2a30f6a27 (""esp6: Avoid skb_cow_data whenever possible"")
 Reported-by: valis <sec@valis.email>
-Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -3430,7 +3430,7 @@ In conclusion, while it is essential to thoroughly test and validate any cryptog
   passes-through unexpected characters from a format specifier
   (report/testcase by ""puppet-meteor"").
 + add a check for end-of-string in cvtchar to handle a malformed
-  string in infotocap (report/testcase by ""puppet-meteor"").",0,1,"(2) NO: No vulnerability.
+  string in infotocap (report/testcase by ""puppet-meteor"").",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -3521,7 +3521,7 @@ Fixed this by adding this logic in
 st_select_lex::optimize_unflattened_subqueries():
 
   If a member of a UNION is correlated, mark all its members as
-  correlated, so that they are prepared to be executed multiple times.",0,1,"(2) NO: No vulnerability.
+  correlated, so that they are prepared to be executed multiple times.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -3668,7 +3668,7 @@ allow chroot().
 
 Partially fixes GHSA-67h7-w3jq-vh4q.
 
-Signed-off-by: Simon McVittie <smcv@collabora.com>",0,1,"(2) NO: No vulnerability detected.
+Signed-off-by: Simon McVittie <smcv@collabora.com>",0,0,"(2) NO: No vulnerability detected.
 
 Here's a brief explanation:
 
@@ -3713,7 +3713,7 @@ HOW TO SPECIFY A USER ID
          <heinrichh@uni-duesseldorf.de>
 
 Without the brackets gpg uses a substring match, which risks selecting
-the wrong recipient.",0,1,"(2) NO: No vulnerability.
+the wrong recipient.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -3976,7 +3976,7 @@ However, to ensure the code's security, it's recommended to perform a thorough s
 
 Problem:    Accessing beyond allocated memory when using the cmdline window in
             Ex mode.
-Solution:   Use ""*"" instead of ""'<,'>"" for Visual mode.",0,1,"(2) NO: No vulnerability.
+Solution:   Use ""*"" instead of ""'<,'>"" for Visual mode.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4006,7 +4006,7 @@ Solution:   Use ""*"" instead of ""'<,'>"" for Visual mode.",0,1,"(2) NO: No vul
 
 **Conclusion:**
 The provided code does not contain any vulnerabilities that would compromise the security of the system. It follows standard practices for handling command modifiers and special cases in Vim.",['CWE-787'],CVE-2022-2288,Out-of-bounds Write in GitHub repository vim/vim prior to 9.0.
-253515,mruby,f72315575f78a9a773adbce0ee7d3ec33434cb76,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/f72315575f78a9a773adbce0ee7d3ec33434cb76,codegen.c: fix a argument generation bug in array assignment.,0,1,"(2) NO: No vulnerability.
+253515,mruby,f72315575f78a9a773adbce0ee7d3ec33434cb76,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/f72315575f78a9a773adbce0ee7d3ec33434cb76,codegen.c: fix a argument generation bug in array assignment.,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4074,7 +4074,7 @@ Cc: qemu-stable@nongnu.org
 Reviewed-by: Mark Cave-Ayland <mark.cave-ayland@ilande.co.uk>
 Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
 Reviewed-by: Alistair Francis <alistair.francis@wdc.com>
-Signed-off-by: Jason Wang <jasowang@redhat.com>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Jason Wang <jasowang@redhat.com>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4102,7 +4102,7 @@ Based on the analysis, there is no clear vulnerability detected in the provided 
 484063,open62541,b79db1ac78146fc06b0b8435773d3967de2d659c,https://github.com/open62541/open62541,https://github.com/open62541/open62541/commit/b79db1ac78146fc06b0b8435773d3967de2d659c,"fix(plugin): Add default limits for chunks and message size
 
 Based on a reported DoS vulnerability reported by Team82 (Claroty
-Research).",0,1,"(2) NO: No vulnerability.
+Research).",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4290,7 +4290,7 @@ Link: https://lore.kernel.org/r/20210315214821.452959-1-tyreld@linux.ibm.com",0,
 * The function call to `dlpar_add_slot()` is assumed to be secure and properly implemented. If `dlpar_add_slot()` has vulnerabilities, they would be specific to that function and not related to the code provided in this function.",['CWE-120'],CVE-2021-28972,"In drivers/pci/hotplug/rpadlpar_sysfs.c in the Linux kernel through 5.11.8, the RPA PCI Hotplug driver has a user-tolerable buffer overflow when writing a new device name to the driver from userspace, allowing userspace to write data to the kernel stack frame directly. This occurs because add_slot_store and remove_slot_store mishandle drc_name '\0' termination, aka CID-cc7a0bb058b8."
 509510,server,9e39d0ae44595dbd1570805d97c9c874778a6be8,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/9e39d0ae44595dbd1570805d97c9c874778a6be8,"MDEV-25787 Bug report: crash on SELECT DISTINCT thousands_blob_fields
 
-fix a debug assert to account for not opened temp tables",0,1,"(2) NO: No vulnerability.
+fix a debug assert to account for not opened temp tables",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4322,7 +4322,7 @@ Fixes: 5e9a97b1f449 (""i2c: ismt: Adding support for I2C_SMBUS_BLOCK_PROC_CALL""
 Reported-and-tested-by: Zheyu Ma <zheyuma97@gmail.com>
 Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 Reviewed-by: Mika Westerberg <mika.westerberg@linux.intel.com>
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4579,7 +4579,7 @@ Change-Id: I06e57cbb8eca43816eff79eac264fa7aae8f7163",0,0,"(2) NO: No vulnerabil
 
 **Conclusion:**
 The provided code does not contain any vulnerabilities that would lead to memory leaks, buffer overflows, or type safety issues. It follows best practices for input validation, output size calculation, memory management, and tensor operations.",['CWE-369'],CVE-2022-21735,"Tensorflow is an Open Source Machine Learning Framework. The implementation of `FractionalMaxPool` can be made to crash a TensorFlow process via a division by 0. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-437671,radare2,d4ce40b516ffd70cf2e9e36832d8de139117d522,https://github.com/radare/radare2,https://github.com/radareorg/radare2/commit/d4ce40b516ffd70cf2e9e36832d8de139117d522,Fix oobread in symbols header parsing ##bin,0,1,"(2) NO: No vulnerability.
+437671,radare2,d4ce40b516ffd70cf2e9e36832d8de139117d522,https://github.com/radare/radare2,https://github.com/radareorg/radare2/commit/d4ce40b516ffd70cf2e9e36832d8de139117d522,Fix oobread in symbols header parsing ##bin,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4642,7 +4642,7 @@ Fix the integer overflow by changing elem_size to u64 from u32.
 Fixes: 557c0c6e7df8 (""bpf: convert stackmap to pre-allocation"")
 Signed-off-by: Tatsuhiko Yasumatsu <th.yasumatsu@gmail.com>
 Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
-Link: https://lore.kernel.org/bpf/20210930135545.173698-1-th.yasumatsu@gmail.com",0,1,"(2) NO: No vulnerability.
+Link: https://lore.kernel.org/bpf/20210930135545.173698-1-th.yasumatsu@gmail.com",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4770,7 +4770,7 @@ If the extra field was larger than the space the user provided with
 inflateGetHeader(), and if multiple calls of inflate() delivered
 the extra header data, then there could be a buffer overflow of the
 provided space. This commit assures that provided space is not
-exceeded.",0,1,"(2) NO: No vulnerability detected.
+exceeded.",0,0,"(2) NO: No vulnerability detected.
 
 The provided code is a part of the `inflate` function from the zlib library, which is a well-tested and widely used compression library. The code implements the DEFLATE algorithm, which is known for its robustness and reliability. The code includes various checks and conditions to ensure data integrity, such as:
 
@@ -4813,7 +4813,7 @@ The arguments must determine a valid sparse tensor. This means that when indices
 Also added test, by modifying existing test with empty sparse tensor to now run with an invalid sparse tensor input.
 
 PiperOrigin-RevId: 388562757
-Change-Id: Id8b54cd7c2316025b4f9a77292c8fb5344d17609",0,1,"(2) NO: No vulnerability.
+Change-Id: Id8b54cd7c2316025b4f9a77292c8fb5344d17609",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4832,7 +4832,7 @@ Change-Id: Id8b54cd7c2316025b4f9a77292c8fb5344d17609",0,1,"(2) NO: No vulnerabil
 
 * The code does not exhibit any of the vulnerabilities typically associated with C/C++ code (e.g., buffer overflows, memory leaks, or unsafe use of pointers).
 * The input validation, memory management, and error handling practices are robust and follow good programming practices.",['CWE-476'],CVE-2021-37647,"TensorFlow is an end-to-end open source platform for machine learning. When a user does not supply arguments that determine a valid sparse tensor, `tf.raw_ops.SparseTensorSliceDataset` implementation can be made to dereference a null pointer. The [implementation](https://github.com/tensorflow/tensorflow/blob/8d72537c6abf5a44103b57b9c2e22c14f5f49698/tensorflow/core/kernels/data/sparse_tensor_slice_dataset_op.cc#L240-L251) has some argument validation but fails to consider the case when either `indices` or `values` are provided for an empty sparse tensor when the other is not. If `indices` is empty, then [code that performs validation](https://github.com/tensorflow/tensorflow/blob/8d72537c6abf5a44103b57b9c2e22c14f5f49698/tensorflow/core/kernels/data/sparse_tensor_slice_dataset_op.cc#L260-L261) (i.e., checking that the indices are monotonically increasing) results in a null pointer dereference. If `indices` as provided by the user is empty, then `indices` in the C++ code above is backed by an empty `std::vector`, hence calling `indices->dim_size(0)` results in null pointer dereferencing (same as calling `std::vector::at()` on an empty vector). We have patched the issue in GitHub commit 02cc160e29d20631de3859c6653184e3f876b9d7. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-398518,rizin,aa6917772d2f32e5a7daab25a46c72df0b5ea406,https://github.com/rizinorg/rizin,https://github.com/rizinorg/rizin/commit/aa6917772d2f32e5a7daab25a46c72df0b5ea406,Fix oob write for dwarf with abbrev with count 0 (Fix #2083) (#2086),0,1,"(2) NO: No vulnerability.
+398518,rizin,aa6917772d2f32e5a7daab25a46c72df0b5ea406,https://github.com/rizinorg/rizin,https://github.com/rizinorg/rizin/commit/aa6917772d2f32e5a7daab25a46c72df0b5ea406,Fix oob write for dwarf with abbrev with count 0 (Fix #2083) (#2086),0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4854,7 +4854,7 @@ Change-Id: Id8b54cd7c2316025b4f9a77292c8fb5344d17609",0,1,"(2) NO: No vulnerabil
 337374,vim,8e4b76da1d7e987d43ca960dfbc372d1c617466f,https://github.com/vim/vim,https://github.com/vim/vim/commit/8e4b76da1d7e987d43ca960dfbc372d1c617466f,"patch 8.2.4901: NULL pointer access when using invalid pattern
 
 Problem:    NULL pointer access when using invalid pattern.
-Solution:   Check for failed regexp program.",0,1,"(2) NO: No vulnerability.
+Solution:   Check for failed regexp program.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4918,7 +4918,7 @@ Therefore, the code does not contain any vulnerabilities that would be classifie
 269330,tensorflow,0f931751fb20f565c4e94aa6df58d54a003cdb30,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/0f931751fb20f565c4e94aa6df58d54a003cdb30,"Validate dimensions of input tensor in `FractionalAvgPoolGrad`
 
 PiperOrigin-RevId: 388286227
-Change-Id: Ieb7566155e92acc8993a2212c76deacadc0edc8a",0,1,"(2) NO: No vulnerability.
+Change-Id: Ieb7566155e92acc8993a2212c76deacadc0edc8a",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -4957,7 +4957,7 @@ Change-Id: Ieb7566155e92acc8993a2212c76deacadc0edc8a",0,1,"(2) NO: No vulnerabil
 - **Type Casting**: The type casting from double to `T` is a standard operation in deep learning frameworks and is generally safe if the framework's type management is correctly implemented.
 
 **Conclusion**: Based on the analysis, there is no clear vulnerability detected in the provided code snippet. The code includes proper input validation, memory management, and logical operations that are typical for a custom deep learning operation. However, a thorough review of the entire codebase and framework's implementation details would be necessary to ensure there are no hidden issues or edge cases not covered in this snippet.",['CWE-476'],CVE-2021-37651,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation for `tf.raw_ops.FractionalAvgPoolGrad` can be tricked into accessing data outside of bounds of heap allocated buffers. The [implementation](https://github.com/tensorflow/tensorflow/blob/f24faa153ad31a4b51578f8181d3aaab77a1ddeb/tensorflow/core/kernels/fractional_avg_pool_op.cc#L205) does not validate that the input tensor is non-empty. Thus, code constructs an empty `EigenDoubleMatrixMap` and then accesses this buffer with indices that are outside of the empty area. We have patched the issue in GitHub commit 0f931751fb20f565c4e94aa6df58d54a003cdb30. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-329925,cairo,03a820b173ed1fdef6ff14b4468f5dbc02ff59be,https://gitlab.freedesktop.org/cairo/cairo,https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/85/diffs?commit_id=03a820b173ed1fdef6ff14b4468f5dbc02ff59be,Fix mask usage in image-compositor,0,1,"(2) NO: No vulnerability.
+329925,cairo,03a820b173ed1fdef6ff14b4468f5dbc02ff59be,https://gitlab.freedesktop.org/cairo/cairo,https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/85/diffs?commit_id=03a820b173ed1fdef6ff14b4468f5dbc02ff59be,Fix mask usage in image-compositor,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -5011,7 +5011,7 @@ Signed-off-by: Matthieu Herrb <matthieu@herrb.eu>",0,0,"(2) NO: No vulnerability
    - The code does not contain any known common vulnerabilities (e.g., buffer overflow, memory leak, integer overflow, etc.) that could be exploited by an attacker.
 
 **Conclusion:** Based on the analysis, there is no clear indication of a vulnerability in the provided code. The function appears to be implemented with proper memory management, input validation, and error handling practices.",['CWE-191'],CVE-2020-14361,A flaw was found in X.Org Server before xorg-x11-server 1.20.9. An Integer underflow leading to heap-buffer overflow may lead to a privilege escalation vulnerability. The highest threat from this vulnerability is to data confidentiality and integrity as well as system availability.
-277489,libmobi,eafc415bc6067e72577f70d6dd5acbf057ce6e6f,https://github.com/bfabiszewski/libmobi,https://github.com/bfabiszewski/libmobi/commit/eafc415bc6067e72577f70d6dd5acbf057ce6e6f,Fix wrong boundary checks in inflections parser resulting in stack buffer over-read with corrupt input,0,1,"(2) NO: No vulnerability.
+277489,libmobi,eafc415bc6067e72577f70d6dd5acbf057ce6e6f,https://github.com/bfabiszewski/libmobi,https://github.com/bfabiszewski/libmobi/commit/eafc415bc6067e72577f70d6dd5acbf057ce6e6f,Fix wrong boundary checks in inflections parser resulting in stack buffer over-read with corrupt input,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -5031,7 +5031,7 @@ Signed-off-by: Matthieu Herrb <matthieu@herrb.eu>",0,0,"(2) NO: No vulnerability
 
 **Conclusion:**
 Based on the provided code, there is no direct vulnerability detected. The function includes good practices for input validation, bounds checking, and memory operations. However, it is important to note that the function's behavior is undefined if the input `rule` is out of bounds or if `*rule` is a null pointer. In such cases, the function's behavior is not well-defined, which could potentially lead to unexpected behavior or crashes. To ensure the function's robustness, it would be beneficial to add explicit checks for these edge cases.",['CWE-787'],CVE-2022-1533,Buffer Over-read in GitHub repository bfabiszewski/libmobi prior to 0.11. This vulnerability is capable of arbitrary code execution.
-439266,ImageMagick6,b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick/issues/1337,0,1,"(2) NO: No vulnerability detected.
+439266,ImageMagick6,b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick/issues/1337,0,0,"(2) NO: No vulnerability detected.
 
 The provided C code for the `ReadBMPImage` function appears to be well-structured and follows best practices for handling BMP files in a C context. Here are some key points that indicate the code is safe:
 
@@ -5109,7 +5109,7 @@ Based on the analysis, the provided code does not contain any vulnerabilities th
 328807,vim,d25f003342aca9889067f2e839963dfeccf1fe05,https://github.com/vim/vim,https://github.com/vim/vim/commit/d25f003342aca9889067f2e839963dfeccf1fe05,"patch 9.0.0011: reading beyond the end of the line with put command
 
 Problem:    Reading beyond the end of the line with put command.
-Solution:   Adjust the end mark position.",0,1,"(2) NO: No vulnerability detected.
+Solution:   Adjust the end mark position.",0,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Explanation:**
 
@@ -5132,7 +5132,7 @@ In rsi_send_beacon, if rsi_prepare_beacon fails the allocated skb should
 be released.
 
 Signed-off-by: Navid Emamdoost <navid.emamdoost@gmail.com>
-Signed-off-by: Kalle Valo <kvalo@codeaurora.org>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Kalle Valo <kvalo@codeaurora.org>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -5215,7 +5215,7 @@ Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>",0,0,"(2) NO: No vulnerability.
 413623,radare2,10517e3ff0e609697eb8cde60ec8dc999ee5ea24,https://github.com/radare/radare2,https://github.com/radareorg/radare2/commit/10517e3ff0e609697eb8cde60ec8dc999ee5ea24,"aaef on arm/thumb switches causes uaf ##crash
 
 * Reported by peacock-doris via huntr.dev
-* Reproducer: poc_uaf_r_reg_get",0,1,"(2) NO: No vulnerability detected.
+* Reproducer: poc_uaf_r_reg_get",0,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -5349,7 +5349,7 @@ converted to unsigned anyway.
 
 Signed-off-by: Kevin Wolf <kwolf@redhat.com>
 Reviewed-by: Max Reitz <mreitz@redhat.com>
-Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -5410,7 +5410,7 @@ Solution:   Check for running into the end of the line.",0,0,"(2) NO: No vulnera
 7. **No Unchecked Resource Leaks:** The function ensures that mutex locks are always released, even in error conditions, preventing resource leaks.
 
 **Conclusion:** The provided code demonstrates good practices for handling Mqtt messages in a multithreaded environment, including input validation, error handling, and thread safety. No vulnerabilities were detected in the code snippet.",['CWE-787'],CVE-2021-45936,wolfSSL wolfMQTT 1.9 has a heap-based buffer overflow in MqttDecode_Disconnect (called from MqttClient_DecodePacket and MqttClient_WaitType).
-219912,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,0,1,"(2) NO: No vulnerability.
+219912,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -5467,7 +5467,7 @@ Reviewed-by: Adam Jackson <ajax@redhat.com>
 416366,vim,1c3dd8ddcba63c1af5112e567215b3cec2de11d0,https://github.com/vim/vim,https://github.com/vim/vim/commit/1c3dd8ddcba63c1af5112e567215b3cec2de11d0,"patch 9.0.0490: using freed memory with cmdwin and BufEnter autocmd
 
 Problem:    Using freed memory with cmdwin and BufEnter autocmd.
-Solution:   Make sure pointer to b_p_iminsert is still valid.",0,1,"(2) NO: No vulnerability detected.
+Solution:   Make sure pointer to b_p_iminsert is still valid.",0,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -5739,7 +5739,7 @@ The provided code does not contain any vulnerabilities that could lead to memory
 240276,vim,44db8213d38c39877d2148eff6a72f4beccfb94e,https://github.com/vim/vim,https://github.com/vim/vim/commit/44db8213d38c39877d2148eff6a72f4beccfb94e,"patch 8.2.4219: reading before the start of the line
 
 Problem:    Reading before the start of the line.
-Solution:   Check boundary before trying to read the character.",0,1,"(2) NO: No vulnerability.
+Solution:   Check boundary before trying to read the character.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -5838,7 +5838,7 @@ restored.
 
 The fix is to erase fields for the spare memory from the saved frame.
 
-This closes #469 issue on Github.",0,1,"(2) NO: No vulnerability.
+This closes #469 issue on Github.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -5932,7 +5932,7 @@ these to avoid a memory leak.
 
 Fixes: afd2daa26c7a (""Bluetooth: Add support for virtio transport driver"")
 Signed-off-by: Soenke Huster <soenke.huster@eknoes.de>
-Signed-off-by: Marcel Holtmann <marcel@holtmann.org>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Marcel Holtmann <marcel@holtmann.org>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -5980,7 +5980,7 @@ Signed-off-by: Marcel Holtmann <marcel@holtmann.org>",0,1,"(2) NO: No vulnerabil
 Before, the process would crash or certain elements would be silently ignored. Now an InvalidArgument is raised.
 
 PiperOrigin-RevId: 384844020
-Change-Id: Iba44417e383bdd0e1abc4012bfca83b2377dd335",0,1,"(2) NO: No vulnerability detected.
+Change-Id: Iba44417e383bdd0e1abc4012bfca83b2377dd335",0,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -6052,7 +6052,7 @@ Reported-at: https://github.com/openvswitch/ovs-issues/issues/226
 Signed-off-by: Aaron Conole <aconole@redhat.com>
 Reviewed-by: David Marchand <david.marchand@redhat.com>
 Tested-by: Wan Junjie <wanjunjie@bytedance.com>
-Signed-off-by: Alin-Gabriel Serdean <aserdean@ovn.org>",0,1,"(2) NO: No vulnerability.
+Signed-off-by: Alin-Gabriel Serdean <aserdean@ovn.org>",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6104,7 +6104,7 @@ Change-Id: I6182124c545989cef80cefd439b659095920763b",0,0,"(2) NO: No vulnerabil
 - Add neighbor value check in stl_remove_degenerate
 
 Fixes https://github.com/admesh/admesh/issues/28
-Merges https://github.com/admesh/admesh/pull/55",0,1,"(2) NO: No vulnerability.
+Merges https://github.com/admesh/admesh/pull/55",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6135,7 +6135,7 @@ However, without the full context of the `stl` data structure and its associated
 
 * Add log information
 
-* Modification based on comments.",0,1,"(2) NO: No vulnerability.
+* Modification based on comments.",0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6186,7 +6186,7 @@ directories",0,0,"(2) NO: No vulnerability.
 5. **Vulnerability Assessment:** Based on the analysis, there is no clear vulnerability in the provided code snippet. The function seems to be designed to create directory structures in a controlled manner, assuming the inputs are valid and properly sanitized.
 
 **Conclusion:** No vulnerability was detected in the provided code snippet. The function appears to be functioning as intended, with proper handling of null termination and path traversal. However, it is recommended to ensure that the function is used with properly sanitized inputs to prevent potential security issues.",['CWE-94'],CVE-2022-31214,"A Privilege Context Switching issue was discovered in join.c in Firejail 0.9.68. By crafting a bogus Firejail container that is accepted by the Firejail setuid-root program as a join target, a local attacker can enter an environment in which the Linux user namespace is still the initial user namespace, the NO_NEW_PRIVS prctl is not activated, and the entered mount namespace is under the attacker's control. In this way, the filesystem layout can be adjusted to gain root privileges through execution of available setuid-root binaries such as su or sudo."
-241311,mruby,b1d0296a937fe278239bdfac840a3fd0e93b3ee9,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/b1d0296a937fe278239bdfac840a3fd0e93b3ee9,class.c: clear method cache after `remove_method`.,0,1,"(2) NO: No vulnerability.
+241311,mruby,b1d0296a937fe278239bdfac840a3fd0e93b3ee9,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/b1d0296a937fe278239bdfac840a3fd0e93b3ee9,class.c: clear method cache after `remove_method`.,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6238,7 +6238,7 @@ Based on the analysis, there is no direct vulnerability detected in the provided
 - All input validation checks are in place to prevent potential errors.
 - The function uses safe pointer arithmetic and does not assume any specific memory layout.
 - The function returns specific error codes, allowing the caller to handle errors gracefully.",['CWE-787'],CVE-2022-31031,"PJSIP is a free and open source multimedia communication library written in C language implementing standard based protocols such as SIP, SDP, RTP, STUN, TURN, and ICE. In versions prior to and including 2.12.1 a stack buffer overflow vulnerability affects PJSIP users that use STUN in their applications, either by: setting a STUN server in their account/media config in PJSUA/PJSUA2 level, or directly using `pjlib-util/stun_simple` API. A patch is available in commit 450baca which should be included in the next release. There are no known workarounds for this issue."
-404192,pcre2,03654e751e7f0700693526b67dfcadda6b42c9d0,https://github.com/PCRE2Project/pcre2,https://github.com/PCRE2Project/pcre2/commit/03654e751e7f0700693526b67dfcadda6b42c9d0,Fixed an issue affecting recursions in JIT,0,1,"(2) NO: No vulnerability.
+404192,pcre2,03654e751e7f0700693526b67dfcadda6b42c9d0,https://github.com/PCRE2Project/pcre2,https://github.com/PCRE2Project/pcre2/commit/03654e751e7f0700693526b67dfcadda6b42c9d0,Fixed an issue affecting recursions in JIT,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6265,7 +6265,7 @@ Based on the analysis, there is no direct vulnerability detected in the provided
 **No Vulnerability Detected:**
 
 Based on the analysis, the provided code does not contain any obvious vulnerabilities such as buffer overflows, memory leaks, or untrusted input handling issues. The function uses proper bounds checking, assertion statements, and error handling to ensure the integrity of the data structure being processed. Therefore, the result is **(2) NO: No vulnerability.**",['CWE-703'],CVE-2022-1587,An out-of-bounds read vulnerability was discovered in the PCRE2 library in the get_recurse_data_length() function of the pcre2_jit_compile.c file. This issue affects recursions in JIT-compiled regular expressions caused by duplicate data transfers.
-292205,hexchat,4e061a43b3453a9856d34250c3913175c45afe9d,https://github.com/hexchat/hexchat,https://github.com/hexchat/hexchat/commit/4e061a43b3453a9856d34250c3913175c45afe9d,Clean up handling CAP LS,0,1,"(2) NO: No vulnerability.
+292205,hexchat,4e061a43b3453a9856d34250c3913175c45afe9d,https://github.com/hexchat/hexchat,https://github.com/hexchat/hexchat/commit/4e061a43b3453a9856d34250c3913175c45afe9d,Clean up handling CAP LS,0,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6404,7 +6404,7 @@ Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",0,1,"(1) YES: Vulnerab
 5. **Whitespace Handling:** The function checks if the next character is probably a whitespace using `PJ_SCAN_IS_PROBABLY_SPACE` and if `scanner->skip_ws` is true. If both conditions are met, it calls `pj_scan_skip_whitespace`. This is a **safe** operation as it's a conditional check and a function call that presumably skips whitespace without causing issues.
 
 **Conclusion:** The code does not contain any obvious vulnerabilities. The null check, safe pointer operations, and conditional checks ensure that the function behaves safely and correctly. Therefore, no vulnerability is detected.",['CWE-125'],CVE-2022-21723,"PJSIP is a free and open source multimedia communication library written in C language implementing standard based protocols such as SIP, SDP, RTP, STUN, TURN, and ICE. In versions 2.11.1 and prior, parsing an incoming SIP message that contains a malformed multipart can potentially cause out-of-bound read access. This issue affects all PJSIP users that accept SIP multipart. The patch is available as commit in the `master` branch. There are no known workarounds."
-197057,drogon,3c785326c63a34aa1799a639ae185bc9453cb447,https://github.com/drogonframework/drogon,https://github.com/drogonframework/drogon/commit/3c785326c63a34aa1799a639ae185bc9453cb447,Prevent malformed upload path causing arbitrary write (#1174),1,1,"(2) NO: No vulnerability.
+197057,drogon,3c785326c63a34aa1799a639ae185bc9453cb447,https://github.com/drogonframework/drogon,https://github.com/drogonframework/drogon/commit/3c785326c63a34aa1799a639ae185bc9453cb447,Prevent malformed upload path causing arbitrary write (#1174),1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6429,7 +6429,7 @@ Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",0,1,"(1) YES: Vulnerab
 **Potential Improvement:**
 
 - Consider using `filesystem::path::normalize()` to handle any potential symbolic links or redundant path components in `fsPath`. This would ensure the path is as intended, preventing unintended behavior due to symbolic links or redundant components. However, this is not a security vulnerability but a potential code improvement.",['CWE-552'],CVE-2022-25297,This affects the package drogonframework/drogon before 1.7.5. The unsafe handling of file names during upload using HttpFile::save() method may enable attackers to write files to arbitrary locations outside the designated target folder.
-201007,pjproject,560a1346f87aabe126509bb24930106dea292b00,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/560a1346f87aabe126509bb24930106dea292b00,Merge pull request from GHSA-f5qg-pqcg-765m,1,1,"(2) NO: No vulnerability.
+201007,pjproject,560a1346f87aabe126509bb24930106dea292b00,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/560a1346f87aabe126509bb24930106dea292b00,Merge pull request from GHSA-f5qg-pqcg-765m,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6444,7 +6444,7 @@ Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",0,1,"(1) YES: Vulnerab
 5. **Return Value**: The function returns the length of the output, which is calculated as `(int)(p-buf)`. This indicates that the function does not return any error codes related to memory allocation or formatting, as long as the input validation and error checks are correctly implemented.
 
 **Conclusion**: Based on the provided code, there is no immediate vulnerability detected. The function includes input validation, proper memory allocation, and error checking, which are essential for preventing common vulnerabilities such as buffer overflows and memory leaks. However, a thorough security analysis would require reviewing the code in the context of the broader system and considering potential edge cases or interactions with other components.",['CWE-787'],CVE-2022-24764,"PJSIP is a free and open source multimedia communication library written in C. Versions 2.12 and prior contain a stack buffer overflow vulnerability that affects PJSUA2 users or users that call the API `pjmedia_sdp_print(), pjmedia_sdp_media_print()`. Applications that do not use PJSUA2 and do not directly call `pjmedia_sdp_print()` or `pjmedia_sdp_media_print()` should not be affected. A patch is available on the `master` branch of the `pjsip/pjproject` GitHub repository. There are currently no known workarounds."
-210692,ImageMagick6,b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick/issues/1337,1,1,"(2) NO: No vulnerability detected.
+210692,ImageMagick6,b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick/issues/1337,1,0,"(2) NO: No vulnerability detected.
 
 The provided C code for the `ReadBMPImage` function appears to be well-written and follows best practices for handling BMP files in the ImageMagick library. Here are some key points that indicate the code is safe:
 
@@ -6468,7 +6468,7 @@ for a should be released.
 
 Signed-off-by: Navid Emamdoost <navid.emamdoost@gmail.com>
 Link: https://lore.kernel.org/r/20190925152742.16258-1-navid.emamdoost@gmail.com
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6492,7 +6492,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>",1,1,"(2) NO: No 
      - **Race Conditions:** The use of mutex locking for the attachment list addition helps prevent race conditions.
 
 **Conclusion:** Based on the analysis, there is no immediate vulnerability detected in the provided code snippet. The function follows best practices for memory management, error handling, and thread safety.",['CWE-401'],CVE-2019-19069,"A memory leak in the fastrpc_dma_buf_attach() function in drivers/misc/fastrpc.c in the Linux kernel before 5.3.9 allows attackers to cause a denial of service (memory consumption) by triggering dma_get_sgtable() failures, aka CID-fc739a058d99."
-195409,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,1,1,"(2) NO: No vulnerability.
+195409,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6557,7 +6557,7 @@ Change-Id: I28eedcfd87a53aaf34deb075acea1f8c95470808",1,0,"(2) NO: No vulnerabil
 
 **Conclusion:**
 Based on the analysis, there is no identified vulnerability in the provided code. The code demonstrates good practices in input validation, memory management, and error handling.",['CWE-703'],CVE-2021-37672,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions an attacker can read from outside of bounds of heap allocated data by sending specially crafted illegal arguments to `tf.raw_ops.SdcaOptimizerV2`. The [implementation](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/core/kernels/sdca_internal.cc#L320-L353) does not check that the length of `example_labels` is the same as the number of examples. We have patched the issue in GitHub commit a4e138660270e7599793fa438cd7b2fc2ce215a6. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-211785,jasper,4cd52b5daac62b00a0a328451544807ddecf775f,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/4cd52b5daac62b00a0a328451544807ddecf775f,Avoid maxrlvls more than upper bound to cause heap-buffer-overflow,1,1,"(2) NO: No vulnerability detected.
+211785,jasper,4cd52b5daac62b00a0a328451544807ddecf775f,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/4cd52b5daac62b00a0a328451544807ddecf775f,Avoid maxrlvls more than upper bound to cause heap-buffer-overflow,1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -6646,7 +6646,7 @@ kmsg snip:
 Fixes: 5d069dbe8aaf (""fuse: fix bad inode"")
 Cc: stable@vger.kernel.org # 5.10+
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6893,7 +6893,7 @@ Change-Id: Ia4228960b5d2aa44480385f74bdd70d21a3613c3",1,0,"(2) NO: No vulnerabil
 
 - **Dependency on `EvalDiv` and `EvalQuantized`:** The security of this function depends on the implementation of `EvalDiv` and `EvalQuantized`. If these functions have vulnerabilities, it could affect the overall security of this function. However, based on the provided information, there is no evidence of such vulnerabilities.
 - **Context and Node Safety:** The function ensures the context and node are valid, which is crucial for preventing potential issues related to invalid state or node configurations.",['CWE-369'],CVE-2021-37683,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of division in TFLite is [vulnerable to a division by 0 error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/div.cc). There is no check that the divisor tensor does not contain zero elements. We have patched the issue in GitHub commit 1e206baedf8bef0334cca3eb92bab134ef525a28. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-214003,libvncserver,7b1ef0ffc4815cab9a96c7278394152bdc89dc4d,https://github.com/LibVNC/libvncserver,https://github.com/LibVNC/libvncserver/commit/7b1ef0ffc4815cab9a96c7278394152bdc89dc4d,LibVNCClient: really fix #250,1,1,"(2) NO: No vulnerability.
+214003,libvncserver,7b1ef0ffc4815cab9a96c7278394152bdc89dc4d,https://github.com/LibVNC/libvncserver,https://github.com/LibVNC/libvncserver/commit/7b1ef0ffc4815cab9a96c7278394152bdc89dc4d,LibVNCClient: really fix #250,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -6912,7 +6912,7 @@ Change-Id: Ia4228960b5d2aa44480385f74bdd70d21a3613c3",1,0,"(2) NO: No vulnerabil
    - **Safety:** The function includes checks to prevent buffer overflows and manages memory correctly, indicating a safe implementation.
 
 **Conclusion:** Based on the analysis, there is no clear vulnerability detected in the provided code snippet. The function includes necessary input validation and memory management practices, suggesting it is safe and functional. However, without the full context of the codebase and the RFB server implementation, a more comprehensive analysis might uncover potential issues.",['CWE-787'],CVE-2018-20020,LibVNC before commit 7b1ef0ffc4815cab9a96c7278394152bdc89dc4d contains heap out-of-bound write vulnerability inside structure in VNC client code that can result remote code execution
-195742,gpac,37592ad86c6ca934d34740012213e467acc4a3b0,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/37592ad86c6ca934d34740012213e467acc4a3b0,fixed #2163,1,1,"(2) NO: No vulnerability detected.
+195742,gpac,37592ad86c6ca934d34740012213e467acc4a3b0,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/37592ad86c6ca934d34740012213e467acc4a3b0,fixed #2163,1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -6944,7 +6944,7 @@ Based on the analysis, the provided code does not contain any vulnerabilities th
 
 Problem:    Accessing beyond allocated memory when using the cmdline window in
             Ex mode.
-Solution:   Use ""*"" instead of ""'<,'>"" for Visual mode.",1,1,"(2) NO: No vulnerability.
+Solution:   Use ""*"" instead of ""'<,'>"" for Visual mode.",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7082,7 +7082,7 @@ Signed-off-by: Donald Sharp <sharpd@nvidia.com>",1,0,"(2) NO: No vulnerability.
 - The code does not have any issues with the BGP protocol state management, as it checks for the `peer_active_nego` flag before clearing the route.
 
 Therefore, no vulnerabilities were detected in the provided code.",['CWE-125'],CVE-2022-37032,An out-of-bounds read in the BGP daemon of FRRouting FRR before 8.4 may lead to a segmentation fault and denial of service. This occurs in bgp_capability_msg_parse in bgpd/bgp_packet.c.
-195984,gpac,3dbe11b37d65c8472faf0654410068e5500b3adb,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/3dbe11b37d65c8472faf0654410068e5500b3adb,fixed #2175,1,1,"(2) NO: No vulnerability.
+195984,gpac,3dbe11b37d65c8472faf0654410068e5500b3adb,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/3dbe11b37d65c8472faf0654410068e5500b3adb,fixed #2175,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7385,7 +7385,7 @@ While there are potential issues with the code, such as the lack of validation f
 * Ensure that the functions used to read and process data are properly implemented and do not have buffer overflows.",['CWE-125'],CVE-2022-1987,Buffer Over-read in GitHub repository bfabiszewski/libmobi prior to 0.11.
 214282,radare2,9650e3c352f675687bf6c6f65ff2c4a3d0e288fa,https://github.com/radare/radare2,https://github.com/radareorg/radare2/commit/9650e3c352f675687bf6c6f65ff2c4a3d0e288fa,"Fix oobread segfault in java arith8.class ##crash
 
-* Reported by Cen Zhang via huntr.dev",1,1,"(2) NO: No vulnerability.
+* Reported by Cen Zhang via huntr.dev",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7554,7 +7554,7 @@ Since no vulnerabilities are detected in the provided code, the answer is **(2) 
 We don't own the reference here, it is owned by the caller and given to
 us for the scope of this function. Leftover mistake from 0.10 porting.
 
-https://bugzilla.gnome.org/show_bug.cgi?id=774897",1,1,"(2) NO: No vulnerability.
+https://bugzilla.gnome.org/show_bug.cgi?id=774897",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7578,7 +7578,7 @@ https://bugzilla.gnome.org/show_bug.cgi?id=774897",1,1,"(2) NO: No vulnerability
 **Conclusion:** Based on the analysis, there is no clear vulnerability detected in the provided code. The code appears to be correctly implementing the FLX decoding logic with proper memory management, bounds checking, and error handling.",['CWE-125'],CVE-2016-9810,"The gst_decode_chain_free_internal function in the flxdex decoder in gst-plugins-good in GStreamer before 1.10.2 allows remote attackers to cause a denial of service (invalid memory read and crash) via an invalid file, which triggers an incorrect unref call."
 199841,radare2,feaa4e7f7399c51ee6f52deb84dc3f795b4035d6,https://github.com/radare/radare2,https://github.com/radareorg/radare2/commit/feaa4e7f7399c51ee6f52deb84dc3f795b4035d6,"Fix null deref in xnu.kernelcache ##crash
 
-* Reported by @xshad3 via huntr.dev",1,1,"(2) NO: No vulnerability.
+* Reported by @xshad3 via huntr.dev",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7670,7 +7670,7 @@ converted to unsigned anyway.
 
 Signed-off-by: Kevin Wolf <kwolf@redhat.com>
 Reviewed-by: Max Reitz <mreitz@redhat.com>
-Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7781,7 +7781,7 @@ Reproducer:
 
 Reported-by: Lyu Tao <tao.lyu@epfl.ch>
 Signed-off-by: ChenXiaoSong <chenxiaosong2@huawei.com>
-Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7805,7 +7805,7 @@ Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",1,1,"(2) NO: N
 * The code follows standard practices for handling file system operations, error handling, and resource management.
 * There are no obvious security vulnerabilities such as buffer overflows, memory leaks, or insecure attribute settings.
 * The use of the NFS protocol suggests that the code is designed to work with a secure file system protocol.",['CWE-909'],CVE-2022-24448,"An issue was discovered in fs/nfs/dir.c in the Linux kernel before 5.16.5. If an application sets the O_DIRECTORY flag, and tries to open a regular file, nfs_atomic_open() performs a regular lookup. If a regular file is found, ENOTDIR should occur, but the server instead returns uninitialized data in the file descriptor."
-201382,gerbv,672214abb47a802fc000125996e6e0a46c623a4e,https://github.com/gerbv/gerbv,https://github.com/gerbv/gerbv/commit/672214abb47a802fc000125996e6e0a46c623a4e,Add test to demonstrate buffer overrun,1,1,"(2) NO: No vulnerability.
+201382,gerbv,672214abb47a802fc000125996e6e0a46c623a4e,https://github.com/gerbv/gerbv,https://github.com/gerbv/gerbv/commit/672214abb47a802fc000125996e6e0a46c623a4e,Add test to demonstrate buffer overrun,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7832,7 +7832,7 @@ Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",1,1,"(2) NO: N
 * The code does not contain any obvious vulnerabilities such as buffer overflows, memory leaks, or critical sections that could lead to arbitrary code execution.
 * The error handling and warnings are printed to the console, but the program continues execution without crashing or allowing unauthorized access to sensitive data.
 * The code does not contain any logic that could lead to a denial-of-service (DoS) attack or a data corruption attack.",['CWE-787'],CVE-2021-40391,"An out-of-bounds write vulnerability exists in the drill format T-code tool number functionality of Gerbv 2.7.0, dev (commit b5f1eacd), and the forked version of Gerbv (commit 71493260). A specially-crafted drill file can lead to code execution. An attacker can provide a malicious file to trigger this vulnerability."
-213037,php-src,2bcbc95f033c31b00595ed39f79c3a99b4ed0501,https://github.com/php/php-src,http://git.php.net/?p=php-src.git;a=commit;h=2bcbc95f033c31b00595ed39f79c3a99b4ed0501,Fix bug #79037 (global buffer-overflow in `mbfl_filt_conv_big5_wchar`),1,1,"(2) NO: No vulnerability.
+213037,php-src,2bcbc95f033c31b00595ed39f79c3a99b4ed0501,https://github.com/php/php-src,http://git.php.net/?p=php-src.git;a=commit;h=2bcbc95f033c31b00595ed39f79c3a99b4ed0501,Fix bug #79037 (global buffer-overflow in `mbfl_filt_conv_big5_wchar`),1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7858,7 +7858,7 @@ come directly from skb->data and are not guarded in any way.
 
 Signed-off-by: Jordy Zomer <jordy@pwning.systems>
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-Signed-off-by: David S. Miller <davem@davemloft.net>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: David S. Miller <davem@davemloft.net>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7909,7 +7909,7 @@ Change-Id: I7f0a3590b8acae3f3e3e2fe636e1f5ef285693cf",1,0,"(2) NO: No vulnerabil
 216654,core,2c3f37672277b1f73f84722802aaa0ab1ab3e413,https://github.com/LibreOffice/core,https://github.com/dovecot/core/commit/2c3f37672277b1f73f84722802aaa0ab1ab3e413,"auth: Don't crash expanding %variables when username isn't set.
 
 This continues the auth-policy fix in
-c3d3faa4f72a676e183f34be960cff13a5a725ae",1,1,"(2) NO: No vulnerability.
+c3d3faa4f72a676e183f34be960cff13a5a725ae",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -7958,7 +7958,7 @@ Based on the analysis, there is no clear vulnerability detected in the provided 
 
 **Conclusion:**
 Based on the analysis, the provided code does not exhibit any detectable vulnerabilities. It follows secure practices for elliptic curve cryptography, including input validation, randomness, side-channel protection, and proper data handling. Therefore, the result is **(2) NO: No vulnerability.**",['CWE-415'],CVE-2020-27209,The ECDSA operation of the micro-ecc library 1.0 is vulnerable to simple power analysis attacks which allows an adversary to extract the private ECC key.
-210278,unicorn,3d3deac5e6d38602b689c4fef5dac004f07a2e63,https://github.com/unicorn-engine/unicorn,https://github.com/unicorn-engine/unicorn/commit/3d3deac5e6d38602b689c4fef5dac004f07a2e63,Fix crash when mapping a big memory and calling uc_close,1,1,"(2) NO: No vulnerability.
+210278,unicorn,3d3deac5e6d38602b689c4fef5dac004f07a2e63,https://github.com/unicorn-engine/unicorn,https://github.com/unicorn-engine/unicorn/commit/3d3deac5e6d38602b689c4fef5dac004f07a2e63,Fix crash when mapping a big memory and calling uc_close,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -8087,7 +8087,7 @@ Change-Id: Ia21a3e3d62a90d642a4561f08f3b543e5ad00c46",1,0,"(2) NO: No vulnerabil
 - **Logging**: Consider enhancing the logging mechanism to provide more context, such as the specific tensor and its data type, which can help in debugging and tracking memory usage.",['CWE-617'],CVE-2022-23571,"Tensorflow is an Open Source Machine Learning Framework. When decoding a tensor from protobuf, a TensorFlow process can encounter cases where a `CHECK` assertion is invalidated based on user controlled arguments, if the tensors have an invalid `dtype` and 0 elements or an invalid shape. This allows attackers to cause denial of services in TensorFlow processes. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
 198452,tensorflow,a989426ee1346693cc015792f11d715f6944f2b8,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a989426ee1346693cc015792f11d715f6944f2b8,"Improve to cover scale value greater than one
 
-PiperOrigin-RevId: 433050921",1,1,"(2) NO: No vulnerability.
+PiperOrigin-RevId: 433050921",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -8121,7 +8121,7 @@ easier and we don't have to undo all the interrupt allocations in
 this case.
 
 Signed-off-by: Johannes Berg <johannes.berg@intel.com>
-Signed-off-by: Luca Coelho <luciano.coelho@intel.com>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Luca Coelho <luciano.coelho@intel.com>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -8145,7 +8145,7 @@ Based on the analysis, the function does not exhibit any obvious vulnerabilities
 208912,vim,1c3dd8ddcba63c1af5112e567215b3cec2de11d0,https://github.com/vim/vim,https://github.com/vim/vim/commit/1c3dd8ddcba63c1af5112e567215b3cec2de11d0,"patch 9.0.0490: using freed memory with cmdwin and BufEnter autocmd
 
 Problem:    Using freed memory with cmdwin and BufEnter autocmd.
-Solution:   Make sure pointer to b_p_iminsert is still valid.",1,1,"(2) NO: No vulnerability detected.
+Solution:   Make sure pointer to b_p_iminsert is still valid.",1,0,"(2) NO: No vulnerability detected.
 
 The provided C code appears to be a custom implementation of the `getcmdline_int` function, which is a common function in command-line editors like `vi`. The code includes various features such as incremental search, history management, and command-line editing, which are typical for such applications. 
 
@@ -8268,7 +8268,7 @@ The provided code contains a potential memory leak due to the use of `njs_array_
 **Conclusion:** Based on the analysis, there is no clear vulnerability in the provided code snippet. The function includes proper input validation, safe configuration options, and error handling, which are essential for preventing potential security issues.",['CWE-269'],CVE-2022-30592,liblsquic/lsquic_qenc_hdl.c in LiteSpeed QUIC (aka LSQUIC) before 3.1.0 mishandles MAX_TABLE_CAPACITY.
 208505,tor,57e35ad3d91724882c345ac709666a551a977f0f,https://github.com/torproject/tor,https://gitweb.torproject.org/tor.git/commitdiff/57e35ad3d91724882c345ac709666a551a977f0f,"Avoid possible segfault when handling networkstatus vote with bad flavor
 
-Fix for 6530; fix on 0.2.2.6-alpha.",1,1,"(2) NO: No vulnerability detected.
+Fix for 6530; fix on 0.2.2.6-alpha.",1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -8351,7 +8351,7 @@ allow chroot().
 
 Partially fixes GHSA-67h7-w3jq-vh4q.
 
-Signed-off-by: Simon McVittie <smcv@collabora.com>",1,1,"(2) NO: No vulnerability detected.
+Signed-off-by: Simon McVittie <smcv@collabora.com>",1,0,"(2) NO: No vulnerability detected.
 
 Here's a brief explanation:
 
@@ -8491,7 +8491,7 @@ Reported-at: https://github.com/openvswitch/ovs-issues/issues/226
 Signed-off-by: Aaron Conole <aconole@redhat.com>
 Reviewed-by: David Marchand <david.marchand@redhat.com>
 Tested-by: Wan Junjie <wanjunjie@bytedance.com>
-Signed-off-by: Alin-Gabriel Serdean <aserdean@ovn.org>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Alin-Gabriel Serdean <aserdean@ovn.org>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -8636,7 +8636,7 @@ Here are some reasons why the code is considered safe:
 5. **Edge Cases**: The code handles edge cases such as deleting characters before the insertion point, adjusting the cursor position, and ensuring that the cursor remains visible after deletion.
 
 Given the robustness of the code and the fact that it's part of a well-maintained and widely-used text editor, it is unlikely to contain a vulnerability that would be considered a significant security risk. However, it's always a good practice to review and test code, especially when it's part of a critical system or application.",['CWE-787'],CVE-2022-2207,Heap-based Buffer Overflow in GitHub repository vim/vim prior to 8.2.
-195309,squid,5e2ea2b13bd98f53e29964ca26bb0d602a8a12b9,https://github.com/squid-cache/squid,https://github.com/squid-cache/squid/commit/5e2ea2b13bd98f53e29964ca26bb0d602a8a12b9,Improve handling of Gopher responses (#1022),1,1,"(2) NO: No vulnerability detected.
+195309,squid,5e2ea2b13bd98f53e29964ca26bb0d602a8a12b9,https://github.com/squid-cache/squid,https://github.com/squid-cache/squid/commit/5e2ea2b13bd98f53e29964ca26bb0d602a8a12b9,Improve handling of Gopher responses (#1022),1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -8771,7 +8771,7 @@ Fixes:
 
 **Conclusion:**
 The code does not contain any vulnerabilities that could lead to buffer overflows, memory leaks, or use-after-free errors. It safely handles runs of identical bytes, ensuring compatibility with readers that have limitations on maximum run lengths. Therefore, no vulnerability is detected.",['CWE-787'],CVE-2020-16305,A buffer overflow vulnerability in pcx_write_rle() in contrib/japanese/gdev10v.c of Artifex Software GhostScript v9.50 allows a remote attacker to cause a denial of service via a crafted PDF file. This is fixed in v9.51.
-196894,cryptopp,9425e16437439e68c7d96abef922167d68fafaff,https://github.com/weidai11/cryptopp,https://github.com/weidai11/cryptopp/commit/9425e16437439e68c7d96abef922167d68fafaff,Fix for CVE-2015-2141. Thanks to Evgeny Sidorov for reporting. Squaring to satisfy Jacobi requirements suggested by JPM.,1,1,"(2) NO: No vulnerability.
+196894,cryptopp,9425e16437439e68c7d96abef922167d68fafaff,https://github.com/weidai11/cryptopp,https://github.com/weidai11/cryptopp/commit/9425e16437439e68c7d96abef922167d68fafaff,Fix for CVE-2015-2141. Thanks to Evgeny Sidorov for reporting. Squaring to satisfy Jacobi requirements suggested by JPM.,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -8862,7 +8862,7 @@ The provided C code contains a potential buffer overflow vulnerability due to th
 **Conclusion:**
 Based on the analysis, the provided code does not contain any obvious vulnerabilities such as buffer overflows, memory leaks, or insufficient input validation. The function includes proper input validation, bounds checking, and memory allocation practices. Therefore, no vulnerability was detected.",['CWE-787'],CVE-2021-33361,Memory leak in the afra_box_read function in MP4Box in GPAC 1.0.1 allows attackers to read memory via a crafted file.
 208522,unbound,02080f6b180232f43b77f403d0c038e9360a460f,https://github.com/NLnetLabs/unbound,https://github.com/NLnetLabs/unbound/commit/02080f6b180232f43b77f403d0c038e9360a460f,"- Fix Integer Overflows in Size Calculations,
-  reported by X41 D-Sec.",1,1,"(2) NO: No vulnerability.
+  reported by X41 D-Sec.",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -8921,7 +8921,7 @@ PiperOrigin-RevId: 445524908",1,0,"(2) NO: No vulnerability.
 - Add neighbor value check in stl_remove_degenerate
 
 Fixes https://github.com/admesh/admesh/issues/28
-Merges https://github.com/admesh/admesh/pull/55",1,1,"(2) NO: No vulnerability.
+Merges https://github.com/admesh/admesh/pull/55",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -9068,7 +9068,7 @@ reads kiocb->private it can contain uninitialized data.
 
 Fixes: 3e08773c3841 (""block: switch polling to be bio based"")
 Signed-off-by: Joseph Ravichandran <jravi@mit.edu>
-Signed-off-by: Jens Axboe <axboe@kernel.dk>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Jens Axboe <axboe@kernel.dk>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -9195,7 +9195,7 @@ Tested-by: Tabitha Sable <tabitha.c.sable@gmail.com>
 Fixes: 81a6a5cdd2c5 (""Task Control Groups: automatic userspace notification of idle cgroups"")
 Cc: stable@vger.kernel.org # v2.6.24+
 Signed-off-by: ""Eric W. Biederman"" <ebiederm@xmission.com>
-Signed-off-by: Tejun Heo <tj@kernel.org>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Tejun Heo <tj@kernel.org>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -9223,7 +9223,7 @@ Signed-off-by: Tejun Heo <tj@kernel.org>",1,1,"(2) NO: No vulnerability.
 
 * red fixes
 
-* remove magic number",1,1,"(2) NO: No vulnerability.
+* remove magic number",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -9250,7 +9250,7 @@ If the extra field was larger than the space the user provided with
 inflateGetHeader(), and if multiple calls of inflate() delivered
 the extra header data, then there could be a buffer overflow of the
 provided space. This commit assures that provided space is not
-exceeded.",1,1,"(2) NO: No vulnerability detected.
+exceeded.",1,0,"(2) NO: No vulnerability detected.
 
 **Explanation:**
 
@@ -9337,7 +9337,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>",1,0,"(2) NO: No vulnerability.
 This is due to not checking that the params for the quantization exists. If there is no quantization, we should not access the `.params` field.
 
 PiperOrigin-RevId: 385163909
-Change-Id: I2beb8d50649b6542db224c163033fbcbaa49314f",1,1,"(2) NO: No vulnerability.
+Change-Id: I2beb8d50649b6542db224c163033fbcbaa49314f",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -9390,7 +9390,7 @@ is not empty after the encryption handshake.
 
 Our thanks to Jacob Champion for reporting this problem.
 
-Security: CVE-2021-23222",1,1,"(2) NO: No vulnerability detected.
+Security: CVE-2021-23222",1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -9421,7 +9421,7 @@ Therefore, no vulnerabilities were detected in the provided code.",['CWE-522'],C
 196328,vim,409510c588b1eec1ae33511ae97a21eb8e110895,https://github.com/vim/vim,https://github.com/vim/vim/commit/409510c588b1eec1ae33511ae97a21eb8e110895,"patch 8.2.5050: using freed memory when searching for pattern in path
 
 Problem:    Using freed memory when searching for pattern in path.
-Solution:   Make a copy of the line.",1,1,"(2) NO: No vulnerability detected.
+Solution:   Make a copy of the line.",1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Explanation:**
 
@@ -9697,7 +9697,7 @@ Signed-off-by: Joachim Nilsson <troglobit@gmail.com>",1,0,"(2) NO: No vulnerabil
 **Note:** The code does not have any obvious vulnerabilities that would lead to a security breach. However, it's always a good practice to review and enhance input validation and error handling to prevent potential issues.",['CWE-787'],CVE-2020-20276,An unauthenticated stack-based buffer overflow vulnerability in common.c's handle_PORT in uftpd FTP server versions 2.10 and earlier can be abused to cause a crash and could potentially lead to remote code execution.
 215103,mongo,a5e2f9b0a236462a6d1ca129583c617f111367b4,https://github.com/mongodb/mongo,https://github.com/mongodb/mongo/commit/a5e2f9b0a236462a6d1ca129583c617f111367b4,"SERVER-59071 Treat '$sample' as unsharded when connecting directly to shards
 
-(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",1,1,"(2) NO: No vulnerability.
+(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -9736,7 +9736,7 @@ The provided code does not contain any vulnerabilities that could lead to data c
 
 **Recommendation:**
 While the code is secure, it could benefit from additional documentation and comments to improve readability and maintainability. Additionally, further testing and analysis could be performed to ensure that the code handles all edge cases and performs as expected under various scenarios.",['CWE-617'],CVE-2021-32037,"An authorized user may trigger an invariant which may result in denial of service or server exit if a relevant aggregation request is sent to a shard. Usually, the requests are sent via mongos and special privileges are required in order to know the address of the shards and to log in to the shards of an auth enabled environment."
-197128,mruby,f72315575f78a9a773adbce0ee7d3ec33434cb76,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/f72315575f78a9a773adbce0ee7d3ec33434cb76,codegen.c: fix a argument generation bug in array assignment.,1,1,"(2) NO: No vulnerability.
+197128,mruby,f72315575f78a9a773adbce0ee7d3ec33434cb76,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/f72315575f78a9a773adbce0ee7d3ec33434cb76,codegen.c: fix a argument generation bug in array assignment.,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -9797,7 +9797,7 @@ restored.
 
 The fix is to erase fields for the spare memory from the saved frame.
 
-This closes #469 issue on Github.",1,1,"(2) NO: No vulnerability.
+This closes #469 issue on Github.",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -9904,7 +9904,7 @@ Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",1,0,"(2) NO: No vulner
 **Conclusion:** Based on the analysis, there are no vulnerabilities detected in the provided code. The function includes proper memory management, input validation, and error handling, making it secure against common attacks.",['CWE-200'],CVE-2021-41072,"squashfs_opendir in unsquash-2.c in Squashfs-Tools 4.5 allows Directory Traversal, a different vulnerability than CVE-2021-40153. A squashfs filesystem that has been crafted to include a symbolic link and then contents under the same filename in a filesystem can cause unsquashfs to first create the symbolic link pointing outside the expected directory, and then the subsequent write operation will cause the unsquashfs process to write through the symbolic link elsewhere in the filesystem."
 197223,njs,ab1702c7af9959366a5ddc4a75b4357d4e9ebdc1,https://github.com/nginx/njs,https://github.com/nginx/njs/commit/ab1702c7af9959366a5ddc4a75b4357d4e9ebdc1,"Fixed typo while calculating module path length.
 
-The issue was introduced in 77c398f26d7e (not released yet).",1,1,"(2) NO: No vulnerability.
+The issue was introduced in 77c398f26d7e (not released yet).",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -9990,7 +9990,7 @@ PiperOrigin-RevId: 446028341",1,0,"(2) NO: No vulnerability.
 
 **Conclusion:**
 The provided code demonstrates good practices for memory management, input validation, and resource allocation, which collectively minimize the risk of vulnerabilities such as buffer overflows, memory leaks, and data corruption. Therefore, no vulnerability has been detected in this code.",['CWE-703'],CVE-2022-29200,"TensorFlow is an open source platform for machine learning. Prior to versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4, the implementation of `tf.raw_ops.LSTMBlockCell` does not fully validate the input arguments. This results in a `CHECK`-failure which can be used to trigger a denial of service attack. The code does not validate the ranks of any of the arguments to this API call. This results in `CHECK`-failures when the elements of the tensor are accessed. Versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4 contain a patch for this issue."
-206588,php-src,feba44546c27b0158f9ac20e72040a224b918c75,https://github.com/php/php-src,http://git.php.net/?p=php-src.git;a=commitdiff;h=feba44546c27b0158f9ac20e72040a224b918c75,Fixed bug #22965 (Crash in gd lib's ImageFillToBorder()).,1,1,"(2) NO: No vulnerability.
+206588,php-src,feba44546c27b0158f9ac20e72040a224b918c75,https://github.com/php/php-src,http://git.php.net/?p=php-src.git;a=commitdiff;h=feba44546c27b0158f9ac20e72040a224b918c75,Fixed bug #22965 (Crash in gd lib's ImageFillToBorder()).,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10158,7 +10158,7 @@ However, to provide a more thorough analysis, I would recommend reviewing the co
 198662,vim,dc5490e2cbc8c16022a23b449b48c1bd0083f366,https://github.com/vim/vim,https://github.com/vim/vim/commit/dc5490e2cbc8c16022a23b449b48c1bd0083f366,"patch 8.2.4215: illegal memory access when copying lines in Visual mode
 
 Problem:    Illegal memory access when copying lines in Visual mode.
-Solution:   Adjust the Visual position after copying lines.",1,1,"(2) NO: No vulnerability.
+Solution:   Adjust the Visual position after copying lines.",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10182,7 +10182,7 @@ Solution:   Adjust the Visual position after copying lines.",1,1,"(2) NO: No vul
 We have a map of maps. We test that the key exists in the first map but then we don't have any validation that this also means the second map has the needed key. In the scenarios where this is not the case, we'll dereference a nullptr, if we don't have this check
 
 PiperOrigin-RevId: 408739325
-Change-Id: If9bb7ed759aba1f3b56a34913f209508dbaf65ce",1,1,"(2) NO: No vulnerability.
+Change-Id: If9bb7ed759aba1f3b56a34913f209508dbaf65ce",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10211,7 +10211,7 @@ Change-Id: If9bb7ed759aba1f3b56a34913f209508dbaf65ce",1,1,"(2) NO: No vulnerabil
 - **Null Pointers:** The function does not use null pointers in a way that could lead to undefined behavior.
 - **Division by Zero:** There are no divisions by zero in the code.
 - **Undefined Behavior:** The function does not have any undefined behavior due to undefined behavior in C++ (e.g., using uninitialized variables, undefined function calls, etc.). The use of `const` and `auto` ensures that variables are properly initialized and that function calls are valid. The `find` method is used to safely retrieve values from containers, avoiding undefined behavior. The `value(0)` call is safe because it's a well-defined method of the `NodeList` struct, and the `value_size()` check ensures that the index is valid. The `errors::FailedPrecondition` function call is safe because it's a well-defined function call, and the `strings::StrCat` function is used to safely concatenate strings.",['CWE-476'],CVE-2022-23577,"Tensorflow is an Open Source Machine Learning Framework. The implementation of `GetInitOp` is vulnerable to a crash caused by dereferencing a null pointer. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-210050,lua,1f3c6f4534c6411313361697d98d1145a1f030fa,https://github.com/lua/lua,https://github.com/lua/lua/commit/1f3c6f4534c6411313361697d98d1145a1f030fa,Bug: Lua can generate wrong code when _ENV is <const>,1,1,"(2) NO: No vulnerability.
+210050,lua,1f3c6f4534c6411313361697d98d1145a1f030fa,https://github.com/lua/lua,https://github.com/lua/lua/commit/1f3c6f4534c6411313361697d98d1145a1f030fa,Bug: Lua can generate wrong code when _ENV is <const>,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10306,7 +10306,7 @@ To mitigate this vulnerability, consider the following improvements:
 
 Closes: CVE-2022-27650
 
-Signed-off-by: Giuseppe Scrivano <gscrivan@redhat.com>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Giuseppe Scrivano <gscrivan@redhat.com>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10451,7 +10451,7 @@ firmware download routine is finished.
 
 Fixes: 3194c6870158 (""NFC: nfcmrvl: add firmware download support"")
 Signed-off-by: Duoming Zhou <duoming@zju.edu.cn>
-Signed-off-by: David S. Miller <davem@davemloft.net>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: David S. Miller <davem@davemloft.net>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10472,7 +10472,7 @@ Based on the analysis, there is no clear vulnerability in the provided code snip
 206676,vim,777e7c21b7627be80961848ac560cb0a9978ff43,https://github.com/vim/vim,https://github.com/vim/vim/commit/777e7c21b7627be80961848ac560cb0a9978ff43,"patch 8.2.3564: invalid memory access when scrolling without valid screen
 
 Problem:    Invalid memory access when scrolling without a valid screen.
-Solution:   Do not set VALID_BOTLINE in w_valid.",1,1,"(2) NO: No vulnerability detected.
+Solution:   Do not set VALID_BOTLINE in w_valid.",1,0,"(2) NO: No vulnerability detected.
 
 Here's a brief explanation of why no vulnerability was detected in the provided C code:
 
@@ -10483,7 +10483,7 @@ Here's a brief explanation of why no vulnerability was detected in the provided 
 3. **Other Potential Issues**: The code does not have any obvious security vulnerabilities like buffer overflows, memory leaks, or race conditions that could be exploited. The use of `mouse_dragging` and `scrolloff` context seems to be handled in a way that prevents unnecessary scrolling and potential issues.
 
 **Recommendation**: To further reduce the risk of buffer overflow, consider adding bounds checking for any `strcpy()` calls in the code. Additionally, ensure that the `User` class has a proper destructor to prevent memory leaks.",['CWE-122'],CVE-2021-3903,vim is vulnerable to Heap-based Buffer Overflow
-194989,ImageMagick6,450949ed017f009b399c937cf362f0058eacc5fa,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/450949ed017f009b399c937cf362f0058eacc5fa,Pull request: https://github.com/ImageMagick/ImageMagick/pull/4963,1,1,"(2) NO: No vulnerability.
+194989,ImageMagick6,450949ed017f009b399c937cf362f0058eacc5fa,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/450949ed017f009b399c937cf362f0058eacc5fa,Pull request: https://github.com/ImageMagick/ImageMagick/pull/4963,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10613,7 +10613,7 @@ Reviewed By: mjoras, lnicco
 
 Differential Revision: D26613890
 
-fbshipit-source-id: 19bb2be2c731808144e1a074ece313fba11f1945",1,1,"(2) NO: No vulnerability.
+fbshipit-source-id: 19bb2be2c731808144e1a074ece313fba11f1945",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10655,7 +10655,7 @@ CVE-2020-14361 ZDI-CAN 11573
 This vulnerability was discovered by:
 Jan-Niklas Sohn working with Trend Micro Zero Day Initiative
 
-Signed-off-by: Matthieu Herrb <matthieu@herrb.eu>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Matthieu Herrb <matthieu@herrb.eu>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10743,7 +10743,7 @@ The primary vulnerability detected is the potential buffer overflow due to the `
 Before, the process would crash or certain elements would be silently ignored. Now an InvalidArgument is raised.
 
 PiperOrigin-RevId: 384844020
-Change-Id: Iba44417e383bdd0e1abc4012bfca83b2377dd335",1,1,"(2) NO: No vulnerability detected.
+Change-Id: Iba44417e383bdd0e1abc4012bfca83b2377dd335",1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -10830,7 +10830,7 @@ Required by virtio 1.
 
 Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
 Reviewed-by: Amit Shah <amit.shah@redhat.com>
-Reviewed-by: Jason Wang <jasowang@redhat.com>",1,1,"(2) NO: No vulnerability.
+Reviewed-by: Jason Wang <jasowang@redhat.com>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -10949,7 +10949,7 @@ Based on the analysis, the provided code does not contain any vulnerabilities th
 198116,tensorflow,87158f43f05f2720a374f3e6d22a7aaa3a33f750,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/87158f43f05f2720a374f3e6d22a7aaa3a33f750,"Prevent heap OOB in sparse reduction ops.
 
 PiperOrigin-RevId: 387934524
-Change-Id: I894aa30f1e454f09b471d565b4a325da49322c1a",1,1,"(2) NO: No vulnerability.
+Change-Id: I894aa30f1e454f09b471d565b4a325da49322c1a",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -11100,7 +11100,7 @@ This closes #482 issue on Github.",1,0,"(2) NO: No vulnerability.
 **Conclusion:** Based on the analysis, the provided code does not contain any detectable vulnerabilities. It follows best practices for memory management, type safety, and index validation.",['CWE-703'],CVE-2022-31307,Nginx NJS v0.7.2 was discovered to contain a segmentation violation in the function njs_string_offset at src/njs_string.c.
 196841,furnace,0eb02422d5161767e9983bdaa5c429762d3477ce,https://github.com/tildearrow/furnace,https://github.com/tildearrow/furnace/commit/0eb02422d5161767e9983bdaa5c429762d3477ce,"fix possible pattern crash
 
-issue #325",1,1,"(2) NO: No vulnerability detected.
+issue #325",1,0,"(2) NO: No vulnerability detected.
 
 **Analysis:**
 
@@ -11238,7 +11238,7 @@ Conflicts:
 202081,vim,d25f003342aca9889067f2e839963dfeccf1fe05,https://github.com/vim/vim,https://github.com/vim/vim/commit/d25f003342aca9889067f2e839963dfeccf1fe05,"patch 9.0.0011: reading beyond the end of the line with put command
 
 Problem:    Reading beyond the end of the line with put command.
-Solution:   Adjust the end mark position.",1,1,"(2) NO: No vulnerability detected.
+Solution:   Adjust the end mark position.",1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Explanation:**
 
@@ -11433,7 +11433,7 @@ MAX_CONFIG_INTERFACES or when the retrieved function pointer is null.
 
 Signed-off-by: Szymon Heidrich <szymon.heidrich@gmail.com>
 Cc: stable@kernel.org
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>",1,1,"(2) NO: No vulnerability detected.
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>",1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -11475,7 +11475,7 @@ Change-Id: Iadf3f0705b036a9014d27caa5a8bbd91f4c4c401",1,0,"(2) NO: No vulnerabil
 197466,tensorflow,9e82dce6e6bd1f36a57e08fa85af213e2b2f2622,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/9e82dce6e6bd1f36a57e08fa85af213e2b2f2622,"Fix NPE in restoring code.
 
 PiperOrigin-RevId: 388303253
-Change-Id: Ia8c68568cb854bca538909a182b31a618d68ce55",1,1,"(2) NO: No vulnerability.
+Change-Id: Ia8c68568cb854bca538909a182b31a618d68ce55",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -11549,7 +11549,7 @@ In doing so I have also added checks for '.' and for names that
 are shorter than they should be (names in the file system should
 not have '\0' terminators).
 
-Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",1,1,"(2) NO: No vulnerability.
+Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -11667,7 +11667,7 @@ Solution:   Adjust ""badlen"".",1,0,"(2) NO: No vulnerability.
 210944,vim,35d21c6830fc2d68aca838424a0e786821c5891c,https://github.com/vim/vim,https://github.com/vim/vim/commit/35d21c6830fc2d68aca838424a0e786821c5891c,"patch 9.0.0360: crash when invalid line number on :for is ignored
 
 Problem:    Crash when invalid line number on :for is ignored.
-Solution:   Do not check breakpoint for non-existing line.",1,1,"(2) NO: No vulnerability detected.
+Solution:   Do not check breakpoint for non-existing line.",1,0,"(2) NO: No vulnerability detected.
 
 The provided code is a complex implementation of a command-line interface and debugger for a C compiler, which is a common and well-documented part of a development environment. The code includes various safeguards and checks to prevent common vulnerabilities such as buffer overflows, memory leaks, and infinite loops. Here are some of the key features that contribute to its safety:
 
@@ -11684,7 +11684,7 @@ The provided code is a complex implementation of a command-line interface and de
 6. **Error Messages and Reporting**: The code includes features for error messages and reporting, such as `msg_didout`, `msg_didany`, and `msg_verbose_cmd`. These features allow for detailed error messages and reporting, which can help in debugging and debugging.
 
 Given these features, the code appears to be well-protected against common vulnerabilities and is designed to be a safe and reliable part of a development environment. However, it is always possible that there may be some edge cases or specific scenarios that could lead to vulnerabilities, but based on the information provided, no vulnerabilities were detected in this code.",['CWE-416'],CVE-2022-3099,Use After Free in GitHub repository vim/vim prior to 9.0.0360.
-212934,cyrus-imapd,621f9e41465b521399f691c241181300fab55995,https://github.com/cyrusimap/cyrus-imapd,https://github.com/cyrusimap/cyrus-imapd/commit/621f9e41465b521399f691c241181300fab55995,annotate: don't allow everyone to write shared server entries,1,1,"(2) NO: No vulnerability.
+212934,cyrus-imapd,621f9e41465b521399f691c241181300fab55995,https://github.com/cyrusimap/cyrus-imapd,https://github.com/cyrusimap/cyrus-imapd/commit/621f9e41465b521399f691c241181300fab55995,annotate: don't allow everyone to write shared server entries,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -11757,7 +11757,7 @@ However, to be thorough, I would recommend reviewing the code for potential issu
 * The implementation of `DoMatMul`, which could potentially have issues if not properly implemented or if there are bugs in the framework's tensor operations. 
 
 Without more context or access to the framework's source code, it's difficult to identify potential issues that might be hidden. However, based on the information provided, no vulnerabilities were identified.",['CWE-125'],CVE-2021-41219,"TensorFlow is an open source platform for machine learning. In affected versions the code for sparse matrix multiplication is vulnerable to undefined behavior via binding a reference to `nullptr`. This occurs whenever the dimensions of `a` or `b` are 0 or less. In the case on one of these is 0, an empty output tensor should be allocated (to conserve the invariant that output tensors are always allocated when the operation is successful) but nothing should be written to it (that is, we should return early from the kernel implementation). Otherwise, attempts to write to this empty tensor would result in heap OOB access. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range."
-199767,hexchat,4e061a43b3453a9856d34250c3913175c45afe9d,https://github.com/hexchat/hexchat,https://github.com/hexchat/hexchat/commit/4e061a43b3453a9856d34250c3913175c45afe9d,Clean up handling CAP LS,1,1,"(2) NO: No vulnerability.
+199767,hexchat,4e061a43b3453a9856d34250c3913175c45afe9d,https://github.com/hexchat/hexchat,https://github.com/hexchat/hexchat/commit/4e061a43b3453a9856d34250c3913175c45afe9d,Clean up handling CAP LS,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -11909,7 +11909,7 @@ To mitigate this vulnerability, consider the following best practices:
 196698,tensorflow,67bfd9feeecfb3c61d80f0e46d89c170fbee682b,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/67bfd9feeecfb3c61d80f0e46d89c170fbee682b,"Make SparseFillEmptyRows validate that the length of `values` must be equal to the number of index tuples.
 
 PiperOrigin-RevId: 399969549
-Change-Id: I3c2f2ca1c1d2cc88bb5951c6958b38c16e9436c8",1,1,"(2) NO: No vulnerability.
+Change-Id: I3c2f2ca1c1d2cc88bb5951c6958b38c16e9436c8",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -11970,7 +11970,7 @@ Signed-off-by: Robin H. Johnson <rjohnson@digitalocean.com>",1,0,"(2) NO: No vul
    - **Legal and Retention Headers:** The code handles `RGWObjectLegalHold` and `RGWObjectRetention` attributes, ensuring that the response is correctly formatted with the appropriate headers.
 
 **Conclusion:** Based on the provided code snippet, no vulnerabilities were detected. The code includes proper security checks, memory management, and input validation, making it safe to use in an S3 API context.",['CWE-79'],CVE-2020-1760,"A flaw was found in the Ceph Object Gateway, where it supports request sent by an anonymous user in Amazon S3. This flaw could lead to potential XSS attacks due to the lack of proper neutralization of untrusted input."
-194963,ImageMagick6,dc070da861a015d3c97488fdcca6063b44d47a7b,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/dc070da861a015d3c97488fdcca6063b44d47a7b,https://github.com/ImageMagick/ImageMagick/pull/5034,1,1,"(2) NO: No vulnerability detected.
+194963,ImageMagick6,dc070da861a015d3c97488fdcca6063b44d47a7b,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/dc070da861a015d3c97488fdcca6063b44d47a7b,https://github.com/ImageMagick/ImageMagick/pull/5034,1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Explanation:**
 
@@ -12041,7 +12041,7 @@ Change-Id: I1d8a9d0d8988ed5e08be8b9f2004ce1b4cd11b7c",1,0,"(2) NO: No vulnerabil
 
 - **Code Review:** Ensure that the code follows best practices for memory management, such as using smart pointers and validating all inputs.
 - **Testing:** Perform thorough testing to ensure the code behaves as expected under various conditions, including edge cases and performance scenarios.",['CWE-401'],CVE-2022-23578,"Tensorflow is an Open Source Machine Learning Framework. If a graph node is invalid, TensorFlow can leak memory in the implementation of `ImmutableExecutorState::Initialize`. Here, we set `item->kernel` to `nullptr` but it is a simple `OpKernel*` pointer so the memory that was previously allocated to it would leak. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-195017,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,1,1,"(2) NO: No vulnerability.
+195017,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -12189,7 +12189,7 @@ Change-Id: I7f5935b34b53f7e426a5462fcc027bdbf5dcda24",1,0,"(2) NO: No vulnerabil
    - The function's design and implementation seem to follow best practices for type inference and input validation, with checks in place to handle incomplete or invalid inputs gracefully.",['CWE-125'],CVE-2022-23592,Tensorflow is an Open Source Machine Learning Framework. TensorFlow's type inference can cause a heap out of bounds read as the bounds checking is done in a `DCHECK` (which is a no-op during production). An attacker can control the `input_idx` variable such that `ix` would be larger than the number of values in `node_t.args`. The fix will be included in TensorFlow 2.8.0. This is the only affected version.
 195038,mruby,27d1e0132a0804581dca28df042e7047fd27eaa8,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/27d1e0132a0804581dca28df042e7047fd27eaa8,"array.c: fix `mrb_ary_shift_m` initialization bug.
 
-The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",1,1,"(2) NO: No vulnerability.
+The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -12213,7 +12213,7 @@ The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",1,1,"(2) NO: No 
 195039,tensorflow,e7f497570abb6b4ae5af4970620cd880e4c0c904,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/e7f497570abb6b4ae5af4970620cd880e4c0c904,"Fix segfault on OOM in Conv2D.
 
 PiperOrigin-RevId: 404655317
-Change-Id: I33588dbd3f5d0fef980e3c908bf5515a9ee09ce7",1,1,"(2) NO: No vulnerability.
+Change-Id: I33588dbd3f5d0fef980e3c908bf5515a9ee09ce7",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -12235,7 +12235,7 @@ Change-Id: I33588dbd3f5d0fef980e3c908bf5515a9ee09ce7",1,1,"(2) NO: No vulnerabil
 If ConfigProto is not used, then use the default settings which is to allow all devices.
 
 PiperOrigin-RevId: 420391800
-Change-Id: I88161ad7042990aef678e77b597a2fb2c8f815be",1,1,"(2) NO: No vulnerability.
+Change-Id: I88161ad7042990aef678e77b597a2fb2c8f815be",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -12300,7 +12300,7 @@ Change-Id: I369c249cca32e6c56ec193f0ebbf2f2768fc7d43",1,0,"(2) NO: No vulnerabil
   - Handling `Switch` inputs and their dependencies.
 
 Since the code includes these safeguards and does not exhibit vulnerabilities like buffer overflows or memory leaks, **no vulnerability is detected**.",['CWE-617'],CVE-2022-23579,"Tensorflow is an Open Source Machine Learning Framework. The Grappler optimizer in TensorFlow can be used to cause a denial of service by altering a `SavedModel` such that `SafeToRemoveIdentity` would trigger `CHECK` failures. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-195063,gpac,5f2c2a16d30229b6241f02fa28e3d6b810d64858,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/5f2c2a16d30229b6241f02fa28e3d6b810d64858,fixed #1905,1,1,"(2) NO: No vulnerability detected.
+195063,gpac,5f2c2a16d30229b6241f02fa28e3d6b810d64858,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/5f2c2a16d30229b6241f02fa28e3d6b810d64858,fixed #1905,1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 
@@ -12328,7 +12328,7 @@ Since the code includes these safeguards and does not exhibit vulnerabilities li
 **No Vulnerability Detected:**
 
 Based on the analysis, the code does not contain any obvious vulnerabilities such as buffer overflows, memory leaks, or incorrect use of functions that could lead to security issues. The code follows best practices for memory management, error handling, and safe function usage. However, to ensure the code's security, a thorough review by a security expert is recommended, as there might be subtle issues or edge cases not covered in this analysis.",['CWE-476'],CVE-2021-40575,"The binary MP4Box in Gpac 1.0.1 has a null pointer dereference vulnerability in the mpgviddmx_process function in reframe_mpgvid.c, which allows attackers to cause a denial of service. This vulnerability is possibly due to an incomplete fix for CVE-2021-40566."
-195069,gpac,f1ae01d745200a258cdf62622f71754c37cb6c30,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/f1ae01d745200a258cdf62622f71754c37cb6c30,fixed #1900,1,1,"(2) NO: No vulnerability.
+195069,gpac,f1ae01d745200a258cdf62622f71754c37cb6c30,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/f1ae01d745200a258cdf62622f71754c37cb6c30,fixed #1900,1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -12357,7 +12357,7 @@ previously prevented this bug from happening.
 Add a regression test that demonstrates the bug.
 
 PiperOrigin-RevId: 417561444
-Change-Id: I6d1d6cfb71aabbad6102422625a00bbe253ac95a",1,1,"(2) NO: No vulnerability.
+Change-Id: I6d1d6cfb71aabbad6102422625a00bbe253ac95a",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -12418,7 +12418,7 @@ Therefore, the code does not contain any vulnerabilities that could lead to memo
 However, to ensure the code's security, it's recommended to perform a thorough security review, including static and dynamic analysis, to identify any potential issues that might not be immediately apparent.",['CWE-295'],CVE-2021-44273,"e2guardian v5.4.x <= v5.4.3r is affected by missing SSL certificate validation in the SSL MITM engine. In standalone mode (i.e., acting as a proxy or a transparent proxy), with SSL MITM enabled, e2guardian, if built with OpenSSL v1.1.x, did not validate hostnames in certificates of the web servers that it connected to, and thus was itself vulnerable to MITM attacks."
 195220,tmate-ssh-server,1c020d1f5ca462f5b150b46a027aaa1bbe3c9596,https://github.com/tmate-io/tmate-ssh-server,https://github.com/tmate-io/tmate-ssh-server/commit/1c020d1f5ca462f5b150b46a027aaa1bbe3c9596,"Harden /tmp/tmate directory
 
-Suggested by Matthias Gerstner",1,1,"(2) NO: No vulnerability.
+Suggested by Matthias Gerstner",1,0,"(2) NO: No vulnerability.
 
 **Step-by-Step Analysis:**
 
@@ -12438,7 +12438,7 @@ Suggested by Matthias Gerstner",1,1,"(2) NO: No vulnerability.
 
 **Conclusion:**
 Based on the analysis, there is no clear vulnerability detected in the provided code snippet. The code follows best practices for input validation, memory management, and resource management. However, it's worth noting that the absence of explicit error handling for the `atoi` function could potentially lead to issues if the input is not a valid integer. However, this is not considered a vulnerability in the context of the given code snippet.",['CWE-362'],CVE-2021-44512,"World-writable permissions on the /tmp/tmate/sessions directory in tmate-ssh-server 2.3.0 allow a local attacker to compromise the integrity of session handling, or obtain the read-write session ID from a read-only session symlink in this directory."
-195230,pjproject,f74c1fc22b760d2a24369aa72c74c4a9ab985859,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/f74c1fc22b760d2a24369aa72c74c4a9ab985859,Merge pull request from GHSA-r374-qrwv-86hh,1,1,"(2) NO: No vulnerability detected.
+195230,pjproject,f74c1fc22b760d2a24369aa72c74c4a9ab985859,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/f74c1fc22b760d2a24369aa72c74c4a9ab985859,Merge pull request from GHSA-r374-qrwv-86hh,1,0,"(2) NO: No vulnerability detected.
 
 **Step-by-Step Analysis:**
 

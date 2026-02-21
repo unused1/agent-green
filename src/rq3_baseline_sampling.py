@@ -196,10 +196,23 @@ def parse_vuln_prediction(reasoning):
     Extract vulnerability prediction from reasoning text.
     Mirrors parse_vulnerability_response() in single_agent_vuln_openrouter.py.
     Returns: 1 (vulnerable) or 0 (not vulnerable)
+
+    Fixed 2026-02-22: Reorder NO before YES to prevent "no vulnerability detected"
+    matching the YES substring "vulnerability detected". Removed broad fallback
+    keywords that matched in negative contexts (e.g., "no buffer overflow detected").
     """
     # Strip think block — parse only the response after </think>
     parse_text = reasoning.split("</think>", 1)[1].strip() if "</think>" in reasoning else reasoning
     response_lower = parse_text.lower()
+
+    # Explicit NO answers (not vulnerable = 0) — checked FIRST to avoid
+    # "no vulnerability detected" matching the YES substring "vulnerability detected"
+    if any(p in response_lower for p in [
+        "final answer: no", "final answer: (2) no", "(2) no",
+        "answer: no", "no vulnerability", "no security vulnerability",
+        "no, the code",
+    ]):
+        return 0
 
     # Explicit YES answers (vulnerable = 1)
     if any(p in response_lower for p in [
@@ -209,20 +222,10 @@ def parse_vuln_prediction(reasoning):
     ]):
         return 1
 
-    # Explicit NO answers (not vulnerable = 0)
-    if any(p in response_lower for p in [
-        "final answer: no", "final answer: (2) no", "(2) no",
-        "answer: no", "no vulnerability", "no security vulnerability",
-        "no, the code",
-    ]):
-        return 0
-
-    # Fallback keywords
+    # Fallback keywords — only strong positive indicators
     if any(k in response_lower for k in [
         "is vulnerable", "contains a vulnerability",
-        "security vulnerability exists", "security risk",
-        "can be exploited", "buffer overflow", "memory leak",
-        "sql injection", "xss", "race condition",
+        "security vulnerability exists", "can be exploited",
     ]):
         return 1
 
@@ -319,19 +322,80 @@ def compute_truncation_flags(entries):
         e["truncation_flag"] = e["explanation_length_chars"] <= p10_threshold
 
 
-def sample_stratum(stratum, rng):
-    """Load correct entries for a stratum, sample, and return records."""
+def sample_stratum(stratum, rng, preserve_entry_ids=None):
+    """Load correct entries for a stratum, sample, and return records.
+
+    If preserve_entry_ids is given (set of entry_id strings), keep any preserved
+    entries that are still in the correct pool and only draw replacements for the
+    remaining slots. This avoids disrupting existing human ratings.
+    """
     correct_entries = load_vuln_correct(stratum)
 
     n_available = len(correct_entries)
-    n_sample = min(SAMPLES_PER_STRATUM, n_available)
 
     if n_available == 0:
         label = f"{stratum['model']}/{stratum['mode']}/{stratum['prompting']}"
         print(f"  WARNING: 0 correct entries for {label}, skipping")
         return [], n_available
 
-    sampled = rng.sample(correct_entries, n_sample)
+    if preserve_entry_ids:
+        # Build lookup from entry_id -> correct_entry (deduplicated)
+        correct_by_id = {}
+        for e in correct_entries:
+            if e["entry_id"] not in correct_by_id:
+                correct_by_id[e["entry_id"]] = e
+
+        # Rebuild preserved list in ORIGINAL order (from preserve_entry_ids list)
+        # so that sample_id assignment matches the original CSV positions
+        preserve_set = set(preserve_entry_ids)  # for O(1) membership
+        preserved = []
+        seen_ids = set()
+        for eid in preserve_entry_ids:  # iterate in original sample order
+            if eid in correct_by_id and eid not in seen_ids:
+                preserved.append(correct_by_id[eid])
+                seen_ids.add(eid)
+
+        # Pool for replacements excludes all preserved and duplicate entry_ids
+        remaining_pool = [e for e in correct_entries
+                          if e["entry_id"] not in preserve_set and e["entry_id"] not in seen_ids]
+        # Deduplicate remaining pool by entry_id
+        seen_remaining = set()
+        deduped_pool = []
+        for e in remaining_pool:
+            if e["entry_id"] not in seen_remaining:
+                deduped_pool.append(e)
+                seen_remaining.add(e["entry_id"])
+        remaining_pool = deduped_pool
+
+        n_needed = max(0, SAMPLES_PER_STRATUM - len(preserved))
+        if n_needed > 0 and remaining_pool:
+            new_draws = rng.sample(remaining_pool, min(n_needed, len(remaining_pool)))
+            # Insert replacements at the positions of the removed entries
+            # Build output: preserved entries stay in their positions, gaps filled by new draws
+            sampled = []
+            draw_idx = 0
+            for eid in preserve_entry_ids:
+                if eid in correct_by_id and eid in seen_ids:
+                    sampled.append(correct_by_id[eid])
+                elif draw_idx < len(new_draws):
+                    sampled.append(new_draws[draw_idx])
+                    draw_idx += 1
+            # Add any remaining draws (shouldn't happen if counts match)
+            while draw_idx < len(new_draws):
+                sampled.append(new_draws[draw_idx])
+                draw_idx += 1
+        else:
+            sampled = preserved[:SAMPLES_PER_STRATUM]
+
+        n_preserved = min(len(preserved), SAMPLES_PER_STRATUM)
+        n_replaced = len(sampled) - n_preserved
+        if n_replaced > 0:
+            print(f"  Preserved {n_preserved}, drew {n_replaced} replacement(s)")
+        else:
+            print(f"  All {n_preserved} preserved")
+    else:
+        n_sample = min(SAMPLES_PER_STRATUM, n_available)
+        sampled = rng.sample(correct_entries, n_sample)
 
     # Enrich with stratum metadata and explanation length
     for entry in sampled:
@@ -472,9 +536,39 @@ def generate_rater_csv(all_samples, rng):
 # Main
 # ---------------------------------------------------------------------------
 
+def load_preserve_entry_ids(preserve_csv):
+    """Load entry_ids from an existing samples CSV, grouped by stratum.
+
+    Returns dict mapping (model, mode, prompting) -> list of entry_id strings
+    (in original sample_id order, so preserved entries keep their positions).
+    """
+    csv.field_size_limit(sys.maxsize)
+    preserve = defaultdict(list)
+    with open(preserve_csv, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            key = (row["model"], row["mode"], row["prompting"])
+            preserve[key].append(row["entry_id"])
+    total = sum(len(v) for v in preserve.values())
+    print(f"  Loaded {total} entry_ids to preserve from {preserve_csv}\n")
+    return preserve
+
+
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="RQ3 Phase A Baseline Sampling")
+    parser.add_argument("--preserve", type=str, default=None,
+                        help="Path to previous rq3_baseline_samples.csv to preserve valid samples")
+    args = parser.parse_args()
+
     rng = random.Random(RANDOM_SEED)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    # Load entry_ids to preserve (if requested)
+    preserve_map = None
+    if args.preserve:
+        print(f"Preserve mode: keeping valid samples from {args.preserve}")
+        preserve_map = load_preserve_entry_ids(args.preserve)
 
     print("Building strata...")
     strata = build_strata()
@@ -487,7 +581,12 @@ def main():
     for stratum in strata:
         label = f"{stratum['task']} / {stratum['model']} / {stratum['mode']} / {stratum['prompting']}"
         print(f"Sampling: {label}")
-        sampled, n_available = sample_stratum(stratum, rng)
+
+        # Get preserved entry_ids for this stratum (if preserving)
+        stratum_key = (stratum["model"], stratum["mode"], stratum["prompting"])
+        preserve_ids = preserve_map.get(stratum_key) if preserve_map else None
+
+        sampled, n_available = sample_stratum(stratum, rng, preserve_entry_ids=preserve_ids)
         print(f"  {len(sampled)} sampled from {n_available} correct entries")
 
         stratum_info.append(dict(

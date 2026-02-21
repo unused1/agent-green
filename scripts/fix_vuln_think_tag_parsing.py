@@ -52,19 +52,14 @@ def parse_sa_prediction(response_text):
     """
     SA keyword parsing — mirrors single_agent_vuln_detection.py lines 326-345
     and single_agent_vuln_openrouter.py parse_vulnerability_response().
+
+    Fixed 2026-02-22: Reorder NO before YES to prevent "no vulnerability detected"
+    matching the YES substring "vulnerability detected". Removed broad fallback
+    keywords that matched in negative contexts (e.g., "no buffer overflow detected").
     """
     response_lower = response_text.lower()
 
-    # Explicit YES
-    if any(p in response_lower for p in [
-        "final answer: yes", "final answer: (1) yes", "(1) yes",
-        "answer: yes", "vulnerability detected", "yes, the code",
-        "yes: vulnerability",
-        "yes:" ,  # from single_agent_vuln_detection.py
-    ]):
-        return 1
-
-    # Explicit NO
+    # Explicit NO — checked FIRST to avoid substring false positives
     if any(p in response_lower for p in [
         "final answer: no", "final answer: (2) no", "(2) no",
         "answer: no", "no vulnerability", "no security vulnerability",
@@ -73,13 +68,19 @@ def parse_sa_prediction(response_text):
     ]):
         return 0
 
-    # Fallback keywords
+    # Explicit YES
+    if any(p in response_lower for p in [
+        "final answer: yes", "final answer: (1) yes", "(1) yes",
+        "answer: yes", "vulnerability detected", "yes, the code",
+        "yes: vulnerability",
+        "yes:",  # from single_agent_vuln_detection.py
+    ]):
+        return 1
+
+    # Fallback keywords — only strong positive indicators
     if any(k in response_lower for k in [
         "is vulnerable", "contains a vulnerability",
-        "security vulnerability exists", "security risk",
-        "can be exploited", "buffer overflow", "memory leak",
-        "sql injection", "xss", "race condition",
-        "vulnerable", "exploit", "attack",  # from single_agent_vuln_detection.py
+        "security vulnerability exists", "can be exploited",
     ]):
         return 1
 

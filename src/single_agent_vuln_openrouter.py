@@ -135,10 +135,27 @@ def parse_vulnerability_response(response_text):
         tuple: (decision, reasoning)
             decision: 1 (vulnerable) or 0 (not vulnerable)
             reasoning: str containing the full response
+
+    Fixed 2026-02-22: Reorder NO before YES to prevent "no vulnerability detected"
+    matching the YES substring "vulnerability detected". Removed broad fallback
+    keywords that matched in negative contexts (e.g., "no buffer overflow detected").
     """
     # Strip think block — parse only the response after </think>
     parse_text = response_text.split("</think>", 1)[1].strip() if "</think>" in response_text else response_text
     response_lower = parse_text.lower()
+
+    # Check for explicit NO answers — checked FIRST to avoid
+    # "no vulnerability detected" matching the YES substring "vulnerability detected"
+    if any(pattern in response_lower for pattern in [
+        'final answer: no',
+        'final answer: (2) no',
+        '(2) no',
+        'answer: no',
+        'no vulnerability',
+        'no security vulnerability',
+        'no, the code'
+    ]):
+        return 0, response_text
 
     # Check for explicit YES answers
     if any(pattern in response_lower for pattern in [
@@ -152,30 +169,12 @@ def parse_vulnerability_response(response_text):
     ]):
         return 1, response_text
 
-    # Check for explicit NO answers
-    if any(pattern in response_lower for pattern in [
-        'final answer: no',
-        'final answer: (2) no',
-        '(2) no',
-        'answer: no',
-        'no vulnerability',
-        'no security vulnerability',
-        'no, the code'
-    ]):
-        return 0, response_text
-
-    # Fallback: look for vulnerability keywords
+    # Fallback: only strong positive indicators
     if any(keyword in response_lower for keyword in [
         'is vulnerable',
         'contains a vulnerability',
         'security vulnerability exists',
-        'security risk',
-        'can be exploited',
-        'buffer overflow',
-        'memory leak',
-        'sql injection',
-        'xss',
-        'race condition'
+        'can be exploited'
     ]):
         return 1, response_text
 

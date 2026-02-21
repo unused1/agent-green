@@ -9675,7 +9675,7 @@ All string operations use safe functions (`strlcpy`, `snprintf`) with proper bou
 
 ### ✅ Final Answer:
 (2) NO",['CWE-134'],CVE-2022-2652,Depending on the way the format strings in the card label are crafted it's possible to leak kernel stack memory. There is also the possibility for DoS due to the v4l2loopback kernel module crashing when providing the card label on request (reproduce e.g. with many %s modifiers in a row).,
-389760,jasper,d99636fad60629785efd1ef72da772a8ef68f54c,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/d99636fad60629785efd1ef72da772a8ef68f54c,fix memory leaks in function cmdopts_parse,0,1,"Let's analyze the provided C code step by step to determine whether there is a vulnerability.
+389760,jasper,d99636fad60629785efd1ef72da772a8ef68f54c,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/d99636fad60629785efd1ef72da772a8ef68f54c,fix memory leaks in function cmdopts_parse,0,0,"Let's analyze the provided C code step by step to determine whether there is a vulnerability.
 
 ---
 
@@ -10637,7 +10637,7 @@ JFS_IP(ipimap)->i_imap directly, then it will cause a NULL deref.
 
 Reported-by: TCS Robot <tcs_robot@tencent.com>
 Signed-off-by: Haimin Zhang <tcs_kernel@tencent.com>
-Signed-off-by: Dave Kleikamp <dave.kleikamp@oracle.com>",0,1,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
+Signed-off-by: Dave Kleikamp <dave.kleikamp@oracle.com>",0,0,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
 
 ---
 
@@ -10786,7 +10786,7 @@ Some ops that attempt to extract a resource handle from user input
 can lead to nullptr dereferences.  This returns an error in such
 a case.
 
-PiperOrigin-RevId: 445571938",0,1,"Let's analyze the provided C++ code step by step to determine whether there is a vulnerability.
+PiperOrigin-RevId: 445571938",0,0,"Let's analyze the provided C++ code step by step to determine whether there is a vulnerability.
 
 ---
 
@@ -12838,7 +12838,7 @@ Cc: Dmitry Vyukov <dvyukov@google.com>
 Cc: <stable@kernel.org>
 Cc: syzkaller-bugs <syzkaller-bugs@googlegroups.com>
 Signed-off-by: Christian Brauner <christian.brauner@ubuntu.com>
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",0,1,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",0,0,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
 
 ---
 
@@ -13242,7 +13242,7 @@ Avoid get get_order() costs as suggested by Linus Torvalds.
 Fixes: cac2661c53f3 (""esp4: Avoid skb_cow_data whenever possible"")
 Fixes: 03e2a30f6a27 (""esp6: Avoid skb_cow_data whenever possible"")
 Reported-by: valis <sec@valis.email>
-Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>",0,1,"Let's analyze the provided code step by step to determine whether there is a vulnerability, particularly focusing on potential buffer overflows, memory safety issues, or other exploitable flaws.
+Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>",0,0,"Let's analyze the provided code step by step to determine whether there is a vulnerability, particularly focusing on potential buffer overflows, memory safety issues, or other exploitable flaws.
 
 ---
 
@@ -14472,7 +14472,7 @@ Fixes CVE-2017-9782
 Closes https://github.com/jasper-maint/jasper/issues/13
 Closes https://github.com/jasper-maint/jasper/issues/18
 Closes https://github.com/mdadams/jasper/issues/140
-Closes https://github.com/mdadams/jasper/issues/182",0,1,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
+Closes https://github.com/mdadams/jasper/issues/182",0,0,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
 
 ---
 
@@ -16967,7 +16967,7 @@ it, make also alen unsigned, as signed sizes can cause vulnerabilities
 when people forgot to check that they can be negative.
 
 Signed-off-by: Nicolas Iooss <nicolas.iooss+uboot@ledger.fr>
-Reviewed-by: Heiko Schocher <hs@denx.de>",0,1,"Let's analyze the provided C code step by step to determine whether there is a vulnerability, particularly focusing on potential buffer overflows, improper input validation, or other security issues.
+Reviewed-by: Heiko Schocher <hs@denx.de>",0,0,"Let's analyze the provided C code step by step to determine whether there is a vulnerability, particularly focusing on potential buffer overflows, improper input validation, or other security issues.
 
 ---
 
@@ -20416,7 +20416,7 @@ Fix the integer overflow by changing elem_size to u64 from u32.
 Fixes: 557c0c6e7df8 (""bpf: convert stackmap to pre-allocation"")
 Signed-off-by: Tatsuhiko Yasumatsu <th.yasumatsu@gmail.com>
 Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
-Link: https://lore.kernel.org/bpf/20210930135545.173698-1-th.yasumatsu@gmail.com",0,1,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
+Link: https://lore.kernel.org/bpf/20210930135545.173698-1-th.yasumatsu@gmail.com",0,0,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
 
 ---
 
@@ -22244,7 +22244,7 @@ Even though `pos` can be modified based on `dir` and `c`, the bounds checks are 
 ✅ **No buffer overflow or out-of-bounds memory access is possible** due to the comprehensive bounds checks.
 
 (2) NO",['CWE-787'],CVE-2022-1533,Buffer Over-read in GitHub repository bfabiszewski/libmobi prior to 0.11. This vulnerability is capable of arbitrary code execution.,
-439266,ImageMagick6,b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick/issues/1337,0,1,"Let's analyze the provided code step by step to determine whether there is a **security vulnerability**, particularly focusing on **buffer overflows, memory corruption, improper input validation, or unsafe memory operations**.
+439266,ImageMagick6,b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick/issues/1337,0,0,"Let's analyze the provided code step by step to determine whether there is a **security vulnerability**, particularly focusing on **buffer overflows, memory corruption, improper input validation, or unsafe memory operations**.
 
 ---
 
@@ -32467,7 +32467,7 @@ This leads to:
 (1) YES",['CWE-125'],CVE-2016-9810,"The gst_decode_chain_free_internal function in the flxdex decoder in gst-plugins-good in GStreamer before 1.10.2 allows remote attackers to cause a denial of service (invalid memory read and crash) via an invalid file, which triggers an incorrect unref call.",
 199841,radare2,feaa4e7f7399c51ee6f52deb84dc3f795b4035d6,https://github.com/radare/radare2,https://github.com/radareorg/radare2/commit/feaa4e7f7399c51ee6f52deb84dc3f795b4035d6,"Fix null deref in xnu.kernelcache ##crash
 
-* Reported by @xshad3 via huntr.dev",1,1,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
+* Reported by @xshad3 via huntr.dev",1,0,"Let's analyze the provided code step by step to determine whether there is a vulnerability.
 
 ---
 
@@ -33289,7 +33289,7 @@ Reproducer:
 
 Reported-by: Lyu Tao <tao.lyu@epfl.ch>
 Signed-off-by: ChenXiaoSong <chenxiaosong2@huawei.com>
-Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",1,1,"Let's analyze the provided `nfs4_file_open` function step by step to determine whether there is a vulnerability.
+Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",1,0,"Let's analyze the provided `nfs4_file_open` function step by step to determine whether there is a vulnerability.
 
 ---
 
@@ -38628,7 +38628,7 @@ This code is **secure against common vulnerabilities** like buffer overflows, ou
 ### ✅ Final Answer:
 (2) NO",['CWE-787'],CVE-2021-33361,Memory leak in the afra_box_read function in MP4Box in GPAC 1.0.1 allows attackers to read memory via a crafted file.,
 208522,unbound,02080f6b180232f43b77f403d0c038e9360a460f,https://github.com/NLnetLabs/unbound,https://github.com/NLnetLabs/unbound/commit/02080f6b180232f43b77f403d0c038e9360a460f,"- Fix Integer Overflows in Size Calculations,
-  reported by X41 D-Sec.",1,1,"Let's analyze the provided C code step by step to determine whether there is a vulnerability, particularly focusing on potential buffer overflows, memory safety issues, or other security flaws.
+  reported by X41 D-Sec.",1,0,"Let's analyze the provided C code step by step to determine whether there is a vulnerability, particularly focusing on potential buffer overflows, memory safety issues, or other security flaws.
 
 ---
 
@@ -40811,7 +40811,7 @@ Moreover, **this is a classic example of a missing `usb_put_dev` in error path**
 This is due to not checking that the params for the quantization exists. If there is no quantization, we should not access the `.params` field.
 
 PiperOrigin-RevId: 385163909
-Change-Id: I2beb8d50649b6542db224c163033fbcbaa49314f",1,1,"Let's analyze the provided code step by step to determine whether there is a vulnerability, particularly focusing on potential memory safety issues, buffer overflows, use-after-free, or improper bounds checking.
+Change-Id: I2beb8d50649b6542db224c163033fbcbaa49314f",1,0,"Let's analyze the provided code step by step to determine whether there is a vulnerability, particularly focusing on potential memory safety issues, buffer overflows, use-after-free, or improper bounds checking.
 
 ---
 
@@ -41264,7 +41264,7 @@ We were assuming the input name was well formed, hence was
 nul-terminated. As any data coming from external input, this has to be
 thorougly checked.
 Similar to commit 06d24a79af94837d615d0024916bb95a01bf3c59 but adapted
-to older gimp-2-8 code.",1,1,"Let's analyze the provided code step by step to determine whether there is a vulnerability, particularly focusing on potential buffer overflows, memory safety issues, or other exploitable flaws.
+to older gimp-2-8 code.",1,0,"Let's analyze the provided code step by step to determine whether there is a vulnerability, particularly focusing on potential buffer overflows, memory safety issues, or other exploitable flaws.
 
 ---
 
@@ -42295,7 +42295,7 @@ So even if `inet_aton` would reject invalid addresses, the `sprintf` call **alre
 (1) YES: Vulnerability detected.",['CWE-787'],CVE-2020-20276,An unauthenticated stack-based buffer overflow vulnerability in common.c's handle_PORT in uftpd FTP server versions 2.10 and earlier can be abused to cause a crash and could potentially lead to remote code execution.,
 215103,mongo,a5e2f9b0a236462a6d1ca129583c617f111367b4,https://github.com/mongodb/mongo,https://github.com/mongodb/mongo/commit/a5e2f9b0a236462a6d1ca129583c617f111367b4,"SERVER-59071 Treat '$sample' as unsharded when connecting directly to shards
 
-(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",1,1,"Let's analyze the provided C++ code step by step to determine whether there is a **security vulnerability**, particularly focusing on common issues such as:
+(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",1,0,"Let's analyze the provided C++ code step by step to determine whether there is a **security vulnerability**, particularly focusing on common issues such as:
 
 - Buffer overflows
 - Use-after-free
@@ -43833,7 +43833,7 @@ All input validation, bounds checking, and indexing is performed correctly. Ther
 * This is a logic fix, but not the fully safe as changes in the code
   can result on UAF again, to properly protect r2 from crashing we
   need to break the ABI and add refcounting to RRegItem, which can't
-  happen in 5.6.x because of abi-compat rules",1,1,"Let's analyze the provided C code step by step to determine whether there is a vulnerability.
+  happen in 5.6.x because of abi-compat rules",1,0,"Let's analyze the provided C code step by step to determine whether there is a vulnerability.
 
 ---
 
@@ -45973,7 +45973,7 @@ Fixes: c486682ae1e2 (""rpmsg: virtio: Register the rpmsg_char device"")
 Signed-off-by: Hangyu Hua <hbh25y@gmail.com>
 Tested-by: Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>
 Link: https://lore.kernel.org/r/20220426060536.15594-3-hbh25y@gmail.com
-Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>",1,1,"Let's analyze the provided code step by step to determine if there is a vulnerability.
+Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>",1,0,"Let's analyze the provided code step by step to determine if there is a vulnerability.
 
 ---
 
@@ -46937,7 +46937,7 @@ Also, `session_id_length` is set correctly by `EVP_Digest`.
 **(2) NO: No vulnerability.**",['CWE-362'],CVE-2015-1791,"Race condition in the ssl3_get_new_session_ticket function in ssl/s3_clnt.c in OpenSSL before 0.9.8zg, 1.0.0 before 1.0.0s, 1.0.1 before 1.0.1n, and 1.0.2 before 1.0.2b, when used for a multi-threaded client, allows remote attackers to cause a denial of service (double free and application crash) or possibly have unspecified other impact by providing a NewSessionTicket during an attempt to reuse a ticket that had been obtained earlier.",
 216027,tar,cb07844454d8cc9fb21f53ace75975f91185a120,http://git.savannah.gnu.org/cgit/tar,http://git.savannah.gnu.org/cgit/tar.git/commit/?id=cb07844454d8cc9fb21f53ace75975f91185a120,"Fix possible NULL dereference (savannah bug #55369)
 
-* src/sparse.c (pax_decode_header): Check return from find_next_block.",1,1,"Let's analyze the provided code step by step to determine whether there is a vulnerability, particularly focusing on buffer overflows, memory safety, and input validation.
+* src/sparse.c (pax_decode_header): Check return from find_next_block.",1,0,"Let's analyze the provided code step by step to determine whether there is a vulnerability, particularly focusing on buffer overflows, memory safety, and input validation.
 
 ---
 

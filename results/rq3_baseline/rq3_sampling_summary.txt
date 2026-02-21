@@ -7,37 +7,37 @@ Target per stratum: 3
 
 --- vulnerability_detection (48 samples) ---
   Nemotron-Nano-8B / instruct / few-shot:
-    Sampled: 3 / 196 available
+    Sampled: 3 / 188 available
     Explanation length (chars): min=0, max=0, mean=0, median=0
     Has </think> tag: 0/3
     Truncation flags: 3/3
   Nemotron-Nano-8B / instruct / zero-shot:
-    Sampled: 3 / 196 available
+    Sampled: 3 / 191 available
     Explanation length (chars): min=0, max=0, mean=0, median=0
     Has </think> tag: 0/3
     Truncation flags: 3/3
   Nemotron-Nano-8B / thinking / few-shot:
-    Sampled: 3 / 189 available
+    Sampled: 3 / 191 available
     Explanation length (chars): min=1540, max=2763, mean=2109, median=2024
     Has </think> tag: 0/3
     Truncation flags: 0/3
   Nemotron-Nano-8B / thinking / zero-shot:
-    Sampled: 3 / 195 available
+    Sampled: 3 / 188 available
     Explanation length (chars): min=2187, max=2474, mean=2328, median=2324
     Has </think> tag: 0/3
     Truncation flags: 0/3
   Nemotron-Super-49B / instruct / few-shot:
-    Sampled: 3 / 210 available
+    Sampled: 3 / 193 available
     Explanation length (chars): min=0, max=0, mean=0, median=0
     Has </think> tag: 0/3
     Truncation flags: 3/3
   Nemotron-Super-49B / instruct / zero-shot:
-    Sampled: 3 / 216 available
+    Sampled: 3 / 202 available
     Explanation length (chars): min=0, max=0, mean=0, median=0
     Has </think> tag: 0/3
     Truncation flags: 3/3
   Nemotron-Super-49B / thinking / few-shot:
-    Sampled: 3 / 218 available
+    Sampled: 3 / 216 available
     Explanation length (chars): min=14704, max=25588, mean=18979, median=16646
     Has </think> tag: 3/3
     Truncation flags: 0/3
@@ -52,17 +52,17 @@ Target per stratum: 3
     Has </think> tag: 0/3
     Truncation flags: 3/3
   Qwen3-30B-A3B / instruct / zero-shot:
-    Sampled: 3 / 209 available
+    Sampled: 3 / 211 available
     Explanation length (chars): min=0, max=0, mean=0, median=0
     Has </think> tag: 0/3
     Truncation flags: 3/3
   Qwen3-30B-A3B / thinking / few-shot:
-    Sampled: 3 / 207 available
+    Sampled: 3 / 205 available
     Explanation length (chars): min=7342, max=16674, mean=13503, median=16493
     Has </think> tag: 3/3
     Truncation flags: 0/3
   Qwen3-30B-A3B / thinking / zero-shot:
-    Sampled: 3 / 212 available
+    Sampled: 3 / 215 available
     Explanation length (chars): min=8631, max=14807, mean=12520, median=14123
     Has </think> tag: 3/3
     Truncation flags: 0/3
@@ -72,17 +72,17 @@ Target per stratum: 3
     Has </think> tag: 0/3
     Truncation flags: 3/3
   Qwen3-4B / instruct / zero-shot:
-    Sampled: 3 / 204 available
+    Sampled: 3 / 207 available
     Explanation length (chars): min=0, max=0, mean=0, median=0
     Has </think> tag: 0/3
     Truncation flags: 3/3
   Qwen3-4B / thinking / few-shot:
-    Sampled: 3 / 201 available
+    Sampled: 3 / 202 available
     Explanation length (chars): min=14535, max=23252, mean=18440, median=17533
     Has </think> tag: 3/3
     Truncation flags: 0/3
   Qwen3-4B / thinking / zero-shot:
-    Sampled: 3 / 198 available
+    Sampled: 3 / 197 available
     Explanation length (chars): min=11202, max=16745, mean=14487, median=15514
     Has </think> tag: 3/3
     Truncation flags: 0/3
@@ -91,4 +91,4 @@ Target per stratum: 3
   min=1540, max=25588, mean=12438, median=14620
 
 --- Overall response_text length distribution ---
-  min=1263, max=7232, mean=2986, median=2710
+  min=1263, max=7232, mean=2957, median=2656

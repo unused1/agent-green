@@ -982,7 +982,7 @@ After a thorough analysis of the provided code, I have identified no vulnerabili
 **Conclusion**: The code uses safe string handling (`strlcat` with size validation), properly manages memory, and follows standard API patterns. There are no buffer overflows, memory leaks, or unsafe input handling.
 
 (2) NO",['CWE-20'],CVE-2011-1678,"smbfs in Samba 3.5.8 and earlier attempts to use (1) mount.cifs to append to the /etc/mtab file and (2) umount.cifs to append to the /etc/mtab.tmp file without first checking whether resource limits would interfere, which allows local users to trigger corruption of the /etc/mtab file via a process with a small RLIMIT_FSIZE value, a related issue to CVE-2011-1089.",
-226029,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,0,1,"We are given a function `gitn_box_del` that is intended to free memory allocated for a `GroupIdToNameBox` structure.
+226029,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,0,0,"We are given a function `gitn_box_del` that is intended to free memory allocated for a `GroupIdToNameBox` structure.
 
 Let's break down the code:
 
@@ -46811,7 +46811,7 @@ Reproducer:
 
 Reported-by: Lyu Tao <tao.lyu@epfl.ch>
 Signed-off-by: ChenXiaoSong <chenxiaosong2@huawei.com>
-Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",1,1,"We are analyzing the provided NFS file open function for potential vulnerabilities.
+Signed-off-by: Trond Myklebust <trond.myklebust@hammerspace.com>",1,0,"We are analyzing the provided NFS file open function for potential vulnerabilities.
 
 First, let's understand the context: This is a Linux kernel function for opening a file in the NFS (Network File System) driver. We are looking for security vulnerabilities, particularly in the realm of buffer overflows, use-after-free, null pointer dereferences, or other common issues.
 
@@ -62454,7 +62454,7 @@ auto arhashPlan = std::make_unique<SampleFromTimeseriesBucket>(
 The missing validation of `bucketUnpacker` is a critical vulnerability that can cause a server crash. This aligns with the canonical examples (Example 3) where a missing safety check led to a vulnerability.
 
 (1) YES",['CWE-617'],CVE-2021-32037,"An authorized user may trigger an invariant which may result in denial of service or server exit if a relevant aggregation request is sent to a shard. Usually, the requests are sent via mongos and special privileges are required in order to know the address of the shards and to log in to the shards of an auth enabled environment.",
-197128,mruby,f72315575f78a9a773adbce0ee7d3ec33434cb76,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/f72315575f78a9a773adbce0ee7d3ec33434cb76,codegen.c: fix a argument generation bug in array assignment.,1,1,"We are analyzing the provided C code for potential vulnerabilities. The code is a function `gen_assignment` that appears to be part of a Ruby interpreter (or similar) code generator.
+197128,mruby,f72315575f78a9a773adbce0ee7d3ec33434cb76,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/f72315575f78a9a773adbce0ee7d3ec33434cb76,codegen.c: fix a argument generation bug in array assignment.,1,0,"We are analyzing the provided C code for potential vulnerabilities. The code is a function `gen_assignment` that appears to be part of a Ruby interpreter (or similar) code generator.
 
 We are to look for common vulnerabilities such as buffer overflows, use-after-free, integer overflows, etc. However, note that the code is in C and we are to check for security vulnerabilities.
 
@@ -77675,7 +77675,7 @@ Step-by-step analysis:
 Conclusion: The code follows safe OpenSSL practices, handles all resources correctly, and has no buffer overflows or memory leaks. The vulnerability type (memory leak, buffer overflow) is absent.",['CWE-295'],CVE-2021-44273,"e2guardian v5.4.x <= v5.4.3r is affected by missing SSL certificate validation in the SSL MITM engine. In standalone mode (i.e., acting as a proxy or a transparent proxy), with SSL MITM enabled, e2guardian, if built with OpenSSL v1.1.x, did not validate hostnames in certificates of the web servers that it connected to, and thus was itself vulnerable to MITM attacks.",
 195220,tmate-ssh-server,1c020d1f5ca462f5b150b46a027aaa1bbe3c9596,https://github.com/tmate-io/tmate-ssh-server,https://github.com/tmate-io/tmate-ssh-server/commit/1c020d1f5ca462f5b150b46a027aaa1bbe3c9596,"Harden /tmp/tmate directory
 
-Suggested by Matthias Gerstner",1,1,"We are given a C code snippet and we need to determine if there is a vulnerability (YES) or not (NO).
+Suggested by Matthias Gerstner",1,0,"We are given a C code snippet and we need to determine if there is a vulnerability (YES) or not (NO).
 
 Let's break down the code step by step:
 

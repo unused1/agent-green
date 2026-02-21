@@ -10996,7 +10996,7 @@ Let's analyze the provided code step-by-step for security vulnerabilities:
 **Conclusion**: The code implements proper cryptographic key management with comprehensive null checks, duplicate prevention, and protocol-compliant state transitions. It follows security best practices for QUIC handshake processing without introducing exploitable conditions.
 
 (2) NO: No security vulnerability.",['CWE-703'],CVE-2021-24029,"A packet of death scenario is possible in mvfst via a specially crafted message during a QUIC session, which causes a crash via a failed assertion. Per QUIC specification, this particular message should be treated as a connection error. This issue affects mvfst versions prior to commit a67083ff4b8dcbb7ee2839da6338032030d712b0 and proxygen versions prior to v2021.03.15.00.",
-232287,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,0,1,"We are analyzing the provided C++ code for security vulnerabilities.
+232287,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,0,0,"We are analyzing the provided C++ code for security vulnerabilities.
 
 First, let's understand the code: It's a method `SingleComponentLSScan::ParseMCU` that processes a JPEG-like scan (likely part of a JPEG decoder). The code processes a block of data (an MCU, which is a macroblock) by reading and decoding data for a certain number of lines (up to 8 lines) and for each line, it processes a number of pixels.
 
@@ -22137,7 +22137,7 @@ Let's analyze the code step-by-step for security vulnerabilities:
    - No security vulnerability exists because the potential overflow would only occur due to application bugs, not due to processing untrusted data.
 
 (2) NO: No security vulnerability.",['CWE-200'],CVE-2021-31571,The kernel in Amazon Web Services FreeRTOS before 10.4.3 has an integer overflow in queue.c for queue creation.,
-314536,pjproject,560a1346f87aabe126509bb24930106dea292b00,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/560a1346f87aabe126509bb24930106dea292b00,Merge pull request from GHSA-f5qg-pqcg-765m,0,1,"We are analyzing the function `print_media_desc` which is part of a SDP (Session Description Protocol) media description printing function.
+314536,pjproject,560a1346f87aabe126509bb24930106dea292b00,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/560a1346f87aabe126509bb24930106dea292b00,Merge pull request from GHSA-f5qg-pqcg-765m,0,0,"We are analyzing the function `print_media_desc` which is part of a SDP (Session Description Protocol) media description printing function.
 
 The function takes a pointer to a `pjmedia_sdp_media` structure, a buffer `buf` of size `len`, and returns the number of bytes printed or an error.
 
@@ -43995,7 +43995,7 @@ No buffer overflows, integer overflows, or unsafe memory operations are present 
 (2) NO: No security vulnerability.",['CWE-617'],CVE-2022-23571,"Tensorflow is an Open Source Machine Learning Framework. When decoding a tensor from protobuf, a TensorFlow process can encounter cases where a `CHECK` assertion is invalidated based on user controlled arguments, if the tensors have an invalid `dtype` and 0 elements or an invalid shape. This allows attackers to cause denial of services in TensorFlow processes. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",
 198452,tensorflow,a989426ee1346693cc015792f11d715f6944f2b8,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a989426ee1346693cc015792f11d715f6944f2b8,"Improve to cover scale value greater than one
 
-PiperOrigin-RevId: 433050921",1,1,"We are analyzing the provided code for security vulnerabilities.
+PiperOrigin-RevId: 433050921",1,0,"We are analyzing the provided code for security vulnerabilities.
 
 The code is a function `ComparisonQuantized` that compares two quantized tensors (with types uint8 or int8) and stores the result in a boolean output tensor.
 

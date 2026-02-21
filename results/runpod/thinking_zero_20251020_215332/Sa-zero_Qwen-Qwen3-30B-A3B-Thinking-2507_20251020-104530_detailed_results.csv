@@ -16158,7 +16158,7 @@ The code has a functional bug in pointer arithmetic but **no security vulnerabil
 
 Final Answer: NO  
 - **Reasoning**: The code rigorously validates packet and block boundaries, preventing buffer overflows. Integer operations are safe within 64-bit limits. The pointer arithmetic bug is a functional error (causing misaligned processing) but does not introduce a security vulnerability. No other common vulnerabilities (SQLi, command injection, etc.) are present.",['CWE-125'],CVE-2021-43845,"PJSIP is a free and open source multimedia communication library. In version 2.11.1 and prior, if incoming RTCP XR message contain block, the data field is not checked against the received packet size, potentially resulting in an out-of-bound read access. This affects all users that use PJMEDIA and RTCP XR. A malicious actor can send a RTCP XR message with an invalid packet size.",
-453109,libexpat,a2fe525e660badd64b6c557c2b1ec26ddc07f6e4,https://github.com/libexpat/libexpat,https://github.com/libexpat/libexpat/commit/a2fe525e660badd64b6c557c2b1ec26ddc07f6e4,lib: Protect against malicious namespace declarations (CVE-2022-25236),0,1,"We are analyzing the function `addBinding` from the Expat XML parser.
+453109,libexpat,a2fe525e660badd64b6c557c2b1ec26ddc07f6e4,https://github.com/libexpat/libexpat,https://github.com/libexpat/libexpat/commit/a2fe525e660badd64b6c557c2b1ec26ddc07f6e4,lib: Protect against malicious namespace declarations (CVE-2022-25236),0,0,"We are analyzing the function `addBinding` from the Expat XML parser.
 
 Step 1: Analyze the code carefully
 
@@ -19696,7 +19696,7 @@ Fixed this by adding this logic in
 st_select_lex::optimize_unflattened_subqueries():
 
   If a member of a UNION is correlated, mark all its members as
-  correlated, so that they are prepared to be executed multiple times.",0,1,"We are analyzing the provided code snippet from the MySQL server (st_select_lex::optimize_unflattened_subqueries function). The goal is to identify security vulnerabilities.
+  correlated, so that they are prepared to be executed multiple times.",0,0,"We are analyzing the provided code snippet from the MySQL server (st_select_lex::optimize_unflattened_subqueries function). The goal is to identify security vulnerabilities.
 
 First, let's understand the context: This function is part of the MySQL query optimizer, specifically handling subqueries. It iterates over subquery units and optimizes them.
 
@@ -21722,7 +21722,7 @@ it, make also alen unsigned, as signed sizes can cause vulnerabilities
 when people forgot to check that they can be negative.
 
 Signed-off-by: Nicolas Iooss <nicolas.iooss+uboot@ledger.fr>
-Reviewed-by: Heiko Schocher <hs@denx.de>",0,1,"We are analyzing the provided function `do_i2c_md` which is part of a U-Boot command for I2C memory dump.
+Reviewed-by: Heiko Schocher <hs@denx.de>",0,0,"We are analyzing the provided function `do_i2c_md` which is part of a U-Boot command for I2C memory dump.
 
 Step 1: Analyze the code carefully
 

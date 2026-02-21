@@ -479,7 +479,7 @@ before using it.
 Fixes: 6ab55ec0a938 (""ALSA: control: Fix an out-of-bounds bug in get_ctl_id_hash()"")
 Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
 Link: https://lore.kernel.org/r/YwjgNh/gkG1hH7po@kili
-Signed-off-by: Takashi Iwai <tiwai@suse.de>",0,1,"Let's analyze the provided code step-by-step to determine if it contains a vulnerability.
+Signed-off-by: Takashi Iwai <tiwai@suse.de>",0,0,"Let's analyze the provided code step-by-step to determine if it contains a vulnerability.
 
 **Code Overview**
 
@@ -573,7 +573,7 @@ Suggested-by: Michael Hanselmann <public@hansmi.ch>
 Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 Reviewed-by: Michael Hanselmann <public@hansmi.ch>
 Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
-Message-id: 20190108102301.1957-1-kraxel@redhat.com",0,1,"Let's analyze the provided code step-by-step to determine if there is a vulnerability.
+Message-id: 20190108102301.1957-1-kraxel@redhat.com",0,0,"Let's analyze the provided code step-by-step to determine if there is a vulnerability.
 
 **Code Snippet:**
 ```c
@@ -1201,7 +1201,7 @@ Based on the analysis, there are potential security vulnerabilities related to i
 301016,ghostpdl,2793769ff107d8d22dadd30c6e68cd781b569550,https://github.com/ArtifexSoftware/ghostpdl,https://git.ghostscript.com/?p=ghostpdl.git;a=commitdiff;h=2793769ff107d8d22dadd30c6e68cd781b569550,"Bug 701819: fixed ordering in if expression to avoid out-of-bounds access.
 
 Fixes:
-    ./sanbin/gs -dBATCH -dNOPAUSE -r965 -sOutputFile=tmp -sDEVICE=pcx16 ../bug-701819.pdf",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+    ./sanbin/gs -dBATCH -dNOPAUSE -r965 -sOutputFile=tmp -sDEVICE=pcx16 ../bug-701819.pdf",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Function Overview**
 --------------------
@@ -1251,7 +1251,7 @@ However, it's worth noting that a thorough review for logical correctness and co
 411926,heimdal,04171147948d0a3636bc6374181926f0fb2ec83a,https://github.com/heimdal/heimdal,https://github.com/heimdal/heimdal/commit/04171147948d0a3636bc6374181926f0fb2ec83a,"kdc: validate sname in TGS-REQ
 
 In tgs_build_reply(), validate the server name in the TGS-REQ is present before
-dereferencing.",0,1,"**Step-by-Step Analysis**
+dereferencing.",0,0,"**Step-by-Step Analysis**
 
 Given the complexity of the provided code, which appears to be a part of a Kerberos Key Distribution Center (KDC) implementation, specifically the `tgs_build_reply` function responsible for building a response to a Ticket-Granting Service (TGS) request, we will break down the analysis into key steps to determine if a vulnerability is detectable through static program analysis.
 
@@ -1644,7 +1644,7 @@ Required by virtio 1.
 
 Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
 Reviewed-by: Amit Shah <amit.shah@redhat.com>
-Reviewed-by: Jason Wang <jasowang@redhat.com>",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+Reviewed-by: Jason Wang <jasowang@redhat.com>",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Overview**
 ----------------
@@ -1809,7 +1809,7 @@ However, it's crucial to note that a comprehensive security audit should include
 Passing negative indices is illegal but there was a missing check so that resulted in OOB accesses.
 
 PiperOrigin-RevId: 387208551
-Change-Id: I6b7a8a62d3e7c13a16d81619e5bc23ae2cdbc7fd",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+Change-Id: I6b7a8a62d3e7c13a16d81619e5bc23ae2cdbc7fd",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 ### Step 1: Understanding the Functionality
 
@@ -1942,7 +1942,7 @@ The function `string_number_format` formats a double `d` into a string with spec
 - Validate the content and length of `dec_point` and `thousand_sep` to ensure they meet expected criteria.
 - Consider adding more comprehensive error handling for all possible error conditions.
 - Review the manual string manipulation for potential off-by-one errors or logic flaws, though none are immediately apparent.",['CWE-119'],CVE-2019-11929,"Insufficient boundary checks when formatting numbers in number_format allows read/write access to out-of-bounds memory, potentially leading to remote code execution. This issue affects HHVM versions prior to 3.30.10, all versions between 4.0.0 and 4.8.5, all versions between 4.9.0 and 4.18.2, and versions 4.19.0, 4.19.1, 4.20.0, 4.20.1, 4.20.2, 4.21.0, 4.22.0, 4.23.0."
-439114,ImageMagick6,210474b2fac6a661bfa7ed563213920e93e76395,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/210474b2fac6a661bfa7ed563213920e93e76395,Fix ultra rare but potential memory-leak,0,1,"**Security Analysis of Provided Code**
+439114,ImageMagick6,210474b2fac6a661bfa7ed563213920e93e76395,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/210474b2fac6a661bfa7ed563213920e93e76395,Fix ultra rare but potential memory-leak,0,0,"**Security Analysis of Provided Code**
 
 **Overview**
 
@@ -2720,7 +2720,7 @@ Given the potential for double-free vulnerabilities due to the lack of protectio
 - Set pointers to null after deletion to reduce the risk of accidental double-free, though this does not fully mitigate the issue without proper copy semantics management.",['CWE-416'],CVE-2020-15569,PlayerGeneric.cpp in MilkyTracker through 1.02.00 has a use-after-free in the PlayerGeneric destructor.
 220442,mruby,27d1e0132a0804581dca28df042e7047fd27eaa8,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/27d1e0132a0804581dca28df042e7047fd27eaa8,"array.c: fix `mrb_ary_shift_m` initialization bug.
 
-The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",0,1,"Let's analyze the provided code step-by-step to determine if there's a vulnerability.
+The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",0,0,"Let's analyze the provided code step-by-step to determine if there's a vulnerability.
 
 **Code Overview**
 
@@ -3092,7 +3092,7 @@ type int.  Then, copy_from_user() may cause a heap overflow because it is used
 as the third argument of copy_from_user().
 
 Signed-off-by: Hyunwoo Kim <imv4bel@gmail.com>
-Signed-off-by: Helge Deller <deller@gmx.de>",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities, focusing on common issues in kernel code such as race conditions, buffer overflows, and improper error handling.
+Signed-off-by: Helge Deller <deller@gmx.de>",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities, focusing on common issues in kernel code such as race conditions, buffer overflows, and improper error handling.
 
 ### Step 1: Understanding the Function
 
@@ -3365,7 +3365,7 @@ Given the presence of major vulnerabilities related to error handling and potent
 - Consider adding overflow/underflow checks for arithmetic operations, especially when dealing with user-controlled data.",['CWE-703'],CVE-2022-32978,There is an assertion failure in SingleComponentLSScan::ParseMCU in singlecomponentlsscan.cpp in libjpeg before 1.64 via an empty JPEG-LS scan.
 273407,tensorflow,803404044ae7a1efac48ba82d74111fce1ddb09a,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/803404044ae7a1efac48ba82d74111fce1ddb09a,"Fix security vulnerability with LSTMBlockCellOp
 
-PiperOrigin-RevId: 446028341",0,1,"Here's a step-by-step analysis of the provided code to determine if it contains vulnerabilities:
+PiperOrigin-RevId: 446028341",0,0,"Here's a step-by-step analysis of the provided code to determine if it contains vulnerabilities:
 
 **Code Overview**
 The code is a C++ implementation of the `Compute` method for an LSTM (Long Short-Term Memory) cell in a neural network, likely part of the TensorFlow framework given the use of `OpKernelContext` and related macros.
@@ -3518,7 +3518,7 @@ Based on the step-by-step analysis, the code appears to handle potential vulnera
 If ConfigProto is not used, then use the default settings which is to allow all devices.
 
 PiperOrigin-RevId: 420391800
-Change-Id: I88161ad7042990aef678e77b597a2fb2c8f815be",0,1,"Let's analyze the provided code step-by-step from a **static program analysis** and **security vulnerability detection** perspective.
+Change-Id: I88161ad7042990aef678e77b597a2fb2c8f815be",0,0,"Let's analyze the provided code step-by-step from a **static program analysis** and **security vulnerability detection** perspective.
 
 ---
 
@@ -3668,7 +3668,7 @@ The code appears to be robust and secure from a static analysis perspective.",['
 449294,vim,a062006b9de0b2947ab5fb376c6e67ef92a8cd69,https://github.com/vim/vim,https://github.com/vim/vim/commit/a062006b9de0b2947ab5fb376c6e67ef92a8cd69,"patch 8.2.3610: crash when ModeChanged triggered too early
 
 Problem:    Crash when ModeChanged triggered too early.
-Solution:   Trigger ModeChanged after setting VIsual.",0,1,"Let's analyze the provided code step-by-step from a **static program analysis** and **security vulnerability detection** perspective.
+Solution:   Trigger ModeChanged after setting VIsual.",0,0,"Let's analyze the provided code step-by-step from a **static program analysis** and **security vulnerability detection** perspective.
 
 ---
 
@@ -3980,7 +3980,7 @@ However, these are more about robustness and less about clear, exploitable vulne
 **Result: (2) NO: No vulnerability.**
 
 **Note**: This analysis is based on the provided code snippet and general best practices. Without the full context of the project (e.g., how `dev` is validated, error handling in calling code), some assumptions are made.",['CWE-134'],CVE-2022-2652,Depending on the way the format strings in the card label are crafted it's possible to leak kernel stack memory. There is also the possibility for DoS due to the v4l2loopback kernel module crashing when providing the card label on request (reproduce e.g. with many %s modifiers in a row).
-389760,jasper,d99636fad60629785efd1ef72da772a8ef68f54c,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/d99636fad60629785efd1ef72da772a8ef68f54c,fix memory leaks in function cmdopts_parse,0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+389760,jasper,d99636fad60629785efd1ef72da772a8ef68f54c,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/d99636fad60629785efd1ef72da772a8ef68f54c,fix memory leaks in function cmdopts_parse,0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 ### 1. **Memory Allocation**
 - **Check:** `cmdopts = malloc(sizeof(cmdopts_t))`
@@ -7153,7 +7153,7 @@ it, make also alen unsigned, as signed sizes can cause vulnerabilities
 when people forgot to check that they can be negative.
 
 Signed-off-by: Nicolas Iooss <nicolas.iooss+uboot@ledger.fr>
-Reviewed-by: Heiko Schocher <hs@denx.de>",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Reviewed-by: Heiko Schocher <hs@denx.de>",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 ----------------
@@ -7505,7 +7505,7 @@ Given the lack of input validation and the potentially misleading function namin
 484063,open62541,b79db1ac78146fc06b0b8435773d3967de2d659c,https://github.com/open62541/open62541,https://github.com/open62541/open62541/commit/b79db1ac78146fc06b0b8435773d3967de2d659c,"fix(plugin): Add default limits for chunks and message size
 
 Based on a reported DoS vulnerability reported by Team82 (Claroty
-Research).",0,1,"Let's analyze the provided code step-by-step from a **static program analysis** and **security** perspective.
+Research).",0,0,"Let's analyze the provided code step-by-step from a **static program analysis** and **security** perspective.
 
 ---
 
@@ -7662,7 +7662,7 @@ Based on the step-by-step analysis, the code appears to handle potential vulnera
 **Result: (2) NO: No vulnerability.**
 
 **Note:** This analysis is based on the provided code snippet and assumes the surrounding RTOS environment ensures certain constraints (e.g., on `ucQueueType`, memory alignment). Always consider the broader system context when assessing security.",['CWE-200'],CVE-2021-31571,The kernel in Amazon Web Services FreeRTOS before 10.4.3 has an integer overflow in queue.c for queue creation.
-314536,pjproject,560a1346f87aabe126509bb24930106dea292b00,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/560a1346f87aabe126509bb24930106dea292b00,Merge pull request from GHSA-f5qg-pqcg-765m,0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities, focusing on common issues such as buffer overflows, integer overflows, and other memory safety concerns.
+314536,pjproject,560a1346f87aabe126509bb24930106dea292b00,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/560a1346f87aabe126509bb24930106dea292b00,Merge pull request from GHSA-f5qg-pqcg-765m,0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities, focusing on common issues such as buffer overflows, integer overflows, and other memory safety concerns.
 
 ### Step 1: Initial Buffer Checks
 - The function starts by checking if the provided buffer length (`len`) is sufficient to hold the ""m="" line along with some additional data (12+24 bytes). **This is a good practice.**
@@ -7777,7 +7777,7 @@ Based on the step-by-step analysis focusing on traditional security vulnerabilit
 Added more input validation to avoid nullptr dereferencing and array index
 out of bounds issues.
 
-PiperOrigin-RevId: 446192704",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+PiperOrigin-RevId: 446192704",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -8016,7 +8016,7 @@ Conflicts:
 We have valdiation that is duplicated, checking different conditions, in different formats and failing to capture all cases. This should fix all the previous bugs.
 
 PiperOrigin-RevId: 414886981
-Change-Id: Ibf0bba0beb057b76d505324bb9487565daf95f01",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Change-Id: Ibf0bba0beb057b76d505324bb9487565daf95f01",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -9234,7 +9234,7 @@ In rsi_send_beacon, if rsi_prepare_beacon fails the allocated skb should
 be released.
 
 Signed-off-by: Navid Emamdoost <navid.emamdoost@gmail.com>
-Signed-off-by: Kalle Valo <kvalo@codeaurora.org>",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+Signed-off-by: Kalle Valo <kvalo@codeaurora.org>",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Overview**
 ----------------
@@ -9640,7 +9640,7 @@ Based on the step-by-step analysis, the provided code snippet does not exhibit c
 - Enhance input validation for `wait_type`, `wait_packet_id`, and especially `timeout_ms`.
 - Consider improving error messages for system-level errors to aid in debugging.
 - Review the use of `goto` for potential refactoring to improve code readability, though this is not a security concern.",['CWE-787'],CVE-2021-45936,wolfSSL wolfMQTT 1.9 has a heap-based buffer overflow in MqttDecode_Disconnect (called from MqttClient_DecodePacket and MqttClient_WaitType).
-219912,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+219912,gpac,ad18ece95fa064efc0995c4ab2c985f77fb166ec,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/ad18ece95fa064efc0995c4ab2c985f77fb166ec,fixed #1904,0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Overview**
 ----------------
@@ -9739,7 +9739,7 @@ Based on the analysis:
 416366,vim,1c3dd8ddcba63c1af5112e567215b3cec2de11d0,https://github.com/vim/vim,https://github.com/vim/vim/commit/1c3dd8ddcba63c1af5112e567215b3cec2de11d0,"patch 9.0.0490: using freed memory with cmdwin and BufEnter autocmd
 
 Problem:    Using freed memory with cmdwin and BufEnter autocmd.
-Solution:   Make sure pointer to b_p_iminsert is still valid.",0,1,"**Static Code Analysis Report**
+Solution:   Make sure pointer to b_p_iminsert is still valid.",0,0,"**Static Code Analysis Report**
 
 **Code Snippet:** `getcmdline_int` function (provided)
 
@@ -9999,7 +9999,7 @@ else.
 Fixes: f90cf6079bf6 (""media: vidtv: add a bridge driver"")
 Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
 Signed-off-by: Hans Verkuil <hverkuil-cisco@xs4all.nl>
-Signed-off-by: Mauro Carvalho Chehab <mchehab@kernel.org>",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Signed-off-by: Mauro Carvalho Chehab <mchehab@kernel.org>",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -10568,7 +10568,7 @@ After analyzing the code:
 We want to format even the secure information in tests.
 
 Signed-off-by: Peter Krempa <pkrempa@redhat.com>
-Reviewed-by: Erik Skultety <eskultet@redhat.com>",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Reviewed-by: Erik Skultety <eskultet@redhat.com>",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -10735,7 +10735,7 @@ if (!skb->data || skb->len < 1) {
 ```
 
 This ensures the function safely handles invalid or insufficiently sized packets.",['CWE-772'],CVE-2022-26878,drivers/bluetooth/virtio_bt.c in the Linux kernel before 5.16.3 has a memory leak (socket buffers have memory allocated but not freed).
-357668,squirrel,23a0620658714b996d20da3d4dd1a0dcf9b0bd98,https://github.com/albertodemichelis/squirrel,https://github.com/albertodemichelis/squirrel/commit/23a0620658714b996d20da3d4dd1a0dcf9b0bd98,check max member count in class,0,1,"Let's analyze the provided code step-by-step to determine if there's a vulnerability.
+357668,squirrel,23a0620658714b996d20da3d4dd1a0dcf9b0bd98,https://github.com/albertodemichelis/squirrel,https://github.com/albertodemichelis/squirrel/commit/23a0620658714b996d20da3d4dd1a0dcf9b0bd98,check max member count in class,0,0,"Let's analyze the provided code step-by-step to determine if there's a vulnerability.
 
 **Code Overview**
 
@@ -10960,7 +10960,7 @@ Based on the analysis, the code appears to handle potential vulnerabilities adeq
 - Add neighbor value check in stl_remove_degenerate
 
 Fixes https://github.com/admesh/admesh/issues/28
-Merges https://github.com/admesh/admesh/pull/55",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Merges https://github.com/admesh/admesh/pull/55",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -10999,7 +10999,7 @@ Based on the provided code snippet and assuming the called functions (`stl_remov
 
 * Add log information
 
-* Modification based on comments.",0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+* Modification based on comments.",0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Function Overview**
 
@@ -11227,7 +11227,7 @@ Based on the step-by-step analysis, the code does not exhibit clear, exploitable
 - Consider adding input validation for the function parameters.
 - Review the maximum possible value of `length` to ensure it cannot overflow in practical use cases.
 - Ensure that the function is called with valid parameters in all use cases.",['CWE-703'],CVE-2022-1587,An out-of-bounds read vulnerability was discovered in the PCRE2 library in the get_recurse_data_length() function of the pcre2_jit_compile.c file. This issue affects recursions in JIT-compiled regular expressions caused by duplicate data transfers.
-292205,hexchat,4e061a43b3453a9856d34250c3913175c45afe9d,https://github.com/hexchat/hexchat,https://github.com/hexchat/hexchat/commit/4e061a43b3453a9856d34250c3913175c45afe9d,Clean up handling CAP LS,0,1,"Let's analyze the provided code step-by-step for potential vulnerabilities, focusing on common issues such as buffer overflows, injection attacks, and improper error handling.
+292205,hexchat,4e061a43b3453a9856d34250c3913175c45afe9d,https://github.com/hexchat/hexchat,https://github.com/hexchat/hexchat/commit/4e061a43b3453a9856d34250c3913175c45afe9d,Clean up handling CAP LS,0,0,"Let's analyze the provided code step-by-step for potential vulnerabilities, focusing on common issues such as buffer overflows, injection attacks, and improper error handling.
 
 ### Step 1: Buffer Initialization and Usage
 - **Buffer Size**: A fixed-size buffer `char buffer[256];` is used for constructing the ""CAP REQ"" string.
@@ -11602,7 +11602,7 @@ Based on the provided code and the assumptions about the security of the helper 
 **(2) NO: No vulnerability.**
 
 **Note**: This analysis is contingent on the security of the helper functions (`pj_memcpy`, `pj_utoa`, `print_connection_info`, `print_bandw`, `print_attr`) and the correctness of the initial buffer size check for all possible inputs. If any of these functions have vulnerabilities or if the buffer size calculation is flawed for certain inputs, the overall security could be compromised.",['CWE-787'],CVE-2022-24764,"PJSIP is a free and open source multimedia communication library written in C. Versions 2.12 and prior contain a stack buffer overflow vulnerability that affects PJSUA2 users or users that call the API `pjmedia_sdp_print(), pjmedia_sdp_media_print()`. Applications that do not use PJSUA2 and do not directly call `pjmedia_sdp_print()` or `pjmedia_sdp_media_print()` should not be affected. A patch is available on the `master` branch of the `pjsip/pjproject` GitHub repository. There are currently no known workarounds."
-210692,ImageMagick6,b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick/issues/1337,1,1,"**Security Analysis of Provided Code**
+210692,ImageMagick6,b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/b268ce7a59440972f4476b9fd98104b6a836d971,https://github.com/ImageMagick/ImageMagick/issues/1337,1,0,"**Security Analysis of Provided Code**
 
 **Overview**
 
@@ -11652,7 +11652,7 @@ for a should be released.
 
 Signed-off-by: Navid Emamdoost <navid.emamdoost@gmail.com>
 Link: https://lore.kernel.org/r/20190925152742.16258-1-navid.emamdoost@gmail.com
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Overview**
 
@@ -11784,7 +11784,7 @@ Change-Id: I28eedcfd87a53aaf34deb075acea1f8c95470808",1,1,"Let's analyze the pro
 Given the analysis, the code exhibits **good practices** in input validation, memory management, and error handling for the most part. However, there's a **minor vulnerability** regarding the lack of explicit size validation for `example_labels` relative to `example_weights`. Additionally, the safety of the external functions called is assumed.
 
 **Result: (1) YES: Vulnerability detected.** (Minor vulnerability related to input validation and assumed safety of external functions)",['CWE-703'],CVE-2021-37672,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions an attacker can read from outside of bounds of heap allocated data by sending specially crafted illegal arguments to `tf.raw_ops.SdcaOptimizerV2`. The [implementation](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/core/kernels/sdca_internal.cc#L320-L353) does not check that the length of `example_labels` is the same as the number of examples. We have patched the issue in GitHub commit a4e138660270e7599793fa438cd7b2fc2ce215a6. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range."
-211785,jasper,4cd52b5daac62b00a0a328451544807ddecf775f,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/4cd52b5daac62b00a0a328451544807ddecf775f,Avoid maxrlvls more than upper bound to cause heap-buffer-overflow,1,1,"**Step-by-Step Analysis**
+211785,jasper,4cd52b5daac62b00a0a328451544807ddecf775f,https://github.com/mdadams/jasper,https://github.com/jasper-software/jasper/commit/4cd52b5daac62b00a0a328451544807ddecf775f,Avoid maxrlvls more than upper bound to cause heap-buffer-overflow,1,0,"**Step-by-Step Analysis**
 
 1. **Code Overview**:
 	* The provided code is a C function `cp_create` that initializes and configures various parameters for image encoding (likely JPEG 2000 based on the context).
@@ -12041,7 +12041,7 @@ Cc: stable@vger.kernel.org
 Signed-off-by: Tyrel Datwyler <tyreld@linux.ibm.com>
 [mpe: Reformat change log and add mention of possible stack corruption]
 Signed-off-by: Michael Ellerman <mpe@ellerman.id.au>
-Link: https://lore.kernel.org/r/20210315214821.452959-1-tyreld@linux.ibm.com",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+Link: https://lore.kernel.org/r/20210315214821.452959-1-tyreld@linux.ibm.com",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Overview**
 ----------------
@@ -12117,7 +12117,7 @@ Based on the provided code snippet and the step-by-step analysis:
 
 **Answer According to Your Format**:
 (2) NO: No vulnerability. (Directly in the provided snippet, with the above recommendations for further review)",['CWE-908'],CVE-2022-23573,"Tensorflow is an Open Source Machine Learning Framework. The implementation of `AssignOp` can result in copying uninitialized data to a new tensor. This later results in undefined behavior. The implementation has a check that the left hand side of the assignment is initialized (to minimize number of allocations), but does not check that the right hand side is also initialized. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-211181,php-src,a72cd07f2983dc43a6bb35209dc4687852e53c09,https://github.com/php/php-src,http://git.php.net/?p=php-src.git;a=commit;h=a72cd07f2983dc43a6bb35209dc4687852e53c09,Fixed bug #68665 (Invalid free),1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+211181,php-src,a72cd07f2983dc43a6bb35209dc4687852e53c09,https://github.com/php/php-src,http://git.php.net/?p=php-src.git;a=commit;h=a72cd07f2983dc43a6bb35209dc4687852e53c09,Fixed bug #68665 (Invalid free),1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 ----------------
@@ -13109,7 +13109,7 @@ Based on the analysis, there are potential vulnerabilities related to out-of-bou
 2. Ensure `attr->hdr.length` is at least 4 before calculating `value.slen` and accessing memory based on this length.
 3. Consider adding bounds checks in `GETATTRHDR` if not already present.
 4. Review the implementation of `pj_strdup` to ensure it handles potential overflows securely.",['CWE-191'],CVE-2021-37706,"PJSIP is a free and open source multimedia communication library written in C language implementing standard based protocols such as SIP, SDP, RTP, STUN, TURN, and ICE. In affected versions if the incoming STUN message contains an ERROR-CODE attribute, the header length is not checked before performing a subtraction operation, potentially resulting in an integer underflow scenario. This issue affects all users that use STUN. A malicious actor located within the victim’s network may forge and send a specially crafted UDP (STUN) message that could remotely execute arbitrary code on the victim’s machine. Users are advised to upgrade as soon as possible. There are no known workarounds."
-214124,chafa,e6ce3746cdcf0836b9dae659a5aed15d73a080d8,https://github.com/hpjansson/chafa,https://github.com/hpjansson/chafa/commit/e6ce3746cdcf0836b9dae659a5aed15d73a080d8,libnsgif: fix oob in lzw_decode,1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+214124,chafa,e6ce3746cdcf0836b9dae659a5aed15d73a080d8,https://github.com/hpjansson/chafa,https://github.com/hpjansson/chafa/commit/e6ce3746cdcf0836b9dae659a5aed15d73a080d8,libnsgif: fix oob in lzw_decode,1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -13211,7 +13211,7 @@ Based on the provided code snippet and focusing on common C vulnerabilities:
 **Recommendation**: Ensure that `frame_data` and `delta_data` are properly freed when they are no longer needed, ideally in a cleanup function or error path that is executed when the `flxdec` object is destroyed or an error occurs.",['CWE-125'],CVE-2016-9810,"The gst_decode_chain_free_internal function in the flxdex decoder in gst-plugins-good in GStreamer before 1.10.2 allows remote attackers to cause a denial of service (invalid memory read and crash) via an invalid file, which triggers an incorrect unref call."
 199841,radare2,feaa4e7f7399c51ee6f52deb84dc3f795b4035d6,https://github.com/radare/radare2,https://github.com/radareorg/radare2/commit/feaa4e7f7399c51ee6f52deb84dc3f795b4035d6,"Fix null deref in xnu.kernelcache ##crash
 
-* Reported by @xshad3 via huntr.dev",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+* Reported by @xshad3 via huntr.dev",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -13515,7 +13515,7 @@ Based on the provided code snippet and the step-by-step analysis, there is **no 
 **Result: (2) NO: No vulnerability.**
 
 **Note**: This analysis is limited to the provided code snippet. The overall security of the system or module this code is part of could depend on factors outside the scope of this review, such as how this function is called, the security of surrounding code, and the specific environment in which it operates.",['CWE-909'],CVE-2022-24448,"An issue was discovered in fs/nfs/dir.c in the Linux kernel before 5.16.5. If an application sets the O_DIRECTORY flag, and tries to open a regular file, nfs_atomic_open() performs a regular lookup. If a regular file is found, ENOTDIR should occur, but the server instead returns uninitialized data in the file descriptor."
-201382,gerbv,672214abb47a802fc000125996e6e0a46c623a4e,https://github.com/gerbv/gerbv,https://github.com/gerbv/gerbv/commit/672214abb47a802fc000125996e6e0a46c623a4e,Add test to demonstrate buffer overrun,1,1,"**Step-by-Step Analysis**
+201382,gerbv,672214abb47a802fc000125996e6e0a46c623a4e,https://github.com/gerbv/gerbv,https://github.com/gerbv/gerbv/commit/672214abb47a802fc000125996e6e0a46c623a4e,Add test to demonstrate buffer overrun,1,0,"**Step-by-Step Analysis**
 
 1. **Code Overview**:
 	* The provided code is a C function named `drill_parse_T_code`, which appears to be part of a larger program for parsing Gerber files (used in PCB manufacturing).
@@ -13842,7 +13842,7 @@ Based on the step-by-step analysis, the code appears to follow good practices fo
 **Result: (2) NO: No vulnerability.**
 
 **Note**: This analysis is based on the provided code snippet and assumes that external functions (e.g., `t_malloc`, `escape_none`, `t_strcut`, `net_ip2addr`, `dec2str`) are implemented securely.",['CWE-20'],CVE-2016-8652,"The auth component in Dovecot before 2.2.27, when auth-policy is configured, allows a remote attackers to cause a denial of service (crash) by aborting authentication without setting a username."
-198499,micro-ecc,1b5f5cea5145c96dd8791b9b2c41424fc74c2172,https://github.com/kmackay/micro-ecc,https://github.com/kmackay/micro-ecc/commit/1b5f5cea5145c96dd8791b9b2c41424fc74c2172,Fix for #168,1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+198499,micro-ecc,1b5f5cea5145c96dd8791b9b2c41424fc74c2172,https://github.com/kmackay/micro-ecc,https://github.com/kmackay/micro-ecc/commit/1b5f5cea5145c96dd8791b9b2c41424fc74c2172,Fix for #168,1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 The function `uECC_sign_with_k` appears to be part of a cryptographic library, specifically implementing the Elliptic Curve Digital Signature Algorithm (ECDSA). It generates a signature based on a provided private key, message hash, and an optional random number `k`.
@@ -13991,7 +13991,7 @@ Given the potential for exploiting the lack of validation and the direct invocat
 1. **Validate All Inputs**: Ensure all parameters, especially those derived from external sources, are validated.
 2. **Sanitize Callback Usage**: Implement stricter checks for callbacks, possibly including parameter validation within the callback invocation process.
 3. **Error Handling**: Enhance error handling to account for all possible failure points, ensuring the application's stability and security.",['CWE-703'],CVE-2022-2982,Use After Free in GitHub repository vim/vim prior to 9.0.0260.
-197111,tinyexr,a685e3332f61cd4e59324bf3f669d36973d64270,https://github.com/syoyo/tinyexr,https://github.com/syoyo/tinyexr/commit/a685e3332f61cd4e59324bf3f669d36973d64270,Make line_no with too large value(2**20) invalid. Fixes #124,1,1,"**Step-by-Step Analysis**
+197111,tinyexr,a685e3332f61cd4e59324bf3f669d36973d64270,https://github.com/syoyo/tinyexr,https://github.com/syoyo/tinyexr/commit/a685e3332f61cd4e59324bf3f669d36973d64270,Make line_no with too large value(2**20) invalid. Fixes #124,1,0,"**Step-by-Step Analysis**
 
 ### 1. **Input Validation**
 The function `DecodeChunk` performs various checks on input data, such as:
@@ -14038,7 +14038,7 @@ Based on the provided code snippet, the function `DecodeChunk` appears to handle
 This prevents a `DCHECK`-fail when the proto contains an invalid dtype for a tensor shape with 0 elements or for an incomplete tensor shape.
 
 PiperOrigin-RevId: 408369083
-Change-Id: Ia21a3e3d62a90d642a4561f08f3b543e5ad00c46",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Change-Id: Ia21a3e3d62a90d642a4561f08f3b543e5ad00c46",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -14457,7 +14457,7 @@ But **based solely on the code provided**, and assuming proper context and downs
 **(2) NO: No vulnerability.**",['CWE-269'],CVE-2022-30592,liblsquic/lsquic_qenc_hdl.c in LiteSpeed QUIC (aka LSQUIC) before 3.1.0 mishandles MAX_TABLE_CAPACITY.
 208505,tor,57e35ad3d91724882c345ac709666a551a977f0f,https://github.com/torproject/tor,https://gitweb.torproject.org/tor.git/commitdiff/57e35ad3d91724882c345ac709666a551a977f0f,"Avoid possible segfault when handling networkstatus vote with bad flavor
 
-Fix for 6530; fix on 0.2.2.6-alpha.",1,1,"**Step-by-Step Analysis**
+Fix for 6530; fix on 0.2.2.6-alpha.",1,0,"**Step-by-Step Analysis**
 
 1. **Code Overview**:
 	* The provided code is a C function named `networkstatus_parse_vote_from_string`, which appears to be part of a larger system (likely Tor) responsible for parsing network status votes from strings.
@@ -15098,7 +15098,7 @@ Based on the step-by-step analysis, the code appears to handle potential vulnera
 195056,tensorflow,8c6f391a2282684a25cbfec7687bd5d35261a209,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/8c6f391a2282684a25cbfec7687bd5d35261a209,"[lite] Add check for bias_size is zero to avoid division by zero. This shouldn't happen for properly converted models. Just safety check
 
 PiperOrigin-RevId: 416383645
-Change-Id: If8e508bf696ae8ecfb927e69c139a8ccf7fe60cb",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+Change-Id: If8e508bf696ae8ecfb927e69c139a8ccf7fe60cb",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Overview**
 
@@ -15271,7 +15271,7 @@ Based on the analysis, here are the key points regarding vulnerabilities:
 Based on the step-by-step analysis, the code does not exhibit obvious vulnerabilities related to buffer overflows, integer overflows, or logic errors that could lead to security issues.
 
 **Result: (2) NO: No vulnerability.**",['CWE-787'],CVE-2020-16305,A buffer overflow vulnerability in pcx_write_rle() in contrib/japanese/gdev10v.c of Artifex Software GhostScript v9.50 allows a remote attacker to cause a denial of service via a crafted PDF file. This is fixed in v9.51.
-196894,cryptopp,9425e16437439e68c7d96abef922167d68fafaff,https://github.com/weidai11/cryptopp,https://github.com/weidai11/cryptopp/commit/9425e16437439e68c7d96abef922167d68fafaff,Fix for CVE-2015-2141. Thanks to Evgeny Sidorov for reporting. Squaring to satisfy Jacobi requirements suggested by JPM.,1,1,"Let's analyze the provided code step-by-step from a security and static program analysis perspective.
+196894,cryptopp,9425e16437439e68c7d96abef922167d68fafaff,https://github.com/weidai11/cryptopp,https://github.com/weidai11/cryptopp/commit/9425e16437439e68c7d96abef922167d68fafaff,Fix for CVE-2015-2141. Thanks to Evgeny Sidorov for reporting. Squaring to satisfy Jacobi requirements suggested by JPM.,1,0,"Let's analyze the provided code step-by-step from a security and static program analysis perspective.
 
 ---
 
@@ -15379,7 +15379,7 @@ We find **no evidence of a vulnerability** in the provided code snippet.
 ### **Answer:**
 
 **(2) NO: No vulnerability.**",['CWE-399'],CVE-2015-2141,"The InvertibleRWFunction::CalculateInverse function in rw.cpp in libcrypt++ 5.6.2 does not properly blind private key operations for the Rabin-Williams digital signature algorithm, which allows remote attackers to obtain private keys via a timing attack."
-198566,libmobi,eafc415bc6067e72577f70d6dd5acbf057ce6e6f,https://github.com/bfabiszewski/libmobi,https://github.com/bfabiszewski/libmobi/commit/eafc415bc6067e72577f70d6dd5acbf057ce6e6f,Fix wrong boundary checks in inflections parser resulting in stack buffer over-read with corrupt input,1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+198566,libmobi,eafc415bc6067e72577f70d6dd5acbf057ce6e6f,https://github.com/bfabiszewski/libmobi,https://github.com/bfabiszewski/libmobi/commit/eafc415bc6067e72577f70d6dd5acbf057ce6e6f,Fix wrong boundary checks in inflections parser resulting in stack buffer over-read with corrupt input,1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Function Overview**
 
@@ -15415,7 +15415,7 @@ We find **no evidence of a vulnerability** in the provided code snippet.
 **Answer Format as Requested**
 
 (1) YES: Vulnerability detected.",['CWE-787'],CVE-2022-1533,Buffer Over-read in GitHub repository bfabiszewski/libmobi prior to 0.11. This vulnerability is capable of arbitrary code execution.
-207520,rizin,aa6917772d2f32e5a7daab25a46c72df0b5ea406,https://github.com/rizinorg/rizin,https://github.com/rizinorg/rizin/commit/aa6917772d2f32e5a7daab25a46c72df0b5ea406,Fix oob write for dwarf with abbrev with count 0 (Fix #2083) (#2086),1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+207520,rizin,aa6917772d2f32e5a7daab25a46c72df0b5ea406,https://github.com/rizinorg/rizin,https://github.com/rizinorg/rizin/commit/aa6917772d2f32e5a7daab25a46c72df0b5ea406,Fix oob write for dwarf with abbrev with count 0 (Fix #2083) (#2086),1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Overview**
 ----------------
@@ -15633,7 +15633,7 @@ However, a few **potential concerns** might be raised with more context:
 198259,tensorflow,a2b743f6017d7b97af1fe49087ae15f0ac634373,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a2b743f6017d7b97af1fe49087ae15f0ac634373,"Fix heap OOB in `tf.raw_ops.RaggedGather`
 
 PiperOrigin-RevId: 388355464
-Change-Id: If14d96231d1cd7aad7c4d1c22c1bab1576b75717",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Change-Id: If14d96231d1cd7aad7c4d1c22c1bab1576b75717",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -16242,7 +16242,7 @@ If the extra field was larger than the space the user provided with
 inflateGetHeader(), and if multiple calls of inflate() delivered
 the extra header data, then there could be a buffer overflow of the
 provided space. This commit assures that provided space is not
-exceeded.",1,1,"**Step-by-Step Analysis**
+exceeded.",1,0,"**Step-by-Step Analysis**
 
 1. **Code Overview**:
 	* The provided code is an implementation of the `inflate` function, which is part of the zlib library, used for decompressing data compressed with the DEFLATE algorithm.
@@ -16460,7 +16460,7 @@ Let me know if you'd like me to analyze the `elo_work` function or other parts o
 This is due to not checking that the params for the quantization exists. If there is no quantization, we should not access the `.params` field.
 
 PiperOrigin-RevId: 385163909
-Change-Id: I2beb8d50649b6542db224c163033fbcbaa49314f",1,1,"**Step-by-Step Analysis**
+Change-Id: I2beb8d50649b6542db224c163033fbcbaa49314f",1,0,"**Step-by-Step Analysis**
 
 ### 1. **Input Validation**
 - The code checks the number of inputs and outputs, ensuring there's 1 output and 5 inputs.
@@ -16514,7 +16514,7 @@ is not empty after the encryption handshake.
 
 Our thanks to Jacob Champion for reporting this problem.
 
-Security: CVE-2021-23222",1,1,"**Security Analysis of Provided Code**
+Security: CVE-2021-23222",1,0,"**Security Analysis of Provided Code**
 
 **Overview**
 
@@ -16875,7 +16875,7 @@ While the function performs **reasonable shape validation**, it **does not check
 202276,vim,57df9e8a9f9ae1aafdde9b86b10ad907627a87dc,https://github.com/vim/vim,https://github.com/vim/vim/commit/57df9e8a9f9ae1aafdde9b86b10ad907627a87dc,"patch 8.2.4151: reading beyond the end of a line
 
 Problem:    Reading beyond the end of a line.
-Solution:   For block insert only use the offset for correcting the length.",1,1,"**Step-by-Step Analysis**
+Solution:   For block insert only use the offset for correcting the length.",1,0,"**Step-by-Step Analysis**
 
 ### 1. **Function Overview**
 The provided code is for a function `block_insert` which appears to be part of a text editor (likely Vim, given the context and variable names). It handles inserting text into blocks of lines in a buffer.
@@ -17438,7 +17438,7 @@ check.
 Version 1.x and 2.0 filesystems (where the directories were unsorted)
 are sorted and then the above duplicate filename check is applied.
 
-Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Overview**
 The code is for a function `squashfs_opendir` which appears to be part of a SquashFS filesystem implementation. It opens a directory, reads its contents, and returns a `struct dir` containing directory entries.
@@ -18328,7 +18328,7 @@ Based on the provided code snippet and analysis:
 (2) **NO**: No critical vulnerability detected. However, it's recommended to:
 - Add error checking for `strtoll` when parsing `LISTEN_FDS`.
 - Ensure comprehensive error handling throughout the function for robustness.",['CWE-276'],CVE-2022-27650,A flaw was found in crun where containers were incorrectly started with non-empty default permissions. A vulnerability was found in Moby (Docker Engine) where containers were started incorrectly with non-empty inheritable Linux process capabilities. This flaw allows an attacker with access to programs with inheritable file capabilities to elevate those capabilities to the permitted set when execve(2) runs.
-206815,ImageMagick,c111ed9b035532c2c81ea569f2d22fded9517287,https://github.com/ImageMagick/ImageMagick,https://github.com/ImageMagick/ImageMagick/commit/c111ed9b035532c2c81ea569f2d22fded9517287,https://github.com/ImageMagick/ImageMagick/issues/1540,1,1,"**Step-by-Step Analysis**
+206815,ImageMagick,c111ed9b035532c2c81ea569f2d22fded9517287,https://github.com/ImageMagick/ImageMagick,https://github.com/ImageMagick/ImageMagick/commit/c111ed9b035532c2c81ea569f2d22fded9517287,https://github.com/ImageMagick/ImageMagick/issues/1540,1,0,"**Step-by-Step Analysis**
 
 ### 1. **Code Overview**
 The provided code is a C function `SetGrayscaleImage` from the ImageMagick library, which is responsible for converting an image to grayscale. It involves manipulating image data, colorspaces, and memory allocation.
@@ -18574,7 +18574,7 @@ Solution:   Do not set VALID_BOTLINE in w_valid.",1,0,"**Step-by-Step Analysis**
 **Result: (2) NO: No vulnerability.**
 
 **Note**: This analysis is limited to the provided code snippet and does not consider the broader application context, which might introduce vulnerabilities not visible here. For a comprehensive security assessment, a full code review and dynamic analysis would be necessary.",['CWE-122'],CVE-2021-3903,vim is vulnerable to Heap-based Buffer Overflow
-194989,ImageMagick6,450949ed017f009b399c937cf362f0058eacc5fa,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/450949ed017f009b399c937cf362f0058eacc5fa,Pull request: https://github.com/ImageMagick/ImageMagick/pull/4963,1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+194989,ImageMagick6,450949ed017f009b399c937cf362f0058eacc5fa,https://github.com/ImageMagick/ImageMagick6,https://github.com/ImageMagick/ImageMagick6/commit/450949ed017f009b399c937cf362f0058eacc5fa,Pull request: https://github.com/ImageMagick/ImageMagick/pull/4963,1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -18615,7 +18615,7 @@ Fixes: c486682ae1e2 (""rpmsg: virtio: Register the rpmsg_char device"")
 Signed-off-by: Hangyu Hua <hbh25y@gmail.com>
 Tested-by: Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>
 Link: https://lore.kernel.org/r/20220426060536.15594-3-hbh25y@gmail.com
-Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>",1,1,"Let's analyze the provided code step-by-step from a **static program analysis** and **security** perspective.
+Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>",1,0,"Let's analyze the provided code step-by-step from a **static program analysis** and **security** perspective.
 
 ---
 
@@ -18756,7 +18756,7 @@ Based on the provided code snippet and analysis, there are no clear, critical vu
 each attribute a potential name and value.
 
 Fixes Issues #0000617 http://bugs.librdf.org/mantis/view.php?id=617
-and #0000618 http://bugs.librdf.org/mantis/view.php?id=618",1,1,"**Step-by-Step Analysis**
+and #0000618 http://bugs.librdf.org/mantis/view.php?id=618",1,0,"**Step-by-Step Analysis**
 
 1. **Code Overview**:
 	* The provided code is a function `raptor_xml_writer_start_element_common` which appears to be part of a library (likely Raptor) for handling XML writing.
@@ -18883,7 +18883,7 @@ CVE-2020-14361 ZDI-CAN 11573
 This vulnerability was discovered by:
 Jan-Niklas Sohn working with Trend Micro Zero Day Initiative
 
-Signed-off-by: Matthieu Herrb <matthieu@herrb.eu>",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Signed-off-by: Matthieu Herrb <matthieu@herrb.eu>",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -18941,7 +18941,7 @@ Reviewed-by: Rich Salz <rsalz@openssl.org>
 
 Conflicts:
 	ssl/ssl.h
-	ssl/ssl_err.c",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+	ssl/ssl_err.c",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Overview**
 ----------------
@@ -18995,7 +18995,7 @@ if (ticklen > MAX_TICKET_LENGTH) { // Define MAX_TICKET_LENGTH appropriately
 This validation would mitigate the identified vulnerability.",['CWE-362'],CVE-2015-1791,"Race condition in the ssl3_get_new_session_ticket function in ssl/s3_clnt.c in OpenSSL before 0.9.8zg, 1.0.0 before 1.0.0s, 1.0.1 before 1.0.1n, and 1.0.2 before 1.0.2b, when used for a multi-threaded client, allows remote attackers to cause a denial of service (double free and application crash) or possibly have unspecified other impact by providing a NewSessionTicket during an attempt to reuse a ticket that had been obtained earlier."
 216027,tar,cb07844454d8cc9fb21f53ace75975f91185a120,http://git.savannah.gnu.org/cgit/tar,http://git.savannah.gnu.org/cgit/tar.git/commit/?id=cb07844454d8cc9fb21f53ace75975f91185a120,"Fix possible NULL dereference (savannah bug #55369)
 
-* src/sparse.c (pax_decode_header): Check return from find_next_block.",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+* src/sparse.c (pax_decode_header): Check return from find_next_block.",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -19071,7 +19071,7 @@ The code appears to be robust, with thorough input validation, proper memory man
 
 * Reported by @hdthky via huntr.dev
 * Reproducers: poc1
-* BountyID: 8ae2c61a-2220-47a5-bfe8-fe6d41ab1f82",1,1,"**Step-by-Step Analysis**
+* BountyID: 8ae2c61a-2220-47a5-bfe8-fe6d41ab1f82",1,0,"**Step-by-Step Analysis**
 
 ### 1. **Code Overview**
 The provided code is a C function named `create_cache_bins`, which appears to be part of a larger system involved in processing dyld (dynamic linker) cache files, commonly found in macOS and iOS systems. The function's primary purpose is to create a list of binary images (`RList *bins`) from a given dyld cache.
@@ -19213,7 +19213,7 @@ Based on the analysis:
 2. **Validate `len` Against Buffer Size**: Ensure `len` is within the bounds of the `data` buffer before `fread`.
 3. **Sanitize Input for Memory Allocation**: Ensure `jh->wide*jh->clrs` is within reasonable and expected bounds before allocation.
 4. **Enhance Error Handling**: Consider more comprehensive error handling for all potential failure points.",['CWE-189'],CVE-2015-3885,"Integer overflow in the ljpeg_start function in dcraw 7.00 and earlier allows remote attackers to cause a denial of service (crash) via a crafted image, which triggers a buffer overflow, related to the len variable."
-195740,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,1,1,"**Step-by-Step Analysis**
+195740,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,1,0,"**Step-by-Step Analysis**
 
 1. **Code Overview**:
 	* The provided code is a method `ParseMCU` within a class `SampleInterleavedLSScan`.
@@ -19546,7 +19546,7 @@ Given the potential risks identified, especially the use of `sprintf` and the la
 When verifying a digest it is important not to leak timing information
 through memcmp(). Use crypto_memneq() instead.
 
-Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities:
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities:
 
 **Code Snippet:**
 ```c
@@ -20553,7 +20553,7 @@ However, this assessment is contingent upon the assumptions mentioned above bein
 197262,tensorflow,e6cf28c72ba2eb949ca950d834dd6d66bb01cfae,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/e6cf28c72ba2eb949ca950d834dd6d66bb01cfae,"Validate that matrix dimension sizes in SparseMatMul are positive.
 
 PiperOrigin-RevId: 401149683
-Change-Id: Ib33eafc561a39c8741ece80b2edce6d4aae9a57d",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Change-Id: Ib33eafc561a39c8741ece80b2edce6d4aae9a57d",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 
@@ -20600,7 +20600,7 @@ Based on the step-by-step analysis, focusing on common vulnerabilities such as m
 **(2) NO: No vulnerability.**
 
 **Note:** This analysis is based on the provided code snippet and assumes that all external functions and libraries used are secure and correctly implemented. A more comprehensive review would involve examining the entire codebase, including `DoMatMul` and other utility functions.",['CWE-125'],CVE-2021-41219,"TensorFlow is an open source platform for machine learning. In affected versions the code for sparse matrix multiplication is vulnerable to undefined behavior via binding a reference to `nullptr`. This occurs whenever the dimensions of `a` or `b` are 0 or less. In the case on one of these is 0, an empty output tensor should be allocated (to conserve the invariant that output tensors are always allocated when the operation is successful) but nothing should be written to it (that is, we should return early from the kernel implementation). Otherwise, attempts to write to this empty tensor would result in heap OOB access. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range."
-199767,hexchat,4e061a43b3453a9856d34250c3913175c45afe9d,https://github.com/hexchat/hexchat,https://github.com/hexchat/hexchat/commit/4e061a43b3453a9856d34250c3913175c45afe9d,Clean up handling CAP LS,1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities, focusing on common issues in C and the context of IRC (Internet Relay Chat) protocol handling.
+199767,hexchat,4e061a43b3453a9856d34250c3913175c45afe9d,https://github.com/hexchat/hexchat,https://github.com/hexchat/hexchat/commit/4e061a43b3453a9856d34250c3913175c45afe9d,Clean up handling CAP LS,1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities, focusing on common issues in C and the context of IRC (Internet Relay Chat) protocol handling.
 
 ### Step-by-Step Analysis
 
@@ -21067,7 +21067,7 @@ Given the information and focusing strictly on the provided code snippet:
 Prevents an integer overflow that was not caught before.
 
 PiperOrigin-RevId: 415381595
-Change-Id: I76585ddedc912bd9f4a390aeafa8e2ced1a28863",1,1,"Let's analyze the provided code step-by-step for potential vulnerabilities.
+Change-Id: I76585ddedc912bd9f4a390aeafa8e2ced1a28863",1,0,"Let's analyze the provided code step-by-step for potential vulnerabilities.
 
 **Code Overview**
 The code is a method `Compute` in a class, likely part of a TensorFlow operation (OpKernel), designed to process sparse tensors. It performs several checks, manipulates tensor shapes, and creates sparse tensors for output.
@@ -21197,7 +21197,7 @@ Based on the analysis:
 3. **Error Handling:** Consider more explicit error handling and logging for incomplete or invalid types to avoid silent failures.",['CWE-125'],CVE-2022-23592,Tensorflow is an Open Source Machine Learning Framework. TensorFlow's type inference can cause a heap out of bounds read as the bounds checking is done in a `DCHECK` (which is a no-op during production). An attacker can control the `input_idx` variable such that `ix` would be larger than the number of values in `node_t.args`. The fix will be included in TensorFlow 2.8.0. This is the only affected version.
 195038,mruby,27d1e0132a0804581dca28df042e7047fd27eaa8,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/27d1e0132a0804581dca28df042e7047fd27eaa8,"array.c: fix `mrb_ary_shift_m` initialization bug.
 
-The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",1,1,"Let's analyze the provided code step-by-step to determine if there's a vulnerability.
+The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",1,0,"Let's analyze the provided code step-by-step to determine if there's a vulnerability.
 
 **Code Overview**
 
@@ -21322,7 +21322,7 @@ Given these points, the most clear-cut issue in terms of vulnerability, assuming
 195059,tensorflow,92dba16749fae36c246bec3f9ba474d9ddeb7662,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/92dba16749fae36c246bec3f9ba474d9ddeb7662,"Prevent a null-pointer dereference / `CHECK`-fail in grappler.
 
 PiperOrigin-RevId: 409187354
-Change-Id: I369c249cca32e6c56ec193f0ebbf2f2768fc7d43",1,1,"Let's analyze the provided code step-by-step to determine if there's a vulnerability.
+Change-Id: I369c249cca32e6c56ec193f0ebbf2f2768fc7d43",1,0,"Let's analyze the provided code step-by-step to determine if there's a vulnerability.
 
 **Code Overview**
 

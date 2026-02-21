@@ -31,7 +31,7 @@ vulnerability_detection,MA,instruct,few-shot,53.53,4
 vulnerability_detection,MA,instruct,zero-shot,66.78,4
 vulnerability_detection,MA,thinking,few-shot,57.03,4
 vulnerability_detection,MA,thinking,zero-shot,41.09,4
-vulnerability_detection,SA,instruct,few-shot,49.78,4
-vulnerability_detection,SA,instruct,zero-shot,39.9,4
-vulnerability_detection,SA,thinking,few-shot,48.46,4
-vulnerability_detection,SA,thinking,zero-shot,44.0,4
+vulnerability_detection,SA,instruct,few-shot,31.94,4
+vulnerability_detection,SA,instruct,zero-shot,29.92,4
+vulnerability_detection,SA,thinking,few-shot,43.04,4
+vulnerability_detection,SA,thinking,zero-shot,39.57,4

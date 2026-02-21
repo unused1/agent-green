@@ -1454,7 +1454,7 @@ The only clear vulnerability is the potential buffer overflow in the `strlcat` c
 Therefore, I conclude that there is a vulnerability in this code.
 
 (1) YES",['CWE-20'],CVE-2011-1678,"smbfs in Samba 3.5.8 and earlier attempts to use (1) mount.cifs to append to the /etc/mtab file and (2) umount.cifs to append to the /etc/mtab.tmp file without first checking whether resource limits would interfere, which allows local users to trigger corruption of the /etc/mtab file via a process with a small RLIMIT_FSIZE value, a related issue to CVE-2011-1089.",
-226029,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,0,1,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's a function called `gitn_box_del` that takes a `GF_Box *s` as a parameter. It's dealing with a structure called `GroupIdToNameBox`.
+226029,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,0,0,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's a function called `gitn_box_del` that takes a `GF_Box *s` as a parameter. It's dealing with a structure called `GroupIdToNameBox`.
 
 Here's the code:
 
@@ -1921,7 +1921,7 @@ No vulnerability is detected. The code is safe from the perspective of security 
 (2) NO: No vulnerability.",['CWE-476'],CVE-2021-4043,NULL Pointer Dereference in GitHub repository gpac/gpac prior to 1.1.0.,
 483469,mongo,a5e2f9b0a236462a6d1ca129583c617f111367b4,https://github.com/mongodb/mongo,https://github.com/mongodb/mongo/commit/a5e2f9b0a236462a6d1ca129583c617f111367b4,"SERVER-59071 Treat '$sample' as unsharded when connecting directly to shards
 
-(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",0,1,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues or vulnerabilities.
+(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",0,0,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues or vulnerabilities.
 
 First, let me understand what this code does. It appears to be part of a database system (likely MongoDB based on the code structure and terms like ""CollectionPtr"", ""RecordStore"", ""sharded collections"", etc.) that creates a random cursor executor for sampling records.
 
@@ -17146,7 +17146,7 @@ Now, let's look for potential vulnerabilities:
    - Memory leaks are explicitly classified as vulnerabilities in the problem's examples (Example 3), so this qualifies as a vulnerability.
 
 **Conclusion**: The code has a memory leak in error cases, making it vulnerable. **YES**.",['CWE-415'],CVE-2021-40571,"The binary MP4Box in Gpac 1.0.1 has a double-free vulnerability in the ilst_box_read function in box_code_apple.c, which allows attackers to cause a denial of service, even code execution and escalation of privileges.",
-250692,drogon,3c785326c63a34aa1799a639ae185bc9453cb447,https://github.com/drogonframework/drogon,https://github.com/drogonframework/drogon/commit/3c785326c63a34aa1799a639ae185bc9453cb447,Prevent malformed upload path causing arbitrary write (#1174),0,1,"We are given a code snippet from a class `HttpFileImpl` and we are to determine if there is a vulnerability (YES) or not (NO).
+250692,drogon,3c785326c63a34aa1799a639ae185bc9453cb447,https://github.com/drogonframework/drogon,https://github.com/drogonframework/drogon/commit/3c785326c63a34aa1799a639ae185bc9453cb447,Prevent malformed upload path causing arbitrary write (#1174),0,0,"We are given a code snippet from a class `HttpFileImpl` and we are to determine if there is a vulnerability (YES) or not (NO).
 
 Let's break down the code step by step:
 
@@ -44476,7 +44476,7 @@ This code is a code generator, not the application code being executed. It's gen
 After thorough analysis, I don't see any security vulnerabilities in this code generator itself. It's designed to safely generate code for a virtual machine with proper bounds checking and error handling for the operations it performs.
 
 (2) NO",['CWE-125'],CVE-2022-0717,Out-of-bounds Read in GitHub repository mruby/mruby prior to 3.2.,
-477946,clamav-devel,224fee54dd6cd8933d7007331ec2bfca0398d4b4,https://github.com/vrtadmin/clamav-devel,http://git.clamav.net/gitweb?p=clamav-devel.git;a=commit;h=224fee54dd6cd8933d7007331ec2bfca0398d4b4,libclamav/mspack.c: fix Quantum decompressor (bb#1771),0,1,"I need to analyze this C code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, use-after-free, null pointer dereferences, integer overflows, etc.
+477946,clamav-devel,224fee54dd6cd8933d7007331ec2bfca0398d4b4,https://github.com/vrtadmin/clamav-devel,http://git.clamav.net/gitweb?p=clamav-devel.git;a=commit;h=224fee54dd6cd8933d7007331ec2bfca0398d4b4,libclamav/mspack.c: fix Quantum decompressor (bb#1771),0,0,"I need to analyze this C code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, use-after-free, null pointer dereferences, integer overflows, etc.
 
 First, let me understand what this function does. It's a decompression function for some custom format (qtm). It takes a `qtm_stream` structure and an `out_bytes` parameter, which seems to be the number of bytes to decompress.
 
@@ -45350,7 +45350,7 @@ Cc: qemu-stable@nongnu.org
 Reviewed-by: Mark Cave-Ayland <mark.cave-ayland@ilande.co.uk>
 Reviewed-by: Philippe Mathieu-Daudé <philmd@redhat.com>
 Reviewed-by: Alistair Francis <alistair.francis@wdc.com>
-Signed-off-by: Jason Wang <jasowang@redhat.com>",0,1,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's part of a function called `sungem_send_packet` in what seems like a QEMU virtualization project. QEMU is a machine emulator, so this is probably related to network emulation.
+Signed-off-by: Jason Wang <jasowang@redhat.com>",0,0,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's part of a function called `sungem_send_packet` in what seems like a QEMU virtualization project. QEMU is a machine emulator, so this is probably related to network emulation.
 
 The function takes three parameters:
 - `SunGEMState *s`: a pointer to a state structure for the SunGEM network controller.
@@ -49597,7 +49597,7 @@ Final answer: (2) NO
 **Conclusion**: The code is safe from the perspective of static analysis for security vulnerabilities. It has robust input validation, safe indexing, and proper memory handling. **No vulnerability is detected.** 
 
 (2) NO",['CWE-787'],CVE-2022-21740,"Tensorflow is an Open Source Machine Learning Framework. The implementation of `SparseCountSparseOutput` is vulnerable to a heap overflow. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",
-506428,core,69ad3c902ea4bbf9f21ab1857d8923f975dc6145,https://github.com/LibreOffice/core,https://github.com/dovecot/core/commit/69ad3c902ea4bbf9f21ab1857d8923f975dc6145,auth: mech-rpa - Fail on zero len buffer,0,1,"First, I need to analyze this C function for vulnerabilities. The function is `rpa_read_buffer` which takes a pool, data pointers, end pointer, and buffer pointers.
+506428,core,69ad3c902ea4bbf9f21ab1857d8923f975dc6145,https://github.com/LibreOffice/core,https://github.com/dovecot/core/commit/69ad3c902ea4bbf9f21ab1857d8923f975dc6145,auth: mech-rpa - Fail on zero len buffer,0,0,"First, I need to analyze this C function for vulnerabilities. The function is `rpa_read_buffer` which takes a pool, data pointers, end pointer, and buffer pointers.
 
 Here's the code:
 
@@ -78585,7 +78585,7 @@ This is analogous to Example 1 (C vulnerable), where `strcpy` lacks bounds check
 No other vulnerabilities (e.g., memory leaks, use-after-free) are present in this code snippet. The vulnerability is explicitly a buffer overflow due to unsafe `memcpy` usage.  
 
 **Answer:** YES",['CWE-125'],CVE-2022-37032,An out-of-bounds read in the BGP daemon of FRRouting FRR before 8.4 may lead to a segmentation fault and denial of service. This occurs in bgp_capability_msg_parse in bgpd/bgp_packet.c.,
-195984,gpac,3dbe11b37d65c8472faf0654410068e5500b3adb,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/3dbe11b37d65c8472faf0654410068e5500b3adb,fixed #2175,1,1,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's part of a function called `diST_box_read` in what seems like a multimedia processing library (probably related to MPEG or something similar, given the GF_ prefixes).
+195984,gpac,3dbe11b37d65c8472faf0654410068e5500b3adb,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/3dbe11b37d65c8472faf0654410068e5500b3adb,fixed #2175,1,0,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's part of a function called `diST_box_read` in what seems like a multimedia processing library (probably related to MPEG or something similar, given the GF_ prefixes).
 
 Here's the code snippet:
 
@@ -83921,7 +83921,7 @@ Let me write the answer.
           has several discontigious number spaces, allocating from
           different parts of a space is not uncommon (e.g. IANA
           assigned versus vendor-assigned code points in some number
-          space).",1,1,"We are given a function `bgp_capability_msg_parse` that processes a BGP capability message.
+          space).",1,0,"We are given a function `bgp_capability_msg_parse` that processes a BGP capability message.
 
 The goal is to determine if there is a vulnerability (using the examples as a guide). We are to respond with (1) YES if a vulnerability is detected, or (2) NO if not.
 
@@ -91422,7 +91422,7 @@ Let's think about potential issues:
 **Conclusion**: The function performs safe, bounded validation of the header without any buffer overflows, memory leaks, or other vulnerabilities relevant to the canonical examples. It correctly handles input validation and network byte order. **No vulnerability is detected.** 
 
 (2) NO",['CWE-125'],CVE-2022-23645,"swtpm is a libtpms-based TPM emulator with socket, character device, and Linux CUSE interface. Versions prior to 0.5.3, 0.6.2, and 0.7.1 are vulnerable to out-of-bounds read. A specially crafted header of swtpm's state, where the blobheader's hdrsize indicator has an invalid value, may cause an out-of-bounds access when the byte array representing the state of the TPM is accessed. This will likely crash swtpm or prevent it from starting since the state cannot be understood. Users should upgrade to swtpm v0.5.3, v0.6.2, or v0.7.1 to receive a patch. There are currently no known workarounds.",
-207990,pcre2,03654e751e7f0700693526b67dfcadda6b42c9d0,https://github.com/PCRE2Project/pcre2,https://github.com/PCRE2Project/pcre2/commit/03654e751e7f0700693526b67dfcadda6b42c9d0,Fixed an issue affecting recursions in JIT,1,1,"I need to analyze this C code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, use-after-free, null pointer dereferences, integer overflows, etc.
+207990,pcre2,03654e751e7f0700693526b67dfcadda6b42c9d0,https://github.com/PCRE2Project/pcre2,https://github.com/PCRE2Project/pcre2/commit/03654e751e7f0700693526b67dfcadda6b42c9d0,Fixed an issue affecting recursions in JIT,1,0,"I need to analyze this C code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, use-after-free, null pointer dereferences, integer overflows, etc.
 
 First, let me understand what this function does. It seems to be part of a PCRE2 (Perl Compatible Regular Expressions) implementation. The function `get_recurse_data_length` calculates the length of some data structure related to recursive patterns in regex.
 
@@ -95763,7 +95763,7 @@ After a thorough static analysis of the provided code, I identified no buffer ov
 
 Check that input is actually a scalar before treating it as such.
 
-PiperOrigin-RevId: 445524908",1,1,"First, I need to analyze this code for vulnerabilities using static analysis. The code is in C++ and it's part of a TensorFlow OpKernelContext, which is used for custom kernels in TensorFlow.
+PiperOrigin-RevId: 445524908",1,0,"First, I need to analyze this code for vulnerabilities using static analysis. The code is in C++ and it's part of a TensorFlow OpKernelContext, which is used for custom kernels in TensorFlow.
 
 The code snippet is:
 
@@ -96077,7 +96077,7 @@ The code is robust against common vulnerabilities due to TensorFlow's built-in e
 - Add neighbor value check in stl_remove_degenerate
 
 Fixes https://github.com/admesh/admesh/issues/28
-Merges https://github.com/admesh/admesh/pull/55",1,1,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's part of a function called `stl_update_connects_remove_1`. It's dealing with an STL file structure.
+Merges https://github.com/admesh/admesh/pull/55",1,0,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's part of a function called `stl_update_connects_remove_1`. It's dealing with an STL file structure.
 
 Here's the code:
 
@@ -105541,7 +105541,7 @@ I think that's it.
    - This code is vulnerable for a similar reason to Example 3: it fails to handle a critical edge case (null pointer) that could lead to undefined behavior, which is a security risk.
 
 **Conclusion**: The code has a null pointer dereference vulnerability that could cause crashes under invalid inputs. Therefore, the result is **(1) YES**.",['CWE-476'],CVE-2022-23589,"Tensorflow is an Open Source Machine Learning Framework. Under certain scenarios, Grappler component of TensorFlow can trigger a null pointer dereference. There are 2 places where this can occur, for the same malicious alteration of a `SavedModel` file (fixing the first one would trigger the same dereference in the second place). First, during constant folding, the `GraphDef` might not have the required nodes for the binary operation. If a node is missing, the correposning `mul_*child` would be null, and the dereference in the subsequent line would be incorrect. We have a similar issue during `IsIdentityConsumingSwitch`. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",
-211567,clamav-devel,c6870a6c857dd722dffaf6d37ae52ec259d12492,https://github.com/vrtadmin/clamav-devel,https://github.com/vrtadmin/clamav-devel/commit/c6870a6c857dd722dffaf6d37ae52ec259d12492,bb #6808,1,1,"We are given a function `getsistring` that reads a string from a file and returns a null-terminated string.
+211567,clamav-devel,c6870a6c857dd722dffaf6d37ae52ec259d12492,https://github.com/vrtadmin/clamav-devel,https://github.com/vrtadmin/clamav-devel/commit/c6870a6c857dd722dffaf6d37ae52ec259d12492,bb #6808,1,0,"We are given a function `getsistring` that reads a string from a file and returns a null-terminated string.
 
 Let's break down the function step by step:
 
@@ -106184,7 +106184,7 @@ The code does not contain any security vulnerabilities (e.g., buffer overflows, 
 (2) NO",['CWE-787'],CVE-2020-20276,An unauthenticated stack-based buffer overflow vulnerability in common.c's handle_PORT in uftpd FTP server versions 2.10 and earlier can be abused to cause a crash and could potentially lead to remote code execution.,
 215103,mongo,a5e2f9b0a236462a6d1ca129583c617f111367b4,https://github.com/mongodb/mongo,https://github.com/mongodb/mongo/commit/a5e2f9b0a236462a6d1ca129583c617f111367b4,"SERVER-59071 Treat '$sample' as unsharded when connecting directly to shards
 
-(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",1,1,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues or vulnerabilities.
+(cherry picked from commit f3604b901d688c194de5e430c7fbab060c9dc8e0)",1,0,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues or vulnerabilities.
 
 First, let me understand what this code does. It appears to be a function in a database system (likely MongoDB) that creates a random cursor executor for sampling records. It handles various conditions for sharded collections and time-series bucket collections.
 
@@ -106804,7 +106804,7 @@ restored.
 
 The fix is to erase fields for the spare memory from the saved frame.
 
-This closes #469 issue on Github.",1,1,"We are given a function `njs_function_frame_save` in C (likely for a JavaScript engine) and we need to check for vulnerabilities.
+This closes #469 issue on Github.",1,0,"We are given a function `njs_function_frame_save` in C (likely for a JavaScript engine) and we need to check for vulnerabilities.
 
 The goal is to do static analysis to see if there is a vulnerability (like buffer overflow, use-after-free, etc.) that would be detected by the canonical examples.
 
@@ -114466,7 +114466,7 @@ Fixes: c486682ae1e2 (""rpmsg: virtio: Register the rpmsg_char device"")
 Signed-off-by: Hangyu Hua <hbh25y@gmail.com>
 Tested-by: Arnaud Pouliquen <arnaud.pouliquen@foss.st.com>
 Link: https://lore.kernel.org/r/20220426060536.15594-3-hbh25y@gmail.com
-Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>",1,1,"We are given a function `rpmsg_virtio_add_ctrl_dev` in C (kernel context) and we need to check for vulnerabilities.
+Signed-off-by: Mathieu Poirier <mathieu.poirier@linaro.org>",1,0,"We are given a function `rpmsg_virtio_add_ctrl_dev` in C (kernel context) and we need to check for vulnerabilities.
 
 Let's break down the function:
 
@@ -116965,7 +116965,7 @@ This code is structurally sound and implements the same safety patterns as the s
 
 * Reported by @hdthky via huntr.dev
 * Reproducers: poc1
-* BountyID: 8ae2c61a-2220-47a5-bfe8-fe6d41ab1f82",1,1,"We are given a function `create_cache_bins` that is written in C (the code uses C-style functions and types, and the context is a binary analysis tool). We are to determine if there is a vulnerability (YES) or not (NO).
+* BountyID: 8ae2c61a-2220-47a5-bfe8-fe6d41ab1f82",1,0,"We are given a function `create_cache_bins` that is written in C (the code uses C-style functions and types, and the context is a binary analysis tool). We are to determine if there is a vulnerability (YES) or not (NO).
 
 Let's break down the code and look for common vulnerabilities:
 
@@ -117300,7 +117300,7 @@ Required by virtio 1.
 
 Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
 Reviewed-by: Amit Shah <amit.shah@redhat.com>
-Reviewed-by: Jason Wang <jasowang@redhat.com>",1,1,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's part of a VirtIO serial driver. The function is `send_control_msg`, which takes a `VirtIOSerial` pointer, a buffer `buf`, and a length `len`.
+Reviewed-by: Jason Wang <jasowang@redhat.com>",1,0,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's part of a VirtIO serial driver. The function is `send_control_msg`, which takes a `VirtIOSerial` pointer, a buffer `buf`, and a length `len`.
 
 Here's the code:
 

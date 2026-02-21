@@ -1529,7 +1529,7 @@ In this code, the `strlcat` calls are used safely with the size parameter, and t
 After careful analysis, I don't see any vulnerabilities in this code. The `strlcat` calls are correctly implemented with the size parameter, and the code follows good practices for memory management and error handling.
 
 (2) NO",['CWE-20'],CVE-2011-1678,"smbfs in Samba 3.5.8 and earlier attempts to use (1) mount.cifs to append to the /etc/mtab file and (2) umount.cifs to append to the /etc/mtab.tmp file without first checking whether resource limits would interfere, which allows local users to trigger corruption of the /etc/mtab file via a process with a small RLIMIT_FSIZE value, a related issue to CVE-2011-1089."
-226029,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,0,1,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's a function called `gitn_box_del` that takes a `GF_Box *s` as a parameter. It's dealing with a structure called `GroupIdToNameBox`.
+226029,gpac,64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/64a2e1b799352ac7d7aad1989bc06e7b0f2b01db,fixed #2092,0,0,"First, I need to analyze this code for vulnerabilities. The code is in C, and it's a function called `gitn_box_del` that takes a `GF_Box *s` as a parameter. It's dealing with a structure called `GroupIdToNameBox`.
 
 Here's the code:
 
@@ -31870,7 +31870,7 @@ After a thorough static analysis of the provided code, I have identified no vuln
 **Conclusion**: The code correctly handles all edge cases (e.g., large OBU sizes are filtered by the loop condition), validates inputs, and follows safe resource management patterns. There are no buffer overflows, memory leaks, or other vulnerabilities.
 
 (2) NO",['CWE-415'],CVE-2021-40571,"The binary MP4Box in Gpac 1.0.1 has a double-free vulnerability in the ilst_box_read function in box_code_apple.c, which allows attackers to cause a denial of service, even code execution and escalation of privileges."
-250692,drogon,3c785326c63a34aa1799a639ae185bc9453cb447,https://github.com/drogonframework/drogon,https://github.com/drogonframework/drogon/commit/3c785326c63a34aa1799a639ae185bc9453cb447,Prevent malformed upload path causing arbitrary write (#1174),0,1,"We are given a code snippet from a class `HttpFileImpl` and we are to determine if there is a vulnerability (YES) or not (NO).
+250692,drogon,3c785326c63a34aa1799a639ae185bc9453cb447,https://github.com/drogonframework/drogon,https://github.com/drogonframework/drogon/commit/3c785326c63a34aa1799a639ae185bc9453cb447,Prevent malformed upload path causing arbitrary write (#1174),0,0,"We are given a code snippet from a class `HttpFileImpl` and we are to determine if there is a vulnerability (YES) or not (NO).
 
 Let's break down the code step by step:
 
@@ -33377,7 +33377,7 @@ After a step-by-step static analysis of the provided `PlayerGeneric` destructor 
 (2) NO",['CWE-416'],CVE-2020-15569,PlayerGeneric.cpp in MilkyTracker through 1.02.00 has a use-after-free in the PlayerGeneric destructor.
 220442,mruby,27d1e0132a0804581dca28df042e7047fd27eaa8,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/27d1e0132a0804581dca28df042e7047fd27eaa8,"array.c: fix `mrb_ary_shift_m` initialization bug.
 
-The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",0,1,"We are given a function `mrb_ary_shift_m` from the MRI (MRI is the Ruby implementation) for the `mrb` (mrb) library. We are to analyze for vulnerabilities.
+The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",0,0,"We are given a function `mrb_ary_shift_m` from the MRI (MRI is the Ruby implementation) for the `mrb` (mrb) library. We are to analyze for vulnerabilities.
 
 The function is intended to shift an array by `n` elements. Let's break down the code step by step.
 
@@ -44396,7 +44396,7 @@ Let's go through the code:
 The code follows QUIC protocol best practices for handshake state updates. It validates inputs, transfers ownership safely via `std::move`, handles errors explicitly, and avoids common pitfalls (buffer overflows, null dereferences, leaks). No vulnerability is present that could be exploited by an attacker through static analysis.
 
 **Conclusion**: The code is safe. Response: (2) NO.",['CWE-703'],CVE-2021-24029,"A packet of death scenario is possible in mvfst via a specially crafted message during a QUIC session, which causes a crash via a failed assertion. Per QUIC specification, this particular message should be treated as a connection error. This issue affects mvfst versions prior to commit a67083ff4b8dcbb7ee2839da6338032030d712b0 and proxygen versions prior to v2021.03.15.00."
-232287,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,0,1,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
+232287,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,0,0,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
 
 First, let me understand what this code does. It appears to be part of a video codec or image processing library (given the terms like ""MCU"", ""Line"", ""Frame"", ""Golomb coding"", etc.). The function `ParseMCU` processes some data related to ""MCU"" (which in image processing often refers to Minimum Coded Unit).
 
@@ -51762,7 +51762,7 @@ Answer: (2) NO
 (2) NO",['CWE-369'],CVE-2022-23557,"Tensorflow is an Open Source Machine Learning Framework. An attacker can craft a TFLite model that would trigger a division by zero in `BiasAndClamp` implementation. There is no check that the `bias_size` is non zero. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
 274865,tensorflow,a989426ee1346693cc015792f11d715f6944f2b8,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/a989426ee1346693cc015792f11d715f6944f2b8,"Improve to cover scale value greater than one
 
-PiperOrigin-RevId: 433050921",0,1,"We are given a function `ComparisonQuantized` that is part of a TensorFlow Lite (TFLite) implementation. The function handles quantized comparisons between two tensors (input1 and input2) and produces a boolean output tensor.
+PiperOrigin-RevId: 433050921",0,0,"We are given a function `ComparisonQuantized` that is part of a TensorFlow Lite (TFLite) implementation. The function handles quantized comparisons between two tensors (input1 and input2) and produces a boolean output tensor.
 
 The goal is to determine if there is a vulnerability (like a buffer overflow, memory leak, etc.) in this code. We are to respond with (1) YES if a vulnerability is detected, or (2) NO if not.
 
@@ -51922,7 +51922,7 @@ Final answer: (2) NO
 **Final Answer**: (2) NO (No vulnerability detected).",['CWE-703'],CVE-2022-29212,"TensorFlow is an open source platform for machine learning. Prior to versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4, certain TFLite models that were created using TFLite model converter would crash when loaded in the TFLite interpreter. The culprit is that during quantization the scale of values could be greater than 1 but code was always assuming sub-unit scaling. Thus, since code was calling `QuantizeMultiplierSmallerThanOneExp`, the `TFLITE_CHECK_LT` assertion would trigger and abort the process. Versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4 contain a patch for this issue."
 225383,v4l2loopback,e4cd225557486c420f6a34411f98c575effd43dd,https://github.com/umlaeute/v4l2loopback,https://github.com/umlaeute/v4l2loopback/commit/e4cd225557486c420f6a34411f98c575effd43dd,"add explicit format specifier to printf() invocations
 
-CWE-134",0,1,"We are given a function `vidioc_querycap` from a kernel module (v4l2loopback driver). We are to determine if there is a vulnerability (YES) or not (NO).
+CWE-134",0,0,"We are given a function `vidioc_querycap` from a kernel module (v4l2loopback driver). We are to determine if there is a vulnerability (YES) or not (NO).
 
 Let's break down the function:
 
@@ -71071,7 +71071,7 @@ Now, let's think about potential vulnerabilities:
 232839,tensorflow,8a84f7a2b5a2b27ecf88d25bad9ac777cd2f7992,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/8a84f7a2b5a2b27ecf88d25bad9ac777cd2f7992,"Ensure num_streams >= 0 in tf.raw_ops.BoostedTreesCreateQuantileStreamResource
 
 PiperOrigin-RevId: 387452765
-Change-Id: I9990c760e177fabca6a3b9b4612ceeaeeba51495",0,1,"First, I need to analyze this code for vulnerabilities using static analysis. The code is from a TensorFlow OpKernelContext, specifically in the Compute method of a custom kernel.
+Change-Id: I9990c760e177fabca6a3b9b4612ceeaeeba51495",0,0,"First, I need to analyze this code for vulnerabilities using static analysis. The code is from a TensorFlow OpKernelContext, specifically in the Compute method of a custom kernel.
 
 The code does the following:
 
@@ -73376,7 +73376,7 @@ The code is well-structured and follows common safe practices for network packet
 After a thorough review of the code, I don't see any vulnerabilities. The code has all the necessary checks to prevent common security issues.
 
 (2) NO",['CWE-125'],CVE-2021-43845,"PJSIP is a free and open source multimedia communication library. In version 2.11.1 and prior, if incoming RTCP XR message contain block, the data field is not checked against the received packet size, potentially resulting in an out-of-bound read access. This affects all users that use PJMEDIA and RTCP XR. A malicious actor can send a RTCP XR message with an invalid packet size."
-453109,libexpat,a2fe525e660badd64b6c557c2b1ec26ddc07f6e4,https://github.com/libexpat/libexpat,https://github.com/libexpat/libexpat/commit/a2fe525e660badd64b6c557c2b1ec26ddc07f6e4,lib: Protect against malicious namespace declarations (CVE-2022-25236),0,1,"I need to analyze this C code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, memory leaks, use-after-free, etc.
+453109,libexpat,a2fe525e660badd64b6c557c2b1ec26ddc07f6e4,https://github.com/libexpat/libexpat,https://github.com/libexpat/libexpat/commit/a2fe525e660badd64b6c557c2b1ec26ddc07f6e4,lib: Protect against malicious namespace declarations (CVE-2022-25236),0,0,"I need to analyze this C code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, memory leaks, use-after-free, etc.
 
 First, let me understand what this function does. It seems to be part of an XML parser implementation (likely Expat or similar) that handles namespace bindings. The function `addBinding` takes several parameters including a parser, a prefix, an attribute ID, a URI, and a pointer to bindings.
 
@@ -79322,7 +79322,7 @@ Fixed this by adding this logic in
 st_select_lex::optimize_unflattened_subqueries():
 
   If a member of a UNION is correlated, mark all its members as
-  correlated, so that they are prepared to be executed multiple times.",0,1,"I need to analyze this C++ code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
+  correlated, so that they are prepared to be executed multiple times.",0,0,"I need to analyze this C++ code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
 
 First, let me understand what this code does. It appears to be part of a database query optimizer (likely MySQL) that handles subqueries and unions. The function `st_select_lex::optimize_unflattened_subqueries` is processing subqueries in a query plan.
 
@@ -88437,7 +88437,7 @@ Final decision: (2) NO.
 (2) NO",['CWE-120'],CVE-2021-28972,"In drivers/pci/hotplug/rpadlpar_sysfs.c in the Linux kernel through 5.11.8, the RPA PCI Hotplug driver has a user-tolerable buffer overflow when writing a new device name to the driver from userspace, allowing userspace to write data to the kernel stack frame directly. This occurs because add_slot_store and remove_slot_store mishandle drc_name '\0' termination, aka CID-cc7a0bb058b8."
 509510,server,9e39d0ae44595dbd1570805d97c9c874778a6be8,https://github.com/MariaDB/server,https://github.com/MariaDB/server/commit/9e39d0ae44595dbd1570805d97c9c874778a6be8,"MDEV-25787 Bug report: crash on SELECT DISTINCT thousands_blob_fields
 
-fix a debug assert to account for not opened temp tables",0,1,"First, I need to analyze the given code for vulnerabilities. The code is from a function called `ha_maria::drop_table` in what seems like a MariaDB or similar database context. The function takes a `const char *name` as an argument.
+fix a debug assert to account for not opened temp tables",0,0,"First, I need to analyze the given code for vulnerabilities. The code is from a function called `ha_maria::drop_table` in what seems like a MariaDB or similar database context. The function takes a `const char *name` as an argument.
 
 Here's the code:
 
@@ -90230,7 +90230,7 @@ Therefore, we respond with (1) YES.
 **Conclusion**: The code has a **critical out-of-bounds vulnerability** due to unvalidated `splits` tensor. This meets the criteria for a vulnerability detection. 
 
 (1) YES",['CWE-787'],CVE-2022-21740,"Tensorflow is an Open Source Machine Learning Framework. The implementation of `SparseCountSparseOutput` is vulnerable to a heap overflow. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range."
-506428,core,69ad3c902ea4bbf9f21ab1857d8923f975dc6145,https://github.com/LibreOffice/core,https://github.com/dovecot/core/commit/69ad3c902ea4bbf9f21ab1857d8923f975dc6145,auth: mech-rpa - Fail on zero len buffer,0,1,"First, I need to analyze this C function for vulnerabilities. The function is `rpa_read_buffer` which takes a pool, data pointers, end pointer, and buffer pointer. It's supposed to read data from a buffer.
+506428,core,69ad3c902ea4bbf9f21ab1857d8923f975dc6145,https://github.com/LibreOffice/core,https://github.com/dovecot/core/commit/69ad3c902ea4bbf9f21ab1857d8923f975dc6145,auth: mech-rpa - Fail on zero len buffer,0,0,"First, I need to analyze this C function for vulnerabilities. The function is `rpa_read_buffer` which takes a pool, data pointers, end pointer, and buffer pointer. It's supposed to read data from a buffer.
 
 Here's the code:
 
@@ -118451,7 +118451,7 @@ Suggested-by: Al Viro <viro@zeniv.linux.org.uk>
 Reported-by: Qualys Security Advisory <qsa@qualys.com>
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 Cc: stable@kernel.org
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",1,1,"First, I need to analyze the given code snippet for vulnerabilities. The code is:
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>",1,0,"First, I need to analyze the given code snippet for vulnerabilities. The code is:
 
 ```c
 static void *seq_buf_alloc(unsigned long size)
@@ -118917,7 +118917,7 @@ static void *seq_buf_alloc(unsigned long size)
 196846,tensorflow,1e206baedf8bef0334cca3eb92bab134ef525a28,https://github.com/tensorflow/tensorflow,https://github.com/tensorflow/tensorflow/commit/1e206baedf8bef0334cca3eb92bab134ef525a28,"Prevent a division by 0 in division ops.
 
 PiperOrigin-RevId: 385223169
-Change-Id: Ia4228960b5d2aa44480385f74bdd70d21a3613c3",1,1,"First, I need to analyze this code for vulnerabilities using static analysis. The code is in C++ and it's part of TensorFlow Lite's evaluation function for a division operation.
+Change-Id: Ia4228960b5d2aa44480385f74bdd70d21a3613c3",1,0,"First, I need to analyze this code for vulnerabilities using static analysis. The code is in C++ and it's part of TensorFlow Lite's evaluation function for a division operation.
 
 The code does the following:
 
@@ -128321,7 +128321,7 @@ No other vulnerabilities (e.g., integer overflows, use-after-free, null pointer 
 We don't own the reference here, it is owned by the caller and given to
 us for the scope of this function. Leftover mistake from 0.10 porting.
 
-https://bugzilla.gnome.org/show_bug.cgi?id=774897",1,1,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, memory leaks, use-after-free, null pointer dereferences, etc.
+https://bugzilla.gnome.org/show_bug.cgi?id=774897",1,0,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, memory leaks, use-after-free, null pointer dereferences, etc.
 
 First, let me understand what this code does. It appears to be part of a GStreamer plugin for handling FLX (a video format) decoding. The function `gst_flxdec_chain` is called when a buffer is pushed to the pad.
 
@@ -142652,7 +142652,7 @@ After thorough analysis, I don't see any obvious buffer overflows, memory leaks,
 (2) NO",['CWE-399'],CVE-2012-3517,Use-after-free vulnerability in dns.c in Tor before 0.2.2.38 might allow remote attackers to cause a denial of service (daemon crash) via vectors related to failed DNS requests.
 207461,autotrace,e96bffadc25ff0ba0e10745f8012efcc5f920ea9,https://github.com/autotrace/autotrace,https://github.com/autotrace/autotrace/commit/e96bffadc25ff0ba0e10745f8012efcc5f920ea9,"input-bmp: Increase header buffer in some cases
 
-Signed-off-by: Peter Lemenkov <lemenkov@gmail.com>",1,1,"I need to analyze this C code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
+Signed-off-by: Peter Lemenkov <lemenkov@gmail.com>",1,0,"I need to analyze this C code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
 
 First, let me understand what this function does. It appears to be a function that reads a BMP (Bitmap) file and processes it. It's checking the BMP header, reading various fields, and then trying to read the image data.
 
@@ -149010,7 +149010,7 @@ Fixes: d87f1a1cb7b6 (""vhost: support inflight info sharing"")
 Cc: stable@dpdk.org
 
 Signed-off-by: David Marchand <david.marchand@redhat.com>
-Reviewed-by: Maxime Coquelin <maxime.coquelin@redhat.com>",1,1,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
+Reviewed-by: Maxime Coquelin <maxime.coquelin@redhat.com>",1,0,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
 
 First, let me understand what this code does. It appears to be part of a virtualization library (likely for virtio) that handles inflight memory allocation for a virtual network device. The function `vhost_user_get_inflight_fd` is called to get an inflight memory area for a virtual device.
 
@@ -156447,7 +156447,7 @@ After a thorough static analysis of the provided code, I identified a critical v
 **Conclusion**: The code contains a null pointer dereference vulnerability due to unvalidated pointer access (`svm->vmcb01.ptr`). This meets the criteria for a vulnerability (as seen in the canonical examples where missing safety checks lead to YES).
 
 (1) YES",['CWE-862'],CVE-2021-3656,"A flaw was found in the KVM's AMD code for supporting SVM nested virtualization. The flaw occurs when processing the VMCB (virtual machine control block) provided by the L1 guest to spawn/handle a nested guest (L2). Due to improper validation of the ""virt_ext"" field, this issue could allow a malicious L1 to disable both VMLOAD/VMSAVE intercepts and VLS (Virtual VMLOAD/VMSAVE) for the L2 guest. As a result, the L2 guest would be allowed to read/write physical pages of the host, resulting in a crash of the entire system, leak of sensitive data or potential guest-to-host escape."
-196801,gpac,f5a038e6893019ee471b6a57490cf7a495673816,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/f5a038e6893019ee471b6a57490cf7a495673816,fixed #1885,1,1,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, memory leaks, use-after-free, etc.
+196801,gpac,f5a038e6893019ee471b6a57490cf7a495673816,https://github.com/gpac/gpac,https://github.com/gpac/gpac/commit/f5a038e6893019ee471b6a57490cf7a495673816,fixed #1885,1,0,"I need to analyze this code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common vulnerabilities like buffer overflows, memory leaks, use-after-free, etc.
 
 First, let me identify the key parts of the code that might have security issues:
 
@@ -162800,7 +162800,7 @@ After a thorough static analysis of the provided code, I identified a critical v
 The code **does not** have a safeguard against `nx_cur` exceeding `XFRM_MAX_DEPTH`, leading to a **buffer overflow vulnerability**. This matches the pattern of Example 1 (vulnerable) and is a critical security flaw.
 
 (1) YES",['CWE-125'],CVE-2017-11600,"net/xfrm/xfrm_policy.c in the Linux kernel through 4.12.3, when CONFIG_XFRM_MIGRATE is enabled, does not ensure that the dir value of xfrm_userpolicy_id is XFRM_POLICY_MAX or less, which allows local users to cause a denial of service (out-of-bounds access) or possibly have unspecified other impact via an XFRM_MSG_MIGRATE xfrm Netlink message."
-195691,mruby,a4d97934d51cb88954cc49161dc1d151f64afb6b,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/a4d97934d51cb88954cc49161dc1d151f64afb6b,vm.c: check if target_class is NULL (when prepended).,1,1,"I need to analyze this code to determine if there's a vulnerability. Let me go through the code carefully and look for potential security issues.
+195691,mruby,a4d97934d51cb88954cc49161dc1d151f64afb6b,https://github.com/mruby/mruby,https://github.com/mruby/mruby/commit/a4d97934d51cb88954cc49161dc1d151f64afb6b,vm.c: check if target_class is NULL (when prepended).,1,0,"I need to analyze this code to determine if there's a vulnerability. Let me go through the code carefully and look for potential security issues.
 
 First, let me understand what this code is doing. It appears to be part of the mruby virtual machine implementation (a small Ruby implementation). The function `mrb_vm_exec` is the main execution function for the virtual machine.
 
@@ -175646,7 +175646,7 @@ Prior to this patch, this command would trigger a UMR:
 See the accompanying test for how to trigger the heap buffer overrun.
 
 Thanks to Nima Aghdaii for testing and finding numerous
-ways to break early iterations of this patch.",1,1,"We are given a function `bmexec_trans` that is written in C (the code uses `char const *`, `size_t`, `unsigned char`, and C-style loops and conditionals). We are to determine if there is a vulnerability (like buffer overflow, use-after-free, etc.) by static analysis.
+ways to break early iterations of this patch.",1,0,"We are given a function `bmexec_trans` that is written in C (the code uses `char const *`, `size_t`, `unsigned char`, and C-style loops and conditionals). We are to determine if there is a vulnerability (like buffer overflow, use-after-free, etc.) by static analysis.
 
 Let's break down the function:
 
@@ -176834,7 +176834,7 @@ firmware download routine is finished.
 
 Fixes: 3194c6870158 (""NFC: nfcmrvl: add firmware download support"")
 Signed-off-by: Duoming Zhou <duoming@zju.edu.cn>
-Signed-off-by: David S. Miller <davem@davemloft.net>",1,1,"First, I need to analyze this C code for vulnerabilities. The code is from a function called `nfcmrvl_nci_unregister_dev` in what seems like a kernel module or driver context. I should look for common vulnerabilities in such code, especially since it's dealing with memory management and device registration.
+Signed-off-by: David S. Miller <davem@davemloft.net>",1,0,"First, I need to analyze this C code for vulnerabilities. The code is from a function called `nfcmrvl_nci_unregister_dev` in what seems like a kernel module or driver context. I should look for common vulnerabilities in such code, especially since it's dealing with memory management and device registration.
 
 The code does the following:
 
@@ -181622,7 +181622,7 @@ After a thorough static analysis of the provided code, I have identified no secu
 **Conclusion**: The code is free of vulnerabilities that could be exploited (e.g., buffer overflows, memory leaks) as per the examples. All inputs are validated against JPEG standards, and no unsafe operations (like unbounded reads or unmanaged memory) are present.
 
 (2) NO",['CWE-189'],CVE-2015-3885,"Integer overflow in the ljpeg_start function in dcraw 7.00 and earlier allows remote attackers to cause a denial of service (crash) via a crafted image, which triggers a buffer overflow, related to the len variable."
-195740,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,1,1,"I need to analyze this C++ code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
+195740,libjpeg,4746b577931e926a49e50de9720a4946de3069a7,https://github.com/thorfdbg/libjpeg,https://github.com/thorfdbg/libjpeg/commit/4746b577931e926a49e50de9720a4946de3069a7,Fixed handling of empty JPEG-LS scans.,1,0,"I need to analyze this C++ code for potential vulnerabilities using static analysis. Let me go through the code carefully and look for common security issues.
 
 First, let me understand what this code does. It appears to be part of an image processing or compression library (likely related to JPEG or similar formats) that processes ""MCU"" (Minimum Coded Unit) lines. The function `ParseMCU` is handling the parsing of these units.
 
@@ -205700,7 +205700,7 @@ After a thorough static analysis of the provided code, I have identified no vuln
 
 (2) NO",['CWE-754'],CVE-2022-23593,"Tensorflow is an Open Source Machine Learning Framework. The `simplifyBroadcast` function in the MLIR-TFRT infrastructure in TensorFlow is vulnerable to a segfault (hence, denial of service), if called with scalar shapes. If all shapes are scalar, then `maxRank` is 0, so we build an empty `SmallVector`. The fix will be included in TensorFlow 2.8.0. This is the only affected version."
 195095,e2guardian,eae46a7e2a57103aadca903c4a24cca94dc502a2,https://github.com/e2guardian/e2guardian,https://github.com/e2guardian/e2guardian/commit/eae46a7e2a57103aadca903c4a24cca94dc502a2,"Fix bug #707 cert hostnames not being checked
-- only happened when openssl v1.1 is used",1,1,"We are given a C++ function `Socket::startSslClient` that sets up an SSL client connection.
+- only happened when openssl v1.1 is used",1,0,"We are given a C++ function `Socket::startSslClient` that sets up an SSL client connection.
 
 The task is to determine if there is a vulnerability in this code (using the pattern of the examples: YES for vulnerable, NO for safe).
 
