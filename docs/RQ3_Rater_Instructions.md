@@ -2,7 +2,9 @@
 
 ## 1. Task Overview
 
-We are evaluating the quality of AI-generated vulnerability analyses. The goal is to assess how well the AI's response explains its vulnerability assessment.
+We are evaluating the quality of AI-generated vulnerability analyses across multiple models. For each source code sample, responses from three models are presented for evaluation. All models arrived at the correct prediction (true positive or true negative) for every sample — the goal is to assess how well each model *explains* its vulnerability assessment, not whether the prediction is correct.
+
+The cross-model design enables direct comparison of explanation quality across models for the same code, while the blinded rater sheet ensures scoring is not influenced by model identity.
 
 ## 2. Spreadsheet Columns
 
@@ -20,33 +22,32 @@ We are evaluating the quality of AI-generated vulnerability analyses. The goal i
 | `informativeness_score` | Score 1–5 (see rubric below) | **Fill in** |
 | `rater_notes` | Free-text notes | **Fill in** (optional) |
 
+**Note on cross-model grouping**: Multiple consecutive rows may share the same `source_code` — these are responses from different models analyzing the same function. The rater sheet is **blinded**: model identity is not visible. Each row should be scored independently on the merits of its `response_text`.
+
 ## 3. Evaluation Procedure
 
-For each sample, follow these steps in order:
+For each group of samples sharing the same source code, follow these steps:
 
 ### Step 1: Read the source code
 
-Read the function in `source_code`. Form an initial understanding of what the code does, its inputs, control flow, and any potential security concerns.
+Read the function in `source_code`. Form an initial understanding of what the code does, its inputs, control flow, and any potential security concerns. This step is performed **once per code sample** — the same code appears across multiple rows (one per model response).
 
 ### Step 2: Check the ground truth
 
 Read `ground_truth_label` to see if the code is vulnerable or safe. For vulnerable samples, read the `cwe` and `cve_desc` columns to understand what the known vulnerability is. This provides context for assessing the response — it does not mean the AI had access to this information.
 
-### Step 3: Read the AI's response
+### Step 3: Read and score each model's response independently
 
-Read `response_text` carefully. This is the AI's full analysis of the code. Some responses may be short and direct; others may be long and detailed. Both are valid — the scoring rubric accounts for this.
+For each row in the group, read `response_text` carefully and score it on its own merits using the rubrics in Section 4. Important:
 
-### Step 4: Score each metric independently
-
-Score all four metrics using the rubrics in Section 4. Important:
-
+- **Score each response independently** before comparing across models. Do not anchor one model's score to another's — each response should stand on its own against the rubric.
 - Score each metric on its own merits. E.g. A response can be highly clear (high clarity) but miss important issues (low completeness).
 - Use the full 1–5 range.
 - Do not adjust scores based on response length alone. A short response that precisely identifies the core issue can score well; a long response that repeats itself without substance should not.
 
-### Step 5: Add notes
+### Step 4: Add notes
 
-Optional but encouraged for any other scores where the reasoning may not be obvious. Notes are valuable for resolving disagreements between raters.
+Optional but encouraged for any scores where the reasoning may not be obvious. Notes are valuable for resolving disagreements between raters. When multiple responses cover the same code, comparative notes (e.g., "covers edge case X that the other responses missed") are useful but not required.
 
 ## 4. Scoring Rubric
 
@@ -102,10 +103,61 @@ All metrics use a 1–5 Likert scale. Score based on the descriptions below.
 | **4 — Insightful** | Offers meaningful technical depth — identifies non-obvious interactions, explains *why* a pattern is dangerous (or safe), and demonstrates understanding of the underlying security principles. Contains minimal filler or redundancy. |
 | **5 — Highly insightful** | Provides expert-level analysis with novel or non-obvious observations. Demonstrates deep understanding of the vulnerability class, the specific codebase patterns, and their security implications. Every sentence adds value. |
 
-## 5. General Guidelines
+## 5. Evaluation Indicators
+
+The following indicators complement the scoring rubric in Section 4. They describe concrete aspects to look for (and watch out for) when evaluating each metric. These are **descriptive guides, not checklists** — a response does not need to exhibit every positive indicator to score well, nor does the presence of one negative indicator automatically lower a score. Use these alongside the Likert descriptions to anchor scoring decisions.
+
+### 5.1 Completeness
+
+| Look for (positive) | Watch for (negative) |
+|----------------------|----------------------|
+| Discusses the code's purpose, inputs, outputs, and key variables | Generic assertions without grounding in the actual code |
+| Examines multiple vulnerability classes relevant to the code (e.g., buffer overflow, use-after-free, integer overflow) | Focuses on only one aspect when multiple security concerns exist |
+| Provides depth on the specific vulnerability mechanism or safety rationale, not just surface-level categorization | Lists vulnerability categories as a checklist without analyzing each |
+| For vulnerable code: identifies the specific mechanism, not just the general area | Misses obvious attack surfaces or secondary vulnerabilities noted in the CVE |
+| For safe code: explains *why* relevant vulnerability classes do not apply | States "no vulnerability" without justifying the safety of specific constructs |
+
+### 5.2 Clarity
+
+| Look for (positive) | Watch for (negative) |
+|----------------------|----------------------|
+| Organized logical flow from analysis to conclusion | Disorganized structure that requires re-reading to follow |
+| References specific functions, variables, or code lines | Vague references (e.g., "the code checks..." without specifying what or where) |
+| Technical terms used correctly and precisely | Incorrect factual claims or misuse of technical terminology |
+| Each section advances the argument without redundancy | Boilerplate disclaimers or repeated conclusions that add no analytical value |
+
+### 5.3 Actionability
+
+| Look for (positive) | Watch for (negative) |
+|----------------------|----------------------|
+| Points to specific code locations or constructs involved | Generic advice (e.g., "add bounds checking") without specifying where or how |
+| Suggests a concrete fix, patch, or mitigation strategy | Identifies a problem without any direction for remediation |
+| Explains what is missing and how to address it | Restates the conclusion as a recommendation (e.g., "fix the vulnerability") |
+| For safe code: scores of 1–2 are expected — note this in `rater_notes` | N/A — low actionability for safe code is not a negative indicator |
+
+### 5.4 Informativeness
+
+| Look for (positive) | Watch for (negative) |
+|----------------------|----------------------|
+| Explains *why* a pattern is dangerous or safe, not just *that* it is | Restates the code's surface behavior without security analysis |
+| Provides counterfactual reasoning (e.g., what could go wrong without a specific control) | Filler, repetition, or generic security platitudes that dilute useful content |
+| Identifies non-obvious interactions, edge cases, or domain-specific context | Observations that any competent developer would make on first reading |
+| Demonstrates understanding of the vulnerability class and its broader implications | Mechanically listing vulnerability categories without genuine insight |
+
+## 6. General Guidelines
+
+> **Note**: Section 5 (Evaluation Indicators) was added during Phase A calibration to codify recurring patterns observed across initial samples. These indicators are derived from inter-rater discussion and are intended to improve scoring consistency.
 
 ### Scoring independence
 Score each metric independently. Do not let one score influence another. It is entirely valid for a response to score high on one metric and low on another (e.g., highly clear but incomplete).
+
+### Cross-model scoring
+When multiple responses analyse the same source code, score each response against the **rubric**, not against each other. Two responses for the same code may legitimately receive the same scores, or very different scores — let the rubric guide the decision.
+
+After scoring all responses for a code sample independently, it is acceptable to review whether the relative ordering feels correct (e.g., if response A covers more vulnerability classes than response B, A should not score lower on completeness). If a review leads to an adjustment, note the reason in `rater_notes`.
+
+### Sampling constraint
+All samples in this evaluation were selected under a **cross-model correctness constraint**: for each source code sample, all evaluated models arrived at the correct prediction (true positive or true negative). This ensures that explanation quality is assessed for cases where models agree on the correct answer, isolating explanation quality from prediction accuracy.
 
 ### Ground truth as reference, not answer key
 The `ground_truth_label` tells whether the code is actually vulnerable. Use this to assess whether the response correctly identifies (or justifies) the security status. However, a response that reaches the correct conclusion via flawed reasoning should still receive lower scores for completeness and informativeness.
@@ -119,7 +171,7 @@ Responses vary in format — some use numbered steps, others use bullet points, 
 ### Response length
 Longer responses are not inherently better. A concise response that precisely identifies the core issue can outscore a verbose response that buries the key insight in repetition. Conversely, brevity is not inherently better — a response that is too brief to be useful should score accordingly.
 
-## 6. After Scoring
+## 7. After Scoring
 
 - Save the completed spreadsheet
 - Do not discuss individual scores with other raters until the independent scoring phase is complete
