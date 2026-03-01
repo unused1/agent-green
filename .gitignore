@@ -66,3 +66,6 @@ results/runpod_rq2_pod*/
 # Keep processed analysis results (negation patterns)
 !results/analysis/
 !results/analysis_*/
+
+# Draft paper workspace
+docs/LLMs_Reasoning_Explainability_EMSE/
