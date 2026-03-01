@@ -1,7 +1,7 @@
 # Brief: Vulnerability Detection Parser Variance Across Agent Designs
 
 **Date:** 2026-03-01
-**Status:** For discussion with research team
+**Status:** DA fallback fixed (2026-03-01); remaining variance documented
 **Impact:** Vulnerability detection metrics in `consolidated_performance.csv` (48 experiments)
 
 ---
@@ -35,15 +35,22 @@ This variance is a potential threat to the reliability of cross-design compariso
 
 ### 2.2 DA (Dual-Agent) — JSON Parse + Keyword Fallback
 
-**File:** `src/dual_agent_vuln.py` lines 63-85
-**Origin:** Virtually unchanged from upstream (merveast/agent-green), except for think-tag stripping added locally.
+**File:** `src/dual_agent_vuln.py` lines 63-98
+**Origin:** Upstream (merveast/agent-green) with think-tag stripping added locally and keyword fallback tightened (2026-03-01).
 
 | Step | Logic | Result |
 |------|-------|--------|
 | 1. Think-tag strip | Split on `</think>` | — |
 | 2. JSON parse (primary) | If text starts with `{` or `[`: parse `vulnerability_detected` boolean field | 0 or 1 |
-| 3. Keyword fallback | 3 broad substrings: `'vulnerable'`, `'unsafe'`, `'security issue'` | 1 if any match, else 0 |
-| 4. Exception default | JSON parse error | 0 |
+| 3. NO patterns (checked first) | 8 substring patterns: `'final answer: no'`, `'no vulnerability'`, `'no:'`, etc. | 0 |
+| 4. YES patterns | 8 substring patterns: `'final answer: yes'`, `'vulnerability detected'`, `'yes:'`, etc. | 1 |
+| 5. Fallback (strong positives) | 4 narrow keywords: `'is vulnerable'`, `'contains a vulnerability'`, `'security vulnerability exists'`, `'can be exploited'` | 1 |
+| 6. Default | No match | 0 |
+| 7. Exception default | JSON parse error | 0 |
+
+**Local fixes applied:**
+- 2026-02-09: Think-tag stripping (upstream searched entire output including `<think>` block)
+- 2026-03-01: Keyword fallback tightened to match SA quality (NO-before-YES ordering, broad substrings replaced with specific phrases); 2,597 predictions corrected across 16 DA vuln files via `scripts/fix_da_keyword_fallback.py`
 
 ### 2.3 MA (Multi-Agent) — Signal-Counting Consensus
 
@@ -65,9 +72,9 @@ This variance is a potential threat to the reliability of cross-design compariso
 
 ### 3.1 Keyword fallback bias
 
-DA's fallback keywords (`'vulnerable'`, `'unsafe'`, `'security issue'`) are broad substring matches that trigger on almost any security discussion text. SA's fallback requires more specific phrases (`'is vulnerable'`, `'contains a vulnerability'`). MA's fallback requires strong phrases (`'confirmed vulnerability'`, `'exploitable'`).
+~~DA's fallback keywords (`'vulnerable'`, `'unsafe'`, `'security issue'`) are broad substring matches that trigger on almost any security discussion text.~~ **Fixed 2026-03-01:** DA's fallback now uses the same NO-before-YES ordering and tight phrases as SA. SA's fallback requires specific phrases (`'is vulnerable'`, `'contains a vulnerability'`). MA's fallback requires strong phrases (`'confirmed vulnerability'`, `'exploitable'`).
 
-**Impact:** DA fallback is biased toward predicting vulnerable (1); MA fallback is biased toward predicting safe (0).
+**Impact (post-fix):** SA and DA fallback logic is now aligned. MA fallback remains biased toward predicting safe (0) due to its stronger keyword requirements.
 
 ### 3.2 Substring matching limitations (all designs)
 
@@ -100,29 +107,23 @@ DA instruct mode is critically affected: over half of all predictions rely on th
 
 ---
 
-## 5. Options for Resolution
+## 5. Resolution Status
 
-### Option A: Acknowledge as limitation
-Note in the paper that cross-design vulnerability detection comparisons are confounded by parser variance, particularly for DA instruct mode. Within-design comparisons (e.g., thinking vs instruct within SA) are unaffected.
+### Completed fixes
+- **SA keyword parser** (2026-02-22): NO-before-YES ordering, broad fallback removed. 1,021 predictions corrected via `scripts/fix_vuln_keyword_parsing.py`.
+- **DA keyword fallback** (2026-03-01): Tightened to match SA quality. 2,597 predictions corrected (98.4% were false positives removed) via `scripts/fix_da_keyword_fallback.py`.
 
-### Option B: Unified re-parsing
-Apply a single standardized parser to all raw model outputs across all designs. Recompute metrics. Report both original and standardized results. The SA parser (with NO-before-YES fix) is the most well-tested candidate.
+SA and DA now use equivalent keyword logic (NO-before-YES + tight phrases). The primary structural difference is DA's JSON parse path (step 2), which is unaffected by the keyword fix.
 
-### Option C: Unified re-parsing + semantic robustness
-As Option B, plus add negative-context guards (e.g., check for "not vulnerable", "is not vulnerable", "no evidence of") to address substring matching limitations. This would require re-validation of all 48 experiments.
+### Remaining variance
+- **MA parser** uses signal-counting consensus with different keyword sets and a tie-goes-to-vulnerable rule. This is architecturally distinct from SA/DA and reflects the multi-agent design, so alignment is not straightforward.
+- **Substring matching limitations** (Section 3.2) remain in all parsers — negated sentences like "the code is not vulnerable" can still trigger false positives via the `'is vulnerable'` fallback pattern.
 
----
-
-## 6. Recommendation
-
-For the conference submission, **Option B is recommended** as the minimum viable approach. It directly addresses the cross-design reliability concern without requiring a new parser design. Option C could be pursued as a follow-up if the team determines the substring matching edge cases are frequent enough in the actual data to affect reported metrics.
-
-**Immediate next step:** Quantify how many predictions would actually change under unified re-parsing, to assess whether the current metrics are materially affected.
+### Recommendation
+The SA/DA alignment addresses the most impactful cross-design confound (DA instruct 54.4% fallback rate). The remaining MA variance and substring edge cases should be **acknowledged as limitations** in the paper. Within-design comparisons (e.g., thinking vs instruct) are unaffected by parser differences.
 
 ---
 
-## 7. Provenance Note
+## 6. Provenance Note
 
-The SA and DA parsers originate from the upstream repository (merveast/agent-green). The upstream SA parser contained two bugs (think-tag inclusion, YES-before-NO ordering) that were fixed locally. The upstream DA parser was adopted with minimal changes (think-tag stripping only). The MA parser was substantially rewritten from upstream's simpler majority-vote logic.
-
-The DA parser's keyword fallback (`'vulnerable'`, `'unsafe'`, `'security issue'`) is the original upstream (merveast) implementation, which was not revised when the SA parser was tightened.
+The SA and DA parsers originate from the upstream repository (merveast/agent-green). The upstream SA parser contained two bugs (think-tag inclusion, YES-before-NO ordering) that were fixed locally (2026-02-09, 2026-02-22). The upstream DA parser's keyword fallback was tightened locally to match SA (2026-03-01). The MA parser was substantially rewritten from upstream's simpler majority-vote logic.
