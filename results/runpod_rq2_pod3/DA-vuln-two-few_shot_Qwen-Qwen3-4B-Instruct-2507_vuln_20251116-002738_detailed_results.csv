@@ -598,7 +598,7 @@ void gitn_box_del(GF_Box *s)
     // the $sample aggregation stage if the trial plan was chosen.
     return std::pair{std::move(execStatus.getValue()),
                      !trialStage || !trialStage->pickedBackupPlan()};
-}",53510909926140160570175197476495085795,None,,['CWE-617'],CVE-2021-32037,"An authorized user may trigger an invariant which may result in denial of service or server exit if a relevant aggregation request is sent to a shard. Usually, the requests are sent via mongos and special privileges are required in order to know the address of the shards and to log in to the shards of an auth enabled environment.",https://nvd.nist.gov/vuln/detail/CVE-2021-32037,1,"```json
+}",53510909926140160570175197476495085795,None,,['CWE-617'],CVE-2021-32037,"An authorized user may trigger an invariant which may result in denial of service or server exit if a relevant aggregation request is sent to a shard. Usually, the requests are sent via mongos and special privileges are required in order to know the address of the shards and to log in to the shards of an auth enabled environment.",https://nvd.nist.gov/vuln/detail/CVE-2021-32037,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -651,7 +651,7 @@ Signed-off-by: Jason Gunthorpe <jgg@nvidia.com>",0,"static void rtrs_clt_dev_rel
 	mutex_destroy(&clt->paths_ev_mutex);
 	mutex_destroy(&clt->paths_mutex);
 	kfree(clt);
-}",280791422344483990445186805760516988921,rtrs-clt.c,123062054699569722257369072160789726422,['CWE-415'],CVE-2022-29156,drivers/infiniband/ulp/rtrs/rtrs-clt.c in the Linux kernel before 5.16.12 has a double free related to rtrs_clt_dev_release.,https://nvd.nist.gov/vuln/detail/CVE-2022-29156,1,"The code lacks a safeguard to ensure that `clt` is not already being freed. In device driver contexts, object lifetimes are often managed across multiple subsystems, and without explicit ownership or reference counting, concurrent or overlapping frees can lead to double-free or use-after-free vulnerabilities. The author's explanation correctly identifies this risk, and the absence of validation or ownership checks makes the code vulnerable.",2025-11-16T00:28:12.444853
+}",280791422344483990445186805760516988921,rtrs-clt.c,123062054699569722257369072160789726422,['CWE-415'],CVE-2022-29156,drivers/infiniband/ulp/rtrs/rtrs-clt.c in the Linux kernel before 5.16.12 has a double free related to rtrs_clt_dev_release.,https://nvd.nist.gov/vuln/detail/CVE-2022-29156,0,"The code lacks a safeguard to ensure that `clt` is not already being freed. In device driver contexts, object lifetimes are often managed across multiple subsystems, and without explicit ownership or reference counting, concurrent or overlapping frees can lead to double-free or use-after-free vulnerabilities. The author's explanation correctly identifies this risk, and the absence of validation or ownership checks makes the code vulnerable.",2025-11-16T00:28:12.444853
 344242,lua,42d40581dd919fb134c07027ca1ce0844c670daf,https://github.com/lua/lua,https://github.com/lua/lua/commit/42d40581dd919fb134c07027ca1ce0844c670daf,"Save stack space while handling errors
 
 Because error handling (luaG_errormsg) uses slots from EXTRA_STACK,
@@ -733,7 +733,7 @@ Reviewed-by: Tomas Mraz <tmraz@fedoraproject.org>",0,"int setup_tests(void)
     ADD_ALL_TESTS(call_run_cert, OSSL_NELEM(name_fns));
     ADD_TEST(test_GENERAL_NAME_cmp);
     return 1;
-}",300508003271249901349188890485879920788,None,,['CWE-476'],CVE-2020-1971,"The X.509 GeneralName type is a generic type for representing different types of names. One of those name types is known as EDIPartyName. OpenSSL provides a function GENERAL_NAME_cmp which compares different instances of a GENERAL_NAME to see if they are equal or not. This function behaves incorrectly when both GENERAL_NAMEs contain an EDIPARTYNAME. A NULL pointer dereference and a crash may occur leading to a possible denial of service attack. OpenSSL itself uses the GENERAL_NAME_cmp function for two purposes: 1) Comparing CRL distribution point names between an available CRL and a CRL distribution point embedded in an X509 certificate 2) When verifying that a timestamp response token signer matches the timestamp authority name (exposed via the API functions TS_RESP_verify_response and TS_RESP_verify_token) If an attacker can control both items being compared then that attacker could trigger a crash. For example if the attacker can trick a client or server into checking a malicious certificate against a malicious CRL then this may occur. Note that some applications automatically download CRLs based on a URL embedded in a certificate. This checking happens prior to the signatures on the certificate and CRL being verified. OpenSSL's s_server, s_client and verify tools have support for the ""-crl_download"" option which implements automatic CRL downloading and this attack has been demonstrated to work against those tools. Note that an unrelated bug means that affected versions of OpenSSL cannot parse or construct correct encodings of EDIPARTYNAME. However it is possible to construct a malformed EDIPARTYNAME that OpenSSL's parser will accept and hence trigger this attack. All OpenSSL 1.1.1 and 1.0.2 versions are affected by this issue. Other OpenSSL releases are out of support and have not been checked. Fixed in OpenSSL 1.1.1i (Affected 1.1.1-1.1.1h). Fixed in OpenSSL 1.0.2x (Affected 1.0.2-1.0.2w).",https://nvd.nist.gov/vuln/detail/CVE-2020-1971,1,"The author claims no vulnerability, but the code depends on unverified macros and undefined constants. Without knowing how these macros are implemented, there is a risk of undefined behavior, such as buffer overflows or invalid memory access during test registration. Security analysis must err on the side of caution when macros or internal logic are opaque. Therefore, a vulnerability is reasonably inferred due to lack of visibility and potential for undefined behavior.",2025-11-16T00:28:20.261602
+}",300508003271249901349188890485879920788,None,,['CWE-476'],CVE-2020-1971,"The X.509 GeneralName type is a generic type for representing different types of names. One of those name types is known as EDIPartyName. OpenSSL provides a function GENERAL_NAME_cmp which compares different instances of a GENERAL_NAME to see if they are equal or not. This function behaves incorrectly when both GENERAL_NAMEs contain an EDIPARTYNAME. A NULL pointer dereference and a crash may occur leading to a possible denial of service attack. OpenSSL itself uses the GENERAL_NAME_cmp function for two purposes: 1) Comparing CRL distribution point names between an available CRL and a CRL distribution point embedded in an X509 certificate 2) When verifying that a timestamp response token signer matches the timestamp authority name (exposed via the API functions TS_RESP_verify_response and TS_RESP_verify_token) If an attacker can control both items being compared then that attacker could trigger a crash. For example if the attacker can trick a client or server into checking a malicious certificate against a malicious CRL then this may occur. Note that some applications automatically download CRLs based on a URL embedded in a certificate. This checking happens prior to the signatures on the certificate and CRL being verified. OpenSSL's s_server, s_client and verify tools have support for the ""-crl_download"" option which implements automatic CRL downloading and this attack has been demonstrated to work against those tools. Note that an unrelated bug means that affected versions of OpenSSL cannot parse or construct correct encodings of EDIPARTYNAME. However it is possible to construct a malformed EDIPARTYNAME that OpenSSL's parser will accept and hence trigger this attack. All OpenSSL 1.1.1 and 1.0.2 versions are affected by this issue. Other OpenSSL releases are out of support and have not been checked. Fixed in OpenSSL 1.1.1i (Affected 1.1.1-1.1.1h). Fixed in OpenSSL 1.0.2x (Affected 1.0.2-1.0.2w).",https://nvd.nist.gov/vuln/detail/CVE-2020-1971,0,"The author claims no vulnerability, but the code depends on unverified macros and undefined constants. Without knowing how these macros are implemented, there is a risk of undefined behavior, such as buffer overflows or invalid memory access during test registration. Security analysis must err on the side of caution when macros or internal logic are opaque. Therefore, a vulnerability is reasonably inferred due to lack of visibility and potential for undefined behavior.",2025-11-16T00:28:20.261602
 432346,qemu,b05b267840515730dbf6753495d5b7bd8b04ad1c,https://github.com/bonzini/qemu,https://github.com/qemu/qemu/commit/b05b267840515730dbf6753495d5b7bd8b04ad1c,"i2c-ddc: fix oob read
 
 Suggested-by: Michael Hanselmann <public@hansmi.ch>
@@ -973,7 +973,7 @@ corrupted:
         return true;
     }
     return false;
-}",66825183138389317029314964036422106221,dl_dxf.cpp,181081005270076491555487324786328968837,['CWE-191'],CVE-2021-21897,A code execution vulnerability exists in the DL_Dxf::handleLWPolylineData functionality of Ribbonsoft dxflib 3.17.0. A specially-crafted .dxf file can lead to a heap buffer overflow. An attacker can provide a malicious file to trigger this vulnerability.,https://nvd.nist.gov/vuln/detail/CVE-2021-21897,1,"```json
+}",66825183138389317029314964036422106221,dl_dxf.cpp,181081005270076491555487324786328968837,['CWE-191'],CVE-2021-21897,A code execution vulnerability exists in the DL_Dxf::handleLWPolylineData functionality of Ribbonsoft dxflib 3.17.0. A specially-crafted .dxf file can lead to a heap buffer overflow. An attacker can provide a malicious file to trigger this vulnerability.,https://nvd.nist.gov/vuln/detail/CVE-2021-21897,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -4151,7 +4151,7 @@ Fixes:
         gp_fputc(data, file);
     }
 #undef MAX_RUN_COUNT
-}",242406925449442075366182864127739162962,gdevpcx.c,146911482994709759285318949799638474400,['CWE-787'],CVE-2020-16305,A buffer overflow vulnerability in pcx_write_rle() in contrib/japanese/gdev10v.c of Artifex Software GhostScript v9.50 allows a remote attacker to cause a denial of service via a crafted PDF file. This is fixed in v9.51.,https://nvd.nist.gov/vuln/detail/CVE-2020-16305,1,"```json
+}",242406925449442075366182864127739162962,gdevpcx.c,146911482994709759285318949799638474400,['CWE-787'],CVE-2020-16305,A buffer overflow vulnerability in pcx_write_rle() in contrib/japanese/gdev10v.c of Artifex Software GhostScript v9.50 allows a remote attacker to cause a denial of service via a crafted PDF file. This is fixed in v9.51.,https://nvd.nist.gov/vuln/detail/CVE-2020-16305,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -5560,7 +5560,7 @@ Spotted by @DroidTest, thanks!",0,"void dostor(char *name, const int append, con
         unlink(atomic_file);
         atomic_file = NULL;
     }
-}",189507601171684383524883387321805614234,ftpd.c,102895278505023286855651896148239525136,['CWE-434'],CVE-2021-40524,"In Pure-FTPd before 1.0.50, an incorrect max_filesize quota mechanism in the server allows attackers to upload files of unbounded size, which may lead to denial of service or a server hang. This occurs because a certain greater-than-zero test does not anticipate an initial -1 value. (Versions 1.0.23 through 1.0.49 are affected.)",https://nvd.nist.gov/vuln/detail/CVE-2021-40524,1,"```json
+}",189507601171684383524883387321805614234,ftpd.c,102895278505023286855651896148239525136,['CWE-434'],CVE-2021-40524,"In Pure-FTPd before 1.0.50, an incorrect max_filesize quota mechanism in the server allows attackers to upload files of unbounded size, which may lead to denial of service or a server hang. This occurs because a certain greater-than-zero test does not anticipate an initial -1 value. (Versions 1.0.23 through 1.0.49 are affected.)",https://nvd.nist.gov/vuln/detail/CVE-2021-40524,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -5651,7 +5651,7 @@ Signed-off-by: Jakub Kicinski <kuba@kernel.org>",0,"struct sctp_chunk *sctp_make
 	}
 
 	return retval;
-}",175020260748921031996578395052444557756,sm_make_chunk.c,72489321105602052766082993841220689495,['CWE-704'],CVE-2022-0322,"A flaw was found in the sctp_make_strreset_req function in net/sctp/sm_make_chunk.c in the SCTP network protocol in the Linux kernel with a local user privilege access. In this flaw, an attempt to use more buffer than is allocated triggers a BUG_ON issue, leading to a denial of service (DOS).",https://nvd.nist.gov/vuln/detail/CVE-2022-0322,1,"```json
+}",175020260748921031996578395052444557756,sm_make_chunk.c,72489321105602052766082993841220689495,['CWE-704'],CVE-2022-0322,"A flaw was found in the sctp_make_strreset_req function in net/sctp/sm_make_chunk.c in the SCTP network protocol in the Linux kernel with a local user privilege access. In this flaw, an attempt to use more buffer than is allocated triggers a BUG_ON issue, leading to a denial of service (DOS).",https://nvd.nist.gov/vuln/detail/CVE-2022-0322,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -5790,7 +5790,7 @@ Conflicts:
  err:
     s->state = SSL_ST_ERR;
     return (-1);
-}",24541052959849141799219681889549728285,None,,['CWE-362'],CVE-2015-1791,"Race condition in the ssl3_get_new_session_ticket function in ssl/s3_clnt.c in OpenSSL before 0.9.8zg, 1.0.0 before 1.0.0s, 1.0.1 before 1.0.1n, and 1.0.2 before 1.0.2b, when used for a multi-threaded client, allows remote attackers to cause a denial of service (double free and application crash) or possibly have unspecified other impact by providing a NewSessionTicket during an attempt to reuse a ticket that had been obtained earlier.",https://nvd.nist.gov/vuln/detail/CVE-2015-1791,1,"```json
+}",24541052959849141799219681889549728285,None,,['CWE-362'],CVE-2015-1791,"Race condition in the ssl3_get_new_session_ticket function in ssl/s3_clnt.c in OpenSSL before 0.9.8zg, 1.0.0 before 1.0.0s, 1.0.1 before 1.0.1n, and 1.0.2 before 1.0.2b, when used for a multi-threaded client, allows remote attackers to cause a denial of service (double free and application crash) or possibly have unspecified other impact by providing a NewSessionTicket during an attempt to reuse a ticket that had been obtained earlier.",https://nvd.nist.gov/vuln/detail/CVE-2015-1791,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -5961,7 +5961,7 @@ This vulnerability was assigned CVE-2017-12904.",0,"std::string controller::book
 	} else {
 		return _(""bookmarking support is not configured. Please set the configuration variable `bookmark-cmd' accordingly."");
 	}
-}",79271714330892808671163251460832419876,controller.cpp,323926139485782731853395949715316223577,['CWE-787'],CVE-2017-12904,Improper Neutralization of Special Elements used in an OS Command in bookmarking function of Newsbeuter versions 0.7 through 2.9 allows remote attackers to perform user-assisted code execution by crafting an RSS item that includes shell code in its title and/or URL.,https://nvd.nist.gov/vuln/detail/CVE-2017-12904,1,"```json
+}",79271714330892808671163251460832419876,controller.cpp,323926139485782731853395949715316223577,['CWE-787'],CVE-2017-12904,Improper Neutralization of Special Elements used in an OS Command in bookmarking function of Newsbeuter versions 0.7 through 2.9 allows remote attackers to perform user-assisted code execution by crafting an RSS item that includes shell code in its title and/or URL.,https://nvd.nist.gov/vuln/detail/CVE-2017-12904,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -6007,7 +6007,7 @@ Reviewed-by: Jason Wang <jasowang@redhat.com>",0,"static size_t send_control_msg
     virtqueue_push(vq, &elem, len);
     virtio_notify(VIRTIO_DEVICE(vser), vq);
     return len;
-}",134405066708210322765218436102220814555,virtio-serial-bus.c,85242612776593478078186690625596682650,['CWE-787'],CVE-2015-5745,Buffer overflow in the send_control_msg function in hw/char/virtio-serial-bus.c in QEMU before 2.4.0 allows guest users to cause a denial of service (QEMU process crash) via a crafted virtio control message.,https://nvd.nist.gov/vuln/detail/CVE-2015-5745,1,"The code lacks bounds checking on the input length `len` before using it in `iov_from_buf`, which copies data into a virtio ring buffer managed via SG lists. Without ensuring that `len` does not exceed the available space in the destination buffer, a buffer overflow is possible. Even if `iov_from_buf` is a standard library function, its behavior in this context depends on proper input validation, which is missing. Security best practices require validating input lengths before any copy operation, especially in device drivers where memory safety is critical.",2025-11-16T00:29:51.008026
+}",134405066708210322765218436102220814555,virtio-serial-bus.c,85242612776593478078186690625596682650,['CWE-787'],CVE-2015-5745,Buffer overflow in the send_control_msg function in hw/char/virtio-serial-bus.c in QEMU before 2.4.0 allows guest users to cause a denial of service (QEMU process crash) via a crafted virtio control message.,https://nvd.nist.gov/vuln/detail/CVE-2015-5745,0,"The code lacks bounds checking on the input length `len` before using it in `iov_from_buf`, which copies data into a virtio ring buffer managed via SG lists. Without ensuring that `len` does not exceed the available space in the destination buffer, a buffer overflow is possible. Even if `iov_from_buf` is a standard library function, its behavior in this context depends on proper input validation, which is missing. Security best practices require validating input lengths before any copy operation, especially in device drivers where memory safety is critical.",2025-11-16T00:29:51.008026
 355014,pjproject,8b621f192cae14456ee0b0ade52ce6c6f258af1e,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/8b621f192cae14456ee0b0ade52ce6c6f258af1e,Merge pull request from GHSA-3qx3-cg72-wrh9,0,"static void parse_rtcp_bye(pjmedia_rtcp_session *sess,
 			   const void *pkt,
 			   pj_size_t size)
@@ -7179,7 +7179,7 @@ Change-Id: I6b7a8a62d3e7c13a16d81619e5bc23ae2cdbc7fd",0,"TfLiteStatus EvalGather
                            TfLiteTypeGetName(params->type));
       return kTfLiteError;
   }
-}",279577390165387156722866411822496673151,gather_nd.cc,142063643007794638174357713974685200472,['CWE-125'],CVE-2021-37687,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions TFLite's [`GatherNd` implementation](https://github.com/tensorflow/tensorflow/blob/149562d49faa709ea80df1d99fc41d005b81082a/tensorflow/lite/kernels/gather_nd.cc#L124) does not support negative indices but there are no checks for this situation. Hence, an attacker can read arbitrary data from the heap by carefully crafting a model with negative values in `indices`. Similar issue exists in [`Gather` implementation](https://github.com/tensorflow/tensorflow/blob/149562d49faa709ea80df1d99fc41d005b81082a/tensorflow/lite/kernels/gather.cc). We have patched the issue in GitHub commits bb6a0383ed553c286f87ca88c207f6774d5c4a8f and eb921122119a6b6e470ee98b89e65d721663179d. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37687,1,"```json
+}",279577390165387156722866411822496673151,gather_nd.cc,142063643007794638174357713974685200472,['CWE-125'],CVE-2021-37687,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions TFLite's [`GatherNd` implementation](https://github.com/tensorflow/tensorflow/blob/149562d49faa709ea80df1d99fc41d005b81082a/tensorflow/lite/kernels/gather_nd.cc#L124) does not support negative indices but there are no checks for this situation. Hence, an attacker can read arbitrary data from the heap by carefully crafting a model with negative values in `indices`. Similar issue exists in [`Gather` implementation](https://github.com/tensorflow/tensorflow/blob/149562d49faa709ea80df1d99fc41d005b81082a/tensorflow/lite/kernels/gather.cc). We have patched the issue in GitHub commits bb6a0383ed553c286f87ca88c207f6774d5c4a8f and eb921122119a6b6e470ee98b89e65d721663179d. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37687,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -7219,7 +7219,7 @@ Change-Id: I6b7a8a62d3e7c13a16d81619e5bc23ae2cdbc7fd",0,"TfLiteStatus EvalGather
     }
     memmove(buf->data + buf->offset, source, len);
     buf->offset += len;
-}",144002101291977125414572650343381313849,None,,['CWE-787'],CVE-2021-3751,libmobi is vulnerable to Out-of-bounds Write,https://nvd.nist.gov/vuln/detail/CVE-2021-3751,1,"```json
+}",144002101291977125414572650343381313849,None,,['CWE-787'],CVE-2021-3751,libmobi is vulnerable to Out-of-bounds Write,https://nvd.nist.gov/vuln/detail/CVE-2021-3751,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -7382,7 +7382,7 @@ fbshipit-source-id: ee53875d21e02608c6d870388eecf1464de24ff1",0,"String string_n
 
   resstr.setSize(reslen);
   return resstr;
-}",113449506030420962381960959197350451885,zend-string.cpp,48155053696740279281010358677614070619,['CWE-119'],CVE-2019-11929,"Insufficient boundary checks when formatting numbers in number_format allows read/write access to out-of-bounds memory, potentially leading to remote code execution. This issue affects HHVM versions prior to 3.30.10, all versions between 4.0.0 and 4.8.5, all versions between 4.9.0 and 4.18.2, and versions 4.19.0, 4.19.1, 4.20.0, 4.20.1, 4.20.2, 4.21.0, 4.22.0, 4.23.0.",https://nvd.nist.gov/vuln/detail/CVE-2019-11929,1,"```json
+}",113449506030420962381960959197350451885,zend-string.cpp,48155053696740279281010358677614070619,['CWE-119'],CVE-2019-11929,"Insufficient boundary checks when formatting numbers in number_format allows read/write access to out-of-bounds memory, potentially leading to remote code execution. This issue affects HHVM versions prior to 3.30.10, all versions between 4.0.0 and 4.8.5, all versions between 4.9.0 and 4.18.2, and versions 4.19.0, 4.19.1, 4.20.0, 4.20.1, 4.20.2, 4.21.0, 4.22.0, 4.23.0.",https://nvd.nist.gov/vuln/detail/CVE-2019-11929,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -8573,7 +8573,7 @@ fbshipit-source-id: ee53875d21e02608c6d870388eecf1464de24ff1",0,"String string_n
         }
         out.flush();
         depth--;
-    }",135908904515753765989749270271712491869,image.cpp,158908380717507532391090050859668456498,['CWE-125'],CVE-2017-17723,"In Exiv2 0.26, there is a heap-based buffer over-read in the Exiv2::Image::byteSwap4 function in image.cpp. Remote attackers can exploit this vulnerability to disclose memory data or cause a denial of service via a crafted TIFF file.",https://nvd.nist.gov/vuln/detail/CVE-2017-17723,1,"```json
+    }",135908904515753765989749270271712491869,image.cpp,158908380717507532391090050859668456498,['CWE-125'],CVE-2017-17723,"In Exiv2 0.26, there is a heap-based buffer over-read in the Exiv2::Image::byteSwap4 function in image.cpp. Remote attackers can exploit this vulnerability to disclose memory data or cause a denial of service via a crafted TIFF file.",https://nvd.nist.gov/vuln/detail/CVE-2017-17723,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -8699,7 +8699,7 @@ Change-Id: I07c0c42d29dfbb55bfa13ec1f09ef825fb0a1a1d",0,"Status ShapeRefiner::In
   }
 
   return Status::OK();
-}",25506560335878301067355400382857145905,None,,['CWE-369'],CVE-2021-37690,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions when running shape functions, some functions (such as `MutableHashTableShape`) produce extra output information in the form of a `ShapeAndType` struct. The shapes embedded in this struct are owned by an inference context that is cleaned up almost immediately; if the upstream code attempts to access this shape information, it can trigger a segfault. `ShapeRefiner` is mitigating this for normal output shapes by cloning them (and thus putting the newly created shape under ownership of an inference context that will not die), but we were not doing the same for shapes and types. This commit fixes that by doing similar logic on output shapes and types. We have patched the issue in GitHub commit ee119d4a498979525046fba1c3dd3f13a039fbb1. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37690,1,"```json
+}",25506560335878301067355400382857145905,None,,['CWE-369'],CVE-2021-37690,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions when running shape functions, some functions (such as `MutableHashTableShape`) produce extra output information in the form of a `ShapeAndType` struct. The shapes embedded in this struct are owned by an inference context that is cleaned up almost immediately; if the upstream code attempts to access this shape information, it can trigger a segfault. `ShapeRefiner` is mitigating this for normal output shapes by cloning them (and thus putting the newly created shape under ownership of an inference context that will not die), but we were not doing the same for shapes and types. This commit fixes that by doing similar logic on output shapes and types. We have patched the issue in GitHub commit ee119d4a498979525046fba1c3dd3f13a039fbb1. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37690,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -8888,7 +8888,7 @@ A real fix has been implemented in 2.5.x (master).",0,"static size_t handle_retu
     }
 
     return len;
-}",325925920263284522777628774415448931953,auth_url.c,331866999271559721275349792045163085611,['CWE-119'],CVE-2018-18820,"A buffer overflow was discovered in the URL-authentication backend of the Icecast before 2.4.4. If the backend is enabled, then any malicious HTTP client can send a request for that specific resource including a crafted header, leading to denial of service and potentially remote code execution.",https://nvd.nist.gov/vuln/detail/CVE-2018-18820,1,"```json
+}",325925920263284522777628774415448931953,auth_url.c,331866999271559721275349792045163085611,['CWE-119'],CVE-2018-18820,"A buffer overflow was discovered in the URL-authentication backend of the Icecast before 2.4.4. If the backend is enabled, then any malicious HTTP client can send a request for that specific resource including a crafted header, leading to denial of service and potentially remote code execution.",https://nvd.nist.gov/vuln/detail/CVE-2018-18820,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -9028,7 +9028,7 @@ A real fix has been implemented in 2.5.x (master).",0,"static size_t handle_retu
         }
     }
     return saveTo(fsFileName);
-}",130624185763099199387957900171257914087,None,,['CWE-552'],CVE-2022-25297,This affects the package drogonframework/drogon before 1.7.5. The unsafe handling of file names during upload using HttpFile::save() method may enable attackers to write files to arbitrary locations outside the designated target folder.,https://nvd.nist.gov/vuln/detail/CVE-2022-25297,1,"```json
+}",130624185763099199387957900171257914087,None,,['CWE-552'],CVE-2022-25297,This affects the package drogonframework/drogon before 1.7.5. The unsafe handling of file names during upload using HttpFile::save() method may enable attackers to write files to arbitrary locations outside the designated target folder.,https://nvd.nist.gov/vuln/detail/CVE-2022-25297,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -9382,7 +9382,7 @@ Change-Id: Ife8dcbdb021bec4787eef6a4361dd08f17c14bd6",0,"  void Compute(OpKernel
 	delete[] audioDriverName;
 	
 	delete listener;
-}",322349041921925160891638302386197132402,PlayerGeneric.cpp,114108410020377773864246355219706856245,['CWE-416'],CVE-2020-15569,PlayerGeneric.cpp in MilkyTracker through 1.02.00 has a use-after-free in the PlayerGeneric destructor.,https://nvd.nist.gov/vuln/detail/CVE-2020-15569,1,"```json
+}",322349041921925160891638302386197132402,PlayerGeneric.cpp,114108410020377773864246355219706856245,['CWE-416'],CVE-2020-15569,PlayerGeneric.cpp in MilkyTracker through 1.02.00 has a use-after-free in the PlayerGeneric destructor.,https://nvd.nist.gov/vuln/detail/CVE-2020-15569,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -9445,7 +9445,7 @@ The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",0,"mrb_ary_shift
     ARY_SET_LEN(a, len-n);
   }
   return val;
-}",336824346603495353101799104649854425750,array.c,295526445825727607536544634773604768998,['CWE-476'],CVE-2021-4188,mruby is vulnerable to NULL Pointer Dereference,https://nvd.nist.gov/vuln/detail/CVE-2021-4188,1,"```json
+}",336824346603495353101799104649854425750,array.c,295526445825727607536544634773604768998,['CWE-476'],CVE-2021-4188,mruby is vulnerable to NULL Pointer Dereference,https://nvd.nist.gov/vuln/detail/CVE-2021-4188,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -9821,7 +9821,7 @@ Change-Id: I847f69b68d1ddaff4b1e925a09b8b69c1756653b",0,"size_t TfLiteIntArrayGe
   computed_size -= sizeof(dummy.data[0]);
 #endif
   return computed_size;
-}",132887753534839828949485916264712284974,common.c,141963346575108043523158725755967478163,['CWE-190'],CVE-2022-23558,"Tensorflow is an Open Source Machine Learning Framework. An attacker can craft a TFLite model that would cause an integer overflow in `TfLiteIntArrayCreate`. The `TfLiteIntArrayGetSizeInBytes` returns an `int` instead of a `size_t. An attacker can control model inputs such that `computed_size` overflows the size of `int` datatype. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23558,1,"```json
+}",132887753534839828949485916264712284974,common.c,141963346575108043523158725755967478163,['CWE-190'],CVE-2022-23558,"Tensorflow is an Open Source Machine Learning Framework. An attacker can craft a TFLite model that would cause an integer overflow in `TfLiteIntArrayCreate`. The `TfLiteIntArrayGetSizeInBytes` returns an `int` instead of a `size_t. An attacker can control model inputs such that `computed_size` overflows the size of `int` datatype. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23558,0,"```json
 {
   ""vulnerability_detected"": false,
   ""vulnerabilities"": [],
@@ -9875,7 +9875,7 @@ Change-Id: Ia4228960b5d2aa44480385f74bdd70d21a3613c3",0,"TfLiteStatus Eval(TfLit
 #undef TF_LITE_CHECK_DIV_NON_ZERO
 
   return kTfLiteOk;
-}",11976239460896947994282427616906942562,div.cc,298114320359155685162419383998362245720,['CWE-369'],CVE-2021-37683,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of division in TFLite is [vulnerable to a division by 0 error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/div.cc). There is no check that the divisor tensor does not contain zero elements. We have patched the issue in GitHub commit 1e206baedf8bef0334cca3eb92bab134ef525a28. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37683,1,"```json
+}",11976239460896947994282427616906942562,div.cc,298114320359155685162419383998362245720,['CWE-369'],CVE-2021-37683,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of division in TFLite is [vulnerable to a division by 0 error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/div.cc). There is no check that the divisor tensor does not contain zero elements. We have patched the issue in GitHub commit 1e206baedf8bef0334cca3eb92bab134ef525a28. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37683,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -10619,7 +10619,7 @@ err_lock:
   if (errorstate) return false;
   SetIntensityTarget(io);
   return true;
-}",120159629770079906091018300159930359241,codec_apng.cc,71568842210478250977539605329835891073,['CWE-369'],CVE-2021-36692,"libjxl v0.3.7 is affected by a Divide By Zero in issue in lib/extras/codec_apng.cc jxl::DecodeImageAPNG(). When encoding a malicous APNG file using cjxl, an attacker can trigger a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2021-36692,1,"```json
+}",120159629770079906091018300159930359241,codec_apng.cc,71568842210478250977539605329835891073,['CWE-369'],CVE-2021-36692,"libjxl v0.3.7 is affected by a Divide By Zero in issue in lib/extras/codec_apng.cc jxl::DecodeImageAPNG(). When encoding a malicous APNG file using cjxl, an attacker can trigger a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2021-36692,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -11568,7 +11568,7 @@ Signed-off-by: Helge Deller <deller@gmx.de>",0,"pxa3xx_gcu_write(struct file *fi
 	spin_unlock_irqrestore(&priv->spinlock, flags);
 
 	return words * 4;
-}",130082292833953650664570449389673394925,pxa3xx-gcu.c,198658222992962284307702769824081313722,['CWE-703'],CVE-2022-39842,"An issue was discovered in the Linux kernel before 5.19. In pxa3xx_gcu_write in drivers/video/fbdev/pxa3xx-gcu.c, the count parameter has a type conflict of size_t versus int, causing an integer overflow and bypassing the size check. After that, because it is used as the third argument to copy_from_user(), a heap overflow may occur. NOTE: the original discoverer disputes that the overflow can actually happen.",https://nvd.nist.gov/vuln/detail/CVE-2022-39842,1,"```json
+}",130082292833953650664570449389673394925,pxa3xx-gcu.c,198658222992962284307702769824081313722,['CWE-703'],CVE-2022-39842,"An issue was discovered in the Linux kernel before 5.19. In pxa3xx_gcu_write in drivers/video/fbdev/pxa3xx-gcu.c, the count parameter has a type conflict of size_t versus int, causing an integer overflow and bypassing the size check. After that, because it is used as the third argument to copy_from_user(), a heap overflow may occur. NOTE: the original discoverer disputes that the overflow can actually happen.",https://nvd.nist.gov/vuln/detail/CVE-2022-39842,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -11982,7 +11982,7 @@ Change-Id: Iad2ec40d43f5fd7ea016c20283356c12d5ddeab1",0,"  void Compute(OpKernel
   }
 
   return TINYEXR_SUCCESS;
-}",151063885227112731774220545683650954280,tinyexr.h,117099710183052888477970990927407043374,['CWE-20'],CVE-2020-19490,"tinyexr 0.9.5 has a integer overflow over-write in tinyexr::DecodePixelData in tinyexr.h, related to OpenEXR code.",https://nvd.nist.gov/vuln/detail/CVE-2020-19490,1,"```json
+}",151063885227112731774220545683650954280,tinyexr.h,117099710183052888477970990927407043374,['CWE-20'],CVE-2020-19490,"tinyexr 0.9.5 has a integer overflow over-write in tinyexr::DecodePixelData in tinyexr.h, related to OpenEXR code.",https://nvd.nist.gov/vuln/detail/CVE-2020-19490,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -12266,7 +12266,7 @@ fbshipit-source-id: 19bb2be2c731808144e1a074ece313fba11f1945",0,"void updateHand
   m_Stream.SkipStuffing();
 #endif  
   return false;
-}",278625865669519268412189582687913030823,None,,['CWE-703'],CVE-2022-32978,There is an assertion failure in SingleComponentLSScan::ParseMCU in singlecomponentlsscan.cpp in libjpeg before 1.64 via an empty JPEG-LS scan.,https://nvd.nist.gov/vuln/detail/CVE-2022-32978,1,"```json
+}",278625865669519268412189582687913030823,None,,['CWE-703'],CVE-2022-32978,There is an assertion failure in SingleComponentLSScan::ParseMCU in singlecomponentlsscan.cpp in libjpeg before 1.64 via an empty JPEG-LS scan.,https://nvd.nist.gov/vuln/detail/CVE-2022-32978,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -12852,7 +12852,7 @@ PiperOrigin-RevId: 446028341",0,"  void Compute(OpKernelContext* ctx) override {
 
 finalize_it:
 	RETiRet;
-}",319180109338452321529530788318348241217,imptcp.c,222511081390723120608536252618686301143,['CWE-190'],CVE-2018-16881,"A denial of service vulnerability was found in rsyslog in the imptcp module. An attacker could send a specially crafted message to the imptcp socket, which would cause rsyslog to crash. Versions before 8.27.0 are vulnerable.",https://nvd.nist.gov/vuln/detail/CVE-2018-16881,1,"```json
+}",319180109338452321529530788318348241217,imptcp.c,222511081390723120608536252618686301143,['CWE-190'],CVE-2018-16881,"A denial of service vulnerability was found in rsyslog in the imptcp module. An attacker could send a specially crafted message to the imptcp socket, which would cause rsyslog to crash. Versions before 8.27.0 are vulnerable.",https://nvd.nist.gov/vuln/detail/CVE-2018-16881,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -13013,7 +13013,7 @@ Solution:   Trigger ModeChanged after setting VIsual.",0,"n_start_visual_mode(in
 	curwin->w_old_cursor_lnum = curwin->w_cursor.lnum;
 	curwin->w_old_visual_lnum = curwin->w_cursor.lnum;
     }
-}",18013964164383096631914378209665418022,None,,['CWE-122'],CVE-2021-3968,vim is vulnerable to Heap-based Buffer Overflow,https://nvd.nist.gov/vuln/detail/CVE-2021-3968,1,"```json
+}",18013964164383096631914378209665418022,None,,['CWE-122'],CVE-2021-3968,vim is vulnerable to Heap-based Buffer Overflow,https://nvd.nist.gov/vuln/detail/CVE-2021-3968,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -13149,7 +13149,7 @@ PiperOrigin-RevId: 433050921",0,"void ComparisonQuantized(const TfLiteTensor* in
           GetTensorShape(output), GetTensorData<bool>(output));
     }
   }
-}",213386004946249159247710639352470904167,comparisons.cc,191046017812634874260331571010514719419,['CWE-703'],CVE-2022-29212,"TensorFlow is an open source platform for machine learning. Prior to versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4, certain TFLite models that were created using TFLite model converter would crash when loaded in the TFLite interpreter. The culprit is that during quantization the scale of values could be greater than 1 but code was always assuming sub-unit scaling. Thus, since code was calling `QuantizeMultiplierSmallerThanOneExp`, the `TFLITE_CHECK_LT` assertion would trigger and abort the process. Versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4 contain a patch for this issue.",https://nvd.nist.gov/vuln/detail/CVE-2022-29212,1,"```json
+}",213386004946249159247710639352470904167,comparisons.cc,191046017812634874260331571010514719419,['CWE-703'],CVE-2022-29212,"TensorFlow is an open source platform for machine learning. Prior to versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4, certain TFLite models that were created using TFLite model converter would crash when loaded in the TFLite interpreter. The culprit is that during quantization the scale of values could be greater than 1 but code was always assuming sub-unit scaling. Thus, since code was calling `QuantizeMultiplierSmallerThanOneExp`, the `TFLITE_CHECK_LT` assertion would trigger and abort the process. Versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4 contain a patch for this issue.",https://nvd.nist.gov/vuln/detail/CVE-2022-29212,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -13219,7 +13219,7 @@ CWE-134",0,"static int vidioc_querycap(struct file *file, void *priv,
 
 	memset(cap->reserved, 0, sizeof(cap->reserved));
 	return 0;
-}",178769376518603723181418371440757147493,v4l2loopback.c,138252299614112344688826607831650943411,['CWE-134'],CVE-2022-2652,Depending on the way the format strings in the card label are crafted it's possible to leak kernel stack memory. There is also the possibility for DoS due to the v4l2loopback kernel module crashing when providing the card label on request (reproduce e.g. with many %s modifiers in a row).,https://nvd.nist.gov/vuln/detail/CVE-2022-2652,1,"```json
+}",178769376518603723181418371440757147493,v4l2loopback.c,138252299614112344688826607831650943411,['CWE-134'],CVE-2022-2652,Depending on the way the format strings in the card label are crafted it's possible to leak kernel stack memory. There is also the possibility for DoS due to the v4l2loopback kernel module crashing when providing the card label on request (reproduce e.g. with many %s modifiers in a row).,https://nvd.nist.gov/vuln/detail/CVE-2022-2652,0,"```json
 {
   ""vulnerability_detected"": false,
   ""vulnerabilities"": [],
@@ -13479,7 +13479,7 @@ exit:
 		return true;
 
 	return false;
-}",21444025468428283247999063273803236471,crypto.c,97644738698722030133364122587095840919,['CWE-20'],CVE-2021-43267,An issue was discovered in net/tipc/crypto.c in the Linux kernel before 5.14.16. The Transparent Inter-Process Communication (TIPC) functionality allows remote attackers to exploit insufficient validation of user-supplied sizes for the MSG_CRYPTO message type.,https://nvd.nist.gov/vuln/detail/CVE-2021-43267,1,"```json
+}",21444025468428283247999063273803236471,crypto.c,97644738698722030133364122587095840919,['CWE-20'],CVE-2021-43267,An issue was discovered in net/tipc/crypto.c in the Linux kernel before 5.14.16. The Transparent Inter-Process Communication (TIPC) functionality allows remote attackers to exploit insufficient validation of user-supplied sizes for the MSG_CRYPTO message type.,https://nvd.nist.gov/vuln/detail/CVE-2021-43267,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -13551,7 +13551,7 @@ Reported by Changochen.",0,"static ptrdiff_t finderrfunc(lua_State *L)
     }
   }
   return 0;
-}",135963737792819118980125175334737284274,lj_err.c,198203473898814036407466574660463075188,['CWE-125'],CVE-2020-15890,LuaJit through 2.1.0-beta3 has an out-of-bounds read because __gc handler frame traversal is mishandled.,https://nvd.nist.gov/vuln/detail/CVE-2020-15890,1,"```json
+}",135963737792819118980125175334737284274,lj_err.c,198203473898814036407466574660463075188,['CWE-125'],CVE-2020-15890,LuaJit through 2.1.0-beta3 has an out-of-bounds read because __gc handler frame traversal is mishandled.,https://nvd.nist.gov/vuln/detail/CVE-2020-15890,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -13865,7 +13865,7 @@ Signed-off-by: Dave Kleikamp <dave.kleikamp@oracle.com>",0,"void jfs_evict_inode
 		ji->active_ag = -1;
 	}
 	spin_unlock_irq(&ji->ag_lock);
-}",19343683273845236904792229610406110241,inode.c,328882647920718394331416110787337999080,['CWE-476'],CVE-2022-3202,A NULL pointer dereference flaw in diFree in fs/jfs/inode.c in Journaled File System (JFS)in the Linux kernel. This could allow a local attacker to crash the system or leak kernel internal information.,https://nvd.nist.gov/vuln/detail/CVE-2022-3202,1,"```json
+}",19343683273845236904792229610406110241,inode.c,328882647920718394331416110787337999080,['CWE-476'],CVE-2022-3202,A NULL pointer dereference flaw in diFree in fs/jfs/inode.c in Journaled File System (JFS)in the Linux kernel. This could allow a local attacker to crash the system or leak kernel internal information.,https://nvd.nist.gov/vuln/detail/CVE-2022-3202,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -14358,7 +14358,7 @@ Change-Id: I369c249cca32e6c56ec193f0ebbf2f2768fc7d43",0,"bool DependencyOptimize
     }
   }
   return true;
-}",223351651745564626611627672045490996261,None,,['CWE-617'],CVE-2022-23579,"Tensorflow is an Open Source Machine Learning Framework. The Grappler optimizer in TensorFlow can be used to cause a denial of service by altering a `SavedModel` such that `SafeToRemoveIdentity` would trigger `CHECK` failures. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23579,1,"```json
+}",223351651745564626611627672045490996261,None,,['CWE-617'],CVE-2022-23579,"Tensorflow is an Open Source Machine Learning Framework. The Grappler optimizer in TensorFlow can be used to cause a denial of service by altering a `SavedModel` such that `SafeToRemoveIdentity` would trigger `CHECK` failures. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23579,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -15632,7 +15632,7 @@ unlock:
 
 	pj_gettimeofday(&sess->stat.tx.voip_mtc.update);
     }
-}",134123814969944330757535232446891920936,rtcp_xr.c,238632209992792964107720594546671940595,['CWE-125'],CVE-2021-43845,"PJSIP is a free and open source multimedia communication library. In version 2.11.1 and prior, if incoming RTCP XR message contain block, the data field is not checked against the received packet size, potentially resulting in an out-of-bound read access. This affects all users that use PJMEDIA and RTCP XR. A malicious actor can send a RTCP XR message with an invalid packet size.",https://nvd.nist.gov/vuln/detail/CVE-2021-43845,1,"```json
+}",134123814969944330757535232446891920936,rtcp_xr.c,238632209992792964107720594546671940595,['CWE-125'],CVE-2021-43845,"PJSIP is a free and open source multimedia communication library. In version 2.11.1 and prior, if incoming RTCP XR message contain block, the data field is not checked against the received packet size, potentially resulting in an out-of-bound read access. This affects all users that use PJMEDIA and RTCP XR. A malicious actor can send a RTCP XR message with an invalid packet size.",https://nvd.nist.gov/vuln/detail/CVE-2021-43845,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -15875,7 +15875,7 @@ Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>",0,"void recalc_intercepts(st
 
 	vmcb_set_intercept(c, INTERCEPT_VMLOAD);
 	vmcb_set_intercept(c, INTERCEPT_VMSAVE);
-}",61346983903340748153155985789359366401,None,,['CWE-862'],CVE-2021-3656,"A flaw was found in the KVM's AMD code for supporting SVM nested virtualization. The flaw occurs when processing the VMCB (virtual machine control block) provided by the L1 guest to spawn/handle a nested guest (L2). Due to improper validation of the ""virt_ext"" field, this issue could allow a malicious L1 to disable both VMLOAD/VMSAVE intercepts and VLS (Virtual VMLOAD/VMSAVE) for the L2 guest. As a result, the L2 guest would be allowed to read/write physical pages of the host, resulting in a crash of the entire system, leak of sensitive data or potential guest-to-host escape.",https://nvd.nist.gov/vuln/detail/CVE-2021-3656,0,"```json
+}",61346983903340748153155985789359366401,None,,['CWE-862'],CVE-2021-3656,"A flaw was found in the KVM's AMD code for supporting SVM nested virtualization. The flaw occurs when processing the VMCB (virtual machine control block) provided by the L1 guest to spawn/handle a nested guest (L2). Due to improper validation of the ""virt_ext"" field, this issue could allow a malicious L1 to disable both VMLOAD/VMSAVE intercepts and VLS (Virtual VMLOAD/VMSAVE) for the L2 guest. As a result, the L2 guest would be allowed to read/write physical pages of the host, resulting in a crash of the entire system, leak of sensitive data or potential guest-to-host escape.",https://nvd.nist.gov/vuln/detail/CVE-2021-3656,1,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -16255,7 +16255,7 @@ Signed-off-by: David S. Miller <davem@davemloft.net>",0,"static struct nlattr *r
 out:
 	(*sfa)->actions_len += req_size;
 	return  (struct nlattr *) ((unsigned char *)(*sfa) + next_offset);
-}",241955732354437165048790183048012619919,flow_netlink.c,169733194668607707184956779941409309704,['CWE-362'],CVE-2022-2639,"An integer coercion error was found in the openvswitch kernel module. Given a sufficiently large number of actions, while copying and reserving memory for a new action of a new flow, the reserve_sfa_size() function does not return -EMSGSIZE as expected, potentially leading to an out-of-bounds write access. This flaw allows a local user to crash or potentially escalate their privileges on the system.",https://nvd.nist.gov/vuln/detail/CVE-2022-2639,1,"```json
+}",241955732354437165048790183048012619919,flow_netlink.c,169733194668607707184956779941409309704,['CWE-362'],CVE-2022-2639,"An integer coercion error was found in the openvswitch kernel module. Given a sufficiently large number of actions, while copying and reserving memory for a new action of a new flow, the reserve_sfa_size() function does not return -EMSGSIZE as expected, potentially leading to an out-of-bounds write access. This flaw allows a local user to crash or potentially escalate their privileges on the system.",https://nvd.nist.gov/vuln/detail/CVE-2022-2639,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -16553,7 +16553,7 @@ out:
 	*maxcount = 0;
 	errno = EFTYPE;
 	return -1;
-}",150937506413080071452042228145771315015,cdf.c,54795377767819575688029736606662152773,['CWE-787'],CVE-2019-18218,"cdf_read_property_info in cdf.c in file through 5.37 does not restrict the number of CDF_VECTOR elements, which allows a heap-based buffer overflow (4-byte out-of-bounds write).",https://nvd.nist.gov/vuln/detail/CVE-2019-18218,1,"```json
+}",150937506413080071452042228145771315015,cdf.c,54795377767819575688029736606662152773,['CWE-787'],CVE-2019-18218,"cdf_read_property_info in cdf.c in file through 5.37 does not restrict the number of CDF_VECTOR elements, which allows a heap-based buffer overflow (4-byte out-of-bounds write).",https://nvd.nist.gov/vuln/detail/CVE-2019-18218,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -16630,7 +16630,7 @@ Change-Id: I17b6c88aadef4131470378e48cced054bf252e86",0,"  static Status ParseEq
       (*label_types)[label] = GetDimensionType(removed, unique);
     }
     return Status::OK();
-  }",228212953693539342712398927899777742190,einsum_op_impl.h,62458496214900513409618845321239996805,['CWE-703'],CVE-2021-41201,"TensorFlow is an open source platform for machine learning. In affeced versions during execution, `EinsumHelper::ParseEquation()` is supposed to set the flags in `input_has_ellipsis` vector and `*output_has_ellipsis` boolean to indicate whether there is ellipsis in the corresponding inputs and output. However, the code only changes these flags to `true` and never assigns `false`. This results in unitialized variable access if callers assume that `EinsumHelper::ParseEquation()` always sets these flags. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41201,1,"```json
+  }",228212953693539342712398927899777742190,einsum_op_impl.h,62458496214900513409618845321239996805,['CWE-703'],CVE-2021-41201,"TensorFlow is an open source platform for machine learning. In affeced versions during execution, `EinsumHelper::ParseEquation()` is supposed to set the flags in `input_has_ellipsis` vector and `*output_has_ellipsis` boolean to indicate whether there is ellipsis in the corresponding inputs and output. However, the code only changes these flags to `true` and never assigns `false`. This results in unitialized variable access if callers assume that `EinsumHelper::ParseEquation()` always sets these flags. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41201,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -18152,7 +18152,7 @@ st_select_lex::optimize_unflattened_subqueries():
     }
   }
   return FALSE;
-}",335655854636733648424487878771712666992,None,,['CWE-476'],CVE-2021-46664,MariaDB through 10.5.9 allows an application crash in sub_select_postjoin_aggr for a NULL value of aggr.,https://nvd.nist.gov/vuln/detail/CVE-2021-46664,1,"```json
+}",335655854636733648424487878771712666992,None,,['CWE-476'],CVE-2021-46664,MariaDB through 10.5.9 allows an application crash in sub_select_postjoin_aggr for a NULL value of aggr.,https://nvd.nist.gov/vuln/detail/CVE-2021-46664,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -18486,7 +18486,7 @@ next:
 		}
 	}
 	return res;
-}",144028133167446566795171831954194871613,gd_interpolation.c,190827623618557315538392680975816018804,['CWE-119'],CVE-2016-6207,Integer overflow in the _gdContributionsAlloc function in gd_interpolation.c in GD Graphics Library (aka libgd) before 2.2.3 allows remote attackers to cause a denial of service (out-of-bounds memory write or memory consumption) via unspecified vectors.,https://nvd.nist.gov/vuln/detail/CVE-2016-6207,1,"```json
+}",144028133167446566795171831954194871613,gd_interpolation.c,190827623618557315538392680975816018804,['CWE-119'],CVE-2016-6207,Integer overflow in the _gdContributionsAlloc function in gd_interpolation.c in GD Graphics Library (aka libgd) before 2.2.3 allows remote attackers to cause a denial of service (out-of-bounds memory write or memory consumption) via unspecified vectors.,https://nvd.nist.gov/vuln/detail/CVE-2016-6207,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -18603,7 +18603,7 @@ Fixes http://bugzilla.maptools.org/show_bug.cgi?id=2675",0,"static enum TIFFRead
 	}
 	*value=data;
 	return(TIFFReadDirEntryErrOk);
-}",283163990857495325814682097643200308064,None,,['CWE-770'],CVE-2017-12944,"The TIFFReadDirEntryArray function in tif_read.c in LibTIFF 4.0.8 mishandles memory allocation for short files, which allows remote attackers to cause a denial of service (allocation failure and application crash) in the TIFFFetchStripThing function in tif_dirread.c during a tiff2pdf invocation.",https://nvd.nist.gov/vuln/detail/CVE-2017-12944,1,"```json
+}",283163990857495325814682097643200308064,None,,['CWE-770'],CVE-2017-12944,"The TIFFReadDirEntryArray function in tif_read.c in LibTIFF 4.0.8 mishandles memory allocation for short files, which allows remote attackers to cause a denial of service (allocation failure and application crash) in the TIFFFetchStripThing function in tif_dirread.c during a tiff2pdf invocation.",https://nvd.nist.gov/vuln/detail/CVE-2017-12944,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -18934,7 +18934,7 @@ Signed-off-by: Simon McVittie <smcv@collabora.com>",0,"setup_seccomp (FlatpakBwr
 	}
 	if (minify > 1)
 		putchar('\n');
-}",148093103302179844815401983905255483216,jsdump.c,205390724250782891362749099686890673449,['CWE-476'],CVE-2022-30975,"In Artifex MuJS through 1.2.0, jsP_dumpsyntax in jsdump.c has a NULL pointer dereference, as demonstrated by mujs-pp.",https://nvd.nist.gov/vuln/detail/CVE-2022-30975,1,"```json
+}",148093103302179844815401983905255483216,jsdump.c,205390724250782891362749099686890673449,['CWE-476'],CVE-2022-30975,"In Artifex MuJS through 1.2.0, jsP_dumpsyntax in jsdump.c has a NULL pointer dereference, as demonstrated by mujs-pp.",https://nvd.nist.gov/vuln/detail/CVE-2022-30975,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -19122,7 +19122,7 @@ ways to break early iterations of this patch.",0,"bmexec_trans (kwset_t kwset, c
     }
 
   return -1;
-}",262967935690402821011816255604665485413,None,,['CWE-119'],CVE-2015-1345,The bmexec_trans function in kwset.c in grep 2.19 through 2.21 allows local users to cause a denial of service (out-of-bounds heap read and crash) via crafted input when using the -F option.,https://nvd.nist.gov/vuln/detail/CVE-2015-1345,1,"```json
+}",262967935690402821011816255604665485413,None,,['CWE-119'],CVE-2015-1345,The bmexec_trans function in kwset.c in grep 2.19 through 2.21 allows local users to cause a denial of service (out-of-bounds heap read and crash) via crafted input when using the -F option.,https://nvd.nist.gov/vuln/detail/CVE-2015-1345,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -19345,7 +19345,7 @@ Reviewed-by: Heiko Schocher <hs@denx.de>",0,"static int do_i2c_md(struct cmd_tbl
 	i2c_dp_last_length = length;
 
 	return 0;
-}",4295672649069929583389307772574603935,i2c.c,148650655652553671361921673670735435868,['CWE-787'],CVE-2022-34835,"In Das U-Boot through 2022.07-rc5, an integer signedness error and resultant stack-based buffer overflow in the ""i2c md"" command enables the corruption of the return address pointer of the do_i2c_md function.",https://nvd.nist.gov/vuln/detail/CVE-2022-34835,1,"```json
+}",4295672649069929583389307772574603935,i2c.c,148650655652553671361921673670735435868,['CWE-787'],CVE-2022-34835,"In Das U-Boot through 2022.07-rc5, an integer signedness error and resultant stack-based buffer overflow in the ""i2c md"" command enables the corruption of the return address pointer of the do_i2c_md function.",https://nvd.nist.gov/vuln/detail/CVE-2022-34835,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -19442,7 +19442,7 @@ Change-Id: I0ea3ec31d3e7dfda0f03b4027a237f08d00a3091",0,"bool IsConstantFoldable
     return false;
   }
   return true;
-}",319400414252695019518928506839820495961,constant_folding.cc,129656680363802690204267718015734305272,['CWE-824'],CVE-2021-41204,"TensorFlow is an open source platform for machine learning. In affected versions during TensorFlow's Grappler optimizer phase, constant folding might attempt to deep copy a resource tensor. This results in a segfault, as these tensors are supposed to not change. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41204,1,"```json
+}",319400414252695019518928506839820495961,constant_folding.cc,129656680363802690204267718015734305272,['CWE-824'],CVE-2021-41204,"TensorFlow is an open source platform for machine learning. In affected versions during TensorFlow's Grappler optimizer phase, constant folding might attempt to deep copy a resource tensor. This results in a segfault, as these tensors are supposed to not change. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41204,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -20143,7 +20143,7 @@ Solution:   Use ""*"" instead of ""'<,'>"" for Visual mode.",0,"parse_command_mo
 	eap->cmd = (char_u *)""+"";
 
     return OK;
-}",128847198820720658441664267481456465295,ex_docmd.c,80050062526332961104670632599823980115,['CWE-787'],CVE-2022-2288,Out-of-bounds Write in GitHub repository vim/vim prior to 9.0.,https://nvd.nist.gov/vuln/detail/CVE-2022-2288,1,"```json
+}",128847198820720658441664267481456465295,ex_docmd.c,80050062526332961104670632599823980115,['CWE-787'],CVE-2022-2288,Out-of-bounds Write in GitHub repository vim/vim prior to 9.0.,https://nvd.nist.gov/vuln/detail/CVE-2022-2288,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -20545,7 +20545,7 @@ Solution:   Use ""*"" instead of ""'<,'>"" for Visual mode.",0,"parse_command_mo
   qtm->C = C;
 
   return CL_SUCCESS;
-}",309561544522405112370599990059884786931,mspack.c,294647704290965311324683497678599566631,['CWE-20'],CVE-2010-1311,The qtm_decompress function in libclamav/mspack.c in ClamAV before 0.96 allows remote attackers to cause a denial of service (memory corruption and application crash) via a crafted CAB archive that uses the Quantum (aka .Q) compression format.  NOTE: some of these details are obtained from third party information.,https://nvd.nist.gov/vuln/detail/CVE-2010-1311,1,"```json
+}",309561544522405112370599990059884786931,mspack.c,294647704290965311324683497678599566631,['CWE-20'],CVE-2010-1311,The qtm_decompress function in libclamav/mspack.c in ClamAV before 0.96 allows remote attackers to cause a denial of service (memory corruption and application crash) via a crafted CAB archive that uses the Quantum (aka .Q) compression format.  NOTE: some of these details are obtained from third party information.,https://nvd.nist.gov/vuln/detail/CVE-2010-1311,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -20579,7 +20579,7 @@ Signed-off-by: Jason Wang <jasowang@redhat.com>",0,"static void sungem_send_pack
     } else {
         qemu_send_packet(nc, buf, size);
     }
-}",84544313584680412999632571366119869555,sungem.c,289260737548619033998236290754655826819,['CWE-835'],CVE-2021-3416,A potential stack overflow via infinite loop issue was found in various NIC emulators of QEMU in versions up to and including 5.2.0. The issue occurs in loopback mode of a NIC wherein reentrant DMA checks get bypassed. A guest user/process may use this flaw to consume CPU cycles or crash the QEMU process on the host resulting in DoS scenario.,https://nvd.nist.gov/vuln/detail/CVE-2021-3416,1,"The author's explanation correctly identifies that the logic is intended and uses safe APIs, but it fails to address critical null pointer and array bounds issues. The code assumes `s` is valid and that `MAC_XIFCFG >> 2` is a valid index into `s->macregs`, which is not guaranteed. In the absence of null or bounds checks, this constitutes a potential vulnerability that could lead to crashes or undefined behavior in runtime execution. Security analysis must err on the side of caution, especially in low-level device drivers or virtualization code where such assumptions are dangerous.",2025-11-16T00:35:55.302108
+}",84544313584680412999632571366119869555,sungem.c,289260737548619033998236290754655826819,['CWE-835'],CVE-2021-3416,A potential stack overflow via infinite loop issue was found in various NIC emulators of QEMU in versions up to and including 5.2.0. The issue occurs in loopback mode of a NIC wherein reentrant DMA checks get bypassed. A guest user/process may use this flaw to consume CPU cycles or crash the QEMU process on the host resulting in DoS scenario.,https://nvd.nist.gov/vuln/detail/CVE-2021-3416,0,"The author's explanation correctly identifies that the logic is intended and uses safe APIs, but it fails to address critical null pointer and array bounds issues. The code assumes `s` is valid and that `MAC_XIFCFG >> 2` is a valid index into `s->macregs`, which is not guaranteed. In the absence of null or bounds checks, this constitutes a potential vulnerability that could lead to crashes or undefined behavior in runtime execution. Security analysis must err on the side of caution, especially in low-level device drivers or virtualization code where such assumptions are dangerous.",2025-11-16T00:35:55.302108
 484063,open62541,b79db1ac78146fc06b0b8435773d3967de2d659c,https://github.com/open62541/open62541,https://github.com/open62541/open62541/commit/b79db1ac78146fc06b0b8435773d3967de2d659c,"fix(plugin): Add default limits for chunks and message size
 
 Based on a reported DoS vulnerability reported by Team82 (Claroty
@@ -20594,7 +20594,7 @@ Research).",0,"setup_secureChannel(void) {
     testChannel.connection = &testingConnection;
 
     testChannel.state = UA_SECURECHANNELSTATE_OPEN;
-}",210099699353094700409954983864057205013,check_securechannel.c,317936293844889222163489724834611177083,['CWE-703'],CVE-2022-25761,"The package open62541/open62541 before 1.2.5, from 1.3-rc1 and before 1.3.1 are vulnerable to Denial of Service (DoS) due to a missing limitation on the number of received chunks - per single session or in total for all concurrent sessions. An attacker can exploit this vulnerability by sending an unlimited number of huge chunks (e.g. 2GB each) without sending the Final closing chunk.",https://nvd.nist.gov/vuln/detail/CVE-2022-25761,1,"```json
+}",210099699353094700409954983864057205013,check_securechannel.c,317936293844889222163489724834611177083,['CWE-703'],CVE-2022-25761,"The package open62541/open62541 before 1.2.5, from 1.3-rc1 and before 1.3.1 are vulnerable to Denial of Service (DoS) due to a missing limitation on the number of received chunks - per single session or in total for all concurrent sessions. An attacker can exploit this vulnerability by sending an unlimited number of huge chunks (e.g. 2GB each) without sending the Final closing chunk.",https://nvd.nist.gov/vuln/detail/CVE-2022-25761,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -20671,7 +20671,8 @@ Research).",0,"setup_secureChannel(void) {
         }
 
         return pxNewQueue;
-    }",233309018517612713780199359033790626331,queue.c,257322064233856588492480054392208384035,['CWE-200'],CVE-2021-31571,The kernel in Amazon Web Services FreeRTOS before 10.4.3 has an integer overflow in queue.c for queue creation.,https://nvd.nist.gov/vuln/detail/CVE-2021-31571,0,"```json
+    }
+",233309018517612713780199359033790626331,queue.c,257322064233856588492480054392208384035,['CWE-200'],CVE-2021-31571,The kernel in Amazon Web Services FreeRTOS before 10.4.3 has an integer overflow in queue.c for queue creation.,https://nvd.nist.gov/vuln/detail/CVE-2021-31571,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -20811,7 +20812,7 @@ Research).",0,"setup_secureChannel(void) {
   for (i = 0 ; i < len; i+=2) name[i/2] = name[i];
   name[i/2]='\0';
   return name;
-}",103287413099842266713052785251008739113,sis.c,220725720240675887606122374077538393241,['CWE-189'],CVE-2013-2020,"Integer underflow in the cli_scanpe function in pe.c in ClamAV before 0.97.8 allows remote attackers to cause a denial of service (crash) via a skewed offset larger than the size of the PE section in a UPX packed executable, which triggers an out-of-bounds read.",https://nvd.nist.gov/vuln/detail/CVE-2013-2020,1,"```json
+}",103287413099842266713052785251008739113,sis.c,220725720240675887606122374077538393241,['CWE-189'],CVE-2013-2020,"Integer underflow in the cli_scanpe function in pe.c in ClamAV before 0.97.8 allows remote attackers to cause a denial of service (crash) via a skewed offset larger than the size of the PE section in a UPX packed executable, which triggers an out-of-bounds read.",https://nvd.nist.gov/vuln/detail/CVE-2013-2020,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -20965,7 +20966,7 @@ Link: https://lore.kernel.org/r/20210315214821.452959-1-tyreld@linux.ibm.com",0,
 		return rc;
 
 	return nbytes;
-}",228230730882908285016023798985921663046,rpadlpar_sysfs.c,21668029196687947173345261458760783896,['CWE-120'],CVE-2021-28972,"In drivers/pci/hotplug/rpadlpar_sysfs.c in the Linux kernel through 5.11.8, the RPA PCI Hotplug driver has a user-tolerable buffer overflow when writing a new device name to the driver from userspace, allowing userspace to write data to the kernel stack frame directly. This occurs because add_slot_store and remove_slot_store mishandle drc_name '\0' termination, aka CID-cc7a0bb058b8.",https://nvd.nist.gov/vuln/detail/CVE-2021-28972,1,"```json
+}",228230730882908285016023798985921663046,rpadlpar_sysfs.c,21668029196687947173345261458760783896,['CWE-120'],CVE-2021-28972,"In drivers/pci/hotplug/rpadlpar_sysfs.c in the Linux kernel through 5.11.8, the RPA PCI Hotplug driver has a user-tolerable buffer overflow when writing a new device name to the driver from userspace, allowing userspace to write data to the kernel stack frame directly. This occurs because add_slot_store and remove_slot_store mishandle drc_name '\0' termination, aka CID-cc7a0bb058b8.",https://nvd.nist.gov/vuln/detail/CVE-2021-28972,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -20984,7 +20985,7 @@ fix a debug assert to account for not opened temp tables",0,"void ha_maria::drop
   DBUG_ASSERT(!file || file->s->temporary);
   (void) ha_close();
   (void) maria_delete_table_files(name, 1, MY_WME);
-}",36457166293746144750064590645990572247,None,,['CWE-400'],CVE-2021-46668,MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that improperly interact with storage-engine resource limitations for temporary data structures.,https://nvd.nist.gov/vuln/detail/CVE-2021-46668,1,"```json
+}",36457166293746144750064590645990572247,None,,['CWE-400'],CVE-2021-46668,MariaDB through 10.5.9 allows an application crash via certain long SELECT DISTINCT statements that improperly interact with storage-engine resource limitations for temporary data structures.,https://nvd.nist.gov/vuln/detail/CVE-2021-46668,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -22166,7 +22167,7 @@ Change-Id: Id5b3e19c73f3fbe0cc4bba26ca44ff9607bb6356",0,"bool RepeatedAttrDefEqu
   }
   if (!a1_set.empty()) return false;
   return true;
-}",7221108948147885063916901261116103162,op_def_util.cc,99670691263177784698689977477403265008,['CWE-617'],CVE-2022-23565,"Tensorflow is an Open Source Machine Learning Framework. An attacker can trigger denial of service via assertion failure by altering a `SavedModel` on disk such that `AttrDef`s of some operation are duplicated. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23565,1,"```json
+}",7221108948147885063916901261116103162,op_def_util.cc,99670691263177784698689977477403265008,['CWE-617'],CVE-2022-23565,"Tensorflow is an Open Source Machine Learning Framework. An attacker can trigger denial of service via assertion failure by altering a `SavedModel` on disk such that `AttrDef`s of some operation are duplicated. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23565,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -22869,7 +22870,7 @@ int flush;
     if (((in == 0 && out == 0) || flush == Z_FINISH) && ret == Z_OK)
         ret = Z_BUF_ERROR;
     return ret;
-}",77680460964707773234667939079956613143,inflate.c,53439547439920310595361050781327807541,['CWE-787'],CVE-2022-37434,"zlib through 1.2.12 has a heap-based buffer over-read or buffer overflow in inflate in inflate.c via a large gzip header extra field. NOTE: only applications that call inflateGetHeader are affected. Some common applications bundle the affected zlib source code but may be unable to call inflateGetHeader (e.g., see the nodejs/node reference).",https://nvd.nist.gov/vuln/detail/CVE-2022-37434,1,"```json
+}",77680460964707773234667939079956613143,inflate.c,53439547439920310595361050781327807541,['CWE-787'],CVE-2022-37434,"zlib through 1.2.12 has a heap-based buffer over-read or buffer overflow in inflate in inflate.c via a large gzip header extra field. NOTE: only applications that call inflateGetHeader are affected. Some common applications bundle the affected zlib source code but may be unable to call inflateGetHeader (e.g., see the nodejs/node reference).",https://nvd.nist.gov/vuln/detail/CVE-2022-37434,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -22966,7 +22967,7 @@ int flush;
     MARK_CONTEXT_MODIFY(c);
   }
   return value;
-}",103355671348819190033706386778999083640,fiber.c,198318116371258140758763628769197309767,['CWE-703'],CVE-2022-0890,NULL Pointer Dereference in GitHub repository mruby/mruby prior to 3.2.,https://nvd.nist.gov/vuln/detail/CVE-2022-0890,1,"```json
+}",103355671348819190033706386778999083640,fiber.c,198318116371258140758763628769197309767,['CWE-703'],CVE-2022-0890,NULL Pointer Dereference in GitHub repository mruby/mruby prior to 3.2.,https://nvd.nist.gov/vuln/detail/CVE-2022-0890,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -23271,7 +23272,7 @@ Reviewed-by: Maxime Coquelin <maxime.coquelin@redhat.com>",0,"vhost_user_get_inf
 	VHOST_LOG_CONFIG(INFO, ""(%s) send inflight fd: %d\n"", dev->ifname, ctx->fds[0]);
 
 	return RTE_VHOST_MSG_RESULT_REPLY;
-}",77090797647717556170769908563421841237,vhost_user.c,99784894649346629896685974573557095486,['CWE-703'],CVE-2022-0669,"A flaw was found in dpdk. This flaw allows a malicious vhost-user master to attach an unexpected number of fds as ancillary data to VHOST_USER_GET_INFLIGHT_FD / VHOST_USER_SET_INFLIGHT_FD messages that are not closed by the vhost-user slave. By sending such messages continuously, the vhost-user master exhausts available fd in the vhost-user slave process, leading to a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2022-0669,1,"```json
+}",77090797647717556170769908563421841237,vhost_user.c,99784894649346629896685974573557095486,['CWE-703'],CVE-2022-0669,"A flaw was found in dpdk. This flaw allows a malicious vhost-user master to attach an unexpected number of fds as ancillary data to VHOST_USER_GET_INFLIGHT_FD / VHOST_USER_SET_INFLIGHT_FD messages that are not closed by the vhost-user slave. By sending such messages continuously, the vhost-user master exhausts available fd in the vhost-user slave process, leading to a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2022-0669,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -23560,7 +23561,7 @@ Change-Id: Ieb7566155e92acc8993a2212c76deacadc0edc8a",0,"  void Compute(OpKernel
     }
 
     return CAIRO_STATUS_SUCCESS;
-}",297166780528255828865202210898036623430,None,,['CWE-787'],CVE-2020-35492,"A flaw was found in cairo's image-compositor.c in all versions prior to 1.17.4. This flaw allows an attacker who can provide a crafted input file to cairo's image-compositor (for example, by convincing a user to open a file in an application using cairo, or if an application uses cairo on untrusted input) to cause a stack buffer overflow -> out-of-bounds WRITE. The highest impact from this vulnerability is to confidentiality, integrity, as well as system availability.",https://nvd.nist.gov/vuln/detail/CVE-2020-35492,1,"```json
+}",297166780528255828865202210898036623430,None,,['CWE-787'],CVE-2020-35492,"A flaw was found in cairo's image-compositor.c in all versions prior to 1.17.4. This flaw allows an attacker who can provide a crafted input file to cairo's image-compositor (for example, by convincing a user to open a file in an application using cairo, or if an application uses cairo on untrusted input) to cause a stack buffer overflow -> out-of-bounds WRITE. The highest impact from this vulnerability is to confidentiality, integrity, as well as system availability.",https://nvd.nist.gov/vuln/detail/CVE-2020-35492,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -24813,7 +24814,7 @@ Signed-off-by: Matthieu Herrb <matthieu@herrb.eu>",0,"SProcXkbSelectEvents(Clien
     uECC_vli_nativeToBytes(signature + curve->num_bytes, curve->num_bytes, s);
 #endif
     return 1;
-}",118273926663441096280456772911326940472,uECC.c,232283246719977371910544173978221438887,['CWE-415'],CVE-2020-27209,The ECDSA operation of the micro-ecc library 1.0 is vulnerable to simple power analysis attacks which allows an adversary to extract the private ECC key.,https://nvd.nist.gov/vuln/detail/CVE-2020-27209,1,"```json
+}",118273926663441096280456772911326940472,uECC.c,232283246719977371910544173978221438887,['CWE-415'],CVE-2020-27209,The ECDSA operation of the micro-ecc library 1.0 is vulnerable to simple power analysis attacks which allows an adversary to extract the private ECC key.,https://nvd.nist.gov/vuln/detail/CVE-2020-27209,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -25824,7 +25825,7 @@ Signed-off-by: Kalle Valo <kvalo@codeaurora.org>",0,"static int rsi_send_beacon(
 	rsi_dbg(DATA_TX_ZONE, ""%s: Added to beacon queue\n"", __func__);
 
 	return 0;
-}",202315144827915003727836614095080991835,rsi_91x_mgmt.c,337039362328413232417752595040682703698,['CWE-401'],CVE-2019-19071,"A memory leak in the rsi_send_beacon() function in drivers/net/wireless/rsi/rsi_91x_mgmt.c in the Linux kernel through 5.3.11 allows attackers to cause a denial of service (memory consumption) by triggering rsi_prepare_beacon() failures, aka CID-d563131ef23c.",https://nvd.nist.gov/vuln/detail/CVE-2019-19071,1,"```json
+}",202315144827915003727836614095080991835,rsi_91x_mgmt.c,337039362328413232417752595040682703698,['CWE-401'],CVE-2019-19071,"A memory leak in the rsi_send_beacon() function in drivers/net/wireless/rsi/rsi_91x_mgmt.c in the Linux kernel through 5.3.11 allows attackers to cause a denial of service (memory consumption) by triggering rsi_prepare_beacon() failures, aka CID-d563131ef23c.",https://nvd.nist.gov/vuln/detail/CVE-2019-19071,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -26121,7 +26122,7 @@ Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>",0,"static int protocol_client_
     vnc_read_when(vs, protocol_client_msg, 1);
     return 0;
 }
-",36184187579067934459760117493887101349,vnc.c,252961112607641046911485916255107775979,['CWE-264'],CVE-2014-7815,The set_pixel_format function in ui/vnc.c in QEMU allows remote attackers to cause a denial of service (crash) via a small bytes_per_pixel value.,https://nvd.nist.gov/vuln/detail/CVE-2014-7815,1,"```json
+",36184187579067934459760117493887101349,vnc.c,252961112607641046911485916255107775979,['CWE-264'],CVE-2014-7815,The set_pixel_format function in ui/vnc.c in QEMU allows remote attackers to cause a denial of service (crash) via a small bytes_per_pixel value.,https://nvd.nist.gov/vuln/detail/CVE-2014-7815,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -26613,7 +26614,7 @@ repeat:
 	r_cons_break_pop ();
 	// restore register
 	r_reg_arena_pop (core->anal->reg);
-}",238488437783667654322031890485445145764,None,,['CWE-416'],CVE-2022-0849,Use After Free in r_reg_get_name_idx in GitHub repository radareorg/radare2 prior to 5.6.6.,https://nvd.nist.gov/vuln/detail/CVE-2022-0849,1,"```json
+}",238488437783667654322031890485445145764,None,,['CWE-416'],CVE-2022-0849,Use After Free in r_reg_get_name_idx in GitHub repository radareorg/radare2 prior to 5.6.6.,https://nvd.nist.gov/vuln/detail/CVE-2022-0849,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -26835,7 +26836,7 @@ Change-Id: I22dab7c41be2121ab5efe5403ca0e2f9b7cb24b8",0,"  void Compute(OpKernel
     output_values->flat<T>().device(ctx->eigen_device<Device>()) =
         values_t->flat<T>().binaryExpr(dense_gathered_flat,
                                        typename Functor::func());
-  }",278624482255408254449933942747189407257,sparse_dense_binary_op_shared.cc,247841744604256295308587005697650201397,['CWE-190'],CVE-2022-23567,"Tensorflow is an Open Source Machine Learning Framework. The implementations of `Sparse*Cwise*` ops are vulnerable to integer overflows. These can be used to trigger large allocations (so, OOM based denial of service) or `CHECK`-fails when building new `TensorShape` objects (so, assert failures based denial of service). We are missing some validation on the shapes of the input tensors as well as directly constructing a large `TensorShape` with user-provided dimensions. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23567,0,"```json
+  }",278624482255408254449933942747189407257,sparse_dense_binary_op_shared.cc,247841744604256295308587005697650201397,['CWE-190'],CVE-2022-23567,"Tensorflow is an Open Source Machine Learning Framework. The implementations of `Sparse*Cwise*` ops are vulnerable to integer overflows. These can be used to trigger large allocations (so, OOM based denial of service) or `CHECK`-fails when building new `TensorShape` objects (so, assert failures based denial of service). We are missing some validation on the shapes of the input tensors as well as directly constructing a large `TensorShape` with user-provided dimensions. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23567,1,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -27194,7 +27195,7 @@ Solution:   Check for running into the end of the line.",0,"change_indent(
 
 	vim_free(new_line);
     }
-}",281315459122812097070130024816280546627,indent.c,175343284041603087029849272826009468440,['CWE-787'],CVE-2022-0714,Heap-based Buffer Overflow in GitHub repository vim/vim prior to 8.2.4436.,https://nvd.nist.gov/vuln/detail/CVE-2022-0714,1,"```json
+}",281315459122812097070130024816280546627,indent.c,175343284041603087029849272826009468440,['CWE-787'],CVE-2022-0714,Heap-based Buffer Overflow in GitHub repository vim/vim prior to 8.2.4436.,https://nvd.nist.gov/vuln/detail/CVE-2022-0714,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -27463,7 +27464,7 @@ wait_again:
     }
 
     return rc;
-}",88286430385104780024208637044722033295,mqtt_client.c,315446679366477562127453021881917079842,['CWE-787'],CVE-2021-45936,wolfSSL wolfMQTT 1.9 has a heap-based buffer overflow in MqttDecode_Disconnect (called from MqttClient_DecodePacket and MqttClient_WaitType).,https://nvd.nist.gov/vuln/detail/CVE-2021-45936,1,"```json
+}",88286430385104780024208637044722033295,mqtt_client.c,315446679366477562127453021881917079842,['CWE-787'],CVE-2021-45936,wolfSSL wolfMQTT 1.9 has a heap-based buffer overflow in MqttDecode_Disconnect (called from MqttClient_DecodePacket and MqttClient_WaitType).,https://nvd.nist.gov/vuln/detail/CVE-2021-45936,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -27500,7 +27501,7 @@ wait_again:
 		return hmhd->subType;
 	}
 	return hmhd->subType;
-}",240641657114030682383886931707833033482,hint_track.c,28976036322661795345788739460485147148,['CWE-476'],CVE-2021-40576,"The binary MP4Box in Gpac 1.0.1 has a null pointer dereference vulnerability in the gf_isom_get_payt_count function in hint_track.c, which allows attackers to cause a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2021-40576,1,"```json
+}",240641657114030682383886931707833033482,hint_track.c,28976036322661795345788739460485147148,['CWE-476'],CVE-2021-40576,"The binary MP4Box in Gpac 1.0.1 has a null pointer dereference vulnerability in the gf_isom_get_payt_count function in hint_track.c, which allows attackers to cause a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2021-40576,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -27557,7 +27558,7 @@ Reviewed-by: Adam Jackson <ajax@redhat.com>
     }
 
     return logFileName;
-}",85184341830214931807730036188005624601,log.c,179282942128446717145205180547721530846,['CWE-863'],CVE-2018-14665,A flaw was found in xorg-x11-server before 1.20.3. An incorrect permission check for -modulepath and -logfile options when starting Xorg. X server allows unprivileged users with the ability to log in to the system via physical console to escalate their privileges and run arbitrary code under root privileges.,https://nvd.nist.gov/vuln/detail/CVE-2018-14665,1,"```json
+}",85184341830214931807730036188005624601,log.c,179282942128446717145205180547721530846,['CWE-863'],CVE-2018-14665,A flaw was found in xorg-x11-server before 1.20.3. An incorrect permission check for -modulepath and -logfile options when starting Xorg. X server allows unprivileged users with the ability to log in to the system via physical console to escalate their privileges and run arbitrary code under root privileges.,https://nvd.nist.gov/vuln/detail/CVE-2018-14665,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -28853,7 +28854,7 @@ out_kfree_e:
 	kfree(e->name);
 	kfree(e);
 	return NULL;
-}",87669194077051159663465560005531170449,vidtv_s302m.c,52146840416955452550200941985312251483,['CWE-476'],CVE-2022-3078,An issue was discovered in the Linux kernel through 5.16-rc6. There is a lack of check after calling vzalloc() and lack of free after allocation in drivers/media/test-drivers/vidtv/vidtv_s302m.c.,https://nvd.nist.gov/vuln/detail/CVE-2022-3078,1,"```json
+}",87669194077051159663465560005531170449,vidtv_s302m.c,52146840416955452550200941985312251483,['CWE-476'],CVE-2022-3078,An issue was discovered in the Linux kernel through 5.16-rc6. There is a lack of check after calling vzalloc() and lack of free after allocation in drivers/media/test-drivers/vidtv/vidtv_s302m.c.,https://nvd.nist.gov/vuln/detail/CVE-2022-3078,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -29215,7 +29216,7 @@ Change-Id: Iadf3f0705b036a9014d27caa5a8bbd91f4c4c401",0,"TfLiteTensor* GetVariab
   TfLiteTensor* tensor = GetMutableInput(context, node, index);
   if (tensor == nullptr) return nullptr;
   return tensor->is_variable ? tensor : nullptr;
-}",49925212590704154361310384417186854395,kernel_util.cc,281364131026460345167544019199859453435,['CWE-369'],CVE-2021-37681,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of SVDF in TFLite is [vulnerable to a null pointer error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/svdf.cc#L300-L313). The [`GetVariableInput` function](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/kernel_util.cc#L115-L119) can return a null pointer but `GetTensorData` assumes that the argument is always a valid tensor. Furthermore, because `GetVariableInput` calls [`GetMutableInput`](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/kernel_util.cc#L82-L90) which might return `nullptr`, the `tensor->is_variable` expression can also trigger a null pointer exception. We have patched the issue in GitHub commit 5b048e87e4e55990dae6b547add4dae59f4e1c76. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37681,1,"```json
+}",49925212590704154361310384417186854395,kernel_util.cc,281364131026460345167544019199859453435,['CWE-369'],CVE-2021-37681,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions the implementation of SVDF in TFLite is [vulnerable to a null pointer error](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/svdf.cc#L300-L313). The [`GetVariableInput` function](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/kernel_util.cc#L115-L119) can return a null pointer but `GetTensorData` assumes that the argument is always a valid tensor. Furthermore, because `GetVariableInput` calls [`GetMutableInput`](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/lite/kernels/kernel_util.cc#L82-L90) which might return `nullptr`, the `tensor->is_variable` expression can also trigger a null pointer exception. We have patched the issue in GitHub commit 5b048e87e4e55990dae6b547add4dae59f4e1c76. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37681,0,"```json
 {
   ""vulnerability_detected"": false,
   ""vulnerabilities"": [],
@@ -29253,7 +29254,7 @@ Solution:   Check boundary before trying to read the character.",0,"yank_copy_li
     }
     *pnew = NUL;
     return OK;
-}",215111577434116975174543951046273639484,register.c,303069020104340496076924952267660178460,['CWE-787'],CVE-2022-0407,Heap-based Buffer Overflow in GitHub repository vim/vim prior to 8.2.,https://nvd.nist.gov/vuln/detail/CVE-2022-0407,1,"```json
+}",215111577434116975174543951046273639484,register.c,303069020104340496076924952267660178460,['CWE-787'],CVE-2022-0407,Heap-based Buffer Overflow in GitHub repository vim/vim prior to 8.2.,https://nvd.nist.gov/vuln/detail/CVE-2022-0407,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -29693,7 +29694,7 @@ restore_state:
 		xfrm_states_delete(x_new, nx_new);
 
 	return err;
-}",215751416433603359127168568868479758173,xfrm_policy.c,14403382265138763697521162606727348451,['CWE-125'],CVE-2017-11600,"net/xfrm/xfrm_policy.c in the Linux kernel through 4.12.3, when CONFIG_XFRM_MIGRATE is enabled, does not ensure that the dir value of xfrm_userpolicy_id is XFRM_POLICY_MAX or less, which allows local users to cause a denial of service (out-of-bounds access) or possibly have unspecified other impact via an XFRM_MSG_MIGRATE xfrm Netlink message.",https://nvd.nist.gov/vuln/detail/CVE-2017-11600,1,"```json
+}",215751416433603359127168568868479758173,xfrm_policy.c,14403382265138763697521162606727348451,['CWE-125'],CVE-2017-11600,"net/xfrm/xfrm_policy.c in the Linux kernel through 4.12.3, when CONFIG_XFRM_MIGRATE is enabled, does not ensure that the dir value of xfrm_userpolicy_id is XFRM_POLICY_MAX or less, which allows local users to cause a denial of service (out-of-bounds access) or possibly have unspecified other impact via an XFRM_MSG_MIGRATE xfrm Netlink message.",https://nvd.nist.gov/vuln/detail/CVE-2017-11600,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -29740,7 +29741,7 @@ Signed-off-by: Marcel Holtmann <marcel@holtmann.org>",0,"static void virtbt_rx_h
 		kfree_skb(skb);
 		break;
 	}
-}",158789804082007954716918629696286112823,virtio_bt.c,116955738040617915933180365116033475903,['CWE-772'],CVE-2022-26878,drivers/bluetooth/virtio_bt.c in the Linux kernel before 5.16.3 has a memory leak (socket buffers have memory allocated but not freed).,https://nvd.nist.gov/vuln/detail/CVE-2022-26878,1,"Although skb_pull in the Linux kernel is generally protected by internal checks, the absence of a prior validation of skb->len >= 1 or skb->data validity introduces a potential vulnerability. In edge cases or under certain attack vectors, this could result in undefined behavior or memory corruption. The author's mitigation suggestion is valid, and the lack of explicit bounds checking raises a security concern that warrants flagging.",2025-11-16T00:39:49.792554
+}",158789804082007954716918629696286112823,virtio_bt.c,116955738040617915933180365116033475903,['CWE-772'],CVE-2022-26878,drivers/bluetooth/virtio_bt.c in the Linux kernel before 5.16.3 has a memory leak (socket buffers have memory allocated but not freed).,https://nvd.nist.gov/vuln/detail/CVE-2022-26878,0,"Although skb_pull in the Linux kernel is generally protected by internal checks, the absence of a prior validation of skb->len >= 1 or skb->data validity introduces a potential vulnerability. In edge cases or under certain attack vectors, this could result in undefined behavior or memory corruption. The author's mitigation suggestion is valid, and the lack of explicit bounds checking raises a security concern that warrants flagging.",2025-11-16T00:39:49.792554
 357668,squirrel,23a0620658714b996d20da3d4dd1a0dcf9b0bd98,https://github.com/albertodemichelis/squirrel,https://github.com/albertodemichelis/squirrel/commit/23a0620658714b996d20da3d4dd1a0dcf9b0bd98,check max member count in class,0,"bool SQClass::NewSlot(SQSharedState *ss,const SQObjectPtr &key,const SQObjectPtr &val,bool bstatic)
 {
     SQObjectPtr temp;
@@ -30354,7 +30355,7 @@ Merges https://github.com/admesh/admesh/pull/55",0,"stl_remove_degenerate(stl_fi
     stl_update_connects_remove_1(stl, neighbor3);
     stl->neighbors_start[neighbor3].neighbor[(vnot3 + 1) % 3] = -1;
   }
-}",25155049141523797391201320731237896996,connect.c,216745481854892780790975730037335372174,['CWE-125'],CVE-2018-25033,ADMesh through 0.98.4 has a heap-based buffer over-read in stl_update_connects_remove_1 (called from stl_remove_degenerate) in connect.c in libadmesh.a.,https://nvd.nist.gov/vuln/detail/CVE-2018-25033,1,"```json
+}",25155049141523797391201320731237896996,connect.c,216745481854892780790975730037335372174,['CWE-125'],CVE-2018-25033,ADMesh through 0.98.4 has a heap-based buffer over-read in stl_update_connects_remove_1 (called from stl_remove_degenerate) in connect.c in libadmesh.a.,https://nvd.nist.gov/vuln/detail/CVE-2018-25033,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -30488,7 +30489,7 @@ directories",0,"static void build_dirs(char *src, char *dst, size_t src_prefix_l
 			}
 		}
 	}
-}",189578159776607937045956887346946926481,None,,['CWE-94'],CVE-2022-31214,"A Privilege Context Switching issue was discovered in join.c in Firejail 0.9.68. By crafting a bogus Firejail container that is accepted by the Firejail setuid-root program as a join target, a local attacker can enter an environment in which the Linux user namespace is still the initial user namespace, the NO_NEW_PRIVS prctl is not activated, and the entered mount namespace is under the attacker's control. In this way, the filesystem layout can be adjusted to gain root privileges through execution of available setuid-root binaries such as su or sudo.",https://nvd.nist.gov/vuln/detail/CVE-2022-31214,1,"```json
+}",189578159776607937045956887346946926481,None,,['CWE-94'],CVE-2022-31214,"A Privilege Context Switching issue was discovered in join.c in Firejail 0.9.68. By crafting a bogus Firejail container that is accepted by the Firejail setuid-root program as a join target, a local attacker can enter an environment in which the Linux user namespace is still the initial user namespace, the NO_NEW_PRIVS prctl is not activated, and the entered mount namespace is under the attacker's control. In this way, the filesystem layout can be adjusted to gain root privileges through execution of available setuid-root binaries such as su or sudo.",https://nvd.nist.gov/vuln/detail/CVE-2022-31214,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -30520,7 +30521,7 @@ directories",0,"static void build_dirs(char *src, char *dst, size_t src_prefix_l
     return;
   }
   mrb_name_error(mrb, mid, ""method '%n' not defined in %C"", mid, c);
-}",224777801914266123479513901810152701375,None,,['CWE-787'],CVE-2022-1286,heap-buffer-overflow in mrb_vm_exec in mruby/mruby in GitHub repository mruby/mruby prior to 3.2. Possible arbitrary code execution if being exploited.,https://nvd.nist.gov/vuln/detail/CVE-2022-1286,1,"The absence of a method existence check before removal increases the risk of silent failures or unintended state changes. Additionally, clearing method caches without proper validation may disrupt dynamic dispatch and performance. These issues, though subtle, represent real security and stability risks in a runtime environment where method behavior is critical.",2025-11-16T00:40:22.707256
+}",224777801914266123479513901810152701375,None,,['CWE-787'],CVE-2022-1286,heap-buffer-overflow in mrb_vm_exec in mruby/mruby in GitHub repository mruby/mruby prior to 3.2. Possible arbitrary code execution if being exploited.,https://nvd.nist.gov/vuln/detail/CVE-2022-1286,0,"The absence of a method existence check before removal increases the risk of silent failures or unintended state changes. Additionally, clearing method caches without proper validation may disrupt dynamic dispatch and performance. These issues, though subtle, represent real security and stability risks in a runtime environment where method behavior is critical.",2025-11-16T00:40:22.707256
 274814,pjproject,450baca94f475345542c6953832650c390889202,https://github.com/pjsip/pjproject,https://github.com/pjsip/pjproject/commit/450baca94f475345542c6953832650c390889202,Merge pull request from GHSA-26j7-ww69-c4qj,0,"PJ_DEF(pj_status_t) pjstun_parse_msg( void *buf, pj_size_t buf_len, 
 				      pjstun_msg *msg)
 {
@@ -30940,7 +30941,7 @@ return length;
 		serv->sent_capend = TRUE;
 		tcp_send_len (serv, ""CAP END\r\n"", 9);
 	}
-}",298030143557811243277605801674004119778,inbound.c,316287172279434102312310467592869221678,['CWE-22'],CVE-2016-2087,Directory traversal vulnerability in the client in HexChat 2.11.0 allows remote IRC servers to read or modify arbitrary files via a .. (dot dot) in the server name.,https://nvd.nist.gov/vuln/detail/CVE-2016-2087,1,"```json
+}",298030143557811243277605801674004119778,inbound.c,316287172279434102312310467592869221678,['CWE-22'],CVE-2016-2087,Directory traversal vulnerability in the client in HexChat 2.11.0 allows remote IRC servers to read or modify arbitrary files via a .. (dot dot) in the server name.,https://nvd.nist.gov/vuln/detail/CVE-2016-2087,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -31208,7 +31209,7 @@ corrupted:
 	pj_scan_skip_whitespace(scanner);
     }
     return chr;
-}",113292852369107945981597354542276439074,None,,['CWE-125'],CVE-2022-21723,"PJSIP is a free and open source multimedia communication library written in C language implementing standard based protocols such as SIP, SDP, RTP, STUN, TURN, and ICE. In versions 2.11.1 and prior, parsing an incoming SIP message that contains a malformed multipart can potentially cause out-of-bound read access. This issue affects all PJSIP users that accept SIP multipart. The patch is available as commit in the `master` branch. There are no known workarounds.",https://nvd.nist.gov/vuln/detail/CVE-2022-21723,1,"```json
+}",113292852369107945981597354542276439074,None,,['CWE-125'],CVE-2022-21723,"PJSIP is a free and open source multimedia communication library written in C language implementing standard based protocols such as SIP, SDP, RTP, STUN, TURN, and ICE. In versions 2.11.1 and prior, parsing an incoming SIP message that contains a malformed multipart can potentially cause out-of-bound read access. This issue affects all PJSIP users that accept SIP multipart. The patch is available as commit in the `master` branch. There are no known workarounds.",https://nvd.nist.gov/vuln/detail/CVE-2022-21723,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -31251,7 +31252,7 @@ corrupted:
         }
     }
     return saveTo(fsPath / fsFileName);
-}",314463188138781431986696466899338798829,None,,['CWE-552'],CVE-2022-25297,This affects the package drogonframework/drogon before 1.7.5. The unsafe handling of file names during upload using HttpFile::save() method may enable attackers to write files to arbitrary locations outside the designated target folder.,https://nvd.nist.gov/vuln/detail/CVE-2022-25297,1,"```json
+}",314463188138781431986696466899338798829,None,,['CWE-552'],CVE-2022-25297,This affects the package drogonframework/drogon before 1.7.5. The unsafe handling of file names during upload using HttpFile::save() method may enable attackers to write files to arbitrary locations outside the designated target folder.,https://nvd.nist.gov/vuln/detail/CVE-2022-25297,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -32508,7 +32509,7 @@ Change-Id: I28eedcfd87a53aaf34deb075acea1f8c95470808",1,"Status Examples::Initia
       worker_threads, num_examples, num_sparse_features, num_dense_features,
       &examples_));
   return Status::OK();
-}",183156860369052380668778554351089179754,sdca_internal.cc,189786435377355636606855329054946360663,['CWE-703'],CVE-2021-37672,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions an attacker can read from outside of bounds of heap allocated data by sending specially crafted illegal arguments to `tf.raw_ops.SdcaOptimizerV2`. The [implementation](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/core/kernels/sdca_internal.cc#L320-L353) does not check that the length of `example_labels` is the same as the number of examples. We have patched the issue in GitHub commit a4e138660270e7599793fa438cd7b2fc2ce215a6. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37672,0,"```json
+}",183156860369052380668778554351089179754,sdca_internal.cc,189786435377355636606855329054946360663,['CWE-703'],CVE-2021-37672,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions an attacker can read from outside of bounds of heap allocated data by sending specially crafted illegal arguments to `tf.raw_ops.SdcaOptimizerV2`. The [implementation](https://github.com/tensorflow/tensorflow/blob/460e000de3a83278fb00b61a16d161b1964f15f4/tensorflow/core/kernels/sdca_internal.cc#L320-L353) does not check that the length of `example_labels` is the same as the number of examples. We have patched the issue in GitHub commit a4e138660270e7599793fa438cd7b2fc2ce215a6. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37672,1,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -33108,7 +33109,7 @@ Change-Id: I0ea3ec31d3e7dfda0f03b4027a237f08d00a3091",1,"bool IsConstantFoldable
     return false;
   }
   return true;
-}",116289485656616917830363077368123441202,constant_folding.cc,46768745532828534791253050765124097339,['CWE-824'],CVE-2021-41204,"TensorFlow is an open source platform for machine learning. In affected versions during TensorFlow's Grappler optimizer phase, constant folding might attempt to deep copy a resource tensor. This results in a segfault, as these tensors are supposed to not change. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41204,1,"```json
+}",116289485656616917830363077368123441202,constant_folding.cc,46768745532828534791253050765124097339,['CWE-824'],CVE-2021-41204,"TensorFlow is an open source platform for machine learning. In affected versions during TensorFlow's Grappler optimizer phase, constant folding might attempt to deep copy a resource tensor. This results in a segfault, as these tensors are supposed to not change. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41204,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -33207,7 +33208,7 @@ Signed-off-by: Paul Moore <paul@paul-moore.com>",1,"static int selinux_ptrace_tr
 	return avc_has_perm(&selinux_state,
 			    task_sid_subj(parent), task_sid_obj(current),
 			    SECCLASS_PROCESS, PROCESS__PTRACE, NULL);
-}",244235637020461368565337014513482216980,None,,['CWE-416'],CVE-2021-43057,"An issue was discovered in the Linux kernel before 5.14.8. A use-after-free in selinux_ptrace_traceme (aka the SELinux handler for PTRACE_TRACEME) could be used by local attackers to cause memory corruption and escalate privileges, aka CID-a3727a8bac0a. This occurs because of an attempt to access the subjective credentials of another task.",https://nvd.nist.gov/vuln/detail/CVE-2021-43057,1,"```json
+}",244235637020461368565337014513482216980,None,,['CWE-416'],CVE-2021-43057,"An issue was discovered in the Linux kernel before 5.14.8. A use-after-free in selinux_ptrace_traceme (aka the SELinux handler for PTRACE_TRACEME) could be used by local attackers to cause memory corruption and escalate privileges, aka CID-a3727a8bac0a. This occurs because of an attempt to access the subjective credentials of another task.",https://nvd.nist.gov/vuln/detail/CVE-2021-43057,0,"```json
 {
   ""vulnerability_detected"": false,
   ""vulnerabilities"": [],
@@ -33269,7 +33270,7 @@ Link: https://lore.kernel.org/r/20210315214821.452959-1-tyreld@linux.ibm.com",1,
 		return rc;
 
 	return nbytes;
-}",262261814389997886159936729256803084500,rpadlpar_sysfs.c,143265511624763705093739678134289779335,['CWE-120'],CVE-2021-28972,"In drivers/pci/hotplug/rpadlpar_sysfs.c in the Linux kernel through 5.11.8, the RPA PCI Hotplug driver has a user-tolerable buffer overflow when writing a new device name to the driver from userspace, allowing userspace to write data to the kernel stack frame directly. This occurs because add_slot_store and remove_slot_store mishandle drc_name '\0' termination, aka CID-cc7a0bb058b8.",https://nvd.nist.gov/vuln/detail/CVE-2021-28972,1,"```json
+}",262261814389997886159936729256803084500,rpadlpar_sysfs.c,143265511624763705093739678134289779335,['CWE-120'],CVE-2021-28972,"In drivers/pci/hotplug/rpadlpar_sysfs.c in the Linux kernel through 5.11.8, the RPA PCI Hotplug driver has a user-tolerable buffer overflow when writing a new device name to the driver from userspace, allowing userspace to write data to the kernel stack frame directly. This occurs because add_slot_store and remove_slot_store mishandle drc_name '\0' termination, aka CID-cc7a0bb058b8.",https://nvd.nist.gov/vuln/detail/CVE-2021-28972,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -35381,7 +35382,7 @@ errout_tp:
 errout_locked:
 	mutex_unlock(&chain->filter_chain_lock);
 	goto errout;
-}",18151855959135734228627793679159459802,cls_api.c,251903803472854915466369605008106287178,['CWE-416'],CVE-2022-1055,A use-after-free exists in the Linux Kernel in tc_new_tfilter that could allow a local attacker to gain privilege escalation. The exploit requires unprivileged user namespaces. We recommend upgrading past commit 04c2a47ffb13c29778e2a14e414ad4cb5a5db4b5,https://nvd.nist.gov/vuln/detail/CVE-2022-1055,1,"```json
+}",18151855959135734228627793679159459802,cls_api.c,251903803472854915466369605008106287178,['CWE-416'],CVE-2022-1055,A use-after-free exists in the Linux Kernel in tc_new_tfilter that could allow a local attacker to gain privilege escalation. The exploit requires unprivileged user namespaces. We recommend upgrading past commit 04c2a47ffb13c29778e2a14e414ad4cb5a5db4b5,https://nvd.nist.gov/vuln/detail/CVE-2022-1055,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -36726,7 +36727,7 @@ errout_locked:
     }
 
     return 0;
-}",10492118832219739041814229234332696880,None,,['CWE-125'],CVE-2022-21711,"elfspirit is an ELF static analysis and injection framework that parses, manipulates, and camouflages ELF files. When analyzing the ELF file format in versions prior to 1.1, there is an out-of-bounds read bug, which can lead to application crashes or information leakage. By constructing a special format ELF file, the information of any address can be leaked. elfspirit version 1.1 contains a patch for this issue.",https://nvd.nist.gov/vuln/detail/CVE-2022-21711,1,"```json
+}",10492118832219739041814229234332696880,None,,['CWE-125'],CVE-2022-21711,"elfspirit is an ELF static analysis and injection framework that parses, manipulates, and camouflages ELF files. When analyzing the ELF file format in versions prior to 1.1, there is an out-of-bounds read bug, which can lead to application crashes or information leakage. By constructing a special format ELF file, the information of any address can be leaked. elfspirit version 1.1 contains a patch for this issue.",https://nvd.nist.gov/vuln/detail/CVE-2022-21711,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -36884,7 +36885,7 @@ errout_locked:
     /* restore buffer maxlen */
     buf->maxlen = buf_maxlen;
     return MOBI_SUCCESS;
-}",251371537702901623564985735187675051869,index.c,309095437889005741044332361577356993393,['CWE-125'],CVE-2022-1987,Buffer Over-read in GitHub repository bfabiszewski/libmobi prior to 0.11.,https://nvd.nist.gov/vuln/detail/CVE-2022-1987,1,"```json
+}",251371537702901623564985735187675051869,index.c,309095437889005741044332361577356993393,['CWE-125'],CVE-2022-1987,Buffer Over-read in GitHub repository bfabiszewski/libmobi prior to 0.11.,https://nvd.nist.gov/vuln/detail/CVE-2022-1987,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -37110,7 +37111,7 @@ Change-Id: Id5b3e19c73f3fbe0cc4bba26ca44ff9607bb6356",1,"bool RepeatedAttrDefEqu
   }
   if (!a1_set.empty()) return false;
   return true;
-}",228350956694349821922378909162368693155,op_def_util.cc,43202597261631718571985626227626810269,['CWE-617'],CVE-2022-23565,"Tensorflow is an Open Source Machine Learning Framework. An attacker can trigger denial of service via assertion failure by altering a `SavedModel` on disk such that `AttrDef`s of some operation are duplicated. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23565,1,"```json
+}",228350956694349821922378909162368693155,op_def_util.cc,43202597261631718571985626227626810269,['CWE-617'],CVE-2022-23565,"Tensorflow is an Open Source Machine Learning Framework. An attacker can trigger denial of service via assertion failure by altering a `SavedModel` on disk such that `AttrDef`s of some operation are duplicated. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23565,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -37601,7 +37602,7 @@ beach:
 	obj->cache_buf = NULL;
 	MACH0_(mach0_free) (main_mach0);
 	return false;
-}",233224811640274540394040555084759924603,bin_xnu_kernelcache.c,125322815790464606650182134413161579767,['CWE-476'],CVE-2022-0419,NULL Pointer Dereference in GitHub repository radareorg/radare2 prior to 5.6.0.,https://nvd.nist.gov/vuln/detail/CVE-2022-0419,1,"```json
+}",233224811640274540394040555084759924603,bin_xnu_kernelcache.c,125322815790464606650182134413161579767,['CWE-476'],CVE-2022-0419,NULL Pointer Dereference in GitHub repository radareorg/radare2 prior to 5.6.0.,https://nvd.nist.gov/vuln/detail/CVE-2022-0419,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -38472,7 +38473,7 @@ out_drop:
     dprintf(""<----  ...leaving %s()\n"", __FUNCTION__);
 
     return tool_num;
-} /* drill_parse_T_code() */",185752158214328372341115505036759500651,drill.c,62463866492734341751893387181625909179,['CWE-787'],CVE-2021-40391,"An out-of-bounds write vulnerability exists in the drill format T-code tool number functionality of Gerbv 2.7.0, dev (commit b5f1eacd), and the forked version of Gerbv (commit 71493260). A specially-crafted drill file can lead to code execution. An attacker can provide a malicious file to trigger this vulnerability.",https://nvd.nist.gov/vuln/detail/CVE-2021-40391,1,"```json
+} /* drill_parse_T_code() */",185752158214328372341115505036759500651,drill.c,62463866492734341751893387181625909179,['CWE-787'],CVE-2021-40391,"An out-of-bounds write vulnerability exists in the drill format T-code tool number functionality of Gerbv 2.7.0, dev (commit b5f1eacd), and the forked version of Gerbv (commit 71493260). A specially-crafted drill file can lead to code execution. An attacker can provide a malicious file to trigger this vulnerability.",https://nvd.nist.gov/vuln/detail/CVE-2021-40391,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -38587,7 +38588,7 @@ out_drop:
 	}
 
 	return c;
-}",8283586201644887300915898295948875795,mbfilter_big5.c,67113767760618335945735132719612525083,['CWE-125'],CVE-2020-7060,"When using certain mbstring functions to convert multibyte encodings, in PHP versions 7.2.x below 7.2.27, 7.3.x below 7.3.14 and 7.4.x below 7.4.2 it is possible to supply data that will cause function mbfl_filt_conv_big5_wchar to read past the allocated buffer. This may lead to information disclosure or crash.",https://nvd.nist.gov/vuln/detail/CVE-2020-7060,1,"```json
+}",8283586201644887300915898295948875795,mbfilter_big5.c,67113767760618335945735132719612525083,['CWE-125'],CVE-2020-7060,"When using certain mbstring functions to convert multibyte encodings, in PHP versions 7.2.x below 7.2.27, 7.3.x below 7.3.14 and 7.4.x below 7.4.2 it is possible to supply data that will cause function mbfl_filt_conv_big5_wchar to read past the allocated buffer. This may lead to information disclosure or crash.",https://nvd.nist.gov/vuln/detail/CVE-2020-7060,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -38761,7 +38762,7 @@ Change-Id: I7f0a3590b8acae3f3e3e2fe636e1f5ef285693cf",1,"Status ConstantFolding:
   }
 
   return Status::OK();
-}",122664089420988233915419567191040959656,constant_folding.cc,35061507297230918846503076104140700863,['CWE-617'],CVE-2022-23581,"Tensorflow is an Open Source Machine Learning Framework. The Grappler optimizer in TensorFlow can be used to cause a denial of service by altering a `SavedModel` such that `IsSimplifiableReshape` would trigger `CHECK` failures. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23581,1,"```json
+}",122664089420988233915419567191040959656,constant_folding.cc,35061507297230918846503076104140700863,['CWE-617'],CVE-2022-23581,"Tensorflow is an Open Source Machine Learning Framework. The Grappler optimizer in TensorFlow can be used to cause a denial of service by altering a `SavedModel` such that `IsSimplifiableReshape` would trigger `CHECK` failures. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23581,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -39004,7 +39005,7 @@ c3d3faa4f72a676e183f34be960cff13a5a725ae",1,"auth_request_get_var_expand_table_f
     //smp_wmb();
     // call_rcu(block, reclaim_ramblock, rcu);
     reclaim_ramblock(uc, block);
-}",157575120486623399749960791680175069672,exec.c,310161744044250278013604508128366354672,['CWE-476'],CVE-2022-29694,Unicorn Engine v2.0.0-rc7 and below was discovered to contain a NULL pointer dereference via qemu_ram_free.,https://nvd.nist.gov/vuln/detail/CVE-2022-29694,1,"```json
+}",157575120486623399749960791680175069672,exec.c,310161744044250278013604508128366354672,['CWE-476'],CVE-2022-29694,Unicorn Engine v2.0.0-rc7 and below was discovered to contain a NULL pointer dereference via qemu_ram_free.,https://nvd.nist.gov/vuln/detail/CVE-2022-29694,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -39408,7 +39409,7 @@ Change-Id: Ia21a3e3d62a90d642a4561f08f3b543e5ad00c46",1,"bool Tensor::FromProto(
                                       LogMemory::UNKNOWN_STEP_ID, *this);
   }
   return true;
-}",112719252128622113589892906952570683457,tensor.cc,289613009517546867193769314060658742037,['CWE-617'],CVE-2022-23571,"Tensorflow is an Open Source Machine Learning Framework. When decoding a tensor from protobuf, a TensorFlow process can encounter cases where a `CHECK` assertion is invalidated based on user controlled arguments, if the tensors have an invalid `dtype` and 0 elements or an invalid shape. This allows attackers to cause denial of services in TensorFlow processes. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23571,1,"```json
+}",112719252128622113589892906952570683457,tensor.cc,289613009517546867193769314060658742037,['CWE-617'],CVE-2022-23571,"Tensorflow is an Open Source Machine Learning Framework. When decoding a tensor from protobuf, a TensorFlow process can encounter cases where a `CHECK` assertion is invalidated based on user controlled arguments, if the tensors have an invalid `dtype` and 0 elements or an invalid shape. This allows attackers to cause denial of services in TensorFlow processes. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23571,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -40708,7 +40709,7 @@ theend:
 	    ccline.cmdbuff = NULL;
 	return p;
     }
-}",318420655328659351378249069297989245289,ex_getln.c,35630205531070235041879855338965504689,['CWE-416'],CVE-2022-3235,Use After Free in GitHub repository vim/vim prior to 9.0.0490.,https://nvd.nist.gov/vuln/detail/CVE-2022-3235,1,"```json
+}",318420655328659351378249069297989245289,ex_getln.c,35630205531070235041879855338965504689,['CWE-416'],CVE-2022-3235,Use After Free in GitHub repository vim/vim prior to 9.0.0490.,https://nvd.nist.gov/vuln/detail/CVE-2022-3235,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -40888,7 +40889,7 @@ Signed-off-by: Jason Wang <jasowang@redhat.com>",1,"static void gem_transmit(Cad
             gem_update_int_status(s);
         }
     }
-}",96949803014582607595727068395060090256,cadence_gem.c,142576312399333534516163795241152257631,['CWE-835'],CVE-2021-3416,A potential stack overflow via infinite loop issue was found in various NIC emulators of QEMU in versions up to and including 5.2.0. The issue occurs in loopback mode of a NIC wherein reentrant DMA checks get bypassed. A guest user/process may use this flaw to consume CPU cycles or crash the QEMU process on the host resulting in DoS scenario.,https://nvd.nist.gov/vuln/detail/CVE-2021-3416,1,"```json
+}",96949803014582607595727068395060090256,cadence_gem.c,142576312399333534516163795241152257631,['CWE-835'],CVE-2021-3416,A potential stack overflow via infinite loop issue was found in various NIC emulators of QEMU in versions up to and including 5.2.0. The issue occurs in loopback mode of a NIC wherein reentrant DMA checks get bypassed. A guest user/process may use this flaw to consume CPU cycles or crash the QEMU process on the host resulting in DoS scenario.,https://nvd.nist.gov/vuln/detail/CVE-2021-3416,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -43478,7 +43479,7 @@ Signed-off-by: Peter Lemenkov <lemenkov@gmail.com>",1,"at_bitmap input_bmp_reade
 cleanup:
   fclose(fd);
   return (image);
-}",217805098145205715295086602544452101199,input-bmp.c,38605146891124325135879659140059354528,['CWE-787'],CVE-2022-32323,AutoTrace v0.40.0 was discovered to contain a heap overflow via the ReadImage function at input-bmp.c:660.,https://nvd.nist.gov/vuln/detail/CVE-2022-32323,0,"```json
+}",217805098145205715295086602544452101199,input-bmp.c,38605146891124325135879659140059354528,['CWE-787'],CVE-2022-32323,AutoTrace v0.40.0 was discovered to contain a heap overflow via the ReadImage function at input-bmp.c:660.,https://nvd.nist.gov/vuln/detail/CVE-2022-32323,1,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -43968,7 +43969,7 @@ could be crashed if the relevant tables were not present (e.g. chrooted).",1,"  
     if (princ)          krb5_free_principal(krb5context, princ);
     if (krb5context)	krb5_free_context(krb5context);
     return(rc);
-}",99893605133546740733833372677927547347,None,,['CWE-20'],CVE-2010-0433,"The kssl_keytab_is_available function in ssl/kssl.c in OpenSSL before 0.9.8n, when Kerberos is enabled but Kerberos configuration files cannot be opened, does not check a certain return value, which allows remote attackers to cause a denial of service (NULL pointer dereference and daemon crash) via SSL cipher negotiation, as demonstrated by a chroot installation of Dovecot or stunnel without Kerberos configuration files inside the chroot.",https://nvd.nist.gov/vuln/detail/CVE-2010-0433,1,"```json
+}",99893605133546740733833372677927547347,None,,['CWE-20'],CVE-2010-0433,"The kssl_keytab_is_available function in ssl/kssl.c in OpenSSL before 0.9.8n, when Kerberos is enabled but Kerberos configuration files cannot be opened, does not check a certain return value, which allows remote attackers to cause a denial of service (NULL pointer dereference and daemon crash) via SSL cipher negotiation, as demonstrated by a chroot installation of Dovecot or stunnel without Kerberos configuration files inside the chroot.",https://nvd.nist.gov/vuln/detail/CVE-2010-0433,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -44152,7 +44153,7 @@ Signed-off-by: Alin-Gabriel Serdean <aserdean@ovn.org>",1,"ipf_extract_frags_fro
             dp_packet_batch_refill(pb, pkt, pb_idx);
         }
     }
-}",268719993787134993398351954055334505161,ipf.c,8691777507480014794600271586586377411,['CWE-401'],CVE-2021-3905,A memory leak was found in Open vSwitch (OVS) during userspace IP fragmentation processing. An attacker could use this flaw to potentially exhaust available memory by keeping sending packet fragments.,https://nvd.nist.gov/vuln/detail/CVE-2021-3905,1,"```json
+}",268719993787134993398351954055334505161,ipf.c,8691777507480014794600271586586377411,['CWE-401'],CVE-2021-3905,A memory leak was found in Open vSwitch (OVS) during userspace IP fragmentation processing. An attacker could use this flaw to potentially exhaust available memory by keeping sending packet fragments.,https://nvd.nist.gov/vuln/detail/CVE-2021-3905,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -45721,7 +45722,7 @@ Fixes:
 	if (ApplyFunction(y) != x)				// check
 		throw Exception(Exception::OTHER_ERROR, ""InvertibleRWFunction: computational error during private key operation"");
 	return y;
-}",290420030541756407514179370586675759104,rw.cpp,28365074804944330860384058197646130181,['CWE-399'],CVE-2015-2141,"The InvertibleRWFunction::CalculateInverse function in rw.cpp in libcrypt++ 5.6.2 does not properly blind private key operations for the Rabin-Williams digital signature algorithm, which allows remote attackers to obtain private keys via a timing attack.",https://nvd.nist.gov/vuln/detail/CVE-2015-2141,1,"```json
+}",290420030541756407514179370586675759104,rw.cpp,28365074804944330860384058197646130181,['CWE-399'],CVE-2015-2141,"The InvertibleRWFunction::CalculateInverse function in rw.cpp in libcrypt++ 5.6.2 does not properly blind private key operations for the Rabin-Williams digital signature algorithm, which allows remote attackers to obtain private keys via a timing attack.",https://nvd.nist.gov/vuln/detail/CVE-2015-2141,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -45803,7 +45804,7 @@ Fixes:
         }
     }
     return MOBI_SUCCESS;
-}",38529228609046084805262566640890540140,index.c,309095437889005741044332361577356993393,['CWE-787'],CVE-2022-1533,Buffer Over-read in GitHub repository bfabiszewski/libmobi prior to 0.11. This vulnerability is capable of arbitrary code execution.,https://nvd.nist.gov/vuln/detail/CVE-2022-1533,1,"```json
+}",38529228609046084805262566640890540140,index.c,309095437889005741044332361577356993393,['CWE-787'],CVE-2022-1533,Buffer Over-read in GitHub repository bfabiszewski/libmobi prior to 0.11. This vulnerability is capable of arbitrary code execution.,https://nvd.nist.gov/vuln/detail/CVE-2022-1533,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -46044,7 +46045,7 @@ Fixes:
         free(rr);
     }
     return dnscenv->signed_certs_count;
-}",44451332163685602086826854088983200257,dnscrypt.c,338731906376917706393921999097571082291,['CWE-190'],CVE-2019-25038,"Unbound before 1.9.5 allows an integer overflow in a size calculation in dnscrypt/dnscrypt.c. NOTE: The vendor disputes that this is a vulnerability. Although the code may be vulnerable, a running Unbound installation cannot be remotely or locally exploited",https://nvd.nist.gov/vuln/detail/CVE-2019-25038,1,"```json
+}",44451332163685602086826854088983200257,dnscrypt.c,338731906376917706393921999097571082291,['CWE-190'],CVE-2019-25038,"Unbound before 1.9.5 allows an integer overflow in a size calculation in dnscrypt/dnscrypt.c. NOTE: The vendor disputes that this is a vulnerability. Although the code may be vulnerable, a running Unbound installation cannot be remotely or locally exploited",https://nvd.nist.gov/vuln/detail/CVE-2019-25038,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -46175,7 +46176,7 @@ Change-Id: If14d96231d1cd7aad7c4d1c22c1bab1576b75717",1,"  void Compute(OpKernel
     OP_REQUIRES_OK(context,
                    WriteValues(params_dense_values_in, value_slices,
                                out_splits.size(), num_values, context));
-  }",307099744677498626698554862398752331906,ragged_gather_op.cc,101959606941305621670893175769931334336,['CWE-369'],CVE-2021-37641,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions if the arguments to `tf.raw_ops.RaggedGather` don't determine a valid ragged tensor code can trigger a read from outside of bounds of heap allocated buffers. The [implementation](https://github.com/tensorflow/tensorflow/blob/8d72537c6abf5a44103b57b9c2e22c14f5f49698/tensorflow/core/kernels/ragged_gather_op.cc#L70) directly reads the first dimension of a tensor shape before checking that said tensor has rank of at least 1 (i.e., it is not a scalar). Furthermore, the implementation does not check that the list given by `params_nested_splits` is not an empty list of tensors. We have patched the issue in GitHub commit a2b743f6017d7b97af1fe49087ae15f0ac634373. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37641,1,"```json
+  }",307099744677498626698554862398752331906,ragged_gather_op.cc,101959606941305621670893175769931334336,['CWE-369'],CVE-2021-37641,"TensorFlow is an end-to-end open source platform for machine learning. In affected versions if the arguments to `tf.raw_ops.RaggedGather` don't determine a valid ragged tensor code can trigger a read from outside of bounds of heap allocated buffers. The [implementation](https://github.com/tensorflow/tensorflow/blob/8d72537c6abf5a44103b57b9c2e22c14f5f49698/tensorflow/core/kernels/ragged_gather_op.cc#L70) directly reads the first dimension of a tensor shape before checking that said tensor has rank of at least 1 (i.e., it is not a scalar). Furthermore, the implementation does not check that the list given by `params_nested_splits` is not an empty list of tensors. We have patched the issue in GitHub commit a2b743f6017d7b97af1fe49087ae15f0ac634373. The fix will be included in TensorFlow 2.6.0. We will also cherrypick this commit on TensorFlow 2.5.1, TensorFlow 2.4.3, and TensorFlow 2.3.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-37641,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -46551,7 +46552,7 @@ Signed-off-by: Jens Axboe <axboe@kernel.dk>",1,"static int io_rw_init_file(struc
 	}
 
 	return 0;
-}",85149610434779656690730201934331639704,io_uring.c,148301731450961138992553369142373286456,['CWE-94'],CVE-2022-29968,An issue was discovered in the Linux kernel through 5.17.5. io_rw_init_file in fs/io_uring.c lacks initialization of kiocb->private.,https://nvd.nist.gov/vuln/detail/CVE-2022-29968,1,"```json
+}",85149610434779656690730201934331639704,io_uring.c,148301731450961138992553369142373286456,['CWE-94'],CVE-2022-29968,An issue was discovered in the Linux kernel through 5.17.5. io_rw_init_file in fs/io_uring.c lacks initialization of kiocb->private.,https://nvd.nist.gov/vuln/detail/CVE-2022-29968,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -47059,7 +47060,7 @@ Change-Id: I33e7c6626224e1060a8a4ab51ad5d861c6d4c63e",1,"  void Compute(OpKernel
 	module->postProcessSamples();
 	
 	return MP_OK;	
-}",83839366626583868665259951755341094581,LoaderS3M.cpp,183144652101625968491560243513367539209,['CWE-787'],CVE-2019-14464,XMFile::read in XMFile.cpp in milkyplay in MilkyTracker 1.02.00 has a heap-based buffer overflow.,https://nvd.nist.gov/vuln/detail/CVE-2019-14464,1,"```json
+}",83839366626583868665259951755341094581,LoaderS3M.cpp,183144652101625968491560243513367539209,['CWE-787'],CVE-2019-14464,XMFile::read in XMFile.cpp in milkyplay in MilkyTracker 1.02.00 has a heap-based buffer overflow.,https://nvd.nist.gov/vuln/detail/CVE-2019-14464,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -49020,7 +49021,7 @@ RETRY_TRY_BLOCK:
     goto RETRY_TRY_BLOCK;
   }
   MRB_END_EXC(&c_jmp);
-}",44658455618798852770197569753613577766,vm.c,164058079299968555060167307813659313262,['CWE-703'],CVE-2022-1427,Out-of-bounds Read in mrb_obj_is_kind_of in in GitHub repository mruby/mruby prior to 3.2. # Impact: Possible arbitrary code execution if being exploited.,https://nvd.nist.gov/vuln/detail/CVE-2022-1427,1,"```json
+}",44658455618798852770197569753613577766,vm.c,164058079299968555060167307813659313262,['CWE-703'],CVE-2022-1427,Out-of-bounds Read in mrb_obj_is_kind_of in in GitHub repository mruby/mruby prior to 3.2. # Impact: Possible arbitrary code execution if being exploited.,https://nvd.nist.gov/vuln/detail/CVE-2022-1427,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -49848,7 +49849,7 @@ int flush;
         pcs->status.write_pos = pcs->status.read_pos = 0;
     }
     return count;
-}",16750323744555373538118400797572057026,None,,['CWE-787'],CVE-2022-1350,A vulnerability classified as problematic was found in GhostPCL 9.55.0. This vulnerability affects the function chunk_free_object of the file gsmchunk.c. The manipulation with a malicious file leads to a memory corruption. The attack can be initiated remotely but requires user interaction. The exploit has been disclosed to the public as a POC and may be used. It is recommended to apply the patches to fix this issue.,https://nvd.nist.gov/vuln/detail/CVE-2022-1350,1,"```json
+}",16750323744555373538118400797572057026,None,,['CWE-787'],CVE-2022-1350,A vulnerability classified as problematic was found in GhostPCL 9.55.0. This vulnerability affects the function chunk_free_object of the file gsmchunk.c. The manipulation with a malicious file leads to a memory corruption. The attack can be initiated remotely but requires user interaction. The exploit has been disclosed to the public as a POC and may be used. It is recommended to apply the patches to fix this issue.,https://nvd.nist.gov/vuln/detail/CVE-2022-1350,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -49918,7 +49919,7 @@ Signed-off-by: Jiri Kosina <jkosina@suse.cz>",1,"static int elo_probe(struct hid
 err_free:
 	kfree(priv);
 	return ret;
-}",119771214080354607700352502150468808097,hid-elo.c,34235452733984026251117954935462979934,['CWE-200'],CVE-2022-27950,"In drivers/hid/hid-elo.c in the Linux kernel before 5.16.11, a memory leak exists for a certain hid_parse error condition.",https://nvd.nist.gov/vuln/detail/CVE-2022-27950,1,"```json
+}",119771214080354607700352502150468808097,hid-elo.c,34235452733984026251117954935462979934,['CWE-200'],CVE-2022-27950,"In drivers/hid/hid-elo.c in the Linux kernel before 5.16.11, a memory leak exists for a certain hid_parse error condition.",https://nvd.nist.gov/vuln/detail/CVE-2022-27950,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -52544,7 +52545,7 @@ while handling an error"".",1,"l_noret luaG_runerror (lua_State *L, const char *
   if (isLua(ci))  /* if Lua function, add source:line information */
     luaG_addinfo(L, msg, ci_func(ci)->p->source, getcurrentline(ci));
   luaG_errormsg(L);
-}",326823398637399129975364476390386969104,ldebug.c,317295124781077525458993227148135997551,['CWE-787'],CVE-2022-33099,An issue in the component luaG_runerror of Lua v5.4.4 and below leads to a heap-buffer overflow when a recursive error occurs.,https://nvd.nist.gov/vuln/detail/CVE-2022-33099,1,"```json
+}",326823398637399129975364476390386969104,ldebug.c,317295124781077525458993227148135997551,['CWE-787'],CVE-2022-33099,An issue in the component luaG_runerror of Lua v5.4.4 and below leads to a heap-buffer overflow when a recursive error occurs.,https://nvd.nist.gov/vuln/detail/CVE-2022-33099,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -52592,7 +52593,7 @@ Fixes:
                 return 1;
     }
     return 0;
-}",276235081077601818208956388725727672709,gdevlprn.c,146789313062349427560159100335401323936,['CWE-787'],CVE-2020-16287,A buffer overflow vulnerability in lprn_is_black() in contrib/lips4/gdevlprn.c of Artifex Software GhostScript v9.50 allows a remote attacker to cause a denial of service via a crafted PDF file. This is fixed in v9.51.,https://nvd.nist.gov/vuln/detail/CVE-2020-16287,1,"```json
+}",276235081077601818208956388725727672709,gdevlprn.c,146789313062349427560159100335401323936,['CWE-787'],CVE-2020-16287,A buffer overflow vulnerability in lprn_is_black() in contrib/lips4/gdevlprn.c of Artifex Software GhostScript v9.50 allows a remote attacker to cause a denial of service via a crafted PDF file. This is fixed in v9.51.,https://nvd.nist.gov/vuln/detail/CVE-2020-16287,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -52883,7 +52884,7 @@ to older gimp-2-8 code.",1,"load_image (const gchar  *filename,
   gimp_progress_update (1.0);
 
   return image_ID;
-}",219487381392289910094593757172224969152,file-gbr.c,210537502330856952427982223109888523462,['CWE-125'],CVE-2017-17784,"In GIMP 2.8.22, there is a heap-based buffer over-read in load_image in plug-ins/common/file-gbr.c in the gbr import parser, related to mishandling of UTF-8 data.",https://nvd.nist.gov/vuln/detail/CVE-2017-17784,1,"```json
+}",219487381392289910094593757172224969152,file-gbr.c,210537502330856952427982223109888523462,['CWE-125'],CVE-2017-17784,"In GIMP 2.8.22, there is a heap-based buffer over-read in load_image in plug-ins/common/file-gbr.c in the gbr import parser, related to mishandling of UTF-8 data.",https://nvd.nist.gov/vuln/detail/CVE-2017-17784,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -53225,7 +53226,7 @@ Thanks to Ba Jinsheng for reporting this bug",1,"net_bind(short unsigned *port, 
  error:
   close(fd);
   return -1;
-}",32546260713202661418218833633405896143,misc.c,105075321496416144885475599863207164581,['CWE-416'],CVE-2021-38383,OwnTone (aka owntone-server) through 28.1 has a use-after-free in net_bind() in misc.c.,https://nvd.nist.gov/vuln/detail/CVE-2021-38383,1,"```json
+}",32546260713202661418218833633405896143,misc.c,105075321496416144885475599863207164581,['CWE-416'],CVE-2021-38383,OwnTone (aka owntone-server) through 28.1 has a use-after-free in net_bind() in misc.c.,https://nvd.nist.gov/vuln/detail/CVE-2021-38383,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -53509,7 +53510,7 @@ Signed-off-by: Joachim Nilsson <troglobit@gmail.com>",1,"static void handle_PORT
     // the $sample aggregation stage if the trial plan was chosen.
     return std::pair{std::move(execStatus.getValue()),
                      !trialStage || !trialStage->pickedBackupPlan()};
-}",101223003381904306346527857489543984398,None,,['CWE-617'],CVE-2021-32037,"An authorized user may trigger an invariant which may result in denial of service or server exit if a relevant aggregation request is sent to a shard. Usually, the requests are sent via mongos and special privileges are required in order to know the address of the shards and to log in to the shards of an auth enabled environment.",https://nvd.nist.gov/vuln/detail/CVE-2021-32037,0,"```json
+}",101223003381904306346527857489543984398,None,,['CWE-617'],CVE-2021-32037,"An authorized user may trigger an invariant which may result in denial of service or server exit if a relevant aggregation request is sent to a shard. Usually, the requests are sent via mongos and special privileges are required in order to know the address of the shards and to log in to the shards of an auth enabled environment.",https://nvd.nist.gov/vuln/detail/CVE-2021-32037,1,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -53706,7 +53707,7 @@ Signed-off-by: Joachim Nilsson <troglobit@gmail.com>",1,"static void handle_PORT
     break;
   }
   if (val) push();
-}",236078569306136776334536654321578023921,codegen.c,69656694646846748382204460208931803734,['CWE-125'],CVE-2022-0717,Out-of-bounds Read in GitHub repository mruby/mruby prior to 3.2.,https://nvd.nist.gov/vuln/detail/CVE-2022-0717,1,"```json
+}",236078569306136776334536654321578023921,codegen.c,69656694646846748382204460208931803734,['CWE-125'],CVE-2022-0717,Out-of-bounds Read in GitHub repository mruby/mruby prior to 3.2.,https://nvd.nist.gov/vuln/detail/CVE-2022-0717,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -53944,7 +53945,7 @@ This closes #469 issue on Github.",1,"njs_function_frame_save(njs_vm_t *vm, njs_
     }
 
     return NJS_OK;
-}",163196677430813133926152837345587363595,njs_function.c,84952023387586829721392975850477495397,['CWE-416'],CVE-2022-27007,nginx njs 0.7.2 is affected suffers from Use-after-free in njs_function_frame_alloc() when it try to invoke from a restored frame saved with njs_function_frame_save().,https://nvd.nist.gov/vuln/detail/CVE-2022-27007,1,"```json
+}",163196677430813133926152837345587363595,njs_function.c,84952023387586829721392975850477495397,['CWE-416'],CVE-2022-27007,nginx njs 0.7.2 is affected suffers from Use-after-free in njs_function_frame_alloc() when it try to invoke from a restored frame saved with njs_function_frame_save().,https://nvd.nist.gov/vuln/detail/CVE-2022-27007,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -54637,7 +54638,7 @@ PiperOrigin-RevId: 446028341",1,"  void Compute(OpKernelContext* ctx) override {
         f_tensor->matrix<T>(), o_tensor->matrix<T>(), ci_tensor->matrix<T>(),
         co_tensor->matrix<T>(), gates_tensor.matrix<T>(),
         h_tensor->matrix<T>());
-  }",332787893197526379241591780916041422587,lstm_ops.cc,94555141575162353468670590418949369497,['CWE-703'],CVE-2022-29200,"TensorFlow is an open source platform for machine learning. Prior to versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4, the implementation of `tf.raw_ops.LSTMBlockCell` does not fully validate the input arguments. This results in a `CHECK`-failure which can be used to trigger a denial of service attack. The code does not validate the ranks of any of the arguments to this API call. This results in `CHECK`-failures when the elements of the tensor are accessed. Versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4 contain a patch for this issue.",https://nvd.nist.gov/vuln/detail/CVE-2022-29200,1,"```json
+  }",332787893197526379241591780916041422587,lstm_ops.cc,94555141575162353468670590418949369497,['CWE-703'],CVE-2022-29200,"TensorFlow is an open source platform for machine learning. Prior to versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4, the implementation of `tf.raw_ops.LSTMBlockCell` does not fully validate the input arguments. This results in a `CHECK`-failure which can be used to trigger a denial of service attack. The code does not validate the ranks of any of the arguments to this API call. This results in `CHECK`-failures when the elements of the tensor are accessed. Versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4 contain a patch for this issue.",https://nvd.nist.gov/vuln/detail/CVE-2022-29200,0,"```json
 {
   ""vulnerability_detected"": false,
   ""vulnerabilities"": [],
@@ -55176,7 +55177,7 @@ PiperOrigin-RevId: 445522800",1,"  void Compute(OpKernelContext* context) overri
 	}
 beach:
 	free (esil_buf);
-}",336184840247355587470651192558617642560,None,,['CWE-416'],CVE-2022-1031,Use After Free in op_is_set_bp in GitHub repository radareorg/radare2 prior to 5.6.6.,https://nvd.nist.gov/vuln/detail/CVE-2022-1031,1,"```json
+}",336184840247355587470651192558617642560,None,,['CWE-416'],CVE-2022-1031,Use After Free in op_is_set_bp in GitHub repository radareorg/radare2 prior to 5.6.6.,https://nvd.nist.gov/vuln/detail/CVE-2022-1031,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -56271,7 +56272,7 @@ Signed-off-by: David S. Miller <davem@davemloft.net>",1,"void nfcmrvl_nci_unregi
 	nci_unregister_device(ndev);
 	nci_free_device(ndev);
 	kfree(priv);
-}",80022393435189393698798858771068403226,main.c,269589724165464795755961413543377431257,['CWE-416'],CVE-2022-1734,A flaw in Linux Kernel found in nfcmrvl_nci_unregister_dev() in drivers/nfc/nfcmrvl/main.c can lead to use after free both read or write when non synchronized between cleanup routine and firmware download routine.,https://nvd.nist.gov/vuln/detail/CVE-2022-1734,1,"```json
+}",80022393435189393698798858771068403226,main.c,269589724165464795755961413543377431257,['CWE-416'],CVE-2022-1734,A flaw in Linux Kernel found in nfcmrvl_nci_unregister_dev() in drivers/nfc/nfcmrvl/main.c can lead to use after free both read or write when non synchronized between cleanup routine and firmware download routine.,https://nvd.nist.gov/vuln/detail/CVE-2022-1734,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -56633,7 +56634,7 @@ Solution:   Do not set VALID_BOTLINE in w_valid.",1,"update_topline(void)
       }
   }
   return(SyncAuthenticPixels(image,exception));
-}",50584299779312396054491404176852470969,psd.c,159316916509494023086155162326374999236,['CWE-190'],CVE-2022-32545,"A vulnerability was found in ImageMagick, causing an outside the range of representable values of type 'unsigned char' at coders/psd.c, when crafted or untrusted input is processed. This leads to a negative impact to application availability or other problems related to undefined behavior.",https://nvd.nist.gov/vuln/detail/CVE-2022-32545,1,"```json
+}",50584299779312396054491404176852470969,psd.c,159316916509494023086155162326374999236,['CWE-190'],CVE-2022-32545,"A vulnerability was found in ImageMagick, causing an outside the range of representable values of type 'unsigned char' at coders/psd.c, when crafted or untrusted input is processed. This leads to a negative impact to application availability or other problems related to undefined behavior.",https://nvd.nist.gov/vuln/detail/CVE-2022-32545,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -57304,7 +57305,7 @@ fbshipit-source-id: 19bb2be2c731808144e1a074ece313fba11f1945",1,"void updateHand
       conn.sentHandshakeDone = true;
     }
   }
-}",43735419078414129480912957086830640484,ServerStateMachine.cpp,9223824505720776904271246874049398430,['CWE-703'],CVE-2021-24029,"A packet of death scenario is possible in mvfst via a specially crafted message during a QUIC session, which causes a crash via a failed assertion. Per QUIC specification, this particular message should be treated as a connection error. This issue affects mvfst versions prior to commit a67083ff4b8dcbb7ee2839da6338032030d712b0 and proxygen versions prior to v2021.03.15.00.",https://nvd.nist.gov/vuln/detail/CVE-2021-24029,1,"```json
+}",43735419078414129480912957086830640484,ServerStateMachine.cpp,9223824505720776904271246874049398430,['CWE-703'],CVE-2021-24029,"A packet of death scenario is possible in mvfst via a specially crafted message during a QUIC session, which causes a crash via a failed assertion. Per QUIC specification, this particular message should be treated as a connection error. This issue affects mvfst versions prior to commit a67083ff4b8dcbb7ee2839da6338032030d712b0 and proxygen versions prior to v2021.03.15.00.",https://nvd.nist.gov/vuln/detail/CVE-2021-24029,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -57849,7 +57850,7 @@ Change-Id: Iba44417e383bdd0e1abc4012bfca83b2377dd335",1,"  void ComputeAsync(OpK
     };
     CudaSolver::CheckLapackInfoAndDeleteSolverAsync(std::move(solver), dev_info,
                                                     std::move(info_checker));
-  }",232512673394609281083836207268567643755,matrix_solve_op.cc,18056043033202767652193305242094140715,['CWE-354'],CVE-2021-41206,"TensorFlow is an open source platform for machine learning. In affected versions several TensorFlow operations are missing validation for the shapes of the tensor arguments involved in the call. Depending on the API, this can result in undefined behavior and segfault or `CHECK`-fail related crashes but in some scenarios writes and reads from heap populated arrays are also possible. We have discovered these issues internally via tooling while working on improving/testing GPU op determinism. As such, we don't have reproducers and there will be multiple fixes for these issues. These fixes will be included in TensorFlow 2.7.0. We will also cherrypick these commits on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41206,1,"```json
+  }",232512673394609281083836207268567643755,matrix_solve_op.cc,18056043033202767652193305242094140715,['CWE-354'],CVE-2021-41206,"TensorFlow is an open source platform for machine learning. In affected versions several TensorFlow operations are missing validation for the shapes of the tensor arguments involved in the call. Depending on the API, this can result in undefined behavior and segfault or `CHECK`-fail related crashes but in some scenarios writes and reads from heap populated arrays are also possible. We have discovered these issues internally via tooling while working on improving/testing GPU op determinism. As such, we don't have reproducers and there will be multiple fixes for these issues. These fixes will be included in TensorFlow 2.7.0. We will also cherrypick these commits on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41206,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -58092,7 +58093,7 @@ Reviewed-by: Jason Wang <jasowang@redhat.com>",1,"static size_t send_control_msg
     virtqueue_push(vq, &elem, len);
     virtio_notify(VIRTIO_DEVICE(vser), vq);
     return len;
-}",301712778748262907171467771526276497164,virtio-serial-bus.c,253157734411856913752064284433381457044,['CWE-787'],CVE-2015-5745,Buffer overflow in the send_control_msg function in hw/char/virtio-serial-bus.c in QEMU before 2.4.0 allows guest users to cause a denial of service (QEMU process crash) via a crafted virtio control message.,https://nvd.nist.gov/vuln/detail/CVE-2015-5745,1,"The use of memcpy without bounds checking on the destination buffer creates a potential buffer overflow. Even if the virtio queue element is designed to handle the data, the absence of size validation makes this a critical vulnerability. The author's mitigation suggestion is correct, but the original code lacks any such validation, so the vulnerability is present.",2025-11-16T00:50:27.764789
+}",301712778748262907171467771526276497164,virtio-serial-bus.c,253157734411856913752064284433381457044,['CWE-787'],CVE-2015-5745,Buffer overflow in the send_control_msg function in hw/char/virtio-serial-bus.c in QEMU before 2.4.0 allows guest users to cause a denial of service (QEMU process crash) via a crafted virtio control message.,https://nvd.nist.gov/vuln/detail/CVE-2015-5745,0,"The use of memcpy without bounds checking on the destination buffer creates a potential buffer overflow. Even if the virtio queue element is designed to handle the data, the absence of size validation makes this a critical vulnerability. The author's mitigation suggestion is correct, but the original code lacks any such validation, so the vulnerability is present.",2025-11-16T00:50:27.764789
 198703,LibRaw,4606c28f494a750892c5c1ac7903e62dd1c6fdb5,https://github.com/LibRaw/LibRaw,https://github.com/LibRaw/LibRaw/commit/4606c28f494a750892c5c1ac7903e62dd1c6fdb5,0.16.1: fix for dcraw ljpeg_start() vulnerability,1,"int CLASS ljpeg_start (struct jhead *jh, int info_only)
 {
   int c, tag, len;
@@ -60763,7 +60764,7 @@ end:
 #else
 	return NULL;
 #endif
-}",270972574846681061752900592460657064315,descriptors.c,100253523943266503998746709370742625478,['CWE-415'],CVE-2021-40571,"The binary MP4Box in Gpac 1.0.1 has a double-free vulnerability in the ilst_box_read function in box_code_apple.c, which allows attackers to cause a denial of service, even code execution and escalation of privileges.",https://nvd.nist.gov/vuln/detail/CVE-2021-40571,1,"```json
+}",270972574846681061752900592460657064315,descriptors.c,100253523943266503998746709370742625478,['CWE-415'],CVE-2021-40571,"The binary MP4Box in Gpac 1.0.1 has a double-free vulnerability in the ilst_box_read function in box_code_apple.c, which allows attackers to cause a denial of service, even code execution and escalation of privileges.",https://nvd.nist.gov/vuln/detail/CVE-2021-40571,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -61602,7 +61603,7 @@ check_value:
 done:
 	/* device either stalls (value < 0) or reports success */
 	return value;
-}",303126640832251617876878392273862526744,composite.c,18887355761308803276229129312051135602,['CWE-476'],CVE-2022-25258,An issue was discovered in drivers/usb/gadget/composite.c in the Linux kernel before 5.16.10. The USB Gadget subsystem lacks certain validation of interface OS descriptor requests (ones with a large array index and ones associated with NULL function pointer retrieval). Memory corruption might occur.,https://nvd.nist.gov/vuln/detail/CVE-2022-25258,1,"```json
+}",303126640832251617876878392273862526744,composite.c,18887355761308803276229129312051135602,['CWE-476'],CVE-2022-25258,An issue was discovered in drivers/usb/gadget/composite.c in the Linux kernel before 5.16.10. The USB Gadget subsystem lacks certain validation of interface OS descriptor requests (ones with a large array index and ones associated with NULL function pointer retrieval). Memory corruption might occur.,https://nvd.nist.gov/vuln/detail/CVE-2022-25258,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -61965,7 +61966,7 @@ corrupted:
 	free(dir->dirs);
 	free(dir);
 	return NULL;
-}",337353141626678057542635238119408606270,None,,['CWE-22'],CVE-2021-40153,"squashfs_opendir in unsquash-1.c in Squashfs-Tools 4.5 stores the filename in the directory entry; this is then used by unsquashfs to create the new file during the unsquash. The filename is not validated for traversal outside of the destination directory, and thus allows writing to locations outside of the destination.",https://nvd.nist.gov/vuln/detail/CVE-2021-40153,1,"```json
+}",337353141626678057542635238119408606270,None,,['CWE-22'],CVE-2021-40153,"squashfs_opendir in unsquash-1.c in Squashfs-Tools 4.5 stores the filename in the directory entry; this is then used by unsquashfs to create the new file during the unsquash. The filename is not validated for traversal outside of the destination directory, and thus allows writing to locations outside of the destination.",https://nvd.nist.gov/vuln/detail/CVE-2021-40153,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -62489,7 +62490,7 @@ Solution:   Adjust ""badlen"".",1,"spell_suggest(int count)
 skip:
     vim_free(line);
     curwin->w_p_spell = wo_spell_save;
-}",283321822802394416488141327214287342104,spellsuggest.c,284064000006918275605147443263550733278,['CWE-787'],CVE-2022-0943,Heap-based Buffer Overflow occurs in vim in GitHub repository vim/vim prior to 8.2.4563.,https://nvd.nist.gov/vuln/detail/CVE-2022-0943,1,"```json
+}",283321822802394416488141327214287342104,spellsuggest.c,284064000006918275605147443263550733278,['CWE-787'],CVE-2022-0943,Heap-based Buffer Overflow occurs in vim in GitHub repository vim/vim prior to 8.2.4563.,https://nvd.nist.gov/vuln/detail/CVE-2022-0943,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -62657,7 +62658,7 @@ skip:
   o_free(issued_for);
 
   return U_CALLBACK_CONTINUE;
-}",236114269060053642565806917047085397848,webservice.c,249878395356016662912854745569339968395,['CWE-287'],CVE-2021-45379,"Glewlwyd 2.0.0, fixed in 2.6.1 is affected by an incorrect access control vulnerability. One user can attempt to log in as another user without its password.",https://nvd.nist.gov/vuln/detail/CVE-2021-45379,1,"```json
+}",236114269060053642565806917047085397848,webservice.c,249878395356016662912854745569339968395,['CWE-287'],CVE-2021-45379,"Glewlwyd 2.0.0, fixed in 2.6.1 is affected by an incorrect access control vulnerability. One user can attempt to log in as another user without its password.",https://nvd.nist.gov/vuln/detail/CVE-2021-45379,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -63990,7 +63991,7 @@ Change-Id: Ib33eafc561a39c8741ece80b2edce6d4aae9a57d",1,"  void Compute(OpKernel
 		avc_compute_poc(&n_state);
 	memcpy(&avc->s_info, &n_state, sizeof(AVCSliceInfo));
 	return ret;
-}",99100226875075764129164909998725433232,av_parsers.c,168517587328341017594269375399465893964,['CWE-476'],CVE-2021-40565,"A Segmentation fault caused by a null pointer dereference vulnerability exists in Gpac through 1.0.1 via the gf_avc_parse_nalu function in av_parsers.c when using mp4box, which causes a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2021-40565,1,"```json
+}",99100226875075764129164909998725433232,av_parsers.c,168517587328341017594269375399465893964,['CWE-476'],CVE-2021-40565,"A Segmentation fault caused by a null pointer dereference vulnerability exists in Gpac through 1.0.1 via the gf_avc_parse_nalu function in av_parsers.c when using mp4box, which causes a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2021-40565,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -64084,7 +64085,7 @@ Broken by 8f08f1944be438a2422b604c08e5060b5c7bd72f.",1,"static int smtp_command_
 	parser->cur = p;
 	parser->state.poff = 0;
 	return 1;
-}",181341317141954506069810684888107522957,None,,['CWE-835'],CVE-2020-7046,"lib-smtp in submission-login and lmtp in Dovecot 2.3.9 before 2.3.9.3 mishandles truncated UTF-8 data in command parameters, as demonstrated by the unauthenticated triggering of a submission-login infinite loop.",https://nvd.nist.gov/vuln/detail/CVE-2020-7046,1,"```json
+}",181341317141954506069810684888107522957,None,,['CWE-835'],CVE-2020-7046,"lib-smtp in submission-login and lmtp in Dovecot 2.3.9 before 2.3.9.3 mishandles truncated UTF-8 data in command parameters, as demonstrated by the unauthenticated triggering of a submission-login infinite loop.",https://nvd.nist.gov/vuln/detail/CVE-2020-7046,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -64837,7 +64838,7 @@ while (*cc != XCL_END)
 
 if (found != NULL)
   set_jumps(found, LABEL());
-}",183419698766008283102134937176756315954,pcre2_jit_compile.c,284265016287060690142505784626516203619,['CWE-125'],CVE-2022-1586,An out-of-bounds read vulnerability was discovered in the PCRE2 library in the compile_xclass_matchingpath() function of the pcre2_jit_compile.c file. This involves a unicode property matching issue in JIT-compiled regular expressions. The issue occurs because the character was not fully read in case-less matching within JIT.,https://nvd.nist.gov/vuln/detail/CVE-2022-1586,1,"```json
+}",183419698766008283102134937176756315954,pcre2_jit_compile.c,284265016287060690142505784626516203619,['CWE-125'],CVE-2022-1586,An out-of-bounds read vulnerability was discovered in the PCRE2 library in the compile_xclass_matchingpath() function of the pcre2_jit_compile.c file. This involves a unicode property matching issue in JIT-compiled regular expressions. The issue occurs because the character was not fully read in case-less matching within JIT.,https://nvd.nist.gov/vuln/detail/CVE-2022-1586,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -65027,7 +65028,7 @@ if (found != NULL)
     // the $sample aggregation stage if the trial plan was chosen.
     return std::pair{std::move(execStatus.getValue()),
                      !trialStage || !trialStage->pickedBackupPlan()};
-}",239583334467362355681176105432769486304,pipeline_d.cpp,58061396446339864036845237439152201402,['CWE-617'],CVE-2021-32037,"An authorized user may trigger an invariant which may result in denial of service or server exit if a relevant aggregation request is sent to a shard. Usually, the requests are sent via mongos and special privileges are required in order to know the address of the shards and to log in to the shards of an auth enabled environment.",https://nvd.nist.gov/vuln/detail/CVE-2021-32037,1,"```json
+}",239583334467362355681176105432769486304,pipeline_d.cpp,58061396446339864036845237439152201402,['CWE-617'],CVE-2021-32037,"An authorized user may trigger an invariant which may result in denial of service or server exit if a relevant aggregation request is sent to a shard. Usually, the requests are sent via mongos and special privileges are required in order to know the address of the shards and to log in to the shards of an auth enabled environment.",https://nvd.nist.gov/vuln/detail/CVE-2021-32037,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -65105,7 +65106,7 @@ Change-Id: I3c2f2ca1c1d2cc88bb5951c6958b38c16e9436c8",1,"void SparseFillEmptyRow
                        FunctorType()(context, default_value_t, indices_t,
                                      values_t, dense_shape_t, done),
                        done);
-}",163337242627579814226114932816582213259,sparse_fill_empty_rows_op.cc,115550743256362209093747086328381163455,['CWE-125'],CVE-2021-41224,"TensorFlow is an open source platform for machine learning. In affected versions the implementation of `SparseFillEmptyRows` can be made to trigger a heap OOB access. This occurs whenever the size of `indices` does not match the size of `values`. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41224,0,"```json
+}",163337242627579814226114932816582213259,sparse_fill_empty_rows_op.cc,115550743256362209093747086328381163455,['CWE-125'],CVE-2021-41224,"TensorFlow is an open source platform for machine learning. In affected versions the implementation of `SparseFillEmptyRows` can be made to trigger a heap OOB access. This occurs whenever the size of `indices` does not match the size of `values`. The fix will be included in TensorFlow 2.7.0. We will also cherrypick this commit on TensorFlow 2.6.1, TensorFlow 2.5.2, and TensorFlow 2.4.4, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2021-41224,1,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -65343,7 +65344,7 @@ send_data:
   }
 
   return 0;
-}",252320959275346519647300715417843120718,rgw_rest_s3.cc,121704064633287557349192949015382644860,['CWE-79'],CVE-2020-1760,"A flaw was found in the Ceph Object Gateway, where it supports request sent by an anonymous user in Amazon S3. This flaw could lead to potential XSS attacks due to the lack of proper neutralization of untrusted input.",https://nvd.nist.gov/vuln/detail/CVE-2020-1760,1,"```json
+}",252320959275346519647300715417843120718,rgw_rest_s3.cc,121704064633287557349192949015382644860,['CWE-79'],CVE-2020-1760,"A flaw was found in the Ceph Object Gateway, where it supports request sent by an anonymous user in Amazon S3. This flaw could lead to potential XSS attacks due to the lack of proper neutralization of untrusted input.",https://nvd.nist.gov/vuln/detail/CVE-2020-1760,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -66430,7 +66431,7 @@ Change-Id: I1d8a9d0d8988ed5e08be8b9f2004ce1b4cd11b7c",1,"Status ImmutableExecuto
   // for all nodes.
   InitializePending(&graph, cf_info);
   return gview_.SetAllocAttrs(&graph, params_.device);
-}",105248557138287586060572648585871722551,immutable_executor_state.cc,234046012522402227954780787024760975669,['CWE-401'],CVE-2022-23578,"Tensorflow is an Open Source Machine Learning Framework. If a graph node is invalid, TensorFlow can leak memory in the implementation of `ImmutableExecutorState::Initialize`. Here, we set `item->kernel` to `nullptr` but it is a simple `OpKernel*` pointer so the memory that was previously allocated to it would leak. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23578,1,"```json
+}",105248557138287586060572648585871722551,immutable_executor_state.cc,234046012522402227954780787024760975669,['CWE-401'],CVE-2022-23578,"Tensorflow is an Open Source Machine Learning Framework. If a graph node is invalid, TensorFlow can leak memory in the implementation of `ImmutableExecutorState::Initialize`. Here, we set `item->kernel` to `nullptr` but it is a simple `OpKernel*` pointer so the memory that was previously allocated to it would leak. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23578,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -66475,7 +66476,7 @@ Change-Id: I1d8a9d0d8988ed5e08be8b9f2004ce1b4cd11b7c",1,"Status ImmutableExecuto
 		return hmhd->subType;
 	}
 	return hmhd->subType;
-}",91218268849686441388880855658517990203,hint_track.c,60176895274654779679144452624639678766,['CWE-476'],CVE-2021-40576,"The binary MP4Box in Gpac 1.0.1 has a null pointer dereference vulnerability in the gf_isom_get_payt_count function in hint_track.c, which allows attackers to cause a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2021-40576,1,"```json
+}",91218268849686441388880855658517990203,hint_track.c,60176895274654779679144452624639678766,['CWE-476'],CVE-2021-40576,"The binary MP4Box in Gpac 1.0.1 has a null pointer dereference vulnerability in the gf_isom_get_payt_count function in hint_track.c, which allows attackers to cause a denial of service.",https://nvd.nist.gov/vuln/detail/CVE-2021-40576,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -66997,7 +66998,7 @@ The `ARY_PTR` and `ARY_LEN` may be modified in `mrb_get_args`.",1,"mrb_ary_shift
     ARY_SET_LEN(a, len-n);
   }
   return val;
-}",88987793594626442814152795226896894437,array.c,131985777969528154957566525214352537878,['CWE-476'],CVE-2021-4188,mruby is vulnerable to NULL Pointer Dereference,https://nvd.nist.gov/vuln/detail/CVE-2021-4188,0,"```json
+}",88987793594626442814152795226896894437,array.c,131985777969528154957566525214352537878,['CWE-476'],CVE-2021-4188,mruby is vulnerable to NULL Pointer Dereference,https://nvd.nist.gov/vuln/detail/CVE-2021-4188,1,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -67180,7 +67181,7 @@ Change-Id: I88161ad7042990aef678e77b597a2fb2c8f815be",1,"Status BuildXlaCompilat
   *cache = new XlaCompilationCache(
       client.ValueOrDie(), DeviceType(registration->compilation_device_name));
   return Status::OK();
-}",179065639871904945359341382009364285020,xla_platform_info.cc,171804916137745205288117058026592469555,['CWE-476'],CVE-2022-23595,"Tensorflow is an Open Source Machine Learning Framework. When building an XLA compilation cache, if default settings are used, TensorFlow triggers a null pointer dereference. In the default scenario, all devices are allowed, so `flr->config_proto` is `nullptr`. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23595,1,"```json
+}",179065639871904945359341382009364285020,xla_platform_info.cc,171804916137745205288117058026592469555,['CWE-476'],CVE-2022-23595,"Tensorflow is an Open Source Machine Learning Framework. When building an XLA compilation cache, if default settings are used, TensorFlow triggers a null pointer dereference. In the default scenario, all devices are allowed, so `flr->config_proto` is `nullptr`. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23595,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -67242,7 +67243,7 @@ Change-Id: I369c249cca32e6c56ec193f0ebbf2f2768fc7d43",1,"bool DependencyOptimize
     }
   }
   return true;
-}",61147310262209694276783937154772465535,dependency_optimizer.cc,98916752340112642333125918775752240620,['CWE-617'],CVE-2022-23579,"Tensorflow is an Open Source Machine Learning Framework. The Grappler optimizer in TensorFlow can be used to cause a denial of service by altering a `SavedModel` such that `SafeToRemoveIdentity` would trigger `CHECK` failures. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23579,1,"```json
+}",61147310262209694276783937154772465535,dependency_optimizer.cc,98916752340112642333125918775752240620,['CWE-617'],CVE-2022-23579,"Tensorflow is an Open Source Machine Learning Framework. The Grappler optimizer in TensorFlow can be used to cause a denial of service by altering a `SavedModel` such that `SafeToRemoveIdentity` would trigger `CHECK` failures. The fix will be included in TensorFlow 2.8.0. We will also cherrypick this commit on TensorFlow 2.7.1, TensorFlow 2.6.3, and TensorFlow 2.5.3, as these are also affected and still in supported range.",https://nvd.nist.gov/vuln/detail/CVE-2022-23579,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -67796,7 +67797,7 @@ Change-Id: I369c249cca32e6c56ec193f0ebbf2f2768fc7d43",1,"bool DependencyOptimize
 	gf_filter_pid_drop_packet(ctx->ipid);
 
 	return GF_OK;
-}",49630978088913986571244550780083545600,reframe_mpgvid.c,148306570807841160156662867455353144265,['CWE-476'],CVE-2021-40575,"The binary MP4Box in Gpac 1.0.1 has a null pointer dereference vulnerability in the mpgviddmx_process function in reframe_mpgvid.c, which allows attackers to cause a denial of service. This vulnerability is possibly due to an incomplete fix for CVE-2021-40566.",https://nvd.nist.gov/vuln/detail/CVE-2021-40575,1,"```json
+}",49630978088913986571244550780083545600,reframe_mpgvid.c,148306570807841160156662867455353144265,['CWE-476'],CVE-2021-40575,"The binary MP4Box in Gpac 1.0.1 has a null pointer dereference vulnerability in the mpgviddmx_process function in reframe_mpgvid.c, which allows attackers to cause a denial of service. This vulnerability is possibly due to an incomplete fix for CVE-2021-40566.",https://nvd.nist.gov/vuln/detail/CVE-2021-40575,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -67962,7 +67963,7 @@ Change-Id: I6d1d6cfb71aabbad6102422625a00bbe253ac95a",1,"llvm::Optional<Value> s
         loc, shape_and_rank_for_dim[i].first, index));
   }
   return Value(builder->create<tensor::FromElementsOp>(loc, elements));
-}",84683486121098934971147990908524528886,tf_cpurt_symbolic_shape_optimization.cc,183860206963562900623001205261417288221,['CWE-754'],CVE-2022-23593,"Tensorflow is an Open Source Machine Learning Framework. The `simplifyBroadcast` function in the MLIR-TFRT infrastructure in TensorFlow is vulnerable to a segfault (hence, denial of service), if called with scalar shapes. If all shapes are scalar, then `maxRank` is 0, so we build an empty `SmallVector`. The fix will be included in TensorFlow 2.8.0. This is the only affected version.",https://nvd.nist.gov/vuln/detail/CVE-2022-23593,1,"```json
+}",84683486121098934971147990908524528886,tf_cpurt_symbolic_shape_optimization.cc,183860206963562900623001205261417288221,['CWE-754'],CVE-2022-23593,"Tensorflow is an Open Source Machine Learning Framework. The `simplifyBroadcast` function in the MLIR-TFRT infrastructure in TensorFlow is vulnerable to a segfault (hence, denial of service), if called with scalar shapes. If all shapes are scalar, then `maxRank` is 0, so we build an empty `SmallVector`. The fix will be included in TensorFlow 2.8.0. This is the only affected version.",https://nvd.nist.gov/vuln/detail/CVE-2022-23593,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -68100,7 +68101,7 @@ Change-Id: I6d1d6cfb71aabbad6102422625a00bbe253ac95a",1,"llvm::Optional<Value> s
     isssl = true;
     issslserver = false;
     return 0;
-}",285364534121786496260977042144971081331,Socket.cpp,283084154597152068392957992825637904487,['CWE-295'],CVE-2021-44273,"e2guardian v5.4.x <= v5.4.3r is affected by missing SSL certificate validation in the SSL MITM engine. In standalone mode (i.e., acting as a proxy or a transparent proxy), with SSL MITM enabled, e2guardian, if built with OpenSSL v1.1.x, did not validate hostnames in certificates of the web servers that it connected to, and thus was itself vulnerable to MITM attacks.",https://nvd.nist.gov/vuln/detail/CVE-2021-44273,1,"```json
+}",285364534121786496260977042144971081331,Socket.cpp,283084154597152068392957992825637904487,['CWE-295'],CVE-2021-44273,"e2guardian v5.4.x <= v5.4.3r is affected by missing SSL certificate validation in the SSL MITM engine. In standalone mode (i.e., acting as a proxy or a transparent proxy), with SSL MITM enabled, e2guardian, if built with OpenSSL v1.1.x, did not validate hostnames in certificates of the web servers that it connected to, and thus was itself vulnerable to MITM attacks.",https://nvd.nist.gov/vuln/detail/CVE-2021-44273,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -68197,7 +68198,7 @@ Suggested by Matthias Gerstner",1,"int main(int argc, char **argv, char **envp)
 	tmate_ssh_server_main(tmate_session,
 			      tmate_settings->keys_dir, tmate_settings->bind_addr, tmate_settings->ssh_port);
 	return 0;
-}",154027151645284385944526585123822701001,tmate-main.c,280350825550794138629823084137678566150,['CWE-362'],CVE-2021-44512,"World-writable permissions on the /tmp/tmate/sessions directory in tmate-ssh-server 2.3.0 allow a local attacker to compromise the integrity of session handling, or obtain the read-write session ID from a read-only session symlink in this directory.",https://nvd.nist.gov/vuln/detail/CVE-2021-44512,1,"```json
+}",154027151645284385944526585123822701001,tmate-main.c,280350825550794138629823084137678566150,['CWE-362'],CVE-2021-44512,"World-writable permissions on the /tmp/tmate/sessions directory in tmate-ssh-server 2.3.0 allow a local attacker to compromise the integrity of session handling, or obtain the read-write session ID from a read-only session symlink in this directory.",https://nvd.nist.gov/vuln/detail/CVE-2021-44512,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [
@@ -68435,7 +68436,7 @@ Suggested by Matthias Gerstner",1,"int main(int argc, char **argv, char **envp)
 
 	pj_gettimeofday(&sess->stat.tx.voip_mtc.update);
     }
-}",128531615202269817130665554219664776865,rtcp_xr.c,114410540091951766279707779044798368853,['CWE-125'],CVE-2021-43845,"PJSIP is a free and open source multimedia communication library. In version 2.11.1 and prior, if incoming RTCP XR message contain block, the data field is not checked against the received packet size, potentially resulting in an out-of-bound read access. This affects all users that use PJMEDIA and RTCP XR. A malicious actor can send a RTCP XR message with an invalid packet size.",https://nvd.nist.gov/vuln/detail/CVE-2021-43845,1,"```json
+}",128531615202269817130665554219664776865,rtcp_xr.c,114410540091951766279707779044798368853,['CWE-125'],CVE-2021-43845,"PJSIP is a free and open source multimedia communication library. In version 2.11.1 and prior, if incoming RTCP XR message contain block, the data field is not checked against the received packet size, potentially resulting in an out-of-bound read access. This affects all users that use PJMEDIA and RTCP XR. A malicious actor can send a RTCP XR message with an invalid packet size.",https://nvd.nist.gov/vuln/detail/CVE-2021-43845,0,"```json
 {
   ""vulnerability_detected"": true,
   ""vulnerabilities"": [

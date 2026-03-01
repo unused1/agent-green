@@ -60027,7 +60027,7 @@ Solution:   Do not decrement the index when it is zero.",1,"suggest_trie_walk(
 	    }
 	}
     }
-}",86190004113264578506184029642372711349,spellsuggest.c,224942464208559430024115846607965193151,['CWE-787'],CVE-2022-2126,Out-of-bounds Read in GitHub repository vim/vim prior to 8.2.,https://nvd.nist.gov/vuln/detail/CVE-2022-2126,1,"Let me carefully analyze the code to identify any security vulnerabilities. I'll be looking for common security issues like buffer overflows, memory corruption, use-after-free, insecure memory operations, etc.
+}",86190004113264578506184029642372711349,spellsuggest.c,224942464208559430024115846607965193151,['CWE-787'],CVE-2022-2126,Out-of-bounds Read in GitHub repository vim/vim prior to 8.2.,https://nvd.nist.gov/vuln/detail/CVE-2022-2126,0,"Let me carefully analyze the code to identify any security vulnerabilities. I'll be looking for common security issues like buffer overflows, memory corruption, use-after-free, insecure memory operations, etc.
 
 First, let's look at the key data structures and their sizes:
 

@@ -90,7 +90,7 @@ def parse_sa_prediction(response_text):
 def parse_da_prediction(response_text):
     """
     DA parsing — mirrors dual_agent_vuln.py extract_vulnerability_decision().
-    JSON parse + keyword fallback.
+    JSON parse + keyword fallback (tightened 2026-03-01: NO-before-YES + tight phrases).
     """
     try:
         text = response_text.strip()
@@ -104,7 +104,26 @@ def parse_da_prediction(response_text):
                 decision = False
         else:
             lowered = text.lower()
-            decision = any(k in lowered for k in ["vulnerable", "unsafe", "security issue"])
+            # NO-before-YES ordering to prevent substring false positives
+            if any(p in lowered for p in [
+                "final answer: no", "final answer: (2) no", "(2) no",
+                "answer: no", "no vulnerability", "no security vulnerability",
+                "no, the code", "no:",
+            ]):
+                decision = False
+            elif any(p in lowered for p in [
+                "final answer: yes", "final answer: (1) yes", "(1) yes",
+                "answer: yes", "vulnerability detected", "yes, the code",
+                "yes: vulnerability", "yes:",
+            ]):
+                decision = True
+            elif any(k in lowered for k in [
+                "is vulnerable", "contains a vulnerability",
+                "security vulnerability exists", "can be exploited",
+            ]):
+                decision = True
+            else:
+                decision = False
 
         return 1 if decision else 0
     except Exception:
