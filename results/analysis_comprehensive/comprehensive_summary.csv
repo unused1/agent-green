@@ -23,10 +23,10 @@ log_analysis,SA,instruct,few-shot,6.77,4
 log_analysis,SA,instruct,zero-shot,5.35,4
 log_analysis,SA,thinking,few-shot,3.46,4
 log_analysis,SA,thinking,zero-shot,5.36,4
-vulnerability_detection,DA,instruct,few-shot,57.26,4
-vulnerability_detection,DA,instruct,zero-shot,55.21,4
-vulnerability_detection,DA,thinking,few-shot,57.71,4
-vulnerability_detection,DA,thinking,zero-shot,62.8,4
+vulnerability_detection,DA,instruct,few-shot,13.08,4
+vulnerability_detection,DA,instruct,zero-shot,11.23,4
+vulnerability_detection,DA,thinking,few-shot,42.61,4
+vulnerability_detection,DA,thinking,zero-shot,47.86,4
 vulnerability_detection,MA,instruct,few-shot,53.53,4
 vulnerability_detection,MA,instruct,zero-shot,66.78,4
 vulnerability_detection,MA,thinking,few-shot,57.03,4
