@@ -27,10 +27,16 @@ The following datasets are actively used in experiments.
 | Attribute | Value |
 |-----------|-------|
 | **Task** | Vulnerability Detection |
-| **Description** | Balanced dataset of vulnerable and benign code samples with CWE (Common Weakness Enumeration) labels for binary classification. |
-| **Samples Used** | 386 (balanced) |
-| **Location** | `vuln_database/VulTrial_386_samples_balanced.jsonl` |
-| **Notes** | Used for RQ1 and RQ2 vulnerability detection experiments. |
+| **Description** | Balanced dataset of vulnerable and benign code samples with CWE (Common Weakness Enumeration) labels for binary classification. Sourced from PrimeVul v0.1. |
+| **Samples Used** | 486 (balanced: 243 vuln + 243 safe) |
+| **Location** | `vuln_database/VulTrial_486_samples_balanced.jsonl` |
+| **Notes** | Combined dataset used for final RQ1 and RQ2 vulnerability detection experiments. Created by expanding the original 386-sample set with 100 incremental samples (50 vuln + 50 safe) drawn from VulTrial-870. |
+
+**Dataset lineage:**
+- `VulTrial_386_samples_balanced.jsonl` — Original 386 balanced samples (193 vuln + 193 safe). Used for initial experiment runs.
+- `VulTrial_870_samples_balanced.jsonl` — Full pool of 870 balanced samples (435 vuln + 435 safe) from PrimeVul v0.1.
+- `VulTrial_100_incremental.jsonl` — 100 incremental samples (50 vuln + 50 safe), stratified random sample from the 484-sample set difference (870 − 386), seed=42. Used for incremental inference runs.
+- `VulTrial_486_samples_balanced.jsonl` — Combined dataset (386 + 100 = 486 samples). Used as ground truth for final evaluation.
 
 ---
 
@@ -112,7 +118,7 @@ The following datasets are potential alternatives or candidates for future exper
 | Dataset | Task | Samples | Status |
 |---------|------|---------|--------|
 | HumanEval | Code Generation | 164 | In use |
-| VulTrial | Vulnerability Detection | 386 | In use |
+| VulTrial | Vulnerability Detection | 486 | In use |
 | HDFS (LogHub) | Log Analysis | 385 | In use |
 | MLCQ | Technical Debt Detection | 385 | In use |
 | PrimeVul | Vulnerability Detection | - | Alternative |

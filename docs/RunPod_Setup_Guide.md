@@ -439,6 +439,41 @@ curl https://<YOUR_POD_ID>-8000.proxy.runpod.net/health
 huggingface-cli download Qwen/Qwen2.5-Coder-7B-Instruct --local-dir /workspace/models/Qwen2.5-Coder-7B-Instruct --resume-download
 ```
 
+## Incremental VulTrial-486 Runs (Phase 8)
+
+For the incremental 100-sample vuln detection expansion, the following environment variables must be set **in addition to** the standard setup:
+
+```bash
+# Point to the 100-sample incremental dataset (not the original 386)
+export VULN_DATASET=/home/user/Desktop/agent-green/vuln_database/VulTrial_100_incremental.jsonl
+
+# Store results in a separate directory for later merging
+export RESULTS_DIR=/home/user/Desktop/agent-green/results/runpod_vuln_incremental
+```
+
+All config files (`config.py`, `config_nemotron.py`) support `VULN_DATASET` env var override. The scripts process all samples in the file (no hardcoded count).
+
+### Pod allocation
+
+| Pod | Models | Est. Wall Time |
+|-----|--------|---------------|
+| Pod 1 | Nemotron-Super-49B, Nemotron-Nano-8B | ~35h (with 1.5× buffer: ~53h) |
+| Pod 2 | Qwen3-30B-A3B (Instruct + Thinking), Qwen3-4B (Instruct + Thinking) | ~16.5h (with 1.5× buffer: ~25h) |
+
+### Post-inference
+
+After downloading results from RunPod:
+```bash
+# Merge 386 + 100 = 486 sample results and re-evaluate
+python scripts/merge_vuln_incremental.py
+
+# Re-run consolidation to pick up runpod_vuln_486 results
+python scripts/consolidate_performance.py --output results/consolidated_performance.csv
+python scripts/consolidate_emissions.py --output results/consolidated_emissions.csv
+```
+
+---
+
 ## Next Steps
 
 1. ✅ Create RunPod pod with vLLM template

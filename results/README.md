@@ -17,6 +17,8 @@ results/
 ├── rq2_cross_architecture/  # Phase 5-6: Cross-architecture validation with Nemotron 8B+49B (Dec 9-Jan 2026)
 ├── rq2_nm8b_ma_rerun_20260103/ # Rerun verification for Nemotron 8B MA Vuln experiments (Jan 3, 2026)
 ├── runpod_log_analysis/     # Phase 7: RQ3 Log Analysis experiments (Jan 2026)
+├── runpod_vuln_incremental/ # Phase 8: Incremental 100-sample vuln detection runs (Mar 2026)
+├── runpod_vuln_486/         # Phase 8b: Merged 486-sample vuln detection results (386+100)
 ├── analysis/                # Analysis outputs from Jupyter notebooks (Phase 1-2)
 ├── analysis_prompt_comparison/ # Prompt comparison analysis outputs
 ├── analysis_phase2a/        # Phase 2a analysis outputs
@@ -703,7 +705,34 @@ Analysis performed in `/notebooks/`:
 
 ---
 
-**Last Updated**: 2026-02-22
+### Phase 8: Incremental Vulnerability Detection Expansion (Mar 2026)
+
+**Purpose**: Expand vulnerability detection dataset from 386 to 486 samples for improved statistical power.
+
+**Hardware**: RunPod (NVIDIA H100 80GB HBM3)
+
+**Directories**:
+- `results/runpod_vuln_incremental/` — Raw inference results on 100 incremental samples (50 vuln + 50 safe)
+- `results/runpod_vuln_486/` — Merged results (386 + 100 = 486 samples) with re-evaluated metrics
+
+**Dataset**: `vuln_database/VulTrial_100_incremental.jsonl` — 100 new samples drawn from VulTrial-870 pool (stratified random, seed=42)
+
+**Experiments**: All 48 vulnerability detection configurations (4 models × 2 modes × 2 prompting × 3 designs) re-run on the 100 incremental samples.
+
+**Merge Process**:
+1. Incremental results produced by standard experiment scripts using `VULN_DATASET` env var override
+2. Merged with original 386-sample results via `scripts/merge_vuln_incremental.py`
+3. Re-evaluated on combined 486-sample ground truth (`VulTrial_486_samples_balanced.jsonl`)
+4. Consolidated via `scripts/consolidate_performance.py` (source type `runpod_vuln_486`, priority 10)
+
+**Notes**:
+- The `runpod_vuln_incremental/` directory is excluded from consolidation (partial results)
+- Only the merged `runpod_vuln_486/` results are included in final analysis
+- Emissions from incremental runs are tracked separately in `runpod_vuln_incremental/`
+
+---
+
+**Last Updated**: 2026-03-05
 **Total Experiments**: 120+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + 24 RQ3 Log Analysis + 4 Codegen Reruns)
   - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
   - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)

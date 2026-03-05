@@ -197,6 +197,8 @@ def find_all_emissions_files(base_dir: str) -> list[dict]:
         source_type = "unknown"
         if "runpod_log_analysis" in parts:
             source_type = "runpod_log_analysis"
+        elif "runpod_vuln_incremental" in parts:
+            source_type = "runpod_vuln_incremental"
         elif "rq2_cross_architecture" in parts:
             source_type = "rq2_cross_architecture"
         elif "mars_rerun" in parts:
@@ -412,6 +414,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
         "runpod_rerun": 5,
         "runpod_log_analysis": 6,
         "runpod_codegen_rerun": 7,
+        "runpod_vuln_incremental": 8,
     }
 
     # Add priority column

@@ -165,6 +165,10 @@ def get_source_type(file_path: str) -> str:
 
     if "runpod_log_analysis" in path_str:
         return "runpod_log_analysis"
+    elif "runpod_vuln_486" in path_str:
+        return "runpod_vuln_486"
+    elif "runpod_vuln_incremental" in path_str:
+        return "runpod_vuln_incremental"
     elif "rq2_cross_architecture" in path_str:
         return "rq2_cross_architecture"
     elif "mars_rerun" in path_str:
@@ -195,6 +199,7 @@ def find_vuln_summary_files(base_dir: str) -> list[dict]:
     exclude_dirs = {
         "rq2_nm8b_ma_rerun_20260103",
         "context_overflow_test",
+        "runpod_vuln_incremental",  # Partial 100-sample results (merged into runpod_vuln_486)
     }
 
     # Skip files with _conservative_ or _strict_ in the name (use basic normalization only)
@@ -535,6 +540,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
         "runpod_codegen": 7,
         "runpod_rerun": 8,
         "runpod_codegen_rerun": 9,
+        "runpod_vuln_486": 10,
     }
 
     df = df.copy()

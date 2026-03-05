@@ -405,3 +405,127 @@ Cross-stratum duplicate entry IDs (same `task_id` or `idx` appearing in differen
 4. **Phase B — LLM-based evaluation (~385 samples)**: Using human ratings from Phase A as calibration ground truth, develop and validate an LLM-based evaluator. Apply it to ~385 vulnerability detection samples (covering the ~1,624 available pool at 95% confidence / 5% margin of error). Validate LLM–human agreement on the pilot set before scaling.
 
 5. **Baseline comparison**: Use baseline scores to calibrate expectations for the RQ3 prompting style experiments (no-explanation, explain-after, explain-before, evidence-bound).
+
+## 11. Revised Phase A: Super-49B Zero-Shot Focus with LLM-as-Judge
+
+### 11.1 Rationale
+
+The original Phase A design (Section 2.1) distributes 48 samples across 16 strata (4 models × 2 modes × 2 prompting), yielding only 3 samples per stratum — sufficient for rater calibration but not for per-stratum inference. Cross-model agreement pools (Sections 6–7 of the RQ3 pool analysis notebook) further showed that requiring multiple models to agree on correct predictions produces pools too small for adequate sampling, especially for True Positives.
+
+The revised approach focuses evaluation depth on **Nemotron-Super-49B zero-shot** (the best-performing SA model from RQ1, with F1=0.627 in thinking mode) and uses a two-stage human + LLM-as-judge workflow to achieve full coverage of the available pool while minimising human annotation effort.
+
+**Justification for Super-49B**: Nemotron-Super-49B zero-shot achieves the highest SA vulnerability detection F1 across all configurations (RQ1 Table 1). Starting with the best-performing model provides the strongest baseline for explanation quality assessment. Qwen3-30B-A3B is added as a secondary evaluation round (Section 11.7) to enable cross-model comparison.
+
+### 11.2 Evaluation Pools
+
+Nemotron-Super-49B SA zero-shot correct predictions on VulTrial-386:
+
+| Stratum | Pool Size | Composition |
+|---------|-----------|-------------|
+| Thinking zero-shot TP | 142 | Vulnerable code correctly identified |
+| Thinking zero-shot TN | 75 | Safe code correctly identified |
+| Instruct zero-shot TP | 64 | Vulnerable code correctly identified |
+| Instruct zero-shot TN | 137 | Safe code correctly identified |
+| **Total evaluations** | **418** | 217 thinking + 201 instruct |
+| **Think ∩ Inst intersection** | **111** | 54 TP + 57 TN (same code sample correct in both modes) |
+
+Each code sample in the intersection has two evaluable responses (thinking and instruct), enabling direct within-sample mode comparison.
+
+> **Note**: These pool sizes are based on VulTrial-386 (386-sample) results. After the VulTrial-486 expansion (Phase 8), pool sizes will grow as 100 additional samples are evaluated. The pools should be recomputed from the merged 486-sample results in `results/runpod_vuln_486/` before proceeding with RQ3 Phase A sampling.
+
+### 11.3 Workflow Overview
+
+```
+Step 1: Human Rating (15 code samples → 30 evaluations)
+    ↓
+Step 2: LLM-as-Judge Calibration (few-shot from Step 1)
+    ↓
+Step 3: LLM-as-Judge Validation (held-out from Step 1)
+    ↓
+Step 4: LLM-as-Judge Full Evaluation (remaining ~388 evaluations)
+    ↓
+Step 5: Secondary Model — Qwen3-30B-A3B (reuse calibrated judge)
+```
+
+### 11.4 Step 1 — Human Rating
+
+**Sample count: 15 code snippets → 30 response evaluations**
+
+Samples are drawn from the think∩inst intersection pool (111 samples: 54 TP, 57 TN) using stratified random sampling with seed=42. Each selected code snippet is rated for both its thinking-mode and instruct-mode response, yielding two evaluations per snippet.
+
+| Stratum | Snippets | Evaluations |
+|---------|----------|-------------|
+| Intersection TP | 8 | 16 (8 think + 8 inst) |
+| Intersection TN | 7 | 14 (7 think + 7 inst) |
+| **Total** | **15** | **30** |
+
+**Why 15 snippets (30 evaluations)**:
+- **Few-shot calibration** requires ~8 diverse evaluations (2 per stratum: think-TP, think-TN, inst-TP, inst-TN) covering a range of quality levels to anchor the LLM judge.
+- **Validation** requires ~22 evaluations to compute meaningful Spearman rank correlation (ρ) between human and LLM scores across four metrics.
+- **Efficiency**: Reading code once and rating two responses (think + inst) halves the code-reading effort compared to independent sampling.
+
+**Evaluation criteria**: The same four metrics (completeness, clarity, actionability, informativeness) on a 1–5 Likert scale, using the rubrics in `docs/rq3_rater_instructions.md` (Section 4). Model identity and mode are anonymized from raters; however, since each code snippet has exactly two responses, raters will know they are comparing two different model configurations without knowing which is which.
+
+**Rater protocol**: At least two raters independently score all 30 evaluations. Inter-rater agreement is measured via intraclass correlation coefficient (ICC, two-way random, absolute agreement). Disagreements >1 point on any metric are resolved through discussion.
+
+### 11.5 Steps 2–3 — LLM-as-Judge Calibration and Validation
+
+The 30 human-rated evaluations are split into two sets:
+
+| Set | Size | Source | Purpose |
+|-----|------|--------|---------|
+| Calibration (few-shot) | ~8 evaluations | 2 per stratum, selected for quality diversity | Included in LLM judge prompt as scored examples |
+| Validation (held-out) | ~22 evaluations | Remaining human-rated samples | Measure LLM–human agreement before scaling |
+
+**Calibration set selection**: From each of the four strata (think-TP, think-TN, inst-TP, inst-TN), select 2 evaluations that span the observed quality range (e.g., one high-scoring and one low-scoring). This gives the LLM judge concrete anchors for what constitutes different quality levels.
+
+**LLM judge prompt structure**:
+1. Task description and rubric definitions (from rater instructions)
+2. Few-shot examples: 8 evaluations with source code, response text, human scores, and score justifications
+3. Target evaluation: source code + response text → request scores on 4 metrics with justifications
+
+**Validation criteria**: Before proceeding to full evaluation, the LLM judge must demonstrate:
+- Spearman ρ ≥ 0.7 with human scores on each of the four metrics (moderate-to-strong agreement)
+- Mean absolute error (MAE) ≤ 1.0 on the 5-point scale
+- No systematic bias (mean signed error within ±0.5)
+
+If validation fails, the calibration set is revised (e.g., adding more diverse examples, adjusting prompt framing) and validation is re-run. If agreement remains insufficient after 3 iterations, the human-rated set is expanded.
+
+### 11.6 Step 4 — LLM-as-Judge Full Evaluation
+
+Once validated, the LLM judge evaluates the remaining Super-49B zero-shot samples:
+
+| Target | Human-rated | LLM-judged | Total |
+|--------|-------------|------------|-------|
+| Think zero-shot | 15 (from intersection) | 202 | 217 |
+| Inst zero-shot | 15 (from intersection) | 186 | 201 |
+| **Total** | **30** | **388** | **418** |
+
+Each LLM evaluation produces scores on all four metrics plus a justification. The justifications are retained for qualitative analysis and spot-check verification.
+
+**Quality control**: A random 10% of LLM-judged evaluations (~39 samples) are spot-checked by a human rater to verify the judge maintains calibrated performance beyond the validation set.
+
+### 11.7 Step 5 — Secondary Model: Qwen3-30B-A3B
+
+After completing Super-49B evaluation, the same calibrated LLM judge (with the same few-shot examples) is applied to Qwen3-30B-A3B zero-shot correct predictions:
+
+| Stratum | Pool Size |
+|---------|-----------|
+| Thinking zero-shot | 212 correct |
+| Instruct zero-shot | 209 correct |
+| Think ∩ Inst intersection | 153 (72 TP + 81 TN) |
+
+The Qwen3-30B evaluation enables cross-model comparison of explanation quality (Super-49B vs. Qwen3-30B) on their respective correct prediction pools. Where the two models' intersection pools overlap (i.e., the same code sample is correctly predicted by both models in the same mode), direct pairwise comparison of explanation quality is possible.
+
+**Optional human validation**: A small validation set (~10 evaluations) from the Qwen3-30B pool may be human-rated to verify the LLM judge generalises across models. This is recommended but not blocking.
+
+### 11.8 Deliverables
+
+| Artifact | Description |
+|----------|-------------|
+| `results/rq3_baseline/super49b_zero_human_rated.csv` | 30 human-rated evaluations (15 snippets × 2 modes) |
+| `results/rq3_baseline/super49b_zero_llm_judged.csv` | ~388 LLM-judged evaluations |
+| `results/rq3_baseline/qwen30b_zero_llm_judged.csv` | ~421 LLM-judged evaluations |
+| `results/rq3_baseline/llm_judge_validation.csv` | Validation metrics (ρ, MAE, bias) |
+| `scripts/rq3_llm_judge.py` | LLM-as-judge evaluation script |
+| `scripts/rq3_generate_human_rating_set.py` | Script to generate the 15-snippet human rating set |
