@@ -111,12 +111,12 @@ tail -f /workspace/vllm_thinking.log
 # Start vLLM server with 4B model
 cd /workspace/agent-green
 nohup python3 -m vllm.entrypoints.openai.api_server \
-  --model Qwen/Qwen3-4B \
+  --model Qwen/Qwen3-4B-Instruct-2507 \
   --served-model-name "Qwen/Qwen3-4B-Instruct-2507" \
   --host 0.0.0.0 \
   --port 8000 \
   --dtype auto \
-  --max-model-len 40960 \
+  --max-model-len 65536 \
   --gpu-memory-utilization 0.9 \
   --enable-auto-tool-choice \
   --tool-call-parser hermes \
@@ -131,12 +131,12 @@ tail -f /workspace/vllm_instruct.log
 # Start vLLM server with 4B Thinking model
 cd /workspace/agent-green
 nohup python3 -m vllm.entrypoints.openai.api_server \
-  --model Qwen/Qwen3-4B \
+  --model Qwen/Qwen3-4B-Thinking-2507 \
   --served-model-name "Qwen/Qwen3-4B-Thinking-2507" \
   --host 0.0.0.0 \
   --port 8000 \
   --dtype auto \
-  --max-model-len 40960 \
+  --max-model-len 65536 \
   --gpu-memory-utilization 0.9 \
   --enable-auto-tool-choice \
   --tool-call-parser hermes \

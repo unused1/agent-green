@@ -9,6 +9,7 @@
 .env.runpod.vuln
 .env.openrouter-*
 .env.qwen3-*
+.env.incremental.*
 
 config/config.ini
 config/.codecarbon.config
@@ -62,6 +63,9 @@ results/mars/
 results/mars_rerun/
 results/mars_codegen/
 results/runpod_rq2_pod*/
+results/runpod_vuln_incremental/
+results/runpod_vuln_incremental_pod*_raw/
+results/runpod_vuln_486/
 
 # Keep processed analysis results (negation patterns)
 !results/analysis/

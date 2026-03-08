@@ -53,6 +53,9 @@ BASELINE_API_KEY = os.getenv('BASELINE_API_KEY', 'dummy-key')
 # Temperature
 TEMPERATURE = float(os.getenv('TEMPERATURE', '0.0'))
 
+# CodeCarbon energy tracking
+ENABLE_CODECARBON = os.getenv('ENABLE_CODECARBON', 'true').lower() == 'true'
+
 # Select model based on reasoning mode and RunPod usage
 if USE_RUNPOD:
     if ENABLE_REASONING:

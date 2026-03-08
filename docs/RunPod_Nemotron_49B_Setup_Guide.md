@@ -123,16 +123,20 @@ unset HF_HUB_ENABLE_HF_TRANSFER
 # Using FP16 (validated Dec 2025 - slightly less memory than FP8)
 nohup python3 -m vllm.entrypoints.openai.api_server \
     --model nvidia/Llama-3_3-Nemotron-Super-49B-v1_5 \
-    --trust-remote-code \
-    --max-model-len 65536 \
+    --served-model-name "nvidia/Llama-3_3-Nemotron-Super-49B-v1_5" \
     --tensor-parallel-size 2 \
-    --gpu-memory-utilization 0.90 \
-    --dtype float16 \
-    --enforce-eager \
-    > vllm.log 2>&1 &
+    --host 0.0.0.0 \
+    --port 8000 \
+    --dtype auto \
+    --max-model-len 65536 \
+    --gpu-memory-utilization 0.9 \
+    --enable-auto-tool-choice \
+    --tool-call-parser hermes \
+    --trust-remote-code \
+    > /workspace/vllm.log 2>&1 &
 
 # Monitor loading progress (~5-10 minutes)
-tail -f vllm.log
+tail -f /workspace/vllm.log
 ```
 
 ### 3.2 Verify Server is Ready

@@ -286,11 +286,14 @@ def find_existing_vuln_jsonl_files() -> dict:
         source_file = row["source_file"]
         source_dir = Path(source_file).parent
 
-        # Find the detailed_results.jsonl in the same directory
-        jsonl_files = list(source_dir.glob("*_detailed_results.jsonl"))
+        # Find the vuln detailed_results.jsonl in the same directory
+        # Filter out codegen files (RQ2 pod dirs contain both vuln and code JSONL)
+        jsonl_files = [f for f in source_dir.glob("*_detailed_results.jsonl")
+                       if "code" not in f.name.lower() or "vuln" in f.name.lower()]
         if not jsonl_files:
             # Some source_file paths may point to a results/ subdirectory
-            jsonl_files = list(source_dir.glob("results/*_detailed_results.jsonl"))
+            jsonl_files = [f for f in source_dir.glob("results/*_detailed_results.jsonl")
+                           if "code" not in f.name.lower() or "vuln" in f.name.lower()]
 
         for jf in jsonl_files:
             key = parse_config_from_path(str(jf))
@@ -309,8 +312,8 @@ def _find_existing_by_scan() -> dict:
     for jsonl_path in sorted(RESULTS_DIR.rglob("*_detailed_results.jsonl")):
         path_str = str(jsonl_path).lower()
 
-        # Skip non-vuln files
-        if "codegen" in path_str or "_code_" in path_str or "log_analysis" in path_str:
+        # Skip non-vuln files (codegen files use "-code-" or "_code_" in name)
+        if "codegen" in path_str or "_code_" in path_str or "-code-" in path_str or "log_analysis" in path_str:
             continue
         if not ("vuln" in path_str or jsonl_path.name.lower().startswith(("sa-", "da-", "ma-"))):
             continue
@@ -431,6 +434,12 @@ def merge_one_config(
 
     # Derive experiment name from the new JSONL filename
     new_basename = Path(new_path).name.replace("_detailed_results.jsonl", "")
+
+    # For Nemotron models, embed mode in the filename so consolidation can detect it.
+    # Nemotron uses the same model name for both instruct and thinking modes,
+    # so the filename alone doesn't distinguish them.
+    if "Nemotron" in (model or "") and mode:
+        new_basename = f"{new_basename}_{mode}"
 
     # Create output directory (flat structure under runpod_vuln_486/)
     config_dir = output_dir

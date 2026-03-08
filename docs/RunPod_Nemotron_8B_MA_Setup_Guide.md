@@ -120,14 +120,19 @@ unset HF_HUB_ENABLE_HF_TRANSFER
 # Using 64K context to match Qwen3/49B experiments for fair comparison
 nohup python3 -m vllm.entrypoints.openai.api_server \
     --model nvidia/Llama-3.1-Nemotron-Nano-8B-v1 \
-    --trust-remote-code \
+    --served-model-name "nvidia/Llama-3.1-Nemotron-Nano-8B-v1" \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --dtype auto \
     --max-model-len 65536 \
-    --gpu-memory-utilization 0.90 \
-    --enforce-eager \
-    > vllm.log 2>&1 &
+    --gpu-memory-utilization 0.9 \
+    --enable-auto-tool-choice \
+    --tool-call-parser hermes \
+    --trust-remote-code \
+    > /workspace/vllm.log 2>&1 &
 
 # Monitor loading progress (~2-3 minutes)
-tail -f vllm.log
+tail -f /workspace/vllm.log
 ```
 
 **Context Length Note (Updated Dec 23, 2025)**:

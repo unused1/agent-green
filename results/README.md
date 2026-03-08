@@ -19,6 +19,15 @@ results/
 ├── runpod_log_analysis/     # Phase 7: RQ3 Log Analysis experiments (Jan 2026)
 ├── runpod_vuln_incremental/ # Phase 8: Incremental 100-sample vuln detection runs (Mar 2026)
 ├── runpod_vuln_486/         # Phase 8b: Merged 486-sample vuln detection results (386+100)
+├── runpod_vuln_incremental_pod1_raw/ # Raw download from Pod 1 (Qwen3-30B incremental)
+├── runpod_vuln_incremental_pod2_raw/ # Raw download from Pod 2 (Qwen3-4B incremental)
+├── runpod_vuln_incremental_pod3_raw/ # Raw download from Pod 3 (Nemotron-Super-49B Instruct)
+├── runpod_vuln_incremental_pod4_raw/ # Raw download from Pod 4 (Nemotron-Nano-8B Instruct)
+├── runpod_vuln_incremental_pod5_raw/ # Raw download from Pod 5 (Nemotron-Super-49B Thinking)
+├── runpod_vuln_incremental_pod6_raw/ # Raw download from Pod 6 (Nemotron-Nano-8B Thinking)
+├── runpod_vuln_incremental_pod7_raw/ # Raw download from Pod 7 (Nemotron-Super-49B MA-few Thinking)
+├── rq3_baseline/            # RQ3 Phase A: Baseline sampling, pool analysis, and rater sheets
+├── sota_comparison/         # SOTA comparison: Claude Opus 4.5 & Sonnet 4.5 vuln detection (Jan 2026)
 ├── analysis/                # Analysis outputs from Jupyter notebooks (Phase 1-2)
 ├── analysis_prompt_comparison/ # Prompt comparison analysis outputs
 ├── analysis_phase2a/        # Phase 2a analysis outputs
@@ -552,10 +561,13 @@ results/
 ## Datasets
 
 ### Vulnerability Detection
-- **Dataset**: VulTrial (balanced subset)
-- **Samples**: 386 vulnerable/benign code pairs
-- **Source**: `vuln_database/VulTrial_386_samples_balanced.jsonl`
+- **Dataset**: VulTrial (balanced subset, expanded)
+- **Samples**: 486 vulnerable/benign code pairs (243 vuln + 243 safe)
+- **Source**: `vuln_database/VulTrial_486_samples_balanced.jsonl` (combined ground truth)
+- **Original**: 386 samples from `VulTrial_386_samples_balanced.jsonl`
+- **Incremental**: 100 samples from `VulTrial_100_incremental.jsonl` (50 vuln + 50 safe, drawn from VulTrial-870 pool)
 - **Task**: Binary classification (vulnerable vs benign)
+- **Note**: Some MA/Thinking configs have 484-485 samples due to context overflow skips in the original 386-sample runs
 
 ### Code Generation
 - **Dataset**: HumanEval
@@ -705,6 +717,91 @@ Analysis performed in `/notebooks/`:
 
 ---
 
+### **RQ3 Phase A: Baseline Explanation Sampling (Feb–Mar 2026)**
+
+**Purpose**: Stratified sampling of LLM-generated explanations for human rater evaluation of explanation quality (RQ3)
+
+**Directory**: `results/rq3_baseline/`
+
+**Contents**:
+
+| File | Description |
+|------|-------------|
+| `rq3_baseline_samples.csv` | Combined baseline samples across all 3 tasks |
+| `rq3_baseline_samples_vulnerability_detection.csv` | Vuln detection samples (16 strata: 4 models × 2 modes × 2 outcomes) |
+| `rq3_baseline_samples_code_generation.csv` | Code generation samples (16 strata) |
+| `rq3_baseline_samples_log_analysis.csv` | Log analysis samples (16 strata) |
+| `rq3_phase_a_rater_sheet.csv` | Final Phase A rater sheet for human evaluation |
+| `rq3_phase_a_rater_sheet_shanev2.xlsx` | Rater sheet with scores (Excel format) |
+| `rq3_phase_a_draft_scores.csv` | Draft explanation quality scores |
+| `rq3_phase_a_prelim_*.csv/xlsx` | Preliminary versions (pre-keyword-fix) |
+| `rq3_sampling_summary.txt` | Summary statistics of the sampling process |
+| `rq3_pool_*.png` | Pool analysis visualizations (heatmaps, TP/TN composition, intersections) |
+
+**Methodology**:
+- Stratified by model × reasoning mode × correctness outcome (TP/TN for vuln/log, pass/fail for code)
+- 3 samples per stratum (seed=42), drawn from Single-Agent zero-shot results
+- See `docs/RQ3_Baseline_Sampling.md` for full methodology
+
+---
+
+### **SOTA Comparison: Claude API Vulnerability Detection (Jan 24, 2026)**
+
+**Purpose**: Establish SOTA baseline using commercial frontier models for vulnerability detection comparison
+
+**Hardware**: Anthropic API (cloud)
+
+**Directory**: `results/sota_comparison/`
+
+**Sub-directories**:
+```
+sota_comparison/
+├── SA-zero_Claude-Opus-4.5/    # SA Zero-shot with Claude Opus 4.5
+├── SA-few_Claude-Opus-4.5/     # SA Few-shot with Claude Opus 4.5
+├── SA-zero_Claude-Sonnet-4.5/  # SA Zero-shot with Claude Sonnet 4.5
+└── SA-few_Claude-Sonnet-4.5/   # SA Few-shot with Claude Sonnet 4.5
+```
+
+**Experiments**:
+
+| Experiment | Model | Samples | Prompting | Status |
+|------------|-------|---------|-----------|--------|
+| SA Zero-shot | Claude Opus 4.5 | 386 | Zero-shot | ✅ |
+| SA Few-shot | Claude Opus 4.5 | 386 | Few-shot | ✅ |
+| SA Zero-shot | Claude Sonnet 4.5 | 386 | Zero-shot | ✅ |
+| SA Few-shot | Claude Sonnet 4.5 | 386 | Few-shot | ✅ |
+
+**Notes**:
+- Each sub-directory contains `*_detailed_results.jsonl` and `*_summary_metrics.csv`
+- These runs serve as frontier SOTA baselines for comparison against local open-source models
+- No energy tracking (API-based inference, no local GPU)
+
+---
+
+### **Phase 8 Raw Downloads: Incremental Pod Results (Mar 6-8, 2026)**
+
+**Purpose**: Raw results downloaded from RunPod pods during Phase 8 incremental runs, preserved for provenance
+
+**Directories**: `results/runpod_vuln_incremental_pod1_raw/` through `pod7_raw/`
+
+| Pod | Model | Mode | Configs | Status |
+|-----|-------|------|---------|--------|
+| Pod 1 | Qwen3-30B-A3B | Instruct + Thinking | 12 (SA/DA/MA × zero/few) | ✅ |
+| Pod 2 | Qwen3-4B | Instruct + Thinking | 12 (SA/DA/MA × zero/few) | ✅ |
+| Pod 3 | Nemotron-Super-49B | Instruct | 6 (SA/DA/MA × zero/few) | ✅ |
+| Pod 4 | Nemotron-Nano-8B | Instruct | 6 (SA/DA/MA × zero/few) | ✅ |
+| Pod 5 | Nemotron-Super-49B | Thinking | 5 (SA/DA × zero/few + MA-zero) | ✅ |
+| Pod 6 | Nemotron-Nano-8B | Thinking | 6 (SA/DA/MA × zero/few) | ✅ |
+| Pod 7 | Nemotron-Super-49B | Thinking | 1 (MA-few) | ✅ |
+
+**Contents per pod**: JSONL result files, CodeCarbon emissions files (SA dirs + main emissions.csv + .bak rotation files), evaluation CSVs and reports.
+
+**Notes**:
+- These are raw staging directories preserved for provenance; the working copies were reorganized into `runpod_vuln_incremental/` for merging
+- The `.bak` files are CodeCarbon rotation artifacts from schema changes between tracker instances
+
+---
+
 ### Phase 8: Incremental Vulnerability Detection Expansion (Mar 2026)
 
 **Purpose**: Expand vulnerability detection dataset from 386 to 486 samples for improved statistical power.
@@ -732,17 +829,13 @@ Analysis performed in `/notebooks/`:
 
 ---
 
-**Last Updated**: 2026-03-05
-**Total Experiments**: 120+ (32 RQ1 Qwen3 + 32 RQ2 Qwen3 + 32 Cross-Architecture Nemotron + 24 RQ3 Log Analysis + 4 Codegen Reruns)
-  - **RQ1 (Qwen3)**: 16 vulnerability detection + 16 code generation (Single-Agent)
-  - **RQ2 (Qwen3)**: 16 vulnerability detection + 16 code generation (8 Dual-Agent + 8 Multi-Agent each)
-  - **Cross-Architecture Nemotron SA (8B+49B)**: 8 vulnerability detection + 8 code generation ✅
-  - **Cross-Architecture Nemotron DA (8B)**: 4 vulnerability detection + 4 code generation ✅
-  - **Cross-Architecture Nemotron MA (8B)**: 4 vulnerability detection + 4 code generation ✅
-  - **RQ1/RQ2 Log Analysis (Qwen3 4B)**: 12 experiments (SA/DA/MA × zero/few × Instruct/Thinking) ✅
-  - **RQ1/RQ2 Log Analysis (Qwen3 30B)**: 12 experiments ✅
-**Total Samples Processed**: ~56,000+ (96 vuln/code experiments × ~550 avg + 14 log experiments × 385 sessions)
+**Last Updated**: 2026-03-08
+**Total Experiments**: 120 consolidated (48 vuln detection + 48 code generation + 24 log analysis)
+  - **Vulnerability Detection** (48 configs on 486 samples): 4 models × 2 modes × 2 prompting × 3 designs (SA/DA/MA)
+  - **Code Generation** (48 configs on 164 problems): 4 models × 2 modes × 2 prompting × 3 designs (SA/DA/MA)
+  - **Log Analysis** (24 configs on 385 sessions): 2 models × 2 modes × 2 prompting × 3 designs (SA/DA/MA)
+**Total Samples Processed**: ~60,000+ (48 vuln × ~486 + 48 code × 164 + 24 log × 385)
 **Hardware Used**: Mars RTX A5000 + RunPod H100
 **Models Evaluated**: 6 (Qwen3 4B/30B × Instruct/Thinking + Nemotron-Nano-8B + Nemotron-Super-49B)
-**Agent Architectures**: 4 (No-Agent, Single-Agent, Dual-Agent, Multi-Agent)
+**Agent Architectures**: 3 (Single-Agent, Dual-Agent, Multi-Agent)
 **Tasks**: 3 (Vulnerability Detection, Code Generation, Log Analysis)
