@@ -71,5 +71,8 @@ results/runpod_vuln_486/
 !results/analysis/
 !results/analysis_*/
 
+# Archive zip files (keep scripts/source in archive dirs, exclude zips)
+*.zip
+
 # Draft paper workspace
 docs/LLMs_Reasoning_Explainability_EMSE/
