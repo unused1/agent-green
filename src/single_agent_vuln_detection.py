@@ -77,6 +77,64 @@ else:
     exp_name = f"{project_name}_{model}_{timestamp}"
 input_dataset_file = "VulTrial_386_samples_balanced.jsonl"  # Example dataset file name
 
+# --- Vulnerability Response Parser ---
+def parse_vulnerability_response(response_text):
+    """
+    Parse the LLM response to extract vulnerability decision.
+
+    Returns:
+        tuple: (decision, reasoning)
+            decision: 1 (vulnerable) or 0 (not vulnerable)
+            reasoning: str containing the full response
+
+    Fixed 2026-02-22: Reorder NO before YES to prevent "no vulnerability detected"
+    matching the YES substring "vulnerability detected". Removed broad fallback
+    keywords that matched in negative contexts (e.g., "no buffer overflow detected").
+    """
+    # Strip think block — parse only the response after </think>
+    parse_text = response_text.split("</think>", 1)[1].strip() if "</think>" in response_text else response_text
+    response_lower = parse_text.lower()
+
+    # Check for explicit NO answers — checked FIRST to avoid
+    # "no vulnerability detected" matching the YES substring "vulnerability detected"
+    if any(pattern in response_lower for pattern in [
+        'final answer: no',
+        'final answer: (2) no',
+        '(2) no',
+        'answer: no',
+        'no vulnerability',
+        'no security vulnerability',
+        'no, the code',
+        'no:',
+    ]):
+        return 0, response_text
+
+    # Check for explicit YES answers
+    if any(pattern in response_lower for pattern in [
+        'final answer: yes',
+        'final answer: (1) yes',
+        '(1) yes',
+        'answer: yes',
+        'vulnerability detected',
+        'yes, the code',
+        'yes: vulnerability',
+        'yes:',
+    ]):
+        return 1, response_text
+
+    # Fallback: only strong positive indicators
+    if any(keyword in response_lower for keyword in [
+        'is vulnerable',
+        'contains a vulnerability',
+        'security vulnerability exists',
+        'can be exploited'
+    ]):
+        return 1, response_text
+
+    # Default to not vulnerable
+    return 0, response_text
+
+
 # --- Agent Creation ---
 def create_vulnerability_detector_agent(llm_config, sys_prompt):
     return AssistantAgent(
@@ -326,27 +384,9 @@ def run_inference_with_emissions(code_samples, llm_config, sys_prompt_vulnerabil
             # Updated response parsing for YES/NO format
             if res is not None and "content" in res:
                 response_text = res["content"].strip()
-                # Strip think block — parse only the response after </think>
-                parse_text = response_text.split("</think>", 1)[1].strip() if "</think>" in response_text else response_text
-                response_lower = parse_text.lower()
-                
-                # Parse YES/NO responses — NO checked FIRST to avoid "no vulnerability
-                # detected" matching the YES substring "vulnerability detected"
-                # (Fixed 2026-02-22: reorder + reduce broad fallback keywords)
-                if "(2) no" in response_lower or "no:" in response_lower or "no security vulnerability" in response_lower or "no vulnerability" in response_lower:
-                    result['vuln'] = 0
-                    result['reasoning'] = response_text
-                elif "(1) yes" in response_lower or "yes:" in response_lower or "vulnerability detected" in response_lower:
-                    result['vuln'] = 1
-                    result['reasoning'] = response_text
-                else:
-                    # Fallback: only strong positive indicators
-                    if any(keyword in response_lower for keyword in ['is vulnerable', 'contains a vulnerability', 'security vulnerability exists', 'can be exploited']):
-                        result['vuln'] = 1
-                    else:
-                        result['vuln'] = 0  # Default to not vulnerable for unclear responses
-                    result['reasoning'] = response_text
-                    print(f"[Warning] Unclear response format for sample {i}: {response_text[:100]}...")
+                prediction, reasoning = parse_vulnerability_response(response_text)
+                result['vuln'] = prediction
+                result['reasoning'] = reasoning
             else:
                 result['vuln'] = 0  # Default to not vulnerable
                 result['reasoning'] = "No response from agent"

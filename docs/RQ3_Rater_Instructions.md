@@ -2,9 +2,9 @@
 
 ## 1. Task Overview
 
-We are evaluating the quality of AI-generated vulnerability analyses across multiple models. For each source code sample, responses from three models are presented for evaluation. All models arrived at the correct prediction (true positive or true negative) for every sample — the goal is to assess how well each model *explains* its vulnerability assessment, not whether the prediction is correct.
+We are evaluating the quality of AI-generated vulnerability analyses. For each source code sample, multiple AI responses are presented for evaluation. All responses arrived at the correct prediction (true positive or true negative) for every sample — the goal is to assess how well each response *explains* its vulnerability assessment, not whether the prediction is correct.
 
-The cross-model design enables direct comparison of explanation quality across models for the same code, while the blinded rater sheet ensures scoring is not influenced by model identity.
+The paired design enables direct comparison of explanation quality for the same code, while the blinded rater sheet ensures scoring is not influenced by configuration identity.
 
 ## 2. Spreadsheet Columns
 
@@ -22,7 +22,7 @@ The cross-model design enables direct comparison of explanation quality across m
 | `informativeness_score` | Score 1–5 (see rubric below) | **Fill in** |
 | `rater_notes` | Free-text notes | **Fill in** (optional) |
 
-**Note on cross-model grouping**: Multiple consecutive rows may share the same `source_code` — these are responses from different models analyzing the same function. The rater sheet is **blinded**: model identity is not visible. Each row should be scored independently on the merits of its `response_text`.
+**Note on paired grouping**: Multiple consecutive rows may share the same `source_code` — these are different AI responses analyzing the same function. The rater sheet is **blinded**: configuration identity is not visible. Each row should be scored independently on the merits of its `response_text`.
 
 ## 3. Evaluation Procedure
 
@@ -30,17 +30,17 @@ For each group of samples sharing the same source code, follow these steps:
 
 ### Step 1: Read the source code
 
-Read the function in `source_code`. Form an initial understanding of what the code does, its inputs, control flow, and any potential security concerns. This step is performed **once per code sample** — the same code appears across multiple rows (one per model response).
+Read the function in `source_code`. Form an initial understanding of what the code does, its inputs, control flow, and any potential security concerns. This step is performed **once per code sample** — the same code appears across multiple rows (one per AI response).
 
 ### Step 2: Check the ground truth
 
 Read `ground_truth_label` to see if the code is vulnerable or safe. For vulnerable samples, read the `cwe` and `cve_desc` columns to understand what the known vulnerability is. This provides context for assessing the response — it does not mean the AI had access to this information.
 
-### Step 3: Read and score each model's response independently
+### Step 3: Read and score each response independently
 
 For each row in the group, read `response_text` carefully and score it on its own merits using the rubrics in Section 4. Important:
 
-- **Score each response independently** before comparing across models. Do not anchor one model's score to another's — each response should stand on its own against the rubric.
+- **Score each response independently** before comparing across responses. Do not anchor one response's score to another's — each response should stand on its own against the rubric.
 - Score each metric on its own merits. E.g. A response can be highly clear (high clarity) but miss important issues (low completeness).
 - Use the full 1–5 range.
 - Do not adjust scores based on response length alone. A short response that precisely identifies the core issue can score well; a long response that repeats itself without substance should not.
@@ -151,13 +151,13 @@ The following indicators complement the scoring rubric in Section 4. They descri
 ### Scoring independence
 Score each metric independently. Do not let one score influence another. It is entirely valid for a response to score high on one metric and low on another (e.g., highly clear but incomplete).
 
-### Cross-model scoring
+### Cross-response scoring
 When multiple responses analyse the same source code, score each response against the **rubric**, not against each other. Two responses for the same code may legitimately receive the same scores, or very different scores — let the rubric guide the decision.
 
 After scoring all responses for a code sample independently, it is acceptable to review whether the relative ordering feels correct (e.g., if response A covers more vulnerability classes than response B, A should not score lower on completeness). If a review leads to an adjustment, note the reason in `rater_notes`.
 
 ### Sampling constraint
-All samples in this evaluation were selected under a **cross-model correctness constraint**: for each source code sample, all evaluated models arrived at the correct prediction (true positive or true negative). This ensures that explanation quality is assessed for cases where models agree on the correct answer, isolating explanation quality from prediction accuracy.
+All samples in this evaluation were selected under a **cross-configuration correctness constraint**: for each source code sample, all evaluated responses arrived at the correct prediction (true positive or true negative). This ensures that explanation quality is assessed for cases where both configurations agree on the correct answer, isolating explanation quality from prediction accuracy.
 
 ### Ground truth as reference, not answer key
 The `ground_truth_label` tells whether the code is actually vulnerable. Use this to assess whether the response correctly identifies (or justifies) the security status. However, a response that reaches the correct conclusion via flawed reasoning should still receive lower scores for completeness and informativeness.

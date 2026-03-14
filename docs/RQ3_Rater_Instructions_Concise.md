@@ -2,7 +2,7 @@
 
 ## Task
 
-Score the quality of AI-generated vulnerability analyses. All models predicted correctly (TP or TN) — we are evaluating **explanation quality**, not prediction accuracy. The rater sheet is **blinded**: model identity is not visible.
+Score the quality of AI-generated vulnerability analyses. All responses predicted correctly (TP or TN) — we are evaluating **explanation quality**, not prediction accuracy. The rater sheet is **blinded**: configuration identity is not visible.
 
 ## Spreadsheet Columns
 
@@ -18,7 +18,7 @@ Score the quality of AI-generated vulnerability analyses. All models predicted c
 | `informativeness_score` | **Fill in** (1–5) |
 | `rater_notes` | **Fill in** (optional but encouraged for non-obvious scores) |
 
-Consecutive rows sharing the same `source_code` are different models analysing the same function. Score each row independently.
+Consecutive rows sharing the same `source_code` are different AI responses analysing the same function. Score each row independently.
 
 ## Procedure
 
