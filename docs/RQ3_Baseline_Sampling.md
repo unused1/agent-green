@@ -48,7 +48,7 @@ We employ stratified random sampling across model, mode, and prompting style. Ea
 
 **Statistical analysis**: Aggregated results are computed by averaging annotator ratings across all instances for each metric. To compare explanation quality across models, pairwise statistical significance tests use the Wilcoxon signed-rank test, following previous studies. To assess consistency between manual and automatic (LLM-based) evaluations, Spearman's rank correlation coefficient is computed for each metric.
 
-**Available pool composition**: The "Correct Available" counts in Section 4.2 represent all correct predictions with valid explanations (≥100 chars), including both **True Positives** (vulnerable code correctly identified) and **True Negatives** (safe code correctly identified). The pool spans SA thinking-model results from both RQ1 Qwen experiments and cross-architecture Nemotron experiments — it is not limited to RQ1 alone.
+**Available pool composition**: The "Correct Available" counts in Section 4.2 represent all correct predictions with valid explanations (≥100 chars), including both **True Positives** (vulnerable code correctly identified) and **True Negatives** (safe code correctly identified). The pool spans SA thinking-model results from both RQ1 Qwen experiments and cross-architecture Nemotron experiments — it is not limited to RQ1 alone. Vulnerability detection pools are based on VulTrial-486 (486 balanced samples: 243 vulnerable, 243 safe).
 
 **Rationale for sampling only correct predictions**: Explanation quality is most meaningfully evaluated when the model arrives at the right answer. An incorrect prediction with plausible-sounding reasoning would confound assessment — the explanation may be coherent but causally disconnected from the (wrong) decision. Restricting to correct predictions isolates explanation quality from task accuracy.
 
@@ -93,8 +93,10 @@ For each task, we compute the 10th percentile of explanation length (in characte
 
 ### 4.1 Phase A Strata (Vuln Detection, 16 Strata, 48 Samples)
 
-| Model | Mode | Prompting | Correct Available | Sampled |
-|-------|------|-----------|-------------------|---------|
+> **Superseded**: This 16-strata × 3-samples design was the original Phase A plan. The revised Phase A (Section 11) focuses on Nemotron-Super-49B zero-shot with 15 code snippets × 2 modes = 30 evaluations. The table below is retained for reference; "Correct Available" counts are from the VulTrial-386 pool and have since increased with VulTrial-486.
+
+| Model | Mode | Prompting | Correct Available (386) | Sampled |
+|-------|------|-----------|--------------------------|---------|
 | Qwen3-4B | thinking | few-shot | 201 | 3 |
 | Qwen3-4B | thinking | zero-shot | 198 | 3 |
 | Qwen3-30B-A3B | thinking | few-shot | 207 | 3 |
@@ -161,13 +163,13 @@ The original design targeted ~200 samples across 20 strata (8 codegen + 8 vuln +
 
 ### 5.1 Files Produced
 
-**Phase A (current)**:
+**Phase A (original 16-strata design, now archived)**:
 
 | File | Description |
 |------|-------------|
-| `results/rq3_baseline/rq3_baseline_samples.csv` | 48 sampled entries with explanation/response text and metadata |
-| `results/rq3_baseline/rq3_baseline_samples_vulnerability_detection.csv` | Same 48 samples (vuln-only, identical content) |
-| `results/rq3_baseline/rq3_sampling_summary.txt` | Per-stratum statistics (counts, lengths, flags) |
+| `results/rq3_baseline/archive_386/rq3_baseline_samples.csv` | 48 sampled entries (archived — based on VulTrial-386) |
+| `results/rq3_baseline/archive_386/rq3_baseline_samples_vulnerability_detection.csv` | Same 48 samples (archived) |
+| `results/rq3_baseline/archive_386/rq3_sampling_summary.txt` | Per-stratum statistics (archived) |
 | `src/rq3_baseline_sampling.py` | Reproducible sampling script (Phase A version) |
 
 ### 5.2 CSV Schema
@@ -274,7 +276,7 @@ A comprehensive audit of all Nemotron JSONL files (not limited to sampled entrie
 
 | Agent | Task | Zero-shot | Few-shot |
 |-------|------|-----------|----------|
-| SA | vuln | **0/386 (0%)** | **0/386 (0%)** |
+| SA | vuln | **0/486 (0%)** | **0/486 (0%)** |
 | DA | vuln | 62/387 (16%) | 1/387 (0%) |
 | MA | vuln | 333/384 (87%) | 242/384 (63%) |
 | SA | code | 163/164 (99%) | 163/164 (99%) |
@@ -285,7 +287,7 @@ A comprehensive audit of all Nemotron JSONL files (not limited to sampled entrie
 
 | Agent | Task | Zero-shot | Few-shot |
 |-------|------|-----------|----------|
-| SA | vuln | 381/386 (99%) | 380/384 (99%) |
+| SA | vuln | ~99% | ~99% |
 | DA | vuln | 382/387 (99%) | 383/387 (99%) |
 | MA | vuln | 380/386 (98%) | 383/384 (>99%) |
 | SA | code | 96/164 (59%) | 152/164 (93%) |
@@ -296,7 +298,7 @@ A comprehensive audit of all Nemotron JSONL files (not limited to sampled entrie
 
 | Agent | Task | Zero-shot | Few-shot |
 |-------|------|-----------|----------|
-| SA | vuln | 0/386 (0%) | 0/386 (0%) |
+| SA | vuln | 0/486 (0%) | 0/486 (0%) |
 | SA | code | 0/164 (0%) | **126/164 (77%)** |
 | DA | code | 19/164 (12%) | 3/164 (2%) |
 | MA | code | 5/164 (3%) | 81/164 (49%) |
@@ -321,7 +323,7 @@ A comprehensive audit of all Nemotron JSONL files (not limited to sampled entrie
 
 #### 7.4.1 Anomaly Description
 
-Nemotron-Nano-8B produces **zero** `<think>` or `</think>` tags across all 772 SA vulnerability detection entries (386 zero-shot + 386 few-shot), despite the "detailed thinking on" system prompt being applied via `prepend_thinking_toggle()` in `config_nemotron.py`. This behavior is unique to this model-task-agent combination:
+Nemotron-Nano-8B produces **zero** `<think>` or `</think>` tags across all 972 SA vulnerability detection entries (486 zero-shot + 486 few-shot), despite the "detailed thinking on" system prompt being applied via `prepend_thinking_toggle()` in `config_nemotron.py`. This behavior is unique to this model-task-agent combination:
 
 - The same model produces think tags in 99% of SA code generation entries
 - The same model produces think tags in 63–87% of MA vulnerability detection entries
@@ -412,26 +414,26 @@ Cross-stratum duplicate entry IDs (same `task_id` or `idx` appearing in differen
 
 The original Phase A design (Section 2.1) distributes 48 samples across 16 strata (4 models × 2 modes × 2 prompting), yielding only 3 samples per stratum — sufficient for rater calibration but not for per-stratum inference. Cross-model agreement pools (Sections 6–7 of the RQ3 pool analysis notebook) further showed that requiring multiple models to agree on correct predictions produces pools too small for adequate sampling, especially for True Positives.
 
-The revised approach focuses evaluation depth on **Nemotron-Super-49B zero-shot** (the best-performing SA model from RQ1, with F1=0.627 in thinking mode) and uses a two-stage human + LLM-as-judge workflow to achieve full coverage of the available pool while minimising human annotation effort.
+The revised approach focuses evaluation depth on **Nemotron-Super-49B zero-shot** (the best-performing SA model from RQ1, with F1=0.620 in thinking mode) and uses a two-stage human + LLM-as-judge workflow to achieve full coverage of the available pool while minimising human annotation effort.
 
-**Justification for Super-49B**: Nemotron-Super-49B zero-shot achieves the highest SA vulnerability detection F1 across all configurations (RQ1 Table 1). Starting with the best-performing model provides the strongest baseline for explanation quality assessment. Qwen3-30B-A3B is added as a secondary evaluation round (Section 11.7) to enable cross-model comparison.
+**Justification for Super-49B**: Nemotron-Super-49B zero-shot achieves the highest SA vulnerability detection F1 across all configurations (RQ1 Table 1). Starting with the best-performing model provides the strongest baseline for explanation quality assessment. Zero-shot avoids the confound of few-shot influence on explanation style. Qwen3-30B-A3B is added as a secondary evaluation round (Section 11.7) to enable cross-family validation — framed as a replication study testing whether findings from Super-49B generalise to a different architecture and training lineage.
 
 ### 11.2 Evaluation Pools
 
-Nemotron-Super-49B SA zero-shot correct predictions on VulTrial-386:
+Nemotron-Super-49B SA zero-shot correct predictions on VulTrial-486 (486 balanced samples: 243 vulnerable, 243 safe):
 
 | Stratum | Pool Size | Composition |
 |---------|-----------|-------------|
-| Thinking zero-shot TP | 142 | Vulnerable code correctly identified |
-| Thinking zero-shot TN | 75 | Safe code correctly identified |
-| Instruct zero-shot TP | 64 | Vulnerable code correctly identified |
-| Instruct zero-shot TN | 137 | Safe code correctly identified |
-| **Total evaluations** | **418** | 217 thinking + 201 instruct |
-| **Think ∩ Inst intersection** | **111** | 54 TP + 57 TN (same code sample correct in both modes) |
+| Thinking zero-shot TP | 183 | Vulnerable code correctly identified |
+| Thinking zero-shot TN | 79 | Safe code correctly identified |
+| Instruct zero-shot TP | 93 | Vulnerable code correctly identified |
+| Instruct zero-shot TN | 162 | Safe code correctly identified |
+| **Total evaluations** | **517** | 262 thinking + 255 instruct |
+| **Think ∩ Inst intersection** | **135** | 77 TP + 58 TN (same code sample correct in both modes; 5 text-parser mismatches excluded) |
 
 Each code sample in the intersection has two evaluable responses (thinking and instruct), enabling direct within-sample mode comparison.
 
-> **Note**: These pool sizes are based on VulTrial-386 (386-sample) results. After the VulTrial-486 expansion (Phase 8), pool sizes will grow as 100 additional samples are evaluated. The pools should be recomputed from the merged 486-sample results in `results/runpod_vuln_486/` before proceeding with RQ3 Phase A sampling.
+> **Note on TP/TN balance**: The intersection pool shifted from near-balanced (54 TP / 57 TN on VulTrial-386) to TP-heavy (~57% TP on VulTrial-486). This reflects thinking mode's strong TP bias (69.8% TP) dominating the intersection. Five entries were excluded from the original 140 due to text-parser mismatches where the response text conclusion contradicts the parser's prediction: three instruct-mode entries where gt=1 but the response concludes "no vulnerability" (entry_ids 197518, 204017, 206676), and two entries where gt=0 but the response concludes "vulnerability detected" (entry_ids 270922 thinking, 387593 instruct). The corrected pool of 135 remains adequate for stratified sampling of 15 snippets (8 TP / 7 TN) with ample margin.
 
 ### 11.3 Workflow Overview
 
@@ -442,7 +444,7 @@ Step 2: LLM-as-Judge Calibration (few-shot from Step 1)
     ↓
 Step 3: LLM-as-Judge Validation (held-out from Step 1)
     ↓
-Step 4: LLM-as-Judge Full Evaluation (remaining ~388 evaluations)
+Step 4: LLM-as-Judge Full Evaluation (remaining ~487 evaluations)
     ↓
 Step 5: Secondary Model — Qwen3-30B-A3B (reuse calibrated judge)
 ```
@@ -451,7 +453,7 @@ Step 5: Secondary Model — Qwen3-30B-A3B (reuse calibrated judge)
 
 **Sample count: 15 code snippets → 30 response evaluations**
 
-Samples are drawn from the think∩inst intersection pool (111 samples: 54 TP, 57 TN) using stratified random sampling with seed=42. Each selected code snippet is rated for both its thinking-mode and instruct-mode response, yielding two evaluations per snippet.
+Samples are drawn from the think∩inst intersection pool (135 samples: 77 TP, 58 TN) using stratified random sampling with seed=42. Each selected code snippet is rated for both its thinking-mode and instruct-mode response, yielding two evaluations per snippet.
 
 | Stratum | Snippets | Evaluations |
 |---------|----------|-------------|
@@ -467,6 +469,40 @@ Samples are drawn from the think∩inst intersection pool (111 samples: 54 TP, 5
 **Evaluation criteria**: The same four metrics (completeness, clarity, actionability, informativeness) on a 1–5 Likert scale, using the rubrics in `docs/rq3_rater_instructions.md` (Section 4). Model identity and mode are anonymized from raters; however, since each code snippet has exactly two responses, raters will know they are comparing two different model configurations without knowing which is which.
 
 **Rater protocol**: At least two raters independently score all 30 evaluations. Inter-rater agreement is measured via intraclass correlation coefficient (ICC, two-way random, absolute agreement). Disagreements >1 point on any metric are resolved through discussion.
+
+#### 11.4.1 Inter-Rater Reliability Results
+
+Two raters (Shane and HS) independently scored all 30 evaluations. The table below reports ICC(2,1) absolute agreement, Spearman ρ, Cohen's weighted kappa (quadratic), and descriptive agreement statistics.
+
+| Dimension | ICC(2,1) | 95% CI | Interp. | Spearman ρ | Weighted κ | Mean \|diff\| | % Perfect | % Within 1 | Signed diff |
+|-----------|----------|--------|---------|------------|------------|---------------|-----------|------------|-------------|
+| Completeness | 0.354 | [−0.11, 0.69] | poor | 0.637 (p<.001) | 0.346 | 1.17 | 26.7% | 56.7% | −1.17 (HS higher) |
+| Clarity | 0.325 | [−0.05, 0.62] | poor | 0.497 (p=.005) | 0.317 | 0.83 | 30.0% | 86.7% | −0.70 (HS higher) |
+| Actionability | 0.432 | [0.11, 0.68] | poor | 0.535 (p=.002) | 0.424 | 0.63 | 50.0% | 86.7% | −0.37 (HS higher) |
+| Informativeness | 0.171 | [−0.09, 0.49] | poor | 0.520 (p=.003) | 0.166 | 1.30 | 10.0% | 63.3% | −1.30 (HS higher) |
+
+ICC interpretation follows Koo & Li (2016): < 0.50 = poor, 0.50–0.75 = moderate, 0.75–0.90 = good, > 0.90 = excellent.
+
+**Key observations**:
+
+1. **Systematic rater bias**: HS rates consistently higher than Shane across all dimensions (mean difference 0.37–1.30 points). The largest gaps are on completeness (+1.17) and informativeness (+1.30), where the raters appear to apply different thresholds for what constitutes "thorough" vs. "adequate" coverage. Rater means: Shane 2.97/3.67/2.37/2.77 vs. HS 4.13/4.37/2.73/4.07 (comp/clar/act/inf).
+
+2. **Low absolute agreement, moderate rank consistency**: All ICC values fall below 0.50 (poor absolute agreement), driven primarily by the systematic level difference. However, Spearman correlations range from 0.50 to 0.64 — the raters largely agree on which responses are better or worse, even if they disagree on the absolute score level. This distinction matters: the systematic bias is correctable (via discussion calibration or additive adjustment), whereas low rank correlation would indicate fundamental disagreement about quality.
+
+3. **Widespread disagreements**: 20 of 30 samples (66.7%) have at least one dimension with |diff| > 1 point. Discussion-based resolution is required before using these scores for LLM judge calibration.
+
+4. **Per-stratum patterns**: Thinking-mode responses receive higher consensus scores than instruct-mode on completeness (think 3.8 vs. inst 3.3) and clarity (think 4.4 vs. inst 3.7). TN samples score higher than TP samples overall, potentially reflecting the relative difficulty of explaining vulnerability mechanisms vs. confirming safety.
+
+**Resolution approach**: Given the low ICC values, simple averaging is insufficient for consensus. The raters will conduct a joint discussion session to:
+- Review the 20 flagged disagreement samples and reach negotiated consensus scores
+- Recalibrate on the completeness and informativeness rubrics (where the gap is largest)
+- Produce final consensus scores that reflect discussed agreement rather than arithmetic means
+
+The IRR analysis outputs are:
+- `results/rq3_baseline/irr_summary.csv` — per-dimension metrics
+- `results/rq3_baseline/irr_disagreements.csv` — 20 flagged samples with per-rater scores
+- `results/rq3_baseline/super49b_zero_consensus_scores.csv` — 30 rows with per-rater and (preliminary) averaged consensus scores
+- Script: `scripts/rq3_inter_rater_agreement.py`
 
 ### 11.5 Steps 2–3 — LLM-as-Judge Calibration and Validation
 
@@ -497,13 +533,13 @@ Once validated, the LLM judge evaluates the remaining Super-49B zero-shot sample
 
 | Target | Human-rated | LLM-judged | Total |
 |--------|-------------|------------|-------|
-| Think zero-shot | 15 (from intersection) | 202 | 217 |
-| Inst zero-shot | 15 (from intersection) | 186 | 201 |
-| **Total** | **30** | **388** | **418** |
+| Think zero-shot | 15 (from intersection) | 247 | 262 |
+| Inst zero-shot | 15 (from intersection) | 240 | 255 |
+| **Total** | **30** | **487** | **517** |
 
 Each LLM evaluation produces scores on all four metrics plus a justification. The justifications are retained for qualitative analysis and spot-check verification.
 
-**Quality control**: A random 10% of LLM-judged evaluations (~39 samples) are spot-checked by a human rater to verify the judge maintains calibrated performance beyond the validation set.
+**Quality control**: A random 10% of LLM-judged evaluations (~49 samples) are spot-checked by a human rater to verify the judge maintains calibrated performance beyond the validation set.
 
 ### 11.7 Step 5 — Secondary Model: Qwen3-30B-A3B
 
@@ -511,9 +547,9 @@ After completing Super-49B evaluation, the same calibrated LLM judge (with the s
 
 | Stratum | Pool Size |
 |---------|-----------|
-| Thinking zero-shot | 212 correct |
-| Instruct zero-shot | 209 correct |
-| Think ∩ Inst intersection | 153 (72 TP + 81 TN) |
+| Thinking zero-shot | 270 correct |
+| Instruct zero-shot | 264 correct |
+| Think ∩ Inst intersection | 190 (89 TP + 101 TN) |
 
 The Qwen3-30B evaluation enables cross-model comparison of explanation quality (Super-49B vs. Qwen3-30B) on their respective correct prediction pools. Where the two models' intersection pools overlap (i.e., the same code sample is correctly predicted by both models in the same mode), direct pairwise comparison of explanation quality is possible.
 
@@ -523,9 +559,14 @@ The Qwen3-30B evaluation enables cross-model comparison of explanation quality (
 
 | Artifact | Description |
 |----------|-------------|
-| `results/rq3_baseline/super49b_zero_human_rated.csv` | 30 human-rated evaluations (15 snippets × 2 modes) |
-| `results/rq3_baseline/super49b_zero_llm_judged.csv` | ~388 LLM-judged evaluations |
-| `results/rq3_baseline/qwen30b_zero_llm_judged.csv` | ~421 LLM-judged evaluations |
-| `results/rq3_baseline/llm_judge_validation.csv` | Validation metrics (ρ, MAE, bias) |
-| `scripts/rq3_llm_judge.py` | LLM-as-judge evaluation script |
+| `results/rq3_baseline/super49b_zero_human_rating_set.csv` | 30-row master file with entry_id, response_id, source code, response text |
+| `results/rq3_baseline/super49b_zero_consensus_scores.csv` | 30 rows with per-rater scores, consensus scores, stratum metadata |
+| `results/rq3_baseline/irr_summary.csv` | Per-dimension ICC, Spearman ρ, weighted κ, agreement statistics |
+| `results/rq3_baseline/irr_disagreements.csv` | 20 samples flagged for discussion-based resolution |
+| `results/rq3_baseline/super49b_zero_llm_judged.csv` | ~492 LLM-judged evaluations |
+| `results/rq3_baseline/qwen30b_zero_llm_judged.csv` | ~534 LLM-judged evaluations |
+| `results/rq3_baseline/llm_judge_validation_v{N}.csv` | Validation metrics (ρ, MAE, bias) per iteration |
+| `results/rq3_baseline/llm_judge_prompt_v{N}.txt` | Saved judge prompt per calibration iteration |
+| `scripts/rq3_inter_rater_agreement.py` | IRR computation and consensus scoring |
+| `scripts/rq3_llm_judge.py` | LLM-as-judge calibration, validation, and evaluation |
 | `scripts/rq3_generate_human_rating_set.py` | Script to generate the 15-snippet human rating set |
