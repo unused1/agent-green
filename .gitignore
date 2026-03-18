@@ -66,6 +66,8 @@ results/runpod_rq2_pod*/
 results/runpod_vuln_incremental/
 results/runpod_vuln_incremental_pod*_raw/
 results/runpod_vuln_486/
+results/runpod_vuln_870/
+results/runpod_870_batch*_raw/
 
 # Keep processed analysis results (negation patterns)
 !results/analysis/

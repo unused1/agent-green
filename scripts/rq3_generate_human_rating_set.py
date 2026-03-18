@@ -30,14 +30,34 @@ VULN_DATASET = os.path.join(PROJECT_ROOT, "vuln_database", "VulTrial_486_samples
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "results", "rq3_baseline")
 OUTPUT_CSV = os.path.join(OUTPUT_DIR, "super49b_zero_human_rating_set.csv")
 
-# Force-included entry_ids from prior ratings
+# Force-included entry_ids: all 15 human-rated entries are locked so that
+# expanding the pool from VulTrial-486 → VulTrial-870 doesn't change the
+# sampled snippets via random.sample(seed=42).
+# The original 2 forced entries (197517, 222737) retain their prior scores;
+# the remaining 13 were originally drawn by stratified random sampling.
 FORCED_ENTRIES = {
+    # --- Original forced includes (with prior Phase A scores) ---
     197517: {"label": "TP", "ground_truth": 1,
              "prior_scores": {"completeness": 3, "clarity": 4,
                               "actionability": 3, "informativeness": 3}},
     222737: {"label": "TN", "ground_truth": 0,
              "prior_scores": {"completeness": 3, "clarity": 5,
                               "actionability": 3, "informativeness": 4}},
+    # --- Previously sampled TP entries (now locked) ---
+    195029: {"label": "TP", "ground_truth": 1, "prior_scores": {}},
+    195040: {"label": "TP", "ground_truth": 1, "prior_scores": {}},
+    195399: {"label": "TP", "ground_truth": 1, "prior_scores": {}},
+    195409: {"label": "TP", "ground_truth": 1, "prior_scores": {}},
+    195800: {"label": "TP", "ground_truth": 1, "prior_scores": {}},
+    197095: {"label": "TP", "ground_truth": 1, "prior_scores": {}},
+    198013: {"label": "TP", "ground_truth": 1, "prior_scores": {}},
+    # --- Previously sampled TN entries (now locked) ---
+    224153: {"label": "TN", "ground_truth": 0, "prior_scores": {}},
+    325821: {"label": "TN", "ground_truth": 0, "prior_scores": {}},
+    379334: {"label": "TN", "ground_truth": 0, "prior_scores": {}},
+    421378: {"label": "TN", "ground_truth": 0, "prior_scores": {}},
+    442587: {"label": "TN", "ground_truth": 0, "prior_scores": {}},
+    504608: {"label": "TN", "ground_truth": 0, "prior_scores": {}},
 }
 
 # Entries excluded due to text-parser mismatches: the response text conclusion
@@ -205,10 +225,12 @@ def main():
     print()
 
     # Step 6 — build output rows
-    # Prior scores apply only to thinking-mode responses for forced entries
+    # Prior scores apply only to thinking-mode responses for the original
+    # forced entries that had prior Phase A ratings.
     PRIOR_SCORES = {
-        197517: FORCED_ENTRIES[197517]["prior_scores"],
-        222737: FORCED_ENTRIES[222737]["prior_scores"],
+        eid: info["prior_scores"]
+        for eid, info in FORCED_ENTRIES.items()
+        if info["prior_scores"]  # non-empty dict
     }
 
     rows = []
@@ -228,9 +250,9 @@ def main():
             rec = data_dict[eid]
             response_text = rec.get("reasoning", "")
 
-            # Prior scores only for thinking-mode of forced entries
+            # Prior scores only for thinking-mode of entries with prior ratings
             prior = {}
-            if is_forced and resp_id == "think":
+            if resp_id == "think" and eid in PRIOR_SCORES:
                 prior = PRIOR_SCORES[eid]
 
             rows.append({

@@ -43,7 +43,26 @@ This guide walks you through setting up RunPod with vLLM to run your vulnerabili
 ssh root@ssh.runpod.io -p <YOUR_PORT> -i ~/.ssh/id_ed25519
 ```
 
-### 2.2 Install Required Packages
+### 2.2 Bandwidth Speed Test (run first!)
+
+Some RunPod nodes have very poor download speeds (< 100 KB/s), which makes
+package installation take hours instead of minutes. **Always test bandwidth
+before committing to a full install** to avoid wasting credits.
+
+```bash
+# Quick speed test — download the vllm wheel without installing (~433 MB)
+# Good pod: > 10 MB/s (finishes in <1 min). Bad pod: < 1 MB/s (terminate immediately).
+timeout 30 pip download --no-deps --dest /tmp/speedtest vllm --break-system-packages 2>&1 | tail -5
+
+# Clean up test download
+rm -rf /tmp/speedtest
+```
+
+If the download speed is **< 1 MB/s**, terminate the pod and redeploy — a different
+node will likely have better connectivity. This check takes ~15-30 seconds and can
+save hours of wasted GPU billing.
+
+### 2.3 Install Required Packages
 ```bash
 # Install hf_transfer for fast model downloads
 pip install hf_transfer --break-system-packages
