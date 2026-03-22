@@ -65,12 +65,12 @@ save hours of wasted GPU billing.
 ### 2.3 Install Required Packages
 ```bash
 # Install hf_transfer for fast model downloads
-pip install hf_transfer --break-system-packages
+pip install hf_transfer
 
 # Install experiment dependencies
-pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn python-Levenshtein --break-system-packages
+pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn python-Levenshtein
 
-pip install vllm --break-system-packages
+pip install vllm
 ```
 
 **Note**: vLLM will automatically download models from HuggingFace when you start the server. No need to pre-download.

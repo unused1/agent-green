@@ -66,8 +66,10 @@ results/runpod_rq2_pod*/
 results/runpod_vuln_incremental/
 results/runpod_vuln_incremental_pod*_raw/
 results/runpod_vuln_486/
+results/runpod_vuln_384_incremental/
 results/runpod_vuln_870/
 results/runpod_870_batch*_raw/
+results/runpod_na486_raw/
 
 # Keep processed analysis results (negation patterns)
 !results/analysis/
@@ -75,6 +77,13 @@ results/runpod_870_batch*_raw/
 
 # Archive zip files (keep scripts/source in archive dirs, exclude zips)
 *.zip
+
+# Temporary dataset splits (for parallelized RunPod runs)
+vuln_database/VulTrial_486_part*.jsonl
+vuln_database/VulTrial_486_split*.jsonl
+
+# Scratch notes (personal working notes, not for version control)
+docs/scratch/
 
 # Draft paper workspace
 docs/LLMs_Reasoning_Explainability_EMSE/

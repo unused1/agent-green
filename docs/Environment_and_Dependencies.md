@@ -1,7 +1,7 @@
 # Environment and Dependencies
 
 **Purpose**: Document the software and hardware environment used for all experiments to ensure reproducibility.
-**Last Updated**: December 29, 2025
+**Last Updated**: March 21, 2026
 
 ---
 
@@ -25,10 +25,10 @@ All LLM experiments are executed on RunPod cloud GPU instances.
 
 ### 1.3 CUDA / GPU Stack
 
-| Component | Version |
-|-----------|---------|
-| NVIDIA Driver | 570.195.03 |
-| CUDA | 12.8 |
+| Component | Version (Phase 5-8, Dec 2025) | Version (Phase 9, Mar 2026) |
+|-----------|-------------------------------|------------------------------|
+| NVIDIA Driver | 570.195.03 | 580.126.09 |
+| CUDA | 12.8 | 12.8 |
 
 ### 1.4 Hardware Configurations
 
@@ -49,12 +49,15 @@ All LLM experiments are executed on RunPod cloud GPU instances.
 
 ### 1.5 Key Python Packages (RunPod)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| vllm | 0.13.0 | LLM inference server |
-| ag2 (autogen) | 0.10.3 | Multi-agent framework |
-| openai | 2.14.0 | OpenAI-compatible API client |
-| codecarbon | 2.7.1 | Energy/emissions tracking |
+| Package | Version (Phase 5-8, Dec 2025) | Version (Phase 9 B1-B6, Mar 17-20) | Version (Phase 9 B7-B8 NA, Mar 21+) | Purpose |
+|---------|-------------------------------|--------------------------------------|---------------------------------------|---------|
+| vllm | 0.13.0 | 0.17.1 | 0.18.0 | LLM inference server |
+| ag2 (autogen) | 0.10.3 | 0.11.4 | 0.11.4 | Multi-agent framework |
+| openai | 2.14.0 | 2.24.0 | 2.24.0+ | OpenAI-compatible API client |
+| codecarbon | 2.7.1 | 3.2.3 | 3.2.3 | Energy/emissions tracking |
+| torch | — | 2.10.0 | 2.10.0+ | PyTorch (vLLM dependency) |
+
+**Note**: NA experiments (Batch 7-8) on newly created pods may use vllm 0.18.0 (latest pip release as of Mar 21, 2026). Pods created earlier (B1-B6) use vllm 0.17.1. Both versions use the same OpenAI-compatible API and model parameters. NA experiments do not use the AutoGen agent framework, so the autogen version is irrelevant for NA runs.
 
 ---
 
@@ -110,8 +113,10 @@ The Mars server was used for initial Qwen3 experiments (RQ1, RQ2).
 
 | Model | Parameters | Architecture | Thinking Toggle |
 |-------|------------|--------------|-----------------|
-| Qwen/Qwen3-4B-Instruct | 4B | Dense | N/A (Instruct only) |
-| Qwen/Qwen3-4B | 4B | Dense | `/think` and `/no_think` |
+| Qwen/Qwen3-4B-Instruct-2507 | 4B | Dense | N/A (Instruct only) |
+| Qwen/Qwen3-4B-Thinking-2507 | 4B | Dense | Built-in (Thinking model) |
+| Qwen/Qwen3-30B-A3B-Instruct-2507 | 30B (3B active) | MoE | N/A (Instruct only) |
+| Qwen/Qwen3-30B-A3B-Thinking-2507 | 30B (3B active) | MoE | Built-in (Thinking model) |
 
 ### 4.2 Cross-Architecture Validation Models (Nemotron)
 
@@ -181,7 +186,11 @@ Note: vLLM is installed on RunPod instances only, not in local development envir
 | Dataset | Samples | Task | Source |
 |---------|---------|------|--------|
 | HumanEval | 164 | Code Generation | OpenAI |
-| VulTrial | 386 (384 unique) | Vulnerability Detection | Custom balanced dataset |
+| VulTrial-386 | 386 (384 unique) | Vulnerability Detection | Custom balanced dataset |
+| VulTrial-486 | 486 (386 + 100 incremental) | Vulnerability Detection (Phase 8) | Expanded from VulTrial-870 pool |
+| VulTrial-870 | 870 (486 + 384 incremental) | Vulnerability Detection (Phase 9) | Full PrimeVul balanced dataset |
+| VulTrial-384-incremental | 384 (192 vuln + 192 safe) | Phase 9 incremental runs | Set difference: 870 - 486 |
+| HDFS Log Sessions | 385 | Log Analysis | Sampled from HDFS_2k |
 
 ---
 

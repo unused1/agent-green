@@ -1,6 +1,27 @@
+#!/usr/bin/env python3
+"""
+No-Agent Vulnerability Detection (Zero-Shot and Few-Shot)
+
+Direct LLM inference without AutoGen agent framework.
+Uses OpenAI-compatible API (vLLM) with the same parser as SA experiments.
+
+Usage:
+    python src/no_agent_vuln_detection.py --prompt_type zero_shot
+    python src/no_agent_vuln_detection.py --prompt_type few_shot
+    python src/no_agent_vuln_detection.py --prompt_type few_shot --resume <exp_name>
+
+Environment variables:
+    MODEL_FAMILY: nemotron | deepseek | (default: qwen3)
+    ENABLE_REASONING: true | false
+    VULN_DATASET: path to dataset JSONL
+    RESULTS_DIR: output directory
+"""
+
 import os
-import time
+import json
+import argparse
 from datetime import datetime
+from openai import OpenAI
 
 # Dynamic config selection based on MODEL_FAMILY environment variable
 _model_family = os.getenv('MODEL_FAMILY', '').lower()
@@ -13,230 +34,367 @@ elif _model_family == 'nemotron':
 else:
     import config
     print("[Config] Using Qwen3 configuration")
-import ollama
-from codecarbon import EmissionsTracker
-from log_utils import save_templates
-from ollama_utils import start_ollama_server, stop_ollama_server
-from vuln_evaluation import evaluate_and_save_vulnerability, normalize_vulnerability_basic, normalize_vulnerability_conservative, normalize_vulnerability_strict
-import json
 
-# --- Configuration ---
+from codecarbon import OfflineEmissionsTracker
+from vuln_evaluation import (
+    evaluate_and_save_vulnerability,
+    normalize_vulnerability_basic,
+    normalize_vulnerability_conservative,
+    normalize_vulnerability_strict,
+)
+
+# ================================================================
+# CLI ARGUMENT PARSING
+# ================================================================
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="No-Agent Vulnerability Detection")
+    parser.add_argument(
+        "--prompt_type", choices=["zero_shot", "few_shot"], default="zero_shot",
+        help="Prompt type: zero_shot or few_shot"
+    )
+    parser.add_argument(
+        "--resume", type=str, default=None,
+        help="Resume from existing experiment name"
+    )
+    return parser.parse_args()
+
+args = parse_arguments()
+prompt_type = args.prompt_type
+
+# ================================================================
+# CONFIGURATION
+# ================================================================
 llm_config = config.LLM_CONFIG
 task = config.VULNERABILITY_TASK_PROMPT
-sys_prompt_few_shot_vuln_detector = config.SYS_MSG_VULNERABILITY_DETECTOR_FEW_SHOT
-sys_prompt_zero_shot_vuln_detector = config.SYS_MSG_VULNERABILITY_DETECTOR_ZERO_SHOT
 
-LOG_DIR = config.LOG_DIR
-RESULT_DIR = config.RESULT_DIR
-if not os.path.exists(RESULT_DIR):
-    os.makedirs(RESULT_DIR)
+# Select system prompt based on prompt type
+if prompt_type == "few_shot":
+    sys_prompt = config.SYS_MSG_VULNERABILITY_DETECTOR_FEW_SHOT
+    print("Using FEW-SHOT prompt for vulnerability detection.")
+else:
+    sys_prompt = config.SYS_MSG_VULNERABILITY_DETECTOR_ZERO_SHOT
+    print("Using ZERO-SHOT prompt for vulnerability detection.")
 
-# Use vulnerability dataset from config
+# Apply Nemotron thinking toggle if using Nemotron config
+if _model_family == 'nemotron' and hasattr(config, 'prepend_thinking_toggle'):
+    sys_prompt = config.prepend_thinking_toggle(sys_prompt)
+    print(f"[Nemotron] Applied thinking toggle: ENABLE_REASONING={config.ENABLE_REASONING}")
+
 DATASET_FILE = config.VULN_DATASET
+RESULT_DIR = config.RESULT_DIR
+os.makedirs(RESULT_DIR, exist_ok=True)
 
-DESIGN = "NA-zero-vuln"  # Change to "NA-few-vuln" for few-shot
-model_name = llm_config["config_list"][0]["model"]
-model = llm_config["config_list"][0]["model"].replace(":", "-")
-temperature = llm_config["temperature"]
+DESIGN = f"NA-vuln-{prompt_type}"
+model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-project_name = DESIGN.capitalize()
-exp_name = f"{project_name}_{model}_{timestamp}"
 
-# --- Ollama Query Function ---
-def ask_ollama(model, prompt):
-    """Query Ollama model with a prompt"""
+if args.resume:
+    exp_name = args.resume
+    print(f"Resuming experiment: {exp_name}")
+else:
+    exp_name = f"{DESIGN}_{model}_{timestamp}"
+
+print(f"Experiment: {exp_name}")
+print(f"Dataset: {DATASET_FILE}")
+print(f"Design: {DESIGN}")
+print(f"Results: {RESULT_DIR}")
+
+# ================================================================
+# OpenAI-Compatible Client (for vLLM)
+# ================================================================
+client = OpenAI(
+    base_url=llm_config["config_list"][0]["base_url"],
+    api_key=llm_config["config_list"][0].get("api_key", "dummy-key"),
+)
+model_name = llm_config["config_list"][0]["model"]
+temperature = llm_config["temperature"]
+
+
+def query_model(sys_prompt, user_prompt):
+    """Query the model via OpenAI-compatible API (vLLM)."""
     try:
-        response = ollama.generate(
-            model=model,
-            prompt=prompt,
-            options={'temperature': temperature}
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=[
+                {"role": "system", "content": sys_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=temperature,
         )
-    except ollama.ResponseError as e:
-        print('Error:', e.error)
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"  [Error] API call failed: {e}")
         return None
-    return response.get('response', None)
 
-# --- Read Vulnerability Data ---
-def read_vulnerability_data(vuln_dataset_path):
-    """Read vulnerability data from JSONL file"""
-    vulnerabilities = []
-    with open(vuln_dataset_path, 'r') as f:
+
+# ================================================================
+# VULNERABILITY RESPONSE PARSER
+# (Same as single_agent_vuln_detection.py — fixed 2026-02-22)
+# ================================================================
+def parse_vulnerability_response(response_text):
+    """
+    Parse the LLM response to extract vulnerability decision.
+
+    Returns:
+        tuple: (decision, reasoning)
+            decision: 1 (vulnerable) or 0 (not vulnerable)
+            reasoning: str containing the full response
+
+    Fixed 2026-02-22: Reorder NO before YES to prevent "no vulnerability detected"
+    matching the YES substring "vulnerability detected". Removed broad fallback
+    keywords that matched in negative contexts (e.g., "no buffer overflow detected").
+    """
+    # Strip think block — parse only the response after </think>
+    parse_text = response_text.split("</think>", 1)[1].strip() if "</think>" in response_text else response_text
+    response_lower = parse_text.lower()
+
+    # Check for explicit NO answers — checked FIRST
+    if any(pattern in response_lower for pattern in [
+        'final answer: no',
+        'final answer: (2) no',
+        '(2) no',
+        'answer: no',
+        'no vulnerability',
+        'no security vulnerability',
+        'no, the code',
+        'no:',
+    ]):
+        return 0, response_text
+
+    # Check for explicit YES answers
+    if any(pattern in response_lower for pattern in [
+        'final answer: yes',
+        'final answer: (1) yes',
+        '(1) yes',
+        'answer: yes',
+        'vulnerability detected',
+        'yes, the code',
+        'yes: vulnerability',
+        'yes:',
+    ]):
+        return 1, response_text
+
+    # Fallback: only strong positive indicators
+    if any(keyword in response_lower for keyword in [
+        'is vulnerable',
+        'contains a vulnerability',
+        'security vulnerability exists',
+        'can be exploited'
+    ]):
+        return 1, response_text
+
+    # Default to not vulnerable
+    return 0, response_text
+
+
+# ================================================================
+# DATA LOADING
+# ================================================================
+def load_dataset(dataset_path):
+    """Load vulnerability dataset from JSONL file."""
+    samples = []
+    with open(dataset_path, 'r', encoding='utf-8') as f:
         for line in f:
-            data = json.loads(line.strip())
-            vulnerabilities.append(data)
-    return vulnerabilities
+            try:
+                data = json.loads(line.strip())
+                if 'func' in data and 'target' in data:
+                    samples.append(data)
+            except json.JSONDecodeError:
+                continue
+    return samples
 
-# Read vulnerability dataset
-print(f"Reading vulnerability dataset from: {DATASET_FILE}")
-vuln_data = read_vulnerability_data(DATASET_FILE)
-print(f"Loaded {len(vuln_data)} vulnerability samples")
 
-# Extract ground truth from the vulnerability data
-ground_truth = [item['target'] for item in vuln_data]
-print(f"Extracted {len(ground_truth)} ground truth labels")
+# ================================================================
+# RESULTS FILE INITIALIZATION
+# ================================================================
+def initialize_results_files(exp_name, result_dir):
+    """Initialize result files for incremental saving."""
+    detailed_file = os.path.join(result_dir, f"{exp_name}_detailed_results.jsonl")
+    csv_file = os.path.join(result_dir, f"{exp_name}_detailed_results.csv")
+    if not os.path.exists(csv_file):
+        with open(csv_file, 'w') as f:
+            f.write("idx,project,commit_id,project_url,commit_url,commit_message,"
+                    "ground_truth,vuln,reasoning,cwe,cve,cve_desc\n")
+    energy_file = os.path.join(result_dir, f"{exp_name}_energy_tracking.json")
+    return detailed_file, csv_file, energy_file
 
-# --- With CodeCarbon ---
-def run_vulnerability_detection_with_emissions(vuln_data, model_name, prompt_prefix, task, exp_name, result_dir):
-    """
-    Run vulnerability detection inference with emissions tracking
-    """
-    vulnerability_detections = []
-    
-    # Create JSON results file
-    json_results_file = os.path.join(result_dir, f"{exp_name}_results.json")
-    
-    tracker = EmissionsTracker(project_name=exp_name, output_dir=result_dir, save_to_file=True)
+
+def append_result(result, detailed_file, csv_file):
+    """Append a single result to JSONL and CSV files."""
+    with open(detailed_file, 'a') as f:
+        f.write(json.dumps(result) + '\n')
+
+    def esc(x):
+        if x is None:
+            return ""
+        s = str(x)
+        if ',' in s or '"' in s or '\n' in s:
+            return '"' + s.replace('"', '""') + '"'
+        return s
+
+    with open(csv_file, 'a') as f:
+        row = [esc(result.get(k, '')) for k in [
+            'idx', 'project', 'commit_id', 'project_url', 'commit_url',
+            'commit_message', 'ground_truth', 'vuln', 'reasoning',
+            'cwe', 'cve', 'cve_desc'
+        ]]
+        f.write(','.join(row) + '\n')
+
+
+def load_existing_results(detailed_file):
+    """Load existing results for resume support."""
+    results = []
+    if os.path.exists(detailed_file):
+        with open(detailed_file, 'r') as f:
+            for line in f:
+                if line.strip():
+                    results.append(json.loads(line.strip()))
+        print(f"Loaded {len(results)} existing results for resume")
+    return results
+
+
+def load_existing_energy(energy_file):
+    """Load existing energy tracking data."""
+    if os.path.exists(energy_file):
+        with open(energy_file, 'r') as f:
+            return json.load(f)
+    return {"total_emissions": 0.0, "sessions": 0, "session_history": []}
+
+
+def save_energy_data(energy_data, energy_file):
+    """Save energy tracking data."""
+    with open(energy_file, 'w') as f:
+        json.dump(energy_data, f, indent=2)
+
+
+# ================================================================
+# CORE INFERENCE
+# ================================================================
+def run_inference_with_emissions(samples, sys_prompt, task_prompt, exp_name, result_dir):
+    """Run no-agent vulnerability detection with emissions tracking."""
+
+    detailed_file, csv_file, energy_file = initialize_results_files(exp_name, result_dir)
+
+    # Resume support
+    existing_results = load_existing_results(detailed_file)
+    energy_data = load_existing_energy(energy_file)
+    processed_indices = {r['idx'] for r in existing_results}
+    remaining_samples = [s for s in samples if s.get('idx') not in processed_indices]
+
+    if len(remaining_samples) < len(samples):
+        print(f"Resuming: {len(existing_results)} done, {len(remaining_samples)} remaining")
+
+    session_start = datetime.now().isoformat()
+    tracker = OfflineEmissionsTracker(
+        project_name=f"{exp_name}_session_{energy_data['sessions'] + 1}",
+        output_dir=result_dir, country_iso_code="CAN", save_to_file=True,
+    )
     tracker.start()
-    
+
+    results = list(existing_results)
+
     try:
-        for i, vuln_item in enumerate(vuln_data):
-            print(f"Processing vulnerability detection for item {i+1}/{len(vuln_data)}")
-            
-            # Format the task prompt with the function code
-            formatted_task = task.format(func=vuln_item['func'])
-            prompt = prompt_prefix + formatted_task
-            response = ask_ollama(model_name, prompt)
-            
-            if response is not None:
-                vulnerability_detections.append(response)
-                prediction = response
-            else:
-                print(f"[Warning] Skipped vulnerability item {i} — no response or invalid format.")
-                vulnerability_detections.append("")
-                prediction = ""
-            
-            # Create record in the same format as your vulnerability dataset
-            record = {
-                'idx': vuln_item.get('idx', i),
-                'project': vuln_item.get('project', ''),
-                'commit_id': vuln_item.get('commit_id', ''),
-                'project_url': vuln_item.get('project_url', ''),
-                'commit_url': vuln_item.get('commit_url', ''),
-                'commit_message': vuln_item.get('commit_message', ''),
-                'ground_truth': vuln_item.get('ground_truth', vuln_item.get('target')),
-                'cwe': vuln_item.get('cwe', []),
-                'cve': vuln_item.get('cve', ''),
-                'cve_desc': vuln_item.get('cve_desc', ''),
-                'vuln': vuln_item.get('vuln', vuln_item.get('target')),
-                'func': vuln_item['func'],
-                'target': vuln_item['target'],
-                'prediction': prediction,
-                'reasoning': prediction
+        for i, sample in enumerate(remaining_samples):
+            overall_idx = len(existing_results) + i + 1
+            print(f"Processing sample {overall_idx}/{len(samples)} (idx: {sample.get('idx')})")
+
+            # Format user prompt
+            user_prompt = task_prompt.format(code=sample['func'])
+
+            # Direct LLM call — no agent framework
+            response_text = query_model(sys_prompt, user_prompt)
+
+            result = {
+                'idx': sample.get('idx'),
+                'project': sample.get('project', ''),
+                'commit_id': sample.get('commit_id', ''),
+                'project_url': sample.get('project_url', ''),
+                'commit_url': sample.get('commit_url', ''),
+                'commit_message': sample.get('commit_message', ''),
+                'ground_truth': sample.get('target'),
+                'cwe': sample.get('cwe', ''),
+                'cve': sample.get('cve', ''),
+                'cve_desc': sample.get('cve_desc', ''),
             }
-            
-            # Save each record as a separate JSONL line (append mode)
-            with open(json_results_file, 'a') as f:
-                json.dump(record, f)
-                f.write('\n')
-            
-            print(f"Saved result for item {i+1} to {json_results_file}")
-                
+
+            if response_text is not None:
+                prediction, reasoning = parse_vulnerability_response(response_text)
+                result['vuln'] = prediction
+                result['reasoning'] = reasoning
+            else:
+                result['vuln'] = 0
+                result['reasoning'] = "No response from model"
+                print(f"  [Warning] No response for sample {overall_idx}")
+
+            append_result(result, detailed_file, csv_file)
+            results.append(result)
+
+            if (i + 1) % 10 == 0:
+                print(f"  Progress: {overall_idx}/{len(samples)}")
+
     finally:
-        emissions = tracker.stop()
-        print(f"Vulnerability Detection Emissions: {emissions} kg CO2")
-        
-    return vulnerability_detections
+        session_emissions = tracker.stop()
+        energy_data['total_emissions'] += session_emissions
+        energy_data['sessions'] += 1
+        energy_data['session_history'].append({
+            'session': energy_data['sessions'],
+            'start_time': session_start,
+            'end_time': datetime.now().isoformat(),
+            'samples_processed': len(remaining_samples),
+            'session_emissions': session_emissions,
+        })
+        save_energy_data(energy_data, energy_file)
+        print(f"Session emissions: {session_emissions:.6f} kg CO2")
+        print(f"Total emissions: {energy_data['total_emissions']:.6f} kg CO2")
 
-# --- Main Execution ---
-print(f"\nStarting {DESIGN} vulnerability detection...")
-print(f"Model: {model_name}")
-print(f"Temperature: {temperature}")
-print(f"Experiment name: {exp_name}")
+    return results
 
-# Start Ollama server
-print("\nStarting Ollama server...")
-proc = start_ollama_server()
-time.sleep(5)  # Give it some time to initialize
 
-try:
-    # Run vulnerability detection with emissions tracking
-    # Change to sys_prompt_few_shot_vuln_detector for few-shot learning
-    vulnerability_detections = run_vulnerability_detection_with_emissions(
-        vuln_data, 
-        model_name, 
-        sys_prompt_zero_shot_vuln_detector,  # or sys_prompt_few_shot_vuln_detector
-        task, 
-        exp_name, 
-        RESULT_DIR
+# ================================================================
+# MAIN
+# ================================================================
+def main():
+    print(f"\nRunning {DESIGN} (direct model inference, no agent framework)...")
+    print(f"Model: {model_name}")
+    print(f"Temperature: {temperature}")
+
+    samples = load_dataset(DATASET_FILE)
+    print(f"Loaded {len(samples)} samples")
+
+    if not samples:
+        print("No samples found. Exiting.")
+        return
+
+    results = run_inference_with_emissions(
+        samples, sys_prompt, task, exp_name, RESULT_DIR
     )
 
-    print(f"\nAll detailed results saved incrementally to: {os.path.join(RESULT_DIR, f'{exp_name}_results.json')} in JSONL format")
+    # Evaluation
+    predictions = [r['vuln'] for r in results]
 
-    # Save vulnerability detection results (original format)
-    print("\nSaving templates...")
-    save_templates(vulnerability_detections, llm_config, DESIGN, RESULT_DIR)
-    print(f"Templates saved for experiment: {exp_name}")
+    print("\n" + "=" * 60)
+    print("RUNNING EVALUATIONS")
+    print("=" * 60)
 
-finally:
-    # Stop Ollama server
-    print("\nStopping Ollama server...")
-    stop_ollama_server(proc)
+    for i, (fn, name) in enumerate([
+        (normalize_vulnerability_basic, "basic"),
+        (normalize_vulnerability_conservative, "conservative"),
+        (normalize_vulnerability_strict, "strict"),
+    ], 1):
+        suffix = exp_name if name == "basic" else f"{exp_name}_{name}"
+        print(f"\n[{i}/3] {name} normalization...")
+        try:
+            eval_result = evaluate_and_save_vulnerability(fn, predictions, DATASET_FILE, suffix)
+            print(f"  Accuracy: {eval_result.get('accuracy', 0):.4f}")
+        except Exception as e:
+            print(f"  Error: {e}")
 
-# --- Evaluation ---
-print("\n" + "="*60)
-print("STARTING EVALUATIONS")
-print("="*60)
+    print("\n" + "=" * 60)
+    print("COMPLETED")
+    print("=" * 60)
+    print(f"Results: {RESULT_DIR}")
+    print(f"Experiment: {exp_name}")
 
-# Extract predictions and ground truth
-predictions = vulnerability_detections  # These are the raw string responses
-ground_truth_labels = ground_truth  # These are the binary labels (0 or 1)
 
-# Using basic normalization (searches for YES/NO)
-print("\n[1/3] Evaluating with basic normalization...")
-try:
-    results = evaluate_and_save_vulnerability(
-        normalize_vulnerability_basic, 
-        predictions, 
-        DATASET_FILE,  # Pass the dataset file path
-        exp_name
-    )
-    print("✓ Basic normalization completed")
-    print(f"   Accuracy: {results.get('accuracy', 0):.4f}")
-except Exception as e:
-    print(f"✗ Error in basic evaluation: {e}")
-    import traceback
-    traceback.print_exc()
-
-# Using conservative normalization
-print("\n[2/3] Evaluating with conservative normalization...")
-try:
-    results_v1 = evaluate_and_save_vulnerability(
-        normalize_vulnerability_conservative, 
-        predictions, 
-        DATASET_FILE,
-        f"{exp_name}_conservative"
-    )
-    print("✓ Conservative normalization completed")
-    print(f"   Accuracy: {results_v1.get('accuracy', 0):.4f}")
-except Exception as e:
-    print(f"✗ Error in conservative evaluation: {e}")
-    import traceback
-    traceback.print_exc()
-
-# Using strict normalization
-print("\n[3/3] Evaluating with strict normalization...")
-try:
-    results_v2 = evaluate_and_save_vulnerability(
-        normalize_vulnerability_strict, 
-        predictions, 
-        DATASET_FILE,
-        f"{exp_name}_strict"
-    )
-    print("✓ Strict normalization completed")
-    print(f"   Accuracy: {results_v2.get('accuracy', 0):.4f}")
-except Exception as e:
-    print(f"✗ Error in strict evaluation: {e}")
-    import traceback
-    traceback.print_exc()
-
-print("\n" + "="*60)
-print("ALL EVALUATIONS COMPLETED")
-print("="*60)
-print(f"Experiment name: {exp_name}")
-print(f"Results saved in: {RESULT_DIR}")
-print("\nFiles generated:")
-print(f"  - {exp_name}_results.json (detailed JSONL results)")
-print(f"  - {DESIGN}_{model}_{timestamp}_raw.txt (raw templates)")
-print(f"  - {DESIGN}_{model}_{timestamp}_normalized.txt (normalized templates)")
-print(f"  - emissions.csv (carbon emissions)")
-print(f"  - {exp_name}_eval_*.json (evaluation results)")
+if __name__ == "__main__":
+    main()

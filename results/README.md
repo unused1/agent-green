@@ -26,6 +26,17 @@ results/
 ├── runpod_vuln_incremental_pod5_raw/ # Raw download from Pod 5 (Nemotron-Super-49B Thinking)
 ├── runpod_vuln_incremental_pod6_raw/ # Raw download from Pod 6 (Nemotron-Nano-8B Thinking)
 ├── runpod_vuln_incremental_pod7_raw/ # Raw download from Pod 7 (Nemotron-Super-49B MA-few Thinking)
+├── runpod_vuln_384_incremental/ # Phase 9: 384-sample incremental results staging (48 SA/DA/MA configs, for 870 merge)
+├── runpod_vuln_870/         # Phase 9: Merged 870-sample vuln detection results (486+384)
+├── runpod_870_batch1_raw/   # Phase 9 raw: SA instruct × 384 incr (4 models)
+├── runpod_870_batch2_raw/   # Phase 9 raw: SA thinking × 384 incr (4 models)
+├── runpod_870_batch3_raw/   # Phase 9 raw: DA instruct × 384 incr (4 models)
+├── runpod_870_batch4_raw/   # Phase 9 raw: DA thinking × 384 incr (4 models)
+├── runpod_870_batch5_raw/   # Phase 9 raw: MA instruct × 384 incr (4 models)
+├── runpod_870_batch6_raw/   # Phase 9 raw: MA thinking × 384 incr (4 models)
+├── runpod_870_batch7_raw/   # Phase 9 raw: NA instruct × 384 incr (4 models)
+├── runpod_870_batch8_raw/   # Phase 9 raw: NA thinking × 384 incr (4 models)
+├── runpod_na486_raw/        # Phase 9 raw: NA × 486 original samples (4 models × 2 modes)
 ├── rq3_baseline/            # RQ3 Phase A: Baseline sampling, pool analysis, and rater sheets
 ├── sota_comparison/         # SOTA comparison: Claude Opus 4.5 & Sonnet 4.5 vuln detection (Jan 2026)
 ├── analysis/                # Analysis outputs from Jupyter notebooks (Phase 1-2)
@@ -829,13 +840,160 @@ sota_comparison/
 
 ---
 
-**Last Updated**: 2026-03-08
-**Total Experiments**: 120 consolidated (48 vuln detection + 48 code generation + 24 log analysis)
-  - **Vulnerability Detection** (48 configs on 486 samples): 4 models × 2 modes × 2 prompting × 3 designs (SA/DA/MA)
+### Phase 9: VulTrial-870 Expansion (Mar 17-21, 2026)
+
+**Purpose**: Expand vulnerability detection from 486 → 870 samples for improved statistical power and generalizability.
+
+**Hardware**: RunPod (up to 8× NVIDIA H100 80GB HBM3 pods in parallel)
+
+**Dataset**: `vuln_database/VulTrial_384_incremental.jsonl` — 384 new samples (192 vuln + 192 safe), set difference of VulTrial-870 minus VulTrial-486.
+
+**Directories**:
+- `results/runpod_vuln_384_incremental/` — Staged JSONL files ready for merging (flat, from all batches)
+- `results/runpod_vuln_870/` — Merged results (486 + 384 = 870 samples) with re-evaluated metrics
+- `results/runpod_870_batch{1-8}_raw/` — Raw pod downloads preserved for provenance
+
+**Raw Download Structure**:
+```
+runpod_870_batch1_raw/          # Batch 1: SA instruct (8/8 done)
+├── pod1_qwen4b/                # Qwen3-4B-Instruct SA zero+few (384 each)
+├── pod2_qwen30b/               # Qwen3-30B-Instruct SA zero+few (384 each)
+├── pod3_nano8b/                # Nemotron-Nano-8B instruct SA zero+few (384 each)
+└── pod4_super49b/              # Nemotron-Super-49B instruct SA zero+few (384 each)
+
+runpod_870_batch2_raw/          # Batch 2: SA thinking (8/8 done)
+├── pod1_qwen4b/                # Qwen3-4B-Thinking SA zero (384) + SA few partial (131, looping)
+├── pod1_qwen4b_resumed/        # Qwen3-4B-Thinking SA few resumed (384, idx 210271 skipped)
+├── pod2_qwen30b/               # Qwen3-30B-Thinking SA zero+few (384 each)
+├── pod3_nano8b/                # Nemotron-Nano-8B thinking SA zero+few (384 each)
+│   └── _stray_da_from_chain/   # Stray DA files from B2→B3 chain (provenance)
+└── pod4_super49b/              # Nemotron-Super-49B thinking SA zero+few (384 each)
+
+runpod_870_batch3_raw/          # Batch 3: DA instruct (8/8 done)
+├── pod1_qwen4b/                # Qwen3-4B-Instruct DA zero+few (385 each)
+├── pod2_qwen30b/               # Qwen3-30B-Instruct DA zero+few (385 each)
+├── pod3_nano8b/                # Nemotron-Nano-8B instruct DA zero+few (385 each)
+└── pod4_super49b/              # Nemotron-Super-49B instruct DA zero+few (385 each)
+
+runpod_870_batch4_raw/          # Batch 4: DA thinking (8/8 done)
+├── pod1_qwen4b/                # Qwen3-4B-Thinking DA zero+few (385 each)
+├── pod2_qwen30b/               # Qwen3-30B-Thinking DA zero (385)
+├── pod2_qwen30b_few/           # Qwen3-30B-Thinking DA few (385, separate pod)
+├── pod3_nano8b/                # Nemotron-Nano-8B thinking DA zero+few (385 each)
+└── pod4_super49b/              # Nemotron-Super-49B thinking DA zero+few (385 each)
+
+runpod_870_batch5_raw/          # Batch 5: MA instruct (8/8 done)
+├── pod1_qwen4b/                # Qwen3-4B-Instruct MA zero+few (384 each)
+├── pod2_qwen30b/               # Qwen3-30B-Instruct MA zero+few (384 each)
+├── pod3_nano8b/                # Nemotron-Nano-8B instruct MA zero+few (383/382)
+└── pod4_super49b/              # Nemotron-Super-49B instruct MA zero+few (384 each)
+
+runpod_870_batch6_raw/          # Batch 6: MA thinking (8/8 done)
+├── pod1_qwen4b/                # Qwen3-4B-Thinking MA zero+few (384/383)
+├── pod2_qwen30b/               # Qwen3-30B-Thinking MA zero (384)
+│   └── _stray_ma_few/          # Stray MA-few start (3 lines, provenance)
+├── pod2_qwen30b_few/           # Qwen3-30B-Thinking MA few (384, separate pod)
+├── pod3_nano8b/                # Nemotron-Nano-8B thinking MA zero+few (384 each, 44+31 sessions)
+└── pod4_super49b/              # Nemotron-Super-49B thinking MA zero+few (384 each)
+
+runpod_870_batch7_raw/          # Batch 7: NA instruct on 384 incremental
+├── pod1_qwen4b/                # Qwen3-4B-Instruct NA zero+few (384 each)
+├── pod3_nano8b/                # Nemotron-Nano-8B instruct NA zero+few (384 each)
+└── pod4_super49b/              # Nemotron-Super-49B instruct NA zero+few (384 each)
+                                # Qwen3-30B-Instruct: running on pods
+
+runpod_870_batch8_raw/          # Batch 8: NA thinking on 384 incremental
+└── pod3_nano8b/                # Nemotron-Nano-8B thinking NA zero+few (384 each)
+                                # Others: running on pods
+
+runpod_na486_raw/               # NA on original 486 samples (separate from 384 incremental)
+├── nano8b_inst/                # Nemotron-Nano-8B instruct NA zero+few (486 each)
+├── nano8b_think/               # Nemotron-Nano-8B thinking NA zero (486) + stray few
+├── qwen4b_inst/                # Qwen3-4B-Instruct NA zero+few (486 each)
+├── qwen4b_think/               # Qwen3-4B-Thinking NA zero (486) + stray few
+├── qwen4b_think_few/           # Qwen3-4B-Thinking NA few (486)
+├── qwen30b_inst/               # Qwen3-30B-Instruct NA zero+few (486 each)
+├── qwen30b_think_few_split1/   # Qwen3-30B-Thinking NA few split 1/4 (121 samples)
+├── qwen30b_think_few_split2/   # Qwen3-30B-Thinking NA few split 2/4 (121 samples)
+├── qwen30b_think_few_split3/   # Qwen3-30B-Thinking NA few split 3/4 (121 samples)
+├── qwen30b_think_few_split4/   # Qwen3-30B-Thinking NA few split 4/4 (123 samples)
+├── super49b_inst/              # Nemotron-Super-49B instruct NA zero+few (486 each)
+├── super49b_think_zero/        # Nemotron-Super-49B thinking NA zero (486)
+└── super49b_think_few/         # Nemotron-Super-49B thinking NA few (486)
+├── qwen30b_think_zero/         # Qwen3-30B-Thinking NA zero (486)
+```
+
+**Batch Plan — 384 Incremental** (8 batches: 48 SA/DA/MA + 16 NA = 64 configs):
+
+| Batch | Design × Mode | Configs | Status |
+|-------|---------------|---------|--------|
+| 1 | SA instruct | 8/8 done | All downloaded |
+| 2 | SA thinking | 8/8 done | All downloaded (4B few-shot: 1 sample skipped via resume) |
+| 3 | DA instruct | 8/8 done | All downloaded |
+| 4 | DA thinking | 8/8 done | All downloaded |
+| 5 | MA instruct | 8/8 done | All downloaded |
+| 6 | MA thinking | 8/8 done | All downloaded |
+| 7 | NA instruct | **8/8 done** | All downloaded |
+| 8 | NA thinking | **8/8 done** | All downloaded |
+
+**NA on 486 Original** (16 configs, separate runs):
+
+| | 4B-I | 4B-T | 30B-I | 30B-T | N8B-I | N8B-T | 49B-I | 49B-T |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **zero** | done | done | done | done | done | done | done | done |
+| **few** | done | done | done | done* | done | done | done | done |
+
+**Progress Matrix — All Experiments:**
+
+| | 4B-I | 4B-T | 30B-I | 30B-T | N8B-I | N8B-T | 49B-I | 49B-T |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **SA zero (384)** | done | done | done | done | done | done | done | done |
+| **SA few (384)** | done | done | done | done | done | done | done | done |
+| **DA zero (384)** | done | done | done | done | done | done | done | done |
+| **DA few (384)** | done | done | done | done | done | done | done | done |
+| **MA zero (384)** | done | done | done | done | done | done | done | done |
+| **MA few (384)** | done | done | done | done | done | done | done | done |
+| **NA zero (384)** | done | done | done | done | done | done | done | done |
+| **NA few (384)** | done | done | done | done | done | done | done | done |
+| **NA zero (486)** | done | done | done | done | done | done | done | done |
+| **NA few (486)** | done | done | done | done* | done | done | done | done |
+
+*30B-Think NA few 486 completed via 4-way dataset split across 4 pods (121+121+121+123=486). 30B-Think NA zero 486 completed on single pod.
+
+**Merge Process**:
+1. SA/DA/MA incremental 384-sample results staged in `runpod_vuln_384_incremental/` (48/48 complete)
+2. NA 384 incremental results in `runpod_870_batch7_raw/` and `runpod_870_batch8_raw/`
+3. NA 486 original results in `runpod_na486_raw/`
+4. Nemotron thinking files tagged with `_thinking` suffix (since same model name for both modes)
+5. Merged with existing 486-sample results via `scripts/merge_vuln_870.py`
+6. Re-evaluated on combined 870-sample ground truth (`VulTrial_870_samples_balanced.jsonl`)
+7. NA results: 384 incremental + 486 original concatenated for full 870 coverage
+8. 30B-Think NA few 486: 4 split JONLs concatenated, emissions summed from 4 pods
+
+**Key Notes**:
+- DA results have 385 lines (384 samples + 1 skipped/failed sample from resume logic)
+- Nemotron uses same model file for instruct and thinking; mode toggled via system prompt
+- Batch scripts include auto-resume with skip-on-failure (`echo "2"` piped for DA/MA)
+- B3→B4 chaining requires manual download + cleanup between batches (completion check can't distinguish instruct vs thinking DA filenames)
+- RQ3 human-rated entries (15 entry_ids) locked as forced includes in `rq3_generate_human_rating_set.py`
+- Qwen3-30B-A3B-Thinking vLLM loading fails on fresh pods with 50GB container disk (model ~60GB); requires shared /workspace storage (280TB+)
+- Nemotron-Super-49B also fails on 150GB local disk pods; requires shared /workspace storage
+- Nano-8B MA thinking had frequent context overflow crashes (44 sessions for MA-zero, 31 for MA-few)
+- NA thinking generates very long responses (~23K chars avg, up to 51K) without max_tokens limit — same as SA thinking (~21K avg)
+- CodeCarbon emissions.csv only written on tracker.stop() or flush() — not during periodic measurements. Process kills lose emissions data.
+- CodeCarbon emissions.csv rotation creates numbered .bak files during multi-session runs; all merged into main emissions.csv per folder
+- 30B-Think NA few 486 was split across 4 pods (121+121+121+123 samples each) to parallelize the slowest experiment
+
+---
+
+**Last Updated**: 2026-03-22
+**Total Experiments**: 120 consolidated on 486 samples + 80 on 870 expansion (all complete)
+  - **Vulnerability Detection — 486 samples** (48 SA/DA/MA configs): 4 models × 2 modes × 2 prompting × 3 designs
+  - **Vulnerability Detection — 870 expansion** (80 configs, all complete): 48 SA/DA/MA on 384 incr + 16 NA on 384 incr + 16 NA on 486 orig
   - **Code Generation** (48 configs on 164 problems): 4 models × 2 modes × 2 prompting × 3 designs (SA/DA/MA)
   - **Log Analysis** (24 configs on 385 sessions): 2 models × 2 modes × 2 prompting × 3 designs (SA/DA/MA)
-**Total Samples Processed**: ~60,000+ (48 vuln × ~486 + 48 code × 164 + 24 log × 385)
-**Hardware Used**: Mars RTX A5000 + RunPod H100
-**Models Evaluated**: 6 (Qwen3 4B/30B × Instruct/Thinking + Nemotron-Nano-8B + Nemotron-Super-49B)
-**Agent Architectures**: 3 (Single-Agent, Dual-Agent, Multi-Agent)
+**Total Samples Processed**: ~105,000+ (48 vuln × ~486 + 48 vuln × 384 + 32 NA vuln × ~870 + 48 code × 164 + 24 log × 385)
+**Hardware Used**: Mars RTX A5000 + RunPod H100 (up to 14 pods in parallel)
+**Models Evaluated**: 4 (Qwen3 4B/30B + Nemotron-Nano-8B + Nemotron-Super-49B) × 2 modes (Instruct/Thinking)
+**Agent Architectures**: 4 (No-Agent, Single-Agent, Dual-Agent, Multi-Agent)
 **Tasks**: 3 (Vulnerability Detection, Code Generation, Log Analysis)
