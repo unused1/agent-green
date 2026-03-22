@@ -1,0 +1,13 @@
+design,mode,prompting,pass_at_1_pct,total_energy_kwh
+DA,instruct,few-shot,97.1,1.08
+DA,instruct,zero-shot,95.43,1.68
+DA,thinking,few-shot,90.7,7.29
+DA,thinking,zero-shot,90.74,7.4
+MA,instruct,few-shot,98.63,1.34
+MA,instruct,zero-shot,98.48,2.11
+MA,thinking,few-shot,94.36,8.66
+MA,thinking,zero-shot,92.68,10.53
+SA,instruct,few-shot,95.58,1.29
+SA,instruct,zero-shot,97.1,1.16
+SA,thinking,few-shot,96.8,4.44
+SA,thinking,zero-shot,95.27,8.03

@@ -501,87 +501,242 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
     return df_deduped
 
 
-def consolidate_emissions(base_dir: str, output_file: str, aggregate: bool = True, exclude_mars: bool = False, deduplicate: bool = True) -> pd.DataFrame:
-    """Main function to consolidate all emissions data."""
-    print(f"Searching for emissions files in {base_dir}...")
+def load_emissions_from_dir(emissions_dir: str, filter_project_prefix: str = None) -> dict | None:
+    """Load and sum emissions from a directory's emissions.csv.
 
-    emissions_files = find_all_emissions_files(base_dir)
-    print(f"Found {len(emissions_files)} emissions.csv files")
+    Returns dict with summed energy/duration and averaged power, or None if not found.
+    """
+    emissions_path = os.path.join(emissions_dir, "emissions.csv")
+    if not os.path.exists(emissions_path):
+        # Check for merged emissions (e.g., from split runs)
+        emissions_path = os.path.join(emissions_dir, "emissions_merged.csv")
+        if not os.path.exists(emissions_path):
+            return None
 
-    # Filter out MARS results if requested
-    if exclude_mars:
-        mars_sources = {"mars_rerun", "mars_codegen", "unknown"}  # unknown often contains old mars data
-        original_count = len(emissions_files)
-        emissions_files = [f for f in emissions_files if f["source_type"] not in mars_sources
-                          and "mars" not in f["file_path"].lower()]
-        print(f"Excluded {original_count - len(emissions_files)} MARS files, {len(emissions_files)} remaining")
+    try:
+        df = pd.read_csv(emissions_path, on_bad_lines="skip")
+    except Exception:
+        return None
 
-    # Group by source type for reporting
-    by_source = {}
-    for f in emissions_files:
-        src = f["source_type"]
-        by_source[src] = by_source.get(src, 0) + 1
-    print("By source type:")
-    for src, count in sorted(by_source.items()):
-        print(f"  {src}: {count}")
+    if df.empty:
+        return None
 
-    # Load all emissions data
-    all_records = []
-    for file_info in emissions_files:
-        print(f"  Processing: {file_info['file_path']}")
-        records = load_and_process_emissions(file_info)
-        all_records.extend(records)
+    # Filter by project_name prefix if specified
+    if filter_project_prefix and "project_name" in df.columns:
+        mask = df["project_name"].str.contains(filter_project_prefix, case=False, na=False)
+        df = df[mask]
+        if df.empty:
+            return None
 
-    if not all_records:
+    # Sum cumulative, average instantaneous
+    result = {
+        "num_sessions": len(df),
+        "duration_s": df["duration"].sum() if "duration" in df.columns else 0,
+        "emissions_kg": df["emissions"].sum() if "emissions" in df.columns else 0,
+        "energy_kwh": df["energy_consumed"].sum() if "energy_consumed" in df.columns else 0,
+        "cpu_energy_kwh": df["cpu_energy"].sum() if "cpu_energy" in df.columns else 0,
+        "gpu_energy_kwh": df["gpu_energy"].sum() if "gpu_energy" in df.columns else 0,
+        "ram_energy_kwh": df["ram_energy"].sum() if "ram_energy" in df.columns else 0,
+        "cpu_power_w": df["cpu_power"].mean() if "cpu_power" in df.columns else 0,
+        "gpu_power_w": df["gpu_power"].mean() if "gpu_power" in df.columns else 0,
+        "ram_power_w": df["ram_power"].mean() if "ram_power" in df.columns else 0,
+        "gpu_model": df["gpu_model"].iloc[0] if "gpu_model" in df.columns else None,
+        "gpu_count": df["gpu_count"].iloc[0] if "gpu_count" in df.columns else None,
+        "cpu_model": df["cpu_model"].iloc[0] if "cpu_model" in df.columns else None,
+        "country": df["country_name"].iloc[0] if "country_name" in df.columns else None,
+    }
+    return result
+
+
+def weighted_avg(val1, dur1, val2, dur2):
+    """Compute duration-weighted average of two values."""
+    total_dur = dur1 + dur2
+    if total_dur == 0:
+        return 0
+    return (val1 * dur1 + val2 * dur2) / total_dur
+
+
+def load_all_emissions_from_manifest(base_dir: str) -> list[dict]:
+    """Load all emissions using the expanded manifest file.
+
+    Covers vulnerability detection, code generation, and log analysis.
+    For VulTrial-486 SA/DA/MA: combines base 386 + incremental 100 emissions.
+    For mixed dirs (codegen in vuln pods): uses filter_prefix to isolate rows.
+    """
+    import csv as csv_mod
+
+    manifest_path = os.path.join(base_dir, "results", "emissions_source_manifest_expanded.csv")
+    if not os.path.exists(manifest_path):
+        print(f"  Manifest not found: {manifest_path}")
+        return []
+
+    # Map dataset to task
+    dataset_task = {
+        "VulTrial-486": "vulnerability_detection",
+        "VulTrial-384-incr": "vulnerability_detection",
+        "HumanEval": "code_generation",
+        "HDFS-385": "log_analysis",
+    }
+
+    records = []
+    with open(manifest_path, "r") as f:
+        reader = csv_mod.DictReader(f)
+        for row in reader:
+            dataset = row["dataset"]
+            design = row["design"]
+            mode = row["mode"]
+            prompting = row["prompting"]
+            model_short = row["model"]
+            raw_dir = row.get("raw_source_dir", "")
+            base386_dir = row.get("base386_emissions_dir", "")
+            emissions_found = row.get("emissions_csv", "")
+            base386_found = row.get("base386_emissions_found", "")
+            filter_prefix = row.get("filter_prefix", "")
+
+            task = dataset_task.get(dataset, "unknown")
+
+            # Map short model name to full name
+            model_map = {
+                "Qwen3-4B": ("Qwen3-4B-Thinking" if mode == "thinking" else "Qwen3-4B-Instruct", "Qwen", 4),
+                "Qwen3-30B": ("Qwen3-30B-A3B-Thinking" if mode == "thinking" else "Qwen3-30B-A3B-Instruct", "Qwen", 30),
+                "Nano-8B": ("Nemotron-Nano-8B", "Nemotron", 8),
+                "Super-49B": ("Nemotron-Super-49B", "Nemotron", 49),
+            }
+            model_full, model_family, params = model_map.get(model_short, (model_short, "?", 0))
+
+            # Load primary emissions (with optional filter for mixed dirs)
+            primary = None
+            if raw_dir and emissions_found == "YES":
+                primary = load_emissions_from_dir(
+                    raw_dir,
+                    filter_project_prefix=filter_prefix if filter_prefix else None,
+                )
+
+            # Load base 386 emissions (only for VulTrial-486 SA/DA/MA)
+            base = None
+            if dataset == "VulTrial-486" and design != "NoAgent" and base386_dir and base386_found == "YES":
+                base = load_emissions_from_dir(base386_dir)
+
+            # Combine emissions
+            if primary and base:
+                dur1 = base["duration_s"]
+                dur2 = primary["duration_s"]
+                combined = {
+                    "num_sessions": base["num_sessions"] + primary["num_sessions"],
+                    "duration_s": dur1 + dur2,
+                    "emissions_kg": base["emissions_kg"] + primary["emissions_kg"],
+                    "energy_kwh": base["energy_kwh"] + primary["energy_kwh"],
+                    "cpu_energy_kwh": base["cpu_energy_kwh"] + primary["cpu_energy_kwh"],
+                    "gpu_energy_kwh": base["gpu_energy_kwh"] + primary["gpu_energy_kwh"],
+                    "ram_energy_kwh": base["ram_energy_kwh"] + primary["ram_energy_kwh"],
+                    "cpu_power_w": weighted_avg(base["cpu_power_w"], dur1, primary["cpu_power_w"], dur2),
+                    "gpu_power_w": weighted_avg(base["gpu_power_w"], dur1, primary["gpu_power_w"], dur2),
+                    "ram_power_w": weighted_avg(base["ram_power_w"], dur1, primary["ram_power_w"], dur2),
+                    "gpu_model": primary["gpu_model"] or base["gpu_model"],
+                    "gpu_count": primary["gpu_count"] or base["gpu_count"],
+                    "cpu_model": primary["cpu_model"] or base["cpu_model"],
+                    "country": primary["country"] or base["country"],
+                    "source_note": f"386({base386_dir}) + 100({raw_dir})",
+                }
+            elif primary:
+                combined = primary
+                combined["source_note"] = raw_dir
+            elif base:
+                combined = base
+                combined["source_note"] = base386_dir
+            else:
+                continue
+
+            record = {
+                "model": model_full,
+                "model_family": model_family,
+                "parameters_b": params,
+                "design": design,
+                "task": task,
+                "dataset": dataset,
+                "mode": mode,
+                "prompting": prompting,
+                "thinking_enabled": mode == "thinking",
+                "num_sessions": combined["num_sessions"],
+                "total_duration_s": combined["duration_s"],
+                "duration_hours": combined["duration_s"] / 3600,
+                "total_emissions_kg": combined["emissions_kg"],
+                "emissions_g": combined["emissions_kg"] * 1000,
+                "total_energy_kwh": combined["energy_kwh"],
+                "total_cpu_energy_kwh": combined["cpu_energy_kwh"],
+                "total_gpu_energy_kwh": combined["gpu_energy_kwh"],
+                "total_ram_energy_kwh": combined["ram_energy_kwh"],
+                "avg_cpu_power_w": combined["cpu_power_w"],
+                "avg_gpu_power_w": combined["gpu_power_w"],
+                "avg_ram_power_w": combined["ram_power_w"],
+                "gpu_model": combined["gpu_model"],
+                "gpu_count": combined["gpu_count"],
+                "cpu_model": combined["cpu_model"],
+                "country": combined["country"],
+                "source_note": combined.get("source_note", ""),
+            }
+            records.append(record)
+
+    return records
+
+
+def consolidate_emissions(base_dir: str, output_file: str, **kwargs) -> pd.DataFrame:
+    """Main function to consolidate all emissions data from the manifest."""
+    print(f"Consolidating emissions from {base_dir}...")
+
+    from collections import Counter
+
+    records = load_all_emissions_from_manifest(base_dir)
+    if not records:
         print("No emissions data found!")
         return None
 
-    # Create DataFrame
-    df = pd.DataFrame(all_records)
-    print(f"\nLoaded {len(df)} emission records")
+    df = pd.DataFrame(records)
 
-    # Deduplicate if requested
-    if deduplicate:
-        df = deduplicate_records(df)
+    # Print breakdown
+    by_task = Counter(r["task"] for r in records)
+    by_dataset = Counter(r["dataset"] for r in records)
+    print(f"\nLoaded {len(records)} emission records from manifest")
+    for task, count in sorted(by_task.items()):
+        print(f"  {task}: {count}")
+    for ds, count in sorted(by_dataset.items()):
+        print(f"    {ds}: {count}")
 
-    # Save raw data
-    raw_output = output_file.replace(".csv", "_raw.csv")
-    df.to_csv(raw_output, index=False)
-    print(f"Raw emissions data saved to: {raw_output}")
+    print(f"\nTotal consolidated records: {len(df)}")
 
-    # Aggregate if requested
-    if aggregate:
-        df_agg = aggregate_by_experiment(df)
+    # Sort
+    df = df.sort_values(
+        by=["task", "dataset", "parameters_b", "design", "mode", "prompting"],
+        ascending=True,
+        na_position="last"
+    ).reset_index(drop=True)
 
-        # Sort
-        df_agg = df_agg.sort_values(
-            by=["parameters_b", "design", "task", "mode", "prompting"],
-            ascending=[True, True, True, True, True]
-        )
+    # Save output
+    df.to_csv(output_file, index=False)
+    print(f"Consolidated emissions saved to: {output_file}")
 
-        # Save aggregated data
-        df_agg.to_csv(output_file, index=False)
-        print(f"Aggregated emissions data saved to: {output_file}")
+    # Print summary
+    print("\n" + "=" * 80)
+    print("CONSOLIDATION SUMMARY")
+    print("=" * 80)
+    print(f"Total experiment configs: {len(df)}")
 
-        # Print summary
-        print("\n" + "=" * 80)
-        print("CONSOLIDATION SUMMARY (Aggregated)")
-        print("=" * 80)
-        print(f"Total experiments: {len(df_agg)}")
-
-        print(f"\nBy model:")
-        model_summary = df_agg.groupby("model")[["total_emissions_kg", "total_energy_kwh", "num_sessions"]].sum()
-        print(model_summary.to_string())
-
-        print(f"\nBy design:")
-        design_summary = df_agg.groupby("design")[["total_emissions_kg", "total_energy_kwh"]].sum()
-        print(design_summary.to_string())
-
+    if "total_emissions_kg" in df.columns:
         print(f"\nBy task:")
-        task_summary = df_agg.groupby("task")[["total_emissions_kg", "total_energy_kwh"]].sum()
+        task_summary = df.groupby("task")[["total_emissions_kg", "total_energy_kwh"]].sum()
         print(task_summary.to_string())
 
-        return df_agg
+        print(f"\nBy dataset:")
+        ds_summary = df.groupby("dataset")[["total_emissions_kg", "total_energy_kwh"]].sum()
+        print(ds_summary.to_string())
+
+        print(f"\nBy design:")
+        design_summary = df.groupby("design")[["total_emissions_kg", "total_energy_kwh"]].sum()
+        print(design_summary.to_string())
+
+        print(f"\nBy model:")
+        model_summary = df.groupby("model")[["total_emissions_kg", "total_energy_kwh"]].sum()
+        print(model_summary.to_string())
 
     return df
 

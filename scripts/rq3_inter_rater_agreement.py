@@ -42,6 +42,7 @@ SCORE_COLS = [f"{d}_score" for d in DIMENSIONS]
 DEFAULT_RATERS = {
     "Shane": os.path.join(OUTPUT_DIR, "super49b_zero_rater_sheet v2 - Shane.xlsx"),
     "HS": os.path.join(OUTPUT_DIR, "super49b_zero_rater_sheet v2-HS.xlsx"),
+    "Merve": os.path.join(OUTPUT_DIR, "super49b_zero_rater_sheet v2_Merve.xlsx"),
 }
 
 

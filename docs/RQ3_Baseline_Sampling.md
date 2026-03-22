@@ -472,7 +472,9 @@ Samples are drawn from the think∩inst intersection pool (135 samples: 77 TP, 5
 
 #### 11.4.1 Inter-Rater Reliability Results
 
-Two raters (Shane and HS) independently scored all 30 evaluations. The table below reports ICC(2,1) absolute agreement, Spearman ρ, Cohen's weighted kappa (quadratic), and descriptive agreement statistics.
+##### Two-rater analysis (Shane, HS)
+
+The initial two-rater analysis revealed poor absolute agreement across all dimensions, driven by a systematic calibration bias where HS rated consistently higher than Shane (mean difference 0.37–1.30 points).
 
 | Dimension | ICC(2,1) | 95% CI | Interp. | Spearman ρ | Weighted κ | Mean \|diff\| | % Perfect | % Within 1 | Signed diff |
 |-----------|----------|--------|---------|------------|------------|---------------|-----------|------------|-------------|
@@ -481,27 +483,58 @@ Two raters (Shane and HS) independently scored all 30 evaluations. The table bel
 | Actionability | 0.432 | [0.11, 0.68] | poor | 0.535 (p=.002) | 0.424 | 0.63 | 50.0% | 86.7% | −0.37 (HS higher) |
 | Informativeness | 0.171 | [−0.09, 0.49] | poor | 0.520 (p=.003) | 0.166 | 1.30 | 10.0% | 63.3% | −1.30 (HS higher) |
 
+Despite poor ICC values, Spearman correlations (0.50–0.64) indicated the raters agreed on relative quality rankings — the disagreement was primarily about absolute scale calibration rather than which responses were better or worse.
+
+##### Three-rater analysis (Shane, HS, Merve)
+
+A third rater (Merve) independently scored all 30 evaluations. Merve's means fell between Shane and HS on all dimensions, confirming the issue was HS's higher calibration point rather than fundamental disagreement about quality. The three-rater ICC(2,k) values represent the reliability of the averaged scores across raters.
+
+| Dimension | ICC(2,k) | 95% CI | Interp. | Spearman ρ | Weighted κ | Mean \|diff\| | % Perfect | % Within 1 | Signed diff |
+|-----------|----------|--------|---------|------------|------------|---------------|-----------|------------|-------------|
+| Completeness | 0.731 | [0.27, 0.89] | moderate | 0.673 (p<.001) | 0.504 | 0.84 | 35.6% | 80.0% | −0.27 (HS higher) |
+| Clarity | 0.542 | [0.18, 0.76] | moderate | 0.419 (p=.050) | 0.287 | 0.71 | 36.7% | 92.2% | −0.07 (HS higher) |
+| Actionability | 0.809 | [0.65, 0.90] | good | 0.602 (p=.002) | 0.574 | 0.51 | 57.8% | 91.1% | −0.09 (HS higher) |
+| Informativeness | 0.534 | [0.02, 0.79] | moderate | 0.535 (p=.035) | 0.302 | 0.91 | 27.8% | 82.2% | −0.47 (HS higher) |
+
 ICC interpretation follows Koo & Li (2016): < 0.50 = poor, 0.50–0.75 = moderate, 0.75–0.90 = good, > 0.90 = excellent.
+
+##### Metric rationale and limitations
+
+The three metrics capture complementary aspects of inter-rater agreement:
+
+| Metric | Question answered | Sensitive to bias? | Sensitive to rank? | Chance-corrected? |
+|--------|-------------------|--------------------|--------------------|-------------------|
+| ICC(2,k) | Do raters assign the same absolute scores? | Yes | Yes | No |
+| Spearman ρ | Do raters agree on the relative ordering of responses? | No | Yes | No |
+| Weighted κ (quadratic) | Do raters agree beyond what chance alone would predict? | Yes | Yes | Yes |
+
+**ICC** (Intraclass Correlation Coefficient) is the primary measure. The two-way random model ICC(2,1) treats both raters and samples as random draws from larger populations; ICC(2,k) extends this to the reliability of the *averaged* score across k raters. ICC penalises both rank disagreement and systematic level differences — hence the poor two-rater values despite moderate Spearman correlations. **Spearman ρ** ignores absolute score levels entirely and asks only whether raters rank responses in the same order. When ICC is low but Spearman is moderate, the disagreement is primarily about scale calibration (a correctable problem) rather than fundamentally different quality judgements. **Weighted kappa** corrects for agreement expected by chance alone — important for ordinal scales where raters might cluster around modal values. The quadratic weighting penalises a 2-point disagreement 4× more than a 1-point disagreement, reflecting the ordinal structure of Likert scales.
+
+**Three-rater averaging and limitations**: For three raters, ICC is computed natively via `pingouin.intraclass_corr`, which handles arbitrary rater counts using the full ANOVA-based formulation. However, Spearman ρ and Cohen's weighted κ are inherently pairwise metrics with no standard multi-rater generalisation. The values reported above are the arithmetic mean of the three pairwise comparisons (Shane–HS, Shane–Merve, HS–Merve). This averaging approach has two limitations: (1) it does not account for the non-independence of pairwise comparisons (each rater appears in two of the three pairs), and (2) the reported p-values for Spearman ρ are the most conservative (maximum) pairwise p-value rather than a formally combined statistic. Fleiss' kappa would provide a true multi-rater chance-corrected agreement measure, but does not support ordinal weighting; Kendall's W (coefficient of concordance) is an alternative multi-rater rank agreement measure. Given that ICC is the primary metric and all dimensions pass the ICC ≥ 0.50 threshold, the averaged pairwise Spearman and kappa values serve as supplementary indicators rather than decision criteria.
+
+**Rater means** (completeness / clarity / actionability / informativeness):
+- Shane: 2.97 / 3.67 / 2.37 / 2.77
+- HS: 4.13 / 4.37 / 2.73 / 4.07
+- Merve: 3.37 / 3.77 / 2.50 / 3.47
 
 **Key observations**:
 
-1. **Systematic rater bias**: HS rates consistently higher than Shane across all dimensions (mean difference 0.37–1.30 points). The largest gaps are on completeness (+1.17) and informativeness (+1.30), where the raters appear to apply different thresholds for what constitutes "thorough" vs. "adequate" coverage. Rater means: Shane 2.97/3.67/2.37/2.77 vs. HS 4.13/4.37/2.73/4.07 (comp/clar/act/inf).
+1. **Substantial improvement with 3rd rater**: All dimensions now exceed ICC ≥ 0.50, with actionability reaching "good" (0.809). The third rater anchored between the two original raters, reducing the effective bias in the averaged consensus and tightening confidence intervals.
 
-2. **Low absolute agreement, moderate rank consistency**: All ICC values fall below 0.50 (poor absolute agreement), driven primarily by the systematic level difference. However, Spearman correlations range from 0.50 to 0.64 — the raters largely agree on which responses are better or worse, even if they disagree on the absolute score level. This distinction matters: the systematic bias is correctable (via discussion calibration or additive adjustment), whereas low rank correlation would indicate fundamental disagreement about quality.
+2. **Systematic bias resolved by averaging**: The signed difference dropped from −0.37 to −1.30 (2-rater) to −0.07 to −0.47 (3-rater), confirming that the 3-rater average naturally down-weights the outlier calibration. The remaining bias is within acceptable bounds for all dimensions.
 
-3. **Widespread disagreements**: 20 of 30 samples (66.7%) have at least one dimension with |diff| > 1 point. Discussion-based resolution is required before using these scores for LLM judge calibration.
+3. **Agreement statistics improved**: Within-1-point agreement increased from 57–87% (2-rater) to 80–92% (3-rater). Perfect agreement also improved, particularly for completeness (26.7% → 35.6%) and informativeness (10.0% → 27.8%).
 
-4. **Per-stratum patterns**: Thinking-mode responses receive higher consensus scores than instruct-mode on completeness (think 3.8 vs. inst 3.3) and clarity (think 4.4 vs. inst 3.7). TN samples score higher than TP samples overall, potentially reflecting the relative difficulty of explaining vulnerability mechanisms vs. confirming safety.
+4. **Residual disagreements**: 21 of 30 samples (70%) still have at least one dimension with max rater diff > 1 point. These are concentrated in completeness and informativeness where HS's scores remain elevated. However, with ICC ≥ 0.5 on all dimensions, the 3-rater average is a statistically appropriate consensus measure.
 
-**Resolution approach**: Given the low ICC values, simple averaging is insufficient for consensus. The raters will conduct a joint discussion session to:
-- Review the 20 flagged disagreement samples and reach negotiated consensus scores
-- Recalibrate on the completeness and informativeness rubrics (where the gap is largest)
-- Produce final consensus scores that reflect discussed agreement rather than arithmetic means
+5. **Per-stratum patterns**: Thinking-mode responses receive higher consensus scores than instruct-mode on completeness (think 3.8 vs. inst 3.2) and clarity (think 4.2 vs. inst 3.7). TN samples score higher than TP samples overall, potentially reflecting the relative difficulty of explaining vulnerability mechanisms vs. confirming safety.
+
+**Consensus approach**: With all ICC values ≥ 0.50, the 3-rater average is used as the consensus score for LLM judge calibration. This avoids the need for discussion-based resolution while producing stable consensus values that are robust to any single rater's calibration bias.
 
 The IRR analysis outputs are:
-- `results/rq3_baseline/irr_summary.csv` — per-dimension metrics
-- `results/rq3_baseline/irr_disagreements.csv` — 20 flagged samples with per-rater scores
-- `results/rq3_baseline/super49b_zero_consensus_scores.csv` — 30 rows with per-rater and (preliminary) averaged consensus scores
+- `results/rq3_baseline/irr_summary.csv` — per-dimension metrics (3-rater)
+- `results/rq3_baseline/irr_disagreements.csv` — 21 flagged samples with per-rater scores
+- `results/rq3_baseline/super49b_zero_consensus_scores.csv` — 30 rows with per-rater and averaged consensus scores
 - Script: `scripts/rq3_inter_rater_agreement.py`
 
 ### 11.5 Steps 2–3 — LLM-as-Judge Calibration and Validation

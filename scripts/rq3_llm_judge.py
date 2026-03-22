@@ -2,6 +2,8 @@
 LLM-as-Judge pipeline for RQ3 explanation quality evaluation.
 
 Modes:
+    --mode zero-shot-baseline  Score all 30 samples with rubric only (no examples),
+                               compute agreement with human raters as "4th rater" baseline
     --mode calibrate  Select 8 calibration + 22 validation samples, build prompt
     --mode validate   Run judge on 22 held-out, check Spearman >= 0.7, MAE <= 1.0
     --mode evaluate   Run judge on full pool (~487 Super-49B or ~534 Qwen3-30B)
@@ -9,6 +11,7 @@ Modes:
 
 Usage:
     export OPENROUTER_API_KEY=<key>
+    python scripts/rq3_llm_judge.py --mode zero-shot-baseline
     python scripts/rq3_llm_judge.py --mode calibrate
     python scripts/rq3_llm_judge.py --mode validate [--iteration N]
     python scripts/rq3_llm_judge.py --mode evaluate --model super49b
@@ -374,6 +377,238 @@ Score this response on the four dimensions. Respond with JSON only."""
 
 
 # ---------------------------------------------------------------------------
+# Agreement metrics helper
+# ---------------------------------------------------------------------------
+def compute_agreement_metrics(
+    results_df: pd.DataFrame,
+    human_col_prefix: str = "human",
+    llm_col_prefix: str = "llm",
+    label: str = "",
+) -> dict:
+    """Compute Spearman, MAE, and bias between human and LLM scores.
+
+    Args:
+        results_df: DataFrame with {dim}_{human_col_prefix} and {dim}_{llm_col_prefix} columns
+        human_col_prefix: prefix for human score columns (e.g., 'human' -> 'completeness_human')
+        llm_col_prefix: prefix for LLM score columns
+        label: label for print output
+
+    Returns:
+        dict of {dimension: {spearman_rho, spearman_p, mae, bias, pass}}
+    """
+    if label:
+        print(f"\n{'=' * 60}")
+        print(f"AGREEMENT METRICS — {label}")
+        print(f"{'=' * 60}")
+
+    metrics = {}
+    all_pass = True
+    for dim in DIMENSIONS:
+        human = results_df[f"{dim}_{human_col_prefix}"].values
+        llm = results_df[f"{dim}_{llm_col_prefix}"].values
+
+        rho, rho_p = spearmanr(human, llm)
+        mae = np.mean(np.abs(human - llm))
+        bias = np.mean(llm - human)  # positive = LLM scores higher
+
+        pass_rho = rho >= MIN_SPEARMAN
+        pass_mae = mae <= MAX_MAE
+        pass_bias = abs(bias) <= MAX_BIAS
+        dim_pass = pass_rho and pass_mae and pass_bias
+
+        if not dim_pass:
+            all_pass = False
+
+        if label:
+            status = "PASS" if dim_pass else "FAIL"
+            print(f"\n  {dim.upper()} [{status}]")
+            print(f"    Spearman rho:  {rho:.4f} (p={rho_p:.4f}) "
+                  f"{'✓' if pass_rho else '✗'} (>= {MIN_SPEARMAN})")
+            print(f"    MAE:           {mae:.3f} "
+                  f"{'✓' if pass_mae else '✗'} (<= {MAX_MAE})")
+            print(f"    Bias:          {bias:+.3f} "
+                  f"{'✓' if pass_bias else '✗'} (|bias| <= {MAX_BIAS})")
+
+        metrics[dim] = {
+            "spearman_rho": round(rho, 4),
+            "spearman_p": round(rho_p, 6),
+            "mae": round(mae, 3),
+            "bias": round(bias, 3),
+            "pass": dim_pass,
+        }
+
+    return metrics, all_pass
+
+
+# ---------------------------------------------------------------------------
+# Mode: zero-shot-baseline
+# ---------------------------------------------------------------------------
+def mode_zero_shot_baseline():
+    """Score all 30 human-rated samples with rubric only (no few-shot examples).
+
+    This establishes the LLM's natural alignment with human raters before any
+    calibration, treating the LLM as a '4th rater'. The results quantify how
+    much few-shot calibration improves agreement (compare with validate metrics).
+    """
+    print("=== ZERO-SHOT BASELINE (rubric only, no examples) ===\n")
+
+    # Build zero-shot system prompt (rubric only)
+    rubric_text = load_rubric_text()
+    system_prompt = build_system_prompt(rubric_text)
+    print(f"System prompt length: {len(system_prompt)} chars (rubric only)")
+    print(f"Judge model: {JUDGE_MODEL}")
+
+    # Save zero-shot prompt for reproducibility
+    prompt_path = os.path.join(OUTPUT_DIR, "llm_judge_prompt_zero_shot_baseline.txt")
+    with open(prompt_path, "w") as f:
+        f.write(system_prompt)
+    print(f"Prompt saved: {prompt_path}")
+
+    # Load all 30 human-rated samples
+    consensus_df = load_consensus_scores()
+    rater_sheet = pd.read_csv(RATER_SHEET_CSV)
+    consensus_df = consensus_df.merge(
+        rater_sheet[["sample_id", "source_code", "response_text", "cwe", "cve_desc",
+                      "ground_truth_label"]],
+        on="sample_id",
+        how="left",
+    )
+    print(f"\nSamples to evaluate: {len(consensus_df)}")
+
+    # Check for existing partial results (crash recovery)
+    output_path = os.path.join(OUTPUT_DIR, "llm_judge_zero_shot_baseline.csv")
+    completed = {}
+    if os.path.exists(output_path):
+        existing_df = pd.read_csv(output_path)
+        for _, row in existing_df.iterrows():
+            completed[int(row["sample_id"])] = row.to_dict()
+        print(f"Resuming: {len(completed)} already completed")
+
+    # Run judge on each sample
+    results = []
+    for i, (_, row) in enumerate(consensus_df.iterrows(), 1):
+        sid = int(row["sample_id"])
+
+        # Use cached result if available
+        if sid in completed:
+            results.append(completed[sid])
+            print(f"  [{i}/{len(consensus_df)}] sample_id={sid:2d} "
+                  f"stratum={row['stratum']:10s} ... cached")
+            continue
+
+        print(f"  [{i}/{len(consensus_df)}] sample_id={sid:2d} "
+              f"stratum={row['stratum']:10s} ... ", end="", flush=True)
+
+        user_prompt = build_evaluation_prompt(
+            source_code=row["source_code"],
+            response_text=row["response_text"],
+            ground_truth_label=row["ground_truth_label"],
+            cwe=str(row.get("cwe", "")),
+            cve_desc=str(row.get("cve_desc", "")),
+        )
+
+        response = call_llm_judge(system_prompt, user_prompt)
+        parsed = parse_judge_response(response) if response else None
+
+        if parsed:
+            result = {
+                "sample_id": sid,
+                "stratum": row["stratum"],
+                "entry_id": int(row["entry_id"]) if pd.notna(row["entry_id"]) else "",
+                "response_id": row["response_id"],
+            }
+            for dim in DIMENSIONS:
+                result[f"{dim}_human"] = row[f"{dim}_consensus"]
+                result[f"{dim}_llm"] = parsed[f"{dim}_score"]
+                result[f"{dim}_justification"] = parsed[f"{dim}_justification"]
+            results.append(result)
+            llm_scores = [parsed[f"{d}_score"] for d in DIMENSIONS]
+            print(f"scores={llm_scores}")
+        else:
+            print("FAILED to parse response")
+            if response:
+                print(f"    Raw response: {response[:200]}...")
+
+        time.sleep(REQUEST_DELAY_SECONDS)
+
+    if not results:
+        sys.exit("ERROR: No valid results from zero-shot baseline run")
+
+    results_df = pd.DataFrame(results)
+
+    # Save detailed results
+    results_df.to_csv(output_path, index=False)
+    print(f"\nDetailed results: {output_path}")
+    print(f"Scored: {len(results_df)} / {len(consensus_df)} samples")
+
+    # Compute agreement metrics
+    metrics, all_pass = compute_agreement_metrics(
+        results_df, label="Zero-shot baseline (LLM as 4th rater)"
+    )
+
+    # Save metrics summary
+    metrics_path = os.path.join(OUTPUT_DIR, "llm_judge_zero_shot_baseline_metrics.csv")
+    metrics_rows = []
+    for dim, m in metrics.items():
+        metrics_rows.append({"dimension": dim, **m})
+    pd.DataFrame(metrics_rows).to_csv(metrics_path, index=False)
+    print(f"\nMetrics summary: {metrics_path}")
+
+    # Per-rater comparison: compute LLM agreement with each individual rater
+    rater_cols = [c for c in consensus_df.columns if c.startswith("completeness_")
+                  and c != "completeness_consensus" and c != "completeness_diff"]
+    rater_names = [c.replace("completeness_", "") for c in rater_cols]
+
+    if rater_names:
+        print(f"\n{'=' * 60}")
+        print("PER-RATER AGREEMENT (LLM vs. each human rater)")
+        print(f"{'=' * 60}")
+
+        for rname in rater_names:
+            print(f"\n  --- LLM vs. {rname} ---")
+            # Build a temp df with rater scores as 'human' columns
+            temp_df = results_df.copy()
+            for dim in DIMENSIONS:
+                rater_col = f"{dim}_{rname}"
+                if rater_col in consensus_df.columns:
+                    # Merge rater scores by sample_id
+                    rater_scores = consensus_df[["sample_id", rater_col]].copy()
+                    rater_scores = rater_scores.rename(columns={rater_col: f"{dim}_rater"})
+                    temp_df = temp_df.merge(rater_scores, on="sample_id", how="left")
+                else:
+                    temp_df[f"{dim}_rater"] = np.nan
+
+            has_data = not temp_df[[f"{d}_rater" for d in DIMENSIONS]].isna().any().any()
+            if has_data:
+                for dim in DIMENSIONS:
+                    human_vals = temp_df[f"{dim}_rater"].values
+                    llm_vals = temp_df[f"{dim}_llm"].values
+                    rho, rho_p = spearmanr(human_vals, llm_vals)
+                    mae = np.mean(np.abs(human_vals - llm_vals))
+                    bias = np.mean(llm_vals - human_vals)
+                    print(f"    {dim:18s}: ρ={rho:.3f} (p={rho_p:.3f}), "
+                          f"MAE={mae:.2f}, bias={bias:+.2f}")
+
+    # Summary
+    print(f"\n{'=' * 60}")
+    print("ZERO-SHOT BASELINE SUMMARY")
+    print(f"{'=' * 60}")
+    for dim, m in metrics.items():
+        status = "PASS" if m["pass"] else "FAIL"
+        print(f"  {dim:18s}: ρ={m['spearman_rho']:.3f}, "
+              f"MAE={m['mae']:.2f}, bias={m['bias']:+.2f} [{status}]")
+
+    if all_pass:
+        print("\n  Zero-shot baseline passes all thresholds.")
+        print("  Few-shot calibration may still improve alignment.")
+    else:
+        print("\n  Zero-shot baseline does not pass all thresholds.")
+        print("  Few-shot calibration is needed — proceed to: --mode calibrate")
+
+    return metrics
+
+
+# ---------------------------------------------------------------------------
 # Mode: calibrate
 # ---------------------------------------------------------------------------
 def mode_calibrate(iteration: int = 1):
@@ -533,44 +768,9 @@ def mode_validate(iteration: int = 1):
     results_df = pd.DataFrame(results)
 
     # Compute validation metrics
-    print(f"\n{'=' * 60}")
-    print("VALIDATION METRICS")
-    print(f"{'=' * 60}")
-
-    metrics = {}
-    all_pass = True
-    for dim in DIMENSIONS:
-        human = results_df[f"{dim}_human"].values
-        llm = results_df[f"{dim}_llm"].values
-
-        rho, rho_p = spearmanr(human, llm)
-        mae = np.mean(np.abs(human - llm))
-        bias = np.mean(llm - human)  # positive = LLM scores higher
-
-        pass_rho = rho >= MIN_SPEARMAN
-        pass_mae = mae <= MAX_MAE
-        pass_bias = abs(bias) <= MAX_BIAS
-        dim_pass = pass_rho and pass_mae and pass_bias
-
-        if not dim_pass:
-            all_pass = False
-
-        status = "PASS" if dim_pass else "FAIL"
-        print(f"\n  {dim.upper()} [{status}]")
-        print(f"    Spearman rho:  {rho:.4f} (p={rho_p:.4f}) "
-              f"{'✓' if pass_rho else '✗'} (>= {MIN_SPEARMAN})")
-        print(f"    MAE:           {mae:.3f} "
-              f"{'✓' if pass_mae else '✗'} (<= {MAX_MAE})")
-        print(f"    Bias:          {bias:+.3f} "
-              f"{'✓' if pass_bias else '✗'} (|bias| <= {MAX_BIAS})")
-
-        metrics[dim] = {
-            "spearman_rho": round(rho, 4),
-            "spearman_p": round(rho_p, 6),
-            "mae": round(mae, 3),
-            "bias": round(bias, 3),
-            "pass": dim_pass,
-        }
+    metrics, all_pass = compute_agreement_metrics(
+        results_df, label=f"Few-shot validation (iteration {iteration})"
+    )
 
     # Save validation results
     val_results_path = os.path.join(OUTPUT_DIR, f"llm_judge_validation_v{iteration}.csv")
@@ -857,7 +1057,7 @@ def main():
     parser.add_argument(
         "--mode",
         required=True,
-        choices=["calibrate", "validate", "evaluate", "spot-check"],
+        choices=["zero-shot-baseline", "calibrate", "validate", "evaluate", "spot-check"],
         help="Pipeline mode",
     )
     parser.add_argument(
@@ -874,7 +1074,9 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.mode == "calibrate":
+    if args.mode == "zero-shot-baseline":
+        mode_zero_shot_baseline()
+    elif args.mode == "calibrate":
         mode_calibrate(iteration=args.iteration)
     elif args.mode == "validate":
         mode_validate(iteration=args.iteration)
