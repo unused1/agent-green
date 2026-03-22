@@ -1,15 +1,6 @@
 # Environment files
 .env
-.env.local
-.env.mars
-.env.runpod
-.env.runpod.phase2
-.env.mars.codegen
-.env.runpod.codegen
-.env.runpod.vuln
-.env.openrouter-*
-.env.qwen3-*
-.env.incremental.*
+config/env/
 
 config/config.ini
 config/.codecarbon.config

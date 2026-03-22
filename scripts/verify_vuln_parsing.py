@@ -2,17 +2,23 @@
 """
 LLM-as-a-judge verification script for vulnerability parsing.
 
-This script feeds the final conclusion text (with <think> tags stripped) of a vulnerability 
-detection model to a Judge LLM and asks it to determine if the model concluded the code is 
-vulnerable or not. It then compares the Judge LLM's understanding with the keyword parser's 
+This script feeds the final conclusion text (with <think> tags stripped) of a vulnerability
+detection model to a Judge LLM and asks it to determine if the model concluded the code is
+vulnerable or not. It then compares the Judge LLM's understanding with the keyword parser's
 outcome (`vuln` field) to find potential parsing errors.
 
 Usage:
-    # Run on specific files or directories with OpenRouter
-    python scripts/verify_vuln_parsing.py --dirs results/run1 results/run2
-    
-    # Run using local Ollama instance
+    # Google AI Studio (Gemini Flash) — recommended for speed/cost
+    python scripts/verify_vuln_parsing.py --google --dirs results/runpod_vuln_384_incremental --sample-size 100
+
+    # OpenRouter
+    python scripts/verify_vuln_parsing.py --dirs results/run1 --model meta-llama/llama-3.3-70b-instruct
+
+    # Local Ollama
     python scripts/verify_vuln_parsing.py --local --dirs results/SA_runs --model qwen2.5-coder:7b-instruct
+
+    # Specific files with custom output
+    python scripts/verify_vuln_parsing.py --google --files results/file1.jsonl --output results/parsing_check.csv
 """
 
 import argparse
@@ -23,6 +29,8 @@ import re
 import sys
 import time
 from pathlib import Path
+
+csv.field_size_limit(sys.maxsize)
 
 # Try to import openai for API calls
 try:
@@ -42,14 +50,12 @@ def strip_think_block(text):
 def find_jsonl_files(files_arg, dirs_arg):
     """Find all relevant JSONL files from provided files and directories."""
     jsonl_files = []
-    
-    # Add explicitly specified files
+
     if files_arg:
         for f in files_arg:
             if os.path.exists(f) and f.endswith(".jsonl"):
                 jsonl_files.append(f)
-                
-    # Search specified directories
+
     if dirs_arg:
         for d in dirs_arg:
             d_path = Path(d)
@@ -57,14 +63,16 @@ def find_jsonl_files(files_arg, dirs_arg):
                 print(f"Warning: Directory {d} not found or is not a directory.")
                 continue
             for jsonl_path in d_path.rglob("*_detailed_results.jsonl"):
+                # Skip stray/orphan folders
+                if "_stray" in str(jsonl_path):
+                    continue
                 jsonl_files.append(str(jsonl_path))
-                
-    # Deduplicate
-    return list(set(jsonl_files))
+
+    return sorted(set(jsonl_files))
 
 
 def call_llm_judge(client, model, system_prompt, user_prompt, max_retries=3):
-    """Call the LLM judge via the OpenAI compatible client."""
+    """Call the LLM judge via the OpenAI-compatible client."""
     for attempt in range(max_retries):
         try:
             response = client.chat.completions.create(
@@ -75,7 +83,6 @@ def call_llm_judge(client, model, system_prompt, user_prompt, max_retries=3):
                 ],
                 temperature=0.0,
                 max_tokens=500,
-                response_format={"type": "json_object"} if "openrouter" not in str(client.base_url).lower() else None
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -97,34 +104,31 @@ def parse_judge_response(response_text):
     elif "```" in response_text:
         json_str = response_text.split("```")[1].split("```")[0].strip()
     else:
-        # Check if the string starts properly with {
         start = response_text.find("{")
         end = response_text.rfind("}")
         if start != -1 and end != -1:
-            json_str = response_text[start:end+1]
+            json_str = response_text[start:end + 1]
         else:
             return None
 
     try:
         data = json.loads(json_str)
-        # Handle variations of key names the LLM might use
         conclusion = data.get("vulnerable_conclusion")
         if conclusion is None:
             conclusion = data.get("vulnerabile_conclusion")
-            
+
         if conclusion not in [0, 1]:
-            # Convert string booleans if necessary
             if str(conclusion).lower() in ["true", "1", "yes"]:
                 conclusion = 1
             elif str(conclusion).lower() in ["false", "0", "no"]:
                 conclusion = 0
             else:
                 return None
-                
+
         return {
             "vulnerable_conclusion": int(conclusion),
             "confidence": data.get("confidence", "N/A"),
-            "explanation": data.get("explanation", "")
+            "explanation": data.get("explanation", ""),
         }
     except json.JSONDecodeError:
         return None
@@ -149,16 +153,60 @@ Respond strictly with a JSON object in the following format:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="LLM-as-a-judge to verify vulnerability parsing")
+    parser = argparse.ArgumentParser(
+        description="LLM-as-a-judge to verify vulnerability parsing"
+    )
     parser.add_argument("--files", nargs="+", help="Specific JSONL files to process")
-    parser.add_argument("--dirs", nargs="+", help="Directories to scan for *_detailed_results.jsonl")
-    parser.add_argument("--sample-size", type=int, default=0, help="Max entries to evaluate across all files")
-    
+    parser.add_argument(
+        "--dirs",
+        nargs="+",
+        help="Directories to scan for *_detailed_results.jsonl",
+    )
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=0,
+        help="Max entries to evaluate in total (0=all)",
+    )
+    parser.add_argument(
+        "--per-file-limit",
+        type=int,
+        default=0,
+        help="Max entries per file (0=all). Useful for spot-checking many files.",
+    )
+
+    # Provider selection
+    provider_group = parser.add_mutually_exclusive_group()
+    provider_group.add_argument(
+        "--google",
+        action="store_true",
+        help="Use Google AI Studio (Gemini). Requires GOOGLE_API_KEY env var.",
+    )
+    provider_group.add_argument(
+        "--local",
+        action="store_true",
+        help="Use local Ollama instance (http://localhost:11434/v1)",
+    )
+    provider_group.add_argument(
+        "--openai",
+        action="store_true",
+        help="Use OpenAI API. Requires OPENAI_API_KEY env var.",
+    )
+
     # LLM Settings
-    parser.add_argument("--local", action="store_true", help="Use local Ollama instance (http://localhost:11434/v1)")
-    parser.add_argument("--base-url", type=str, default="", help="Custom OpenAI-compatible base URL")
-    parser.add_argument("--model", type=str, default="meta-llama/llama-3.3-70b-instruct", help="Judge model name")
-    
+    parser.add_argument(
+        "--base-url", type=str, default="", help="Custom OpenAI-compatible base URL"
+    )
+    parser.add_argument(
+        "--model", type=str, default="", help="Judge model name (auto-selected if omitted)"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="results/parsing_discrepancies.csv",
+        help="Output CSV path for discrepancy report",
+    )
+
     args = parser.parse_args()
 
     if not args.files and not args.dirs:
@@ -172,38 +220,65 @@ def main():
 
     print(f"Found {len(jsonl_files)} files to check.")
 
-    # Setup LLM Client
-    if args.local:
+    # Setup LLM Client based on provider
+    if args.google:
+        api_base = args.base_url or "https://generativelanguage.googleapis.com/v1beta/openai/"
+        api_key = os.getenv("GOOGLE_API_KEY", "")
+        model = args.model or "gemini-2.5-flash"
+        if not api_key:
+            print("ERROR: GOOGLE_API_KEY not set. Get one from https://aistudio.google.com/apikey")
+            sys.exit(1)
+        print(f"Using Google AI Studio: {model}")
+    elif args.local:
         api_base = args.base_url or "http://localhost:11434/v1"
         api_key = "ollama"
-        model = args.model if args.model != "meta-llama/llama-3.3-70b-instruct" else "qwen2.5-coder:7b-instruct"
-        print(f"Using local inference: {api_base} with model {model}")
-    else:
-        api_base = args.base_url or os.getenv("OPENROUTER_API_BASE", "https://openrouter.ai/api/v1")
-        api_key = os.getenv("OPENROUTER_API_KEY", "")
-        model = args.model
+        model = args.model or "qwen2.5-coder:7b-instruct"
+        print(f"Using local Ollama: {model}")
+    elif args.openai:
+        api_base = args.base_url or "https://api.openai.com/v1"
+        api_key = os.getenv("OPENAI_API_KEY", "")
+        model = args.model or "gpt-4.1-mini"
         if not api_key:
-            print("ERROR: OPENROUTER_API_KEY not set for remote inference. Use --local for Ollama.")
+            print("ERROR: OPENAI_API_KEY not set.")
+            sys.exit(1)
+        print(f"Using OpenAI: {model}")
+    else:
+        # Default: OpenRouter
+        api_base = args.base_url or os.getenv(
+            "OPENROUTER_API_BASE", "https://openrouter.ai/api/v1"
+        )
+        api_key = os.getenv("OPENROUTER_API_KEY", "")
+        model = args.model or "meta-llama/llama-3.3-70b-instruct"
+        if not api_key:
+            print(
+                "ERROR: OPENROUTER_API_KEY not set. Use --google, --local, or --openai instead."
+            )
             sys.exit(1)
         print(f"Using OpenRouter: {model}")
 
     client = openai.OpenAI(api_key=api_key, base_url=api_base)
     system_prompt = build_system_prompt()
-    
+
     all_discrepancies = []
     processed_count = 0
     match_count = 0
+    error_count = 0
 
     for fpath in jsonl_files:
         if args.sample_size > 0 and processed_count >= args.sample_size:
             break
-            
-        print(f"\nProcessing {os.path.basename(fpath)}...")
+
+        fname = os.path.basename(fpath)
+        print(f"\nProcessing {fname}...")
+
+        file_count = 0
         with open(fpath, "r", encoding="utf-8") as f:
             for line in f:
                 if args.sample_size > 0 and processed_count >= args.sample_size:
                     break
-                    
+                if args.per_file_limit > 0 and file_count >= args.per_file_limit:
+                    break
+
                 line = line.strip()
                 if not line:
                     continue
@@ -213,66 +288,95 @@ def main():
                     continue
 
                 if "vuln" not in entry or "reasoning" not in entry:
-                    # Looking specifically for parsed entries
                     continue
-                
-                keyword_vuln = entry["vuln"]
+
+                keyword_vuln = int(entry["vuln"])
                 raw_reasoning = entry["reasoning"]
-                
-                # IMPORTANT: Strip think block so LLM only judges final conclusion
+
+                # Strip think block so LLM only judges final conclusion
                 conclusion_text = strip_think_block(raw_reasoning).strip()
                 if not conclusion_text:
                     continue
 
-                user_prompt = f"AI Final Conclusion Text:\n\"\"\"\n{conclusion_text}\n\"\"\""
-                
+                # Truncate very long conclusions to save tokens
+                if len(conclusion_text) > 3000:
+                    conclusion_text = conclusion_text[:1500] + "\n...[truncated]...\n" + conclusion_text[-1500:]
+
+                user_prompt = f'AI Final Conclusion Text:\n"""\n{conclusion_text}\n"""'
+
                 response = call_llm_judge(client, model, system_prompt, user_prompt)
                 parsed = parse_judge_response(response)
-                
+
                 if parsed:
                     judge_vuln = parsed["vulnerable_conclusion"]
-                    
+
                     if judge_vuln == keyword_vuln:
                         match_count += 1
-                        print(f"  [OK] idx={entry.get('idx', '?')} - Both parsed ({keyword_vuln})")
                     else:
-                        print(f"  [DISCREPANCY] idx={entry.get('idx', '?')} | Keyword: {keyword_vuln} vs Judge: {judge_vuln}")
-                        print(f"      Explanation: {parsed['explanation']}")
-                        
+                        print(
+                            f"  [MISMATCH] idx={entry.get('idx', '?')} | Parser: {keyword_vuln} vs Judge: {judge_vuln} "
+                            f"(conf={parsed['confidence']})"
+                        )
+                        print(f"      {parsed['explanation'][:100]}")
+
                         discrepancy = {
-                            "file": os.path.basename(fpath),
+                            "file": fname,
                             "idx": entry.get("idx", "?"),
                             "keyword_vuln": keyword_vuln,
                             "judge_vuln": judge_vuln,
                             "ground_truth": entry.get("ground_truth", "?"),
                             "judge_confidence": parsed["confidence"],
                             "judge_explanation": parsed["explanation"],
-                            "conclusion_text": conclusion_text
                         }
                         all_discrepancies.append(discrepancy)
                 else:
-                    print(f"  [ERR] Failed to parse judge output for idx={entry.get('idx', '?')}")
-                    
-                processed_count += 1
-                time.sleep(0.1) # Small delay to avoid aggressive rate limiting locally
+                    error_count += 1
+                    if error_count <= 5:
+                        print(
+                            f"  [ERR] Failed to parse judge output for idx={entry.get('idx', '?')}"
+                        )
 
-    print("\n" + "="*50)
+                processed_count += 1
+                file_count += 1
+
+                # Progress
+                if processed_count % 50 == 0:
+                    disc_rate = len(all_discrepancies) / processed_count * 100
+                    print(
+                        f"  ... {processed_count} processed, {len(all_discrepancies)} discrepancies ({disc_rate:.1f}%)"
+                    )
+
+                time.sleep(0.05)  # Small delay to avoid rate limiting
+
+    print("\n" + "=" * 60)
     print("VERIFICATION COMPLETE")
-    print("="*50)
-    print(f"Total processed: {processed_count}")
-    print(f"Matches: {match_count}")
-    print(f"Discrepancies found: {len(all_discrepancies)}")
-    
+    print("=" * 60)
+    print(f"Total processed:    {processed_count}")
+    print(f"Matches:            {match_count}")
+    print(f"Discrepancies:      {len(all_discrepancies)}")
+    print(f"Parse errors:       {error_count}")
+    if processed_count > 0:
+        print(f"Discrepancy rate:   {len(all_discrepancies)/processed_count*100:.1f}%")
+
     if all_discrepancies:
-        report_path = "parsing_discrepancies.csv"
-        with open(report_path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=[
-                "file", "idx", "keyword_vuln", "judge_vuln", "ground_truth",
-                "judge_confidence", "judge_explanation", "conclusion_text"
-            ])
+        os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
+        with open(args.output, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(
+                f,
+                fieldnames=[
+                    "file",
+                    "idx",
+                    "keyword_vuln",
+                    "judge_vuln",
+                    "ground_truth",
+                    "judge_confidence",
+                    "judge_explanation",
+                ],
+            )
             writer.writeheader()
             writer.writerows(all_discrepancies)
-        print(f"Report saved to: {report_path}")
+        print(f"Report saved to: {args.output}")
+
 
 if __name__ == "__main__":
     main()

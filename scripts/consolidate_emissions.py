@@ -48,9 +48,11 @@ def parse_model_from_project_name(project_name: str) -> dict:
     if not project_name:
         return info
 
-    # Parse design type (SA, DA, MA)
-    # Handle both direct prefix (DA-, MA-) and log-analysis prefix (log-analysis_DA-, etc.)
-    if project_name.startswith("DA-") or "_DA-" in project_name:
+    # Parse design type (NoAgent, SA, DA, MA)
+    # Handle both direct prefix (NA-, DA-, MA-) and log-analysis prefix (log-analysis_DA-, etc.)
+    if project_name.startswith("NA-") or "_NA-" in project_name:
+        info["design"] = "NoAgent"
+    elif project_name.startswith("DA-") or "_DA-" in project_name:
         info["design"] = "DA"
     elif project_name.startswith("MA-") or "_MA-" in project_name:
         info["design"] = "MA"
@@ -195,8 +197,15 @@ def find_all_emissions_files(base_dir: str) -> list[dict]:
         parts = relative_path.parts
 
         source_type = "unknown"
+        parts_str = str(relative_path)
         if "runpod_log_analysis" in parts:
             source_type = "runpod_log_analysis"
+        elif any("runpod_870_batch" in p for p in parts):
+            source_type = "runpod_870_batch"
+        elif any("runpod_na486" in p for p in parts):
+            source_type = "runpod_na486"
+        elif any("runpod_vuln_incremental_pod" in p for p in parts):
+            source_type = "runpod_vuln_incremental_pod_raw"
         elif "runpod_vuln_incremental" in parts:
             source_type = "runpod_vuln_incremental"
         elif "rq2_cross_architecture" in parts:
@@ -254,6 +263,22 @@ def load_and_process_emissions(file_info: dict) -> list[dict]:
             if parsed_config[key] is None:
                 parsed_config[key] = path_config.get(key)
 
+        # Determine dataset from source type
+        if "870_batch" in source_type or "384" in source_dir:
+            dataset = "VulTrial-384-incr"
+        elif "na486" in source_type:
+            dataset = "VulTrial-486"
+        elif "vuln_incremental" in source_type:
+            dataset = "VulTrial-100-incr"
+        elif "log_analysis" in source_type:
+            dataset = "HDFS-385"
+        elif "codegen" in source_type:
+            dataset = "HumanEval"
+        elif "vuln" in str(parsed_config.get("task", "")):
+            dataset = "VulTrial-386"
+        else:
+            dataset = "unknown"
+
         # Build result record
         result = {
             # Lineage
@@ -261,6 +286,7 @@ def load_and_process_emissions(file_info: dict) -> list[dict]:
             "source_type": source_type,
             "source_dir": source_dir,
             "project_name": project_name,
+            "dataset": dataset,
 
             # Experiment config
             "model": parsed_config["model"],
@@ -313,7 +339,7 @@ def aggregate_by_experiment(df: pd.DataFrame) -> pd.DataFrame:
     # Define grouping columns
     group_cols = [
         "model", "model_family", "parameters_b", "design",
-        "task", "mode", "prompting", "thinking_enabled"
+        "task", "dataset", "mode", "prompting", "thinking_enabled"
     ]
 
     # Filter out rows with missing key columns
@@ -351,8 +377,8 @@ def aggregate_by_experiment(df: pd.DataFrame) -> pd.DataFrame:
         "country": "first",
 
         # Keep source info
-        "source_type": lambda x: ", ".join(sorted(set(x))),
-        "source_file": lambda x: "; ".join(sorted(set(x))),
+        "source_type": lambda x: ", ".join(sorted(set(str(s) for s in x))),
+        "source_file": lambda x: "; ".join(sorted(set(str(s) for s in x))),
     }).reset_index()
 
     # Flatten column names
@@ -415,6 +441,9 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
         "runpod_log_analysis": 6,
         "runpod_codegen_rerun": 7,
         "runpod_vuln_incremental": 8,
+        "runpod_vuln_incremental_pod_raw": 8,
+        "runpod_870_batch": 9,
+        "runpod_na486": 10,
     }
 
     # Add priority column
@@ -422,7 +451,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
     df["_source_priority"] = df["source_type"].map(lambda x: source_priority.get(x, 0))
 
     # Define deduplication key columns
-    key_cols = ["model", "task", "mode", "prompting", "design"]
+    key_cols = ["model", "task", "dataset", "mode", "prompting", "design"]
 
     # Find duplicates
     df["_dedup_key"] = df[key_cols].apply(lambda x: tuple(x), axis=1)
@@ -457,7 +486,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
 
             # Report
             dropped_sources = sources[sources["_source_priority"] < max_priority]["source_type"].tolist()
-            model, task, mode, prompting, design = key
+            model, task, dataset, mode, prompting, design = key
             print(f"  {model} {design} {task} {mode} {prompting}:")
             print(f"    Keeping: {preferred_source} ({len(group[group['source_type'] == preferred_source])} records)")
             print(f"    Dropping: {dropped_sources} ({len(to_drop)} records)")

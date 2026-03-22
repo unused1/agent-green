@@ -26,10 +26,16 @@ Usage:
 """
 
 import argparse
+import csv
 import json
+import sys
 from pathlib import Path
+from collections import Counter
+
+csv.field_size_limit(sys.maxsize)
 
 import pandas as pd
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 
 def parse_config_from_filename(filename: str) -> dict:
@@ -47,8 +53,10 @@ def parse_config_from_filename(filename: str) -> dict:
     if not filename:
         return info
 
-    # Parse design type (SA, DA, MA)
-    if filename.startswith("DA-") or "_DA-" in filename:
+    # Parse design type (NoAgent, SA, DA, MA)
+    if filename.startswith("NA-") or "_NA-" in filename:
+        info["design"] = "NoAgent"
+    elif filename.startswith("DA-") or "_DA-" in filename:
         info["design"] = "DA"
     elif filename.startswith("MA-") or "_MA-" in filename:
         info["design"] = "MA"
@@ -137,7 +145,9 @@ def infer_config_from_path(file_path: str) -> dict:
         info["task"] = "vulnerability_detection"
 
     # Design detection
-    if "_da-" in path_str or "/da-" in path_str:
+    if "_na-" in path_str or "/na-" in path_str or "na-vuln" in path_str:
+        info["design"] = "NoAgent"
+    elif "_da-" in path_str or "/da-" in path_str:
         info["design"] = "DA"
     elif "_ma-" in path_str or "/ma-" in path_str:
         info["design"] = "MA"
@@ -412,6 +422,7 @@ def load_code_metrics(file_info: dict) -> dict | None:
             # Lineage
             "source_file": file_path,
             "source_type": file_info["source_type"],
+            "dataset": "HumanEval",
 
             # Experiment config
             "model": parsed_config["model"],
@@ -476,6 +487,7 @@ def load_log_analysis_metrics(file_info: dict) -> dict | None:
             # Lineage
             "source_file": file_path,
             "source_type": file_info["source_type"],
+            "dataset": "HDFS-385",
 
             # Experiment config
             "model": parsed_config["model"],
@@ -547,7 +559,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
     df["_source_priority"] = df["source_type"].map(lambda x: source_priority.get(x, 0))
 
     # Define deduplication key columns
-    key_cols = ["model", "task", "mode", "prompting", "design"]
+    key_cols = ["model", "task", "mode", "prompting", "design", "dataset"]
 
     # Create dedup key
     df["_dedup_key"] = df[key_cols].apply(lambda x: tuple(x), axis=1)
@@ -578,7 +590,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
             rows_to_drop.extend(to_drop)
 
             dropped_sources = sources[sources["_source_priority"] < max_priority]["source_type"].tolist()
-            model, task, mode, prompting, design = key
+            model, task, mode, prompting, design, dataset = key
             print(f"  {model} {design} {task} {mode} {prompting}:")
             print(f"    Cross-source: Keeping {preferred_source}, dropping {dropped_sources}")
 
@@ -587,7 +599,7 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
 
         # Stage 2: Within-source deduplication (multiple runs of same experiment)
         if len(group) > 1:
-            model, task, mode, prompting, design = key
+            model, task, mode, prompting, design, dataset = key
 
             # Keep the record with best performance
             if task == "vulnerability_detection":
@@ -615,44 +627,202 @@ def deduplicate_records(df: pd.DataFrame) -> pd.DataFrame:
     return df_deduped
 
 
+def normalize_vuln_basic(pred):
+    """Basic normalization: None/-1 → 1 (conservative: assume vulnerable)."""
+    if pred is None:
+        return 1
+    p = int(pred)
+    return 1 if p == -1 else p
+
+
+def find_and_evaluate_vuln_from_jsonl(base_dir: str, vuln_dirs: list[str] = None) -> list[dict]:
+    """Find JSONL files in staging directories and compute metrics directly.
+
+    This bypasses stale summary CSVs by reading the corrected vuln field
+    from JSONL files and re-evaluating against ground truth.
+
+    Args:
+        base_dir: Project root directory.
+        vuln_dirs: List of directories to scan for JSONL files.
+                   Defaults to runpod_vuln_486 and runpod_vuln_384_incremental.
+
+    Returns:
+        List of performance records ready for consolidation.
+    """
+    results_dir = Path(base_dir) / "results"
+
+    if vuln_dirs is None:
+        vuln_dirs = [
+            results_dir / "runpod_vuln_486",
+            results_dir / "runpod_vuln_384_incremental",
+        ]
+    else:
+        vuln_dirs = [Path(d) for d in vuln_dirs]
+
+    records = []
+
+    for vuln_dir in vuln_dirs:
+        if not vuln_dir.exists():
+            print(f"  Warning: {vuln_dir} not found, skipping")
+            continue
+
+        source_type = vuln_dir.name
+        # Determine dataset label from directory name
+        if "486" in vuln_dir.name:
+            dataset = "VulTrial-486"
+        elif "384" in vuln_dir.name:
+            dataset = "VulTrial-384-incr"
+        else:
+            dataset = vuln_dir.name
+        jsonl_files = sorted(vuln_dir.glob("*_detailed_results.jsonl"))
+
+        # Filter out alternative normalization and stray files
+        jsonl_files = [
+            f for f in jsonl_files
+            if "_conservative_" not in f.name
+            and "_strict_" not in f.name
+            and "_stray" not in str(f)
+        ]
+
+        print(f"\n  Scanning {vuln_dir.name}: {len(jsonl_files)} JSONL files")
+
+        for jsonl_path in jsonl_files:
+            filename = jsonl_path.name
+
+            # Parse config from filename
+            parsed = parse_config_from_filename(filename)
+            path_cfg = infer_config_from_path(str(jsonl_path))
+
+            # Merge (filename takes precedence)
+            for key in parsed:
+                if parsed[key] is None:
+                    parsed[key] = path_cfg.get(key)
+
+            # Handle Nemotron thinking via _thinking suffix
+            if parsed.get("model_family") == "Nemotron" or (
+                parsed.get("model") and "Nemotron" in parsed["model"]
+            ):
+                if "_thinking_" in filename or filename.endswith("_thinking_detailed_results.jsonl"):
+                    parsed["mode"] = "thinking"
+                elif parsed["mode"] is None:
+                    parsed["mode"] = "instruct"
+
+            # Ensure task is set
+            if parsed.get("task") is None:
+                parsed["task"] = "vulnerability_detection"
+
+            # Skip if essential config is missing
+            if not parsed.get("model") or not parsed.get("prompting"):
+                print(f"    Skipping {filename}: missing model or prompting config")
+                continue
+
+            # Load JSONL and compute metrics
+            try:
+                predictions = []
+                ground_truths = []
+                skipped = 0
+
+                with open(jsonl_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if not line.strip():
+                            continue
+                        entry = json.loads(line)
+                        pred = entry.get("vuln")
+                        gt = entry.get("ground_truth", entry.get("target"))
+
+                        if gt is None:
+                            continue
+
+                        pred_norm = normalize_vuln_basic(pred)
+                        predictions.append(pred_norm)
+                        ground_truths.append(int(gt))
+
+                        if pred is not None and int(pred) == -1:
+                            skipped += 1
+
+                if len(predictions) == 0:
+                    print(f"    Skipping {filename}: no valid entries")
+                    continue
+
+                # Compute metrics
+                acc = accuracy_score(ground_truths, predictions)
+                prec = precision_score(ground_truths, predictions, zero_division=0)
+                rec = recall_score(ground_truths, predictions, zero_division=0)
+                f1 = f1_score(ground_truths, predictions, zero_division=0)
+                tn, fp, fn, tp = confusion_matrix(
+                    ground_truths, predictions, labels=[0, 1]
+                ).ravel()
+                correct = sum(p == g for p, g in zip(predictions, ground_truths))
+
+                record = {
+                    "source_file": str(jsonl_path),
+                    "source_type": source_type,
+                    "dataset": dataset,
+                    "model": parsed["model"],
+                    "model_family": parsed.get("model_family"),
+                    "parameters_b": parsed.get("parameters_b"),
+                    "design": parsed.get("design", "SA"),
+                    "task": "vulnerability_detection",
+                    "mode": parsed.get("mode"),
+                    "prompting": parsed.get("prompting"),
+                    "thinking_enabled": parsed.get("mode") == "thinking",
+                    "accuracy": acc,
+                    "precision": prec,
+                    "recall": rec,
+                    "f1_score": f1,
+                    "true_positives": int(tp),
+                    "true_negatives": int(tn),
+                    "false_positives": int(fp),
+                    "false_negatives": int(fn),
+                    "total_samples": len(predictions),
+                    "correct_predictions": correct,
+                    "skipped_samples": skipped,
+                    "pass_at_1": None,
+                    "passed_samples": None,
+                    "failed_samples": None,
+                }
+
+                records.append(record)
+
+            except Exception as e:
+                print(f"    Error processing {filename}: {e}")
+
+    return records
+
+
 def consolidate_performance(base_dir: str, output_file: str, deduplicate: bool = True, exclude_mars: bool = False) -> pd.DataFrame:
     """Main function to consolidate all performance data."""
     print(f"Searching for performance files in {base_dir}...")
 
-    # Find all result files
-    vuln_files = find_vuln_summary_files(base_dir)
+    # --- Vulnerability detection: evaluate directly from JSONL files ---
+    # This reads corrected vuln predictions from JSONL (post parser fixes)
+    # instead of stale summary CSVs generated during the original experiment runs.
+    print("\n--- Vulnerability Detection (from JSONL) ---")
+    vuln_records = find_and_evaluate_vuln_from_jsonl(base_dir)
+    print(f"  Evaluated {len(vuln_records)} vuln detection configs from JSONL")
+
+    # Report vuln by source
+    vuln_by_source = Counter(r["source_type"] for r in vuln_records)
+    for src, count in sorted(vuln_by_source.items()):
+        print(f"    {src}: {count}")
+
+    # --- Code generation and log analysis: keep existing CSV/JSON approach ---
     code_files = find_code_eval_files(base_dir)
     log_files = find_log_analysis_files(base_dir)
 
-    print(f"Found {len(vuln_files)} vulnerability detection summary files")
-    print(f"Found {len(code_files)} code generation evaluation files")
-    print(f"Found {len(log_files)} log analysis summary files")
+    print(f"\n--- Code Generation ---")
+    print(f"  Found {len(code_files)} code generation evaluation files")
+    print(f"\n--- Log Analysis ---")
+    print(f"  Found {len(log_files)} log analysis summary files")
 
     # Filter out MARS if requested
     if exclude_mars:
         mars_sources = {"mars", "mars_rerun", "mars_codegen"}
-        vuln_files = [f for f in vuln_files if f["source_type"] not in mars_sources]
         code_files = [f for f in code_files if f["source_type"] not in mars_sources]
-        print(f"After excluding MARS: {len(vuln_files)} vuln, {len(code_files)} code files")
-
-    # Report by source
-    all_files = vuln_files + code_files + log_files
-    by_source = {}
-    for f in all_files:
-        src = f["source_type"]
-        by_source[src] = by_source.get(src, 0) + 1
-    print("\nBy source type:")
-    for src, count in sorted(by_source.items()):
-        print(f"  {src}: {count}")
+        print(f"  After excluding MARS: {len(code_files)} code files")
 
     # Load all metrics
-    all_records = []
-
-    print("\nLoading vulnerability detection metrics...")
-    for file_info in vuln_files:
-        record = load_vuln_metrics(file_info)
-        if record:
-            all_records.append(record)
+    all_records = list(vuln_records)
 
     print("\nLoading code generation metrics...")
     for file_info in code_files:
@@ -687,7 +857,7 @@ def consolidate_performance(base_dir: str, output_file: str, deduplicate: bool =
     # Reorder columns for readability
     column_order = [
         # Experiment config
-        "model", "model_family", "parameters_b", "design", "task", "mode", "prompting", "thinking_enabled",
+        "model", "model_family", "parameters_b", "design", "task", "dataset", "mode", "prompting", "thinking_enabled",
         # Vulnerability metrics
         "accuracy", "precision", "recall", "f1_score",
         "true_positives", "true_negatives", "false_positives", "false_negatives",
@@ -701,7 +871,7 @@ def consolidate_performance(base_dir: str, output_file: str, deduplicate: bool =
     # Only include columns that exist
     df = df[[c for c in column_order if c in df.columns]]
 
-    # Save to CSV
+    # Save to CSV — keep_default_na=False prevents "NA" design from being read as NaN
     df.to_csv(output_file, index=False)
     print(f"\nConsolidated performance data saved to: {output_file}")
 

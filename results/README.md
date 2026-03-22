@@ -8,9 +8,9 @@ This directory contains all experimental results for the agent-green project, or
 results/
 ├── mars/                    # Phase 1: Initial 4B vuln detection (Oct 11, 2025)
 ├── mars_rerun/              # Phase 1b: 4B vuln detection re-runs with improved CWE prompts (Oct 11, 2025)
+├── mars_codegen/            # Phase 3a: Code generation on Mars 4B (Nov 6-7, 2025)
 ├── runpod/                  # Phase 2a: Initial 30B vuln detection (Oct 20, 2025)
 ├── runpod_rerun/            # Phase 2b: 30B+4B vuln detection re-runs (Nov 2-8, 2025)
-├── mars_codegen/            # Phase 3a: Code generation on Mars 4B (Nov 6-7, 2025)
 ├── runpod_codegen/          # Phase 3b: Code generation on RunPod 4B+30B (Nov 7, 2025)
 ├── runpod_codegen_rerun/    # Phase 3c: Qwen3 code generation reruns with reasoning (Feb 7, 2026)
 ├── runpod_rq2_pod1-8/       # Phase 4: RQ2 Multi-Agent experiments (Nov 15-17, 2025)

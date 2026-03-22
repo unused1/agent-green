@@ -223,20 +223,46 @@ def extract_vulnerability_decision(review_board_response):
         text = re.sub(r'```(?:json)?\s*', '', clean_response)
         text = re.sub(r'```\s*', '', text)
 
-        # Step 2: Extract JSON array from response
-        match = re.search(r'(\[[\s\S]*\])', text)
-        if match:
-            json_str = match.group(1)
+        # Step 2: Extract JSON from response — handles both arrays and single objects
+        # Fixed 2026-03-22: Previously only matched arrays [...], missing single objects {...}
+        # Some models return {"vulnerability": true, ...} instead of [{...}, ...]
+        match_array = re.search(r'(\[[\s\S]*\])', text)
+        match_object = re.search(r'(\{[\s\S]*\})', text)
+
+        if match_array:
+            json_str = match_array.group(1)
+        elif match_object:
+            json_str = match_object.group(1)
         else:
             json_str = text.strip()
 
-        verdicts = json.loads(json_str)
+        parsed = json.loads(json_str)
+
+        # Normalize to list of verdict dicts
+        if isinstance(parsed, dict):
+            # Single object — check for direct vulnerability boolean field
+            if "vulnerability_detected" in parsed:
+                decision = parsed.get("vulnerability_detected", False)
+                reasoning = parsed.get("analysis", parsed.get("reasoning", str(parsed)))
+                return (1 if decision else 0), reasoning
+            if "vulnerability" in parsed and isinstance(parsed["vulnerability"], bool):
+                decision = parsed["vulnerability"]
+                reasoning = parsed.get("analysis", parsed.get("reasoning", str(parsed)))
+                return (1 if decision else 0), reasoning
+            # Wrap single verdict in list for uniform processing
+            verdicts = [parsed]
+        elif isinstance(parsed, list):
+            verdicts = parsed
+        else:
+            verdicts = []
 
         # Step 3: Analyze each verdict
         vuln_signals = 0
         safe_signals = 0
 
         for v in verdicts:
+            if not isinstance(v, dict):
+                continue
             decision = v.get('decision', '').lower().strip()
             severity = v.get('severity', '').lower().strip()
 

@@ -61,10 +61,21 @@ def append_result(result, detailed_file, csv_file, header_fields):
 # DECISION PARSER
 # ================================================================
 def extract_vulnerability_decision(response):
-    """Extract (1=vulnerable, 0=safe) and reasoning text."""
+    """Extract (1=vulnerable, 0=safe) and reasoning text.
+
+    Fixed 2026-03-22: Strip markdown code blocks before JSON parsing.
+    Some models (especially Qwen3 30B instruct) wrap JSON in ```json ... ```
+    which caused the JSON path to be skipped, falling through to keyword
+    matching that defaulted to safe (0).
+    """
+    import re
     try:
         # Strip think block — parse only the response after </think>
         text = response.split("</think>", 1)[1].strip() if "</think>" in response else response.strip()
+        # Strip markdown code blocks (handles ```json ... ``` wrapping)
+        text = re.sub(r'```(?:json)?\s*', '', text)
+        text = re.sub(r'```\s*', '', text)
+        text = text.strip()
         if text.startswith("{") or text.startswith("["):
             data = json.loads(text)
             if isinstance(data, dict):
