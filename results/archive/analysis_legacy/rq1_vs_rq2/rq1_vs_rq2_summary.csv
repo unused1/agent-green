@@ -1,6 +1,0 @@
-Metric,Single-Agent (RQ1),Dual-Agent (RQ2),Multi-Agent (RQ2)
-Vuln F1 Score (%),48.22,47.45,36.37
-Code Pass@1 (%),99.25,79.56,97.26
-Avg Energy (kWh),N/A,1.085,1.811
-Best Config (Vuln),4B-Think-Few (58.88%),30B-Inst-Few (51.76%),Various (~36%)
-Best Config (Code),30B-Inst-Zero (100%),4B-Inst-Few (100%),4B-Inst-Zero (100%)
