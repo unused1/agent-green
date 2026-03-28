@@ -1,0 +1,34 @@
+{
+  "total_emissions": 0.44690007406563825,
+  "sessions": 4,
+  "session_history": [
+    {
+      "session": 1,
+      "start_time": "2025-10-11T10:35:34.595129",
+      "end_time": "2025-10-11T10:38:43.197169",
+      "samples_processed": 386,
+      "session_emissions": 0.0046649428848249885
+    },
+    {
+      "session": 2,
+      "start_time": "2025-10-11T11:02:46.322931",
+      "end_time": "2025-10-11T11:09:12.123287",
+      "samples_processed": 382,
+      "session_emissions": 0.009614142828792051
+    },
+    {
+      "session": 3,
+      "start_time": "2025-10-11T11:09:39.970336",
+      "end_time": "2025-10-11T15:51:55.946217",
+      "samples_processed": 378,
+      "session_emissions": 0.42414116736803137
+    },
+    {
+      "session": 4,
+      "start_time": "2025-10-11T16:59:28.593478",
+      "end_time": "2025-10-11T17:05:08.505394",
+      "samples_processed": 1,
+      "session_emissions": 0.008479820983989863
+    }
+  ]
+}

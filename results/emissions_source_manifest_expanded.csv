@@ -1,132 +1,132 @@
 dataset,design,mode,prompting,model,raw_source_dir,emissions_csv,filter_prefix,base386_emissions_dir,base386_emissions_found
-VulTrial-486,DA,instruct,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod7/results/,YES
-VulTrial-486,DA,thinking,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod8/,YES
-VulTrial-486,DA,instruct,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod3/,YES
-VulTrial-486,DA,thinking,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod4/,YES
-VulTrial-486,DA,instruct,few-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_DA-few_instruct/,YES
-VulTrial-486,DA,thinking,few-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_DA-few_think/,YES
-VulTrial-486,DA,instruct,few-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_DA-few_instruct/,YES
-VulTrial-486,DA,thinking,few-shot,Super-49B,results/runpod_vuln_incremental_pod5_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_DA-few_think/,YES
-VulTrial-486,DA,instruct,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod5/results/,YES
-VulTrial-486,DA,thinking,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod6/,YES
-VulTrial-486,DA,instruct,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod1/results/,YES
-VulTrial-486,DA,thinking,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod2/,YES
-VulTrial-486,DA,instruct,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_DA-zero_instruct/,YES
-VulTrial-486,DA,thinking,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_DA-zero_think/,YES
-VulTrial-486,DA,instruct,zero-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_DA-zero_instruct/,YES
-VulTrial-486,DA,thinking,zero-shot,Super-49B,results/runpod_vuln_incremental_pod5_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_DA-zero_think/,YES
-VulTrial-486,MA,instruct,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod7/results/,YES
-VulTrial-486,MA,thinking,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod8/,YES
-VulTrial-486,MA,instruct,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod3/,YES
-VulTrial-486,MA,thinking,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod4/,YES
-VulTrial-486,MA,instruct,few-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_MA-few_instruct/,YES
-VulTrial-486,MA,thinking,few-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_MA-few_think/,YES
-VulTrial-486,MA,instruct,few-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_MA-few_instruct/,YES
+VulTrial-486,DA,instruct,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,DA-vuln-two-few_shot,results/runpod_rq2_pod7/results/,YES
+VulTrial-486,DA,thinking,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,DA-vuln-two-few_shot,results/runpod_rq2_pod8/,YES
+VulTrial-486,DA,instruct,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,DA-vuln-two-few_shot,results/runpod_rq2_pod3/,YES
+VulTrial-486,DA,thinking,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,DA-vuln-two-few_shot,results/runpod_rq2_pod4/,YES
+VulTrial-486,DA,instruct,few-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,DA-vuln-two-few_shot,results/rq2_cross_architecture/nemotron_8b_vuln_DA-few_instruct/,YES
+VulTrial-486,DA,thinking,few-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,DA-vuln-two-few_shot,results/rq2_cross_architecture/nemotron_8b_vuln_DA-few_think/,YES
+VulTrial-486,DA,instruct,few-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,DA-vuln-two-few_shot,results/rq2_cross_architecture/nemotron_49b_vuln_DA-few_instruct/,YES
+VulTrial-486,DA,thinking,few-shot,Super-49B,results/runpod_vuln_incremental_pod5_raw/runpod_vuln_incremental/,YES,DA-vuln-two-few_shot,results/rq2_cross_architecture/nemotron_49b_vuln_DA-few_think/,YES
+VulTrial-486,DA,instruct,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,DA-vuln-two-zero_shot,results/runpod_rq2_pod5/results/,YES
+VulTrial-486,DA,thinking,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,DA-vuln-two-zero_shot,results/runpod_rq2_pod6/,YES
+VulTrial-486,DA,instruct,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,DA-vuln-two-zero_shot,results/runpod_rq2_pod1/results/,YES
+VulTrial-486,DA,thinking,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,DA-vuln-two-zero_shot,results/runpod_rq2_pod2/,YES
+VulTrial-486,DA,instruct,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,DA-vuln-two-zero_shot,results/rq2_cross_architecture/nemotron_8b_vuln_DA-zero_instruct/,YES
+VulTrial-486,DA,thinking,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,DA-vuln-two-zero_shot,results/rq2_cross_architecture/nemotron_8b_vuln_DA-zero_think/,YES
+VulTrial-486,DA,instruct,zero-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,DA-vuln-two-zero_shot,results/rq2_cross_architecture/nemotron_49b_vuln_DA-zero_instruct/,YES
+VulTrial-486,DA,thinking,zero-shot,Super-49B,results/runpod_vuln_incremental_pod5_raw/runpod_vuln_incremental/,YES,DA-vuln-two-zero_shot,results/rq2_cross_architecture/nemotron_49b_vuln_DA-zero_think/,YES
+VulTrial-486,MA,instruct,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,MA-vuln-four-few_shot,results/runpod_rq2_pod7/results/,YES
+VulTrial-486,MA,thinking,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,MA-vuln-four-few_shot,results/runpod_rq2_pod8/,YES
+VulTrial-486,MA,instruct,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,MA-vuln-four-few_shot,results/runpod_rq2_pod3/,YES
+VulTrial-486,MA,thinking,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,MA-vuln-four-few_shot,results/runpod_rq2_pod4/,YES
+VulTrial-486,MA,instruct,few-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,MA-vuln-four-few_shot,results/rq2_cross_architecture/nemotron_8b_vuln_MA-few_instruct/,YES
+VulTrial-486,MA,thinking,few-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,MA-vuln-four-few_shot,results/rq2_cross_architecture/nemotron_8b_vuln_MA-few_think/,YES
+VulTrial-486,MA,instruct,few-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,MA-vuln-four-few_shot,results/rq2_cross_architecture/nemotron_49b_vuln_MA-few_instruct/,YES
 VulTrial-486,MA,thinking,few-shot,Super-49B,results/runpod_vuln_incremental_pod7_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_MA-few_think/,YES
-VulTrial-486,MA,instruct,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod5/results/,YES
-VulTrial-486,MA,thinking,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod6/,YES
-VulTrial-486,MA,instruct,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod1/results/,YES
-VulTrial-486,MA,thinking,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rq2_pod2/,YES
-VulTrial-486,MA,instruct,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_MA-zero_instruct/,YES
-VulTrial-486,MA,thinking,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_MA-zero_think/,YES
-VulTrial-486,MA,instruct,zero-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_MA-zero_instruct/,YES
+VulTrial-486,MA,instruct,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,MA-vuln-four-zero_shot,results/runpod_rq2_pod5/results/,YES
+VulTrial-486,MA,thinking,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,MA-vuln-four-zero_shot,results/runpod_rq2_pod6/,YES
+VulTrial-486,MA,instruct,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,MA-vuln-four-zero_shot,results/runpod_rq2_pod1/results/,YES
+VulTrial-486,MA,thinking,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,MA-vuln-four-zero_shot,results/runpod_rq2_pod2/,YES
+VulTrial-486,MA,instruct,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,MA-vuln-four-zero_shot,results/rq2_cross_architecture/nemotron_8b_vuln_MA-zero_instruct/,YES
+VulTrial-486,MA,thinking,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,MA-vuln-four-zero_shot,results/rq2_cross_architecture/nemotron_8b_vuln_MA-zero_think/,YES
+VulTrial-486,MA,instruct,zero-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,MA-vuln-four-zero_shot,results/rq2_cross_architecture/nemotron_49b_vuln_MA-zero_instruct/,YES
 VulTrial-486,MA,thinking,zero-shot,Super-49B,results/runpod_vuln_incremental_pod5_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_MA-zero_think/,YES
-VulTrial-486,NoAgent,instruct,few-shot,Qwen3-30B,results/runpod_na486_raw/qwen30b_inst/results/,YES,,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,instruct,few-shot,Qwen3-30B,results/runpod_na486_raw/qwen30b_inst/results/,YES,NA-vuln-few_shot,N/A (full 486 run),N/A
 VulTrial-486,NoAgent,thinking,few-shot,Qwen3-30B,results/runpod_na486_raw/qwen30b_think_few_merged/,YES,,N/A (full 486 run),N/A
-VulTrial-486,NoAgent,instruct,few-shot,Qwen3-4B,results/runpod_na486_raw/qwen4b_inst/results/,YES,,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,instruct,few-shot,Qwen3-4B,results/runpod_na486_raw/qwen4b_inst/results/,YES,NA-vuln-few_shot,N/A (full 486 run),N/A
 VulTrial-486,NoAgent,thinking,few-shot,Qwen3-4B,results/runpod_na486_raw/qwen4b_think_few/results/,YES,,N/A (full 486 run),N/A
-VulTrial-486,NoAgent,instruct,few-shot,Nano-8B,results/runpod_na486_raw/nano8b_inst/results/,YES,,N/A (full 486 run),N/A
-VulTrial-486,NoAgent,thinking,few-shot,Nano-8B,results/runpod_na486_raw/nano8b_think/results/,YES,,N/A (full 486 run),N/A
-VulTrial-486,NoAgent,instruct,few-shot,Super-49B,results/runpod_na486_raw/super49b_inst/results/,YES,,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,instruct,few-shot,Nano-8B,results/runpod_na486_raw/nano8b_inst/results/,YES,NA-vuln-few_shot,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,thinking,few-shot,Nano-8B,results/runpod_na486_raw/nano8b_think/results/,YES,NA-vuln-few_shot,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,instruct,few-shot,Super-49B,results/runpod_na486_raw/super49b_inst/results/,YES,NA-vuln-few_shot,N/A (full 486 run),N/A
 VulTrial-486,NoAgent,thinking,few-shot,Super-49B,results/runpod_na486_raw/super49b_think_few/results/,YES,,N/A (full 486 run),N/A
-VulTrial-486,NoAgent,instruct,zero-shot,Qwen3-30B,results/runpod_na486_raw/qwen30b_inst/results/,YES,,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,instruct,zero-shot,Qwen3-30B,results/runpod_na486_raw/qwen30b_inst/results/,YES,NA-vuln-zero_shot,N/A (full 486 run),N/A
 VulTrial-486,NoAgent,thinking,zero-shot,Qwen3-30B,results/runpod_na486_raw/qwen30b_think_zero/results/,YES,,N/A (full 486 run),N/A
-VulTrial-486,NoAgent,instruct,zero-shot,Qwen3-4B,results/runpod_na486_raw/qwen4b_inst/results/,YES,,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,instruct,zero-shot,Qwen3-4B,results/runpod_na486_raw/qwen4b_inst/results/,YES,NA-vuln-zero_shot,N/A (full 486 run),N/A
 VulTrial-486,NoAgent,thinking,zero-shot,Qwen3-4B,results/runpod_na486_raw/qwen4b_think/results/,YES,,N/A (full 486 run),N/A
-VulTrial-486,NoAgent,instruct,zero-shot,Nano-8B,results/runpod_na486_raw/nano8b_inst/results/,YES,,N/A (full 486 run),N/A
-VulTrial-486,NoAgent,thinking,zero-shot,Nano-8B,results/runpod_na486_raw/nano8b_think/results/,YES,,N/A (full 486 run),N/A
-VulTrial-486,NoAgent,instruct,zero-shot,Super-49B,results/runpod_na486_raw/super49b_inst/results/,YES,,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,instruct,zero-shot,Nano-8B,results/runpod_na486_raw/nano8b_inst/results/,YES,NA-vuln-zero_shot,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,thinking,zero-shot,Nano-8B,results/runpod_na486_raw/nano8b_think/results/,YES,NA-vuln-zero_shot,N/A (full 486 run),N/A
+VulTrial-486,NoAgent,instruct,zero-shot,Super-49B,results/runpod_na486_raw/super49b_inst/results/,YES,NA-vuln-zero_shot,N/A (full 486 run),N/A
 VulTrial-486,NoAgent,thinking,zero-shot,Super-49B,results/runpod_na486_raw/super49b_think_zero/results/,YES,,N/A (full 486 run),N/A
-VulTrial-486,SA,instruct,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rerun/codecarbon_baseline_sa-few/,YES
-VulTrial-486,SA,thinking,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rerun/codecarbon_thinking_sa-few/,YES
-VulTrial-486,SA,instruct,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rerun/codecarbon_baseline_sa-few/,YES
-VulTrial-486,SA,thinking,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rerun/codecarbon_thinking_sa-few/,YES
-VulTrial-486,SA,instruct,few-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_SA-few_instruct/,YES
-VulTrial-486,SA,thinking,few-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_SA-few_thinking/,YES
-VulTrial-486,SA,instruct,few-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_SA-few_instruct/,YES
-VulTrial-486,SA,thinking,few-shot,Super-49B,results/runpod_vuln_incremental_pod5_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_SA-few_thinking/,YES
-VulTrial-486,SA,instruct,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rerun/codecarbon_baseline_sa-zero/,YES
-VulTrial-486,SA,thinking,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,,results/runpod_rerun/codecarbon_thinking_sa-zero/,YES
-VulTrial-486,SA,instruct,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rerun/codecarbon_baseline_sa-zero/,YES
-VulTrial-486,SA,thinking,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,,results/runpod_rerun/codecarbon_thinking_sa-zero/,YES
-VulTrial-486,SA,instruct,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_SA-zero_instruct/,YES
-VulTrial-486,SA,thinking,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_8b_vuln_SA-zero_thinking/,YES
-VulTrial-486,SA,instruct,zero-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_SA-zero_instruct/,YES
-VulTrial-486,SA,thinking,zero-shot,Super-49B,results/runpod_vuln_incremental_pod5_raw/runpod_vuln_incremental/,YES,,results/rq2_cross_architecture/nemotron_49b_vuln_SA-zero_thinking/,YES
-VulTrial-384-incr,DA,instruct,few-shot,Qwen3-30B,results/runpod_870_batch3_raw/pod2_qwen30b/results/,YES,,,
+VulTrial-486,SA,instruct,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,Sa-few,results/runpod_rerun/codecarbon_baseline_sa-few/,YES
+VulTrial-486,SA,thinking,few-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,Sa-few,results/runpod_rerun/codecarbon_thinking_sa-few/,YES
+VulTrial-486,SA,instruct,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,Sa-few,results/runpod_rerun/codecarbon_baseline_sa-few/,YES
+VulTrial-486,SA,thinking,few-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,Sa-few,results/runpod_rerun/codecarbon_thinking_sa-few/,YES
+VulTrial-486,SA,instruct,few-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,Sa-few,results/rq2_cross_architecture/nemotron_8b_vuln_SA-few_instruct/,YES
+VulTrial-486,SA,thinking,few-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,Sa-few,results/rq2_cross_architecture/nemotron_8b_vuln_SA-few_thinking/,YES
+VulTrial-486,SA,instruct,few-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,Sa-few,results/rq2_cross_architecture/nemotron_49b_vuln_SA-few_instruct/,YES
+VulTrial-486,SA,thinking,few-shot,Super-49B,results/runpod_vuln_incremental_pod5_raw/runpod_vuln_incremental/,YES,Sa-few,results/rq2_cross_architecture/nemotron_49b_vuln_SA-few_thinking/,YES
+VulTrial-486,SA,instruct,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,Sa-zero,results/runpod_rerun/codecarbon_baseline_sa-zero/,YES
+VulTrial-486,SA,thinking,zero-shot,Qwen3-30B,results/runpod_vuln_incremental_pod1_raw/runpod_vuln_incremental/,YES,Sa-zero,results/runpod_rerun/codecarbon_thinking_sa-zero/,YES
+VulTrial-486,SA,instruct,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,Sa-zero,results/runpod_rerun/codecarbon_baseline_sa-zero/,YES
+VulTrial-486,SA,thinking,zero-shot,Qwen3-4B,results/runpod_vuln_incremental_pod2_raw/runpod_vuln_incremental/,YES,Sa-zero,results/runpod_rerun/codecarbon_thinking_sa-zero/,YES
+VulTrial-486,SA,instruct,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod4_raw/runpod_vuln_incremental/,YES,Sa-zero,results/rq2_cross_architecture/nemotron_8b_vuln_SA-zero_instruct/,YES
+VulTrial-486,SA,thinking,zero-shot,Nano-8B,results/runpod_vuln_incremental_pod6_raw/runpod_vuln_incremental/,YES,Sa-zero,results/rq2_cross_architecture/nemotron_8b_vuln_SA-zero_thinking/,YES
+VulTrial-486,SA,instruct,zero-shot,Super-49B,results/runpod_vuln_incremental_pod3_raw/runpod_vuln_incremental/,YES,Sa-zero,results/rq2_cross_architecture/nemotron_49b_vuln_SA-zero_instruct/,YES
+VulTrial-486,SA,thinking,zero-shot,Super-49B,results/runpod_vuln_incremental_pod5_raw/runpod_vuln_incremental/,YES,Sa-zero,results/rq2_cross_architecture/nemotron_49b_vuln_SA-zero_thinking/,YES
+VulTrial-384-incr,DA,instruct,few-shot,Qwen3-30B,results/runpod_870_batch3_raw/pod2_qwen30b/results/,YES,DA-vuln-two-few_shot,,
 VulTrial-384-incr,DA,thinking,few-shot,Qwen3-30B,results/runpod_870_batch4_raw/pod2_qwen30b_few/results/,YES,,,
-VulTrial-384-incr,DA,instruct,few-shot,Qwen3-4B,results/runpod_870_batch3_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,DA,thinking,few-shot,Qwen3-4B,results/runpod_870_batch4_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,DA,instruct,few-shot,Nano-8B,results/runpod_870_batch3_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,DA,thinking,few-shot,Nano-8B,results/runpod_870_batch4_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,DA,instruct,few-shot,Super-49B,results/runpod_870_batch3_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,DA,thinking,few-shot,Super-49B,results/runpod_870_batch4_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,DA,instruct,zero-shot,Qwen3-30B,results/runpod_870_batch3_raw/pod2_qwen30b/results/,YES,,,
+VulTrial-384-incr,DA,instruct,few-shot,Qwen3-4B,results/runpod_870_batch3_raw/pod1_qwen4b/results/,YES,DA-vuln-two-few_shot,,
+VulTrial-384-incr,DA,thinking,few-shot,Qwen3-4B,results/runpod_870_batch4_raw/pod1_qwen4b/results/,YES,DA-vuln-two-few_shot,,
+VulTrial-384-incr,DA,instruct,few-shot,Nano-8B,results/runpod_870_batch3_raw/pod3_nano8b/results/,YES,DA-vuln-two-few_shot,,
+VulTrial-384-incr,DA,thinking,few-shot,Nano-8B,results/runpod_870_batch4_raw/pod3_nano8b/results/,YES,DA-vuln-two-few_shot,,
+VulTrial-384-incr,DA,instruct,few-shot,Super-49B,results/runpod_870_batch3_raw/pod4_super49b/results/,YES,DA-vuln-two-few_shot,,
+VulTrial-384-incr,DA,thinking,few-shot,Super-49B,results/runpod_870_batch4_raw/pod4_super49b/results/,YES,DA-vuln-two-few_shot,,
+VulTrial-384-incr,DA,instruct,zero-shot,Qwen3-30B,results/runpod_870_batch3_raw/pod2_qwen30b/results/,YES,DA-vuln-two-zero_shot,,
 VulTrial-384-incr,DA,thinking,zero-shot,Qwen3-30B,results/runpod_870_batch4_raw/pod2_qwen30b/results/,YES,,,
-VulTrial-384-incr,DA,instruct,zero-shot,Qwen3-4B,results/runpod_870_batch3_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,DA,thinking,zero-shot,Qwen3-4B,results/runpod_870_batch4_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,DA,instruct,zero-shot,Nano-8B,results/runpod_870_batch3_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,DA,thinking,zero-shot,Nano-8B,results/runpod_870_batch4_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,DA,instruct,zero-shot,Super-49B,results/runpod_870_batch3_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,DA,thinking,zero-shot,Super-49B,results/runpod_870_batch4_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,MA,instruct,few-shot,Qwen3-30B,results/runpod_870_batch5_raw/pod2_qwen30b/results/,YES,,,
+VulTrial-384-incr,DA,instruct,zero-shot,Qwen3-4B,results/runpod_870_batch3_raw/pod1_qwen4b/results/,YES,DA-vuln-two-zero_shot,,
+VulTrial-384-incr,DA,thinking,zero-shot,Qwen3-4B,results/runpod_870_batch4_raw/pod1_qwen4b/results/,YES,DA-vuln-two-zero_shot,,
+VulTrial-384-incr,DA,instruct,zero-shot,Nano-8B,results/runpod_870_batch3_raw/pod3_nano8b/results/,YES,DA-vuln-two-zero_shot,,
+VulTrial-384-incr,DA,thinking,zero-shot,Nano-8B,results/runpod_870_batch4_raw/pod3_nano8b/results/,YES,DA-vuln-two-zero_shot,,
+VulTrial-384-incr,DA,instruct,zero-shot,Super-49B,results/runpod_870_batch3_raw/pod4_super49b/results/,YES,DA-vuln-two-zero_shot,,
+VulTrial-384-incr,DA,thinking,zero-shot,Super-49B,results/runpod_870_batch4_raw/pod4_super49b/results/,YES,DA-vuln-two-zero_shot,,
+VulTrial-384-incr,MA,instruct,few-shot,Qwen3-30B,results/runpod_870_batch5_raw/pod2_qwen30b/results/,YES,MA-vuln-four-few_shot,,
 VulTrial-384-incr,MA,thinking,few-shot,Qwen3-30B,results/runpod_870_batch6_raw/pod2_qwen30b_few/results/,YES,,,
-VulTrial-384-incr,MA,instruct,few-shot,Qwen3-4B,results/runpod_870_batch5_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,MA,thinking,few-shot,Qwen3-4B,results/runpod_870_batch6_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,MA,instruct,few-shot,Nano-8B,results/runpod_870_batch5_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,MA,thinking,few-shot,Nano-8B,results/runpod_870_batch6_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,MA,instruct,few-shot,Super-49B,results/runpod_870_batch5_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,MA,thinking,few-shot,Super-49B,results/runpod_870_batch6_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,MA,instruct,zero-shot,Qwen3-30B,results/runpod_870_batch5_raw/pod2_qwen30b/results/,YES,,,
+VulTrial-384-incr,MA,instruct,few-shot,Qwen3-4B,results/runpod_870_batch5_raw/pod1_qwen4b/results/,YES,MA-vuln-four-few_shot,,
+VulTrial-384-incr,MA,thinking,few-shot,Qwen3-4B,results/runpod_870_batch6_raw/pod1_qwen4b/results/,YES,MA-vuln-four-few_shot,,
+VulTrial-384-incr,MA,instruct,few-shot,Nano-8B,results/runpod_870_batch5_raw/pod3_nano8b/results/,YES,MA-vuln-four-few_shot,,
+VulTrial-384-incr,MA,thinking,few-shot,Nano-8B,results/runpod_870_batch6_raw/pod3_nano8b/results/,YES,MA-vuln-four-few_shot,,
+VulTrial-384-incr,MA,instruct,few-shot,Super-49B,results/runpod_870_batch5_raw/pod4_super49b/results/,YES,MA-vuln-four-few_shot,,
+VulTrial-384-incr,MA,thinking,few-shot,Super-49B,results/runpod_870_batch6_raw/pod4_super49b/results/,YES,MA-vuln-four-few_shot,,
+VulTrial-384-incr,MA,instruct,zero-shot,Qwen3-30B,results/runpod_870_batch5_raw/pod2_qwen30b/results/,YES,MA-vuln-four-zero_shot,,
 VulTrial-384-incr,MA,thinking,zero-shot,Qwen3-30B,results/runpod_870_batch6_raw/pod2_qwen30b/results/,YES,,,
-VulTrial-384-incr,MA,instruct,zero-shot,Qwen3-4B,results/runpod_870_batch5_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,MA,thinking,zero-shot,Qwen3-4B,results/runpod_870_batch6_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,MA,instruct,zero-shot,Nano-8B,results/runpod_870_batch5_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,MA,thinking,zero-shot,Nano-8B,results/runpod_870_batch6_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,MA,instruct,zero-shot,Super-49B,results/runpod_870_batch5_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,MA,thinking,zero-shot,Super-49B,results/runpod_870_batch6_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,NoAgent,instruct,few-shot,Qwen3-30B,results/runpod_870_batch7_raw/pod2_qwen30b/results/,YES,,,
+VulTrial-384-incr,MA,instruct,zero-shot,Qwen3-4B,results/runpod_870_batch5_raw/pod1_qwen4b/results/,YES,MA-vuln-four-zero_shot,,
+VulTrial-384-incr,MA,thinking,zero-shot,Qwen3-4B,results/runpod_870_batch6_raw/pod1_qwen4b/results/,YES,MA-vuln-four-zero_shot,,
+VulTrial-384-incr,MA,instruct,zero-shot,Nano-8B,results/runpod_870_batch5_raw/pod3_nano8b/results/,YES,MA-vuln-four-zero_shot,,
+VulTrial-384-incr,MA,thinking,zero-shot,Nano-8B,results/runpod_870_batch6_raw/pod3_nano8b/results/,YES,MA-vuln-four-zero_shot,,
+VulTrial-384-incr,MA,instruct,zero-shot,Super-49B,results/runpod_870_batch5_raw/pod4_super49b/results/,YES,MA-vuln-four-zero_shot,,
+VulTrial-384-incr,MA,thinking,zero-shot,Super-49B,results/runpod_870_batch6_raw/pod4_super49b/results/,YES,MA-vuln-four-zero_shot,,
+VulTrial-384-incr,NoAgent,instruct,few-shot,Qwen3-30B,results/runpod_870_batch7_raw/pod2_qwen30b/results/,YES,NA-vuln-few_shot,,
 VulTrial-384-incr,NoAgent,thinking,few-shot,Qwen3-30B,results/runpod_870_batch8_raw/pod2_qwen30b_few/results/,YES,,,
-VulTrial-384-incr,NoAgent,instruct,few-shot,Qwen3-4B,results/runpod_870_batch7_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,NoAgent,thinking,few-shot,Qwen3-4B,results/runpod_870_batch8_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,NoAgent,instruct,few-shot,Nano-8B,results/runpod_870_batch7_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,NoAgent,thinking,few-shot,Nano-8B,results/runpod_870_batch8_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,NoAgent,instruct,few-shot,Super-49B,results/runpod_870_batch7_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,NoAgent,thinking,few-shot,Super-49B,results/runpod_870_batch8_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,NoAgent,instruct,zero-shot,Qwen3-30B,results/runpod_870_batch7_raw/pod2_qwen30b/results/,YES,,,
+VulTrial-384-incr,NoAgent,instruct,few-shot,Qwen3-4B,results/runpod_870_batch7_raw/pod1_qwen4b/results/,YES,NA-vuln-few_shot,,
+VulTrial-384-incr,NoAgent,thinking,few-shot,Qwen3-4B,results/runpod_870_batch8_raw/pod1_qwen4b/results/,YES,NA-vuln-few_shot,,
+VulTrial-384-incr,NoAgent,instruct,few-shot,Nano-8B,results/runpod_870_batch7_raw/pod3_nano8b/results/,YES,NA-vuln-few_shot,,
+VulTrial-384-incr,NoAgent,thinking,few-shot,Nano-8B,results/runpod_870_batch8_raw/pod3_nano8b/results/,YES,NA-vuln-few_shot,,
+VulTrial-384-incr,NoAgent,instruct,few-shot,Super-49B,results/runpod_870_batch7_raw/pod4_super49b/results/,YES,NA-vuln-few_shot,,
+VulTrial-384-incr,NoAgent,thinking,few-shot,Super-49B,results/runpod_870_batch8_raw/pod4_super49b/results/,YES,NA-vuln-few_shot,,
+VulTrial-384-incr,NoAgent,instruct,zero-shot,Qwen3-30B,results/runpod_870_batch7_raw/pod2_qwen30b/results/,YES,NA-vuln-zero_shot,,
 VulTrial-384-incr,NoAgent,thinking,zero-shot,Qwen3-30B,results/runpod_870_batch8_raw/pod2_qwen30b/results/,YES,,,
-VulTrial-384-incr,NoAgent,instruct,zero-shot,Qwen3-4B,results/runpod_870_batch7_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,NoAgent,thinking,zero-shot,Qwen3-4B,results/runpod_870_batch8_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,NoAgent,instruct,zero-shot,Nano-8B,results/runpod_870_batch7_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,NoAgent,thinking,zero-shot,Nano-8B,results/runpod_870_batch8_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,NoAgent,instruct,zero-shot,Super-49B,results/runpod_870_batch7_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,NoAgent,thinking,zero-shot,Super-49B,results/runpod_870_batch8_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,SA,instruct,few-shot,Qwen3-30B,results/runpod_870_batch1_raw/pod2_qwen30b/results/,YES,,,
-VulTrial-384-incr,SA,thinking,few-shot,Qwen3-30B,results/runpod_870_batch2_raw/pod2_qwen30b/results/,YES,,,
-VulTrial-384-incr,SA,instruct,few-shot,Qwen3-4B,results/runpod_870_batch1_raw/pod1_qwen4b/results/,YES,,,
+VulTrial-384-incr,NoAgent,instruct,zero-shot,Qwen3-4B,results/runpod_870_batch7_raw/pod1_qwen4b/results/,YES,NA-vuln-zero_shot,,
+VulTrial-384-incr,NoAgent,thinking,zero-shot,Qwen3-4B,results/runpod_870_batch8_raw/pod1_qwen4b/results/,YES,NA-vuln-zero_shot,,
+VulTrial-384-incr,NoAgent,instruct,zero-shot,Nano-8B,results/runpod_870_batch7_raw/pod3_nano8b/results/,YES,NA-vuln-zero_shot,,
+VulTrial-384-incr,NoAgent,thinking,zero-shot,Nano-8B,results/runpod_870_batch8_raw/pod3_nano8b/results/,YES,NA-vuln-zero_shot,,
+VulTrial-384-incr,NoAgent,instruct,zero-shot,Super-49B,results/runpod_870_batch7_raw/pod4_super49b/results/,YES,NA-vuln-zero_shot,,
+VulTrial-384-incr,NoAgent,thinking,zero-shot,Super-49B,results/runpod_870_batch8_raw/pod4_super49b/results/,YES,NA-vuln-zero_shot,,
+VulTrial-384-incr,SA,instruct,few-shot,Qwen3-30B,results/runpod_870_batch1_raw/pod2_qwen30b/results/,YES,Sa-few,,
+VulTrial-384-incr,SA,thinking,few-shot,Qwen3-30B,results/runpod_870_batch2_raw/pod2_qwen30b/results/,YES,Sa-few,,
+VulTrial-384-incr,SA,instruct,few-shot,Qwen3-4B,results/runpod_870_batch1_raw/pod1_qwen4b/results/,YES,Sa-few,,
 VulTrial-384-incr,SA,thinking,few-shot,Qwen3-4B,results/runpod_870_batch2_raw/pod1_qwen4b_resumed/results/,YES,,,
-VulTrial-384-incr,SA,instruct,few-shot,Nano-8B,results/runpod_870_batch1_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,SA,thinking,few-shot,Nano-8B,results/runpod_870_batch2_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,SA,instruct,few-shot,Super-49B,results/runpod_870_batch1_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,SA,thinking,few-shot,Super-49B,results/runpod_870_batch2_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,SA,instruct,zero-shot,Qwen3-30B,results/runpod_870_batch1_raw/pod2_qwen30b/results/,YES,,,
-VulTrial-384-incr,SA,thinking,zero-shot,Qwen3-30B,results/runpod_870_batch2_raw/pod2_qwen30b/results/,YES,,,
-VulTrial-384-incr,SA,instruct,zero-shot,Qwen3-4B,results/runpod_870_batch1_raw/pod1_qwen4b/results/,YES,,,
+VulTrial-384-incr,SA,instruct,few-shot,Nano-8B,results/runpod_870_batch1_raw/pod3_nano8b/results/,YES,Sa-few,,
+VulTrial-384-incr,SA,thinking,few-shot,Nano-8B,results/runpod_870_batch2_raw/pod3_nano8b/results/,YES,Sa-few,,
+VulTrial-384-incr,SA,instruct,few-shot,Super-49B,results/runpod_870_batch1_raw/pod4_super49b/results/,YES,Sa-few,,
+VulTrial-384-incr,SA,thinking,few-shot,Super-49B,results/runpod_870_batch2_raw/pod4_super49b/results/,YES,Sa-few,,
+VulTrial-384-incr,SA,instruct,zero-shot,Qwen3-30B,results/runpod_870_batch1_raw/pod2_qwen30b/results/,YES,Sa-zero,,
+VulTrial-384-incr,SA,thinking,zero-shot,Qwen3-30B,results/runpod_870_batch2_raw/pod2_qwen30b/results/,YES,Sa-zero,,
+VulTrial-384-incr,SA,instruct,zero-shot,Qwen3-4B,results/runpod_870_batch1_raw/pod1_qwen4b/results/,YES,Sa-zero,,
 VulTrial-384-incr,SA,thinking,zero-shot,Qwen3-4B,results/runpod_870_batch2_raw/pod1_qwen4b/results/,YES,,,
-VulTrial-384-incr,SA,instruct,zero-shot,Nano-8B,results/runpod_870_batch1_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,SA,thinking,zero-shot,Nano-8B,results/runpod_870_batch2_raw/pod3_nano8b/results/,YES,,,
-VulTrial-384-incr,SA,instruct,zero-shot,Super-49B,results/runpod_870_batch1_raw/pod4_super49b/results/,YES,,,
-VulTrial-384-incr,SA,thinking,zero-shot,Super-49B,results/runpod_870_batch2_raw/pod4_super49b/results/,YES,,,
+VulTrial-384-incr,SA,instruct,zero-shot,Nano-8B,results/runpod_870_batch1_raw/pod3_nano8b/results/,YES,Sa-zero,,
+VulTrial-384-incr,SA,thinking,zero-shot,Nano-8B,results/runpod_870_batch2_raw/pod3_nano8b/results/,YES,Sa-zero,,
+VulTrial-384-incr,SA,instruct,zero-shot,Super-49B,results/runpod_870_batch1_raw/pod4_super49b/results/,YES,Sa-zero,,
+VulTrial-384-incr,SA,thinking,zero-shot,Super-49B,results/runpod_870_batch2_raw/pod4_super49b/results/,YES,Sa-zero,,
 HumanEval,DA,instruct,few-shot,Nano-8B,results/rq2_cross_architecture/nemotron_8b_code_DA-few_instruct,YES,DA-code-few,,
 HumanEval,DA,instruct,few-shot,Qwen3-30B,results/runpod_rq2_pod7/results,YES,DA-code-few,,
 HumanEval,DA,instruct,few-shot,Qwen3-4B,results/runpod_rq2_pod3,YES,DA-code-few,,

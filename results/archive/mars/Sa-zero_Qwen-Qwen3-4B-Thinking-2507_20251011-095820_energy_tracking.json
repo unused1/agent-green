@@ -1,0 +1,48 @@
+{
+  "total_emissions": 0.731428433688061,
+  "sessions": 6,
+  "session_history": [
+    {
+      "session": 1,
+      "start_time": "2025-10-11T09:58:20.081811",
+      "end_time": "2025-10-11T10:20:07.268771",
+      "samples_processed": 386,
+      "session_emissions": 0.03271465809413386
+    },
+    {
+      "session": 2,
+      "start_time": "2025-10-11T10:20:16.936596",
+      "end_time": "2025-10-11T10:25:24.759582",
+      "samples_processed": 379,
+      "session_emissions": 0.007677964292298166
+    },
+    {
+      "session": 3,
+      "start_time": "2025-10-11T10:25:44.761362",
+      "end_time": "2025-10-11T10:43:56.442146",
+      "samples_processed": 378,
+      "session_emissions": 0.02732049402085497
+    },
+    {
+      "session": 4,
+      "start_time": "2025-10-11T10:44:27.922930",
+      "end_time": "2025-10-11T10:55:41.369671",
+      "samples_processed": 361,
+      "session_emissions": 0.016841599737981945
+    },
+    {
+      "session": 5,
+      "start_time": "2025-10-11T11:02:31.203770",
+      "end_time": "2025-10-11T17:58:49.413517",
+      "samples_processed": 352,
+      "session_emissions": 0.6257062893456947
+    },
+    {
+      "session": 6,
+      "start_time": "2025-10-11T18:08:06.204345",
+      "end_time": "2025-10-11T18:22:13.070483",
+      "samples_processed": 1,
+      "session_emissions": 0.021167428197097257
+    }
+  ]
+}

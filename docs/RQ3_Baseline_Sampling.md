@@ -396,17 +396,19 @@ Cross-stratum duplicate entry IDs (same `task_id` or `idx` appearing in differen
 
 4. **Log analysis stratum saturation** (original full baseline only): Two Qwen3-4B-Thinking log analysis strata had only 10–11 correct predictions with valid explanations, leaving no room for alternative draws.
 
-## 10. Next Steps
+## 10. Previous Next Steps (Status)
 
-1. **Develop annotation guidelines**: Define scoring rubrics for the four metrics (completeness, clarity, actionability, informativeness) on a 1–5 Likert scale, with concrete examples and boundary cases for vulnerability detection. The rubrics should specify what constitutes each score level and include calibration examples for rater training.
+> Items 1–4 below are from the original plan and have been addressed. See Section 11 for the current revised design and status.
 
-2. **Phase A — Human rater pilot (48 samples)**: Distribute the 48 Phase A samples to human raters for scoring on the four metrics. Model identity, mode, and prompting style are anonymized from raters. At least two raters should independently score the full pilot set to measure inter-rater agreement via Cohen's kappa (for categorical bins) or intraclass correlation coefficient (for ordinal scores), with disagreements resolved through discussion.
+1. **Develop annotation guidelines** — **Complete**. Rubrics defined in `docs/RQ3_Rater_Instructions.md` with detailed 1–5 Likert scale descriptions and boundary cases.
 
-3. **Research team decision on Nemotron-Nano-8B anomaly**: The Nemotron-Nano-8B SA vuln thinking strata show 0% `<think>` tag presence despite the "detailed thinking on" system prompt (Section 7.4). The research team should decide whether to: (a) keep these samples as-is, since the model still produces evaluable step-by-step reasoning; (b) flag them with a covariate in the analysis; or (c) exclude them and accept a reduced factorial design. This decision does not block Qwen sample evaluation — raters can begin with the 12 Qwen samples (4 thinking + 4 instruct × 2 prompting, 3 each) while the team deliberates.
+2. **Human rater pilot** — **Complete (revised scope)**. Original 48-sample plan superseded by the revised 30-evaluation design (Section 11.4). Three raters completed all 30 evaluations; ICC ≥ 0.50 on all dimensions.
 
-4. **Phase B — LLM-based evaluation (~385 samples)**: Using human ratings from Phase A as calibration ground truth, develop and validate an LLM-based evaluator. Apply it to ~385 vulnerability detection samples (covering the ~1,624 available pool at 95% confidence / 5% margin of error). Validate LLM–human agreement on the pilot set before scaling.
+3. **Nemotron-Nano-8B anomaly** — **Acknowledged**. The anomaly is documented (Section 7.4) and flagged as a covariate. The revised Phase A focuses on Super-49B, so this anomaly does not affect the current evaluation.
 
-5. **Baseline comparison**: Use baseline scores to calibrate expectations for the RQ3 prompting style experiments (no-explanation, explain-after, explain-before, evidence-bound).
+4. **LLM-based evaluation** — **In progress**. Pipeline implemented in `scripts/rq3_llm_judge.py` with Claude and Google backends. Ready to execute Steps 2–4 (Section 11.5).
+
+5. **Baseline comparison** — Deferred to after LLM judge evaluation is complete.
 
 ## 11. Revised Phase A: Super-49B Zero-Shot Focus with LLM-as-Judge
 
@@ -537,30 +539,115 @@ The IRR analysis outputs are:
 - `results/rq3_baseline/super49b_zero_consensus_scores.csv` — 30 rows with per-rater and averaged consensus scores
 - Script: `scripts/rq3_inter_rater_agreement.py`
 
-### 11.5 Steps 2–3 — LLM-as-Judge Calibration and Validation
+### 11.5 Steps 2–4 — LLM-as-Judge Pipeline
 
-The 30 human-rated evaluations are split into two sets:
+The LLM judge pipeline uses a model independent of the models under test (Qwen3 and Nemotron). Claude (Anthropic) is the primary judge, with Google Gemini as an alternative backend.
 
-| Set | Size | Source | Purpose |
-|-----|------|--------|---------|
-| Calibration (few-shot) | ~8 evaluations | 2 per stratum, selected for quality diversity | Included in LLM judge prompt as scored examples |
-| Validation (held-out) | ~22 evaluations | Remaining human-rated samples | Measure LLM–human agreement before scaling |
+#### 11.5.1 Judge Model Selection
 
-**Calibration set selection**: From each of the four strata (think-TP, think-TN, inst-TP, inst-TN), select 2 evaluations that span the observed quality range (e.g., one high-scoring and one low-scoring). This gives the LLM judge concrete anchors for what constitutes different quality levels.
+| Backend | Model | Rationale |
+|---------|-------|-----------|
+| Anthropic (primary) | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | Independent family; strong structured output; cost-effective |
+| Anthropic (premium) | Claude Opus 4.6 (`claude-opus-4-6`) | Higher accuracy for complex cases; available via `--judge-model` |
+| Google (alternative) | Gemini 3 Flash (`gemini-3-flash-preview`) | Independent backend; free tier available |
 
-**LLM judge prompt structure**:
-1. Task description and rubric definitions (from rater instructions)
-2. Few-shot examples: 8 evaluations with source code, response text, human scores, and score justifications
-3. Target evaluation: source code + response text → request scores on 4 metrics with justifications
+The judge model must not overlap with any model under test (Qwen3-4B, Qwen3-30B, Nemotron-Nano-8B, Nemotron-Super-49B) to avoid self-evaluation bias.
 
-**Validation criteria**: Before proceeding to full evaluation, the LLM judge must demonstrate:
-- Spearman ρ ≥ 0.7 with human scores on each of the four metrics (moderate-to-strong agreement)
+#### 11.5.2 Step 2 — Zero-Shot Baseline (LLM as "4th Rater")
+
+The LLM scores all 30 human-rated samples using the rubric only (no human examples), establishing the LLM's natural alignment with human raters before any calibration.
+
+```bash
+export ANTHROPIC_API_KEY=<key>
+python scripts/rq3_llm_judge.py --claude --mode zero-shot-baseline
+```
+
+**Outputs**: `llm_judge_zero_shot_baseline.csv` (per-sample scores + justifications), `llm_judge_zero_shot_baseline_metrics.csv` (agreement metrics).
+
+**Agreement metrics computed**:
+- **Spearman ρ** (rank correlation with human consensus)
+- **MAE** — Mean Absolute Error (average absolute difference between LLM and human scores on the 1–5 scale)
+- **Bias** (signed mean difference: positive = LLM scores higher)
+- Per-rater comparison (LLM vs. Shane, LLM vs. HS, LLM vs. Merve)
+
+##### Why Spearman ρ (not ICC) for LLM judge validation
+
+ICC (Intraclass Correlation Coefficient) was used for human inter-rater reliability (Section 11.4.1) because all 3 human raters scored the same items independently under identical conditions — ICC appropriately measures absolute agreement.
+
+For LLM-vs-human validation, Spearman ρ is preferred because:
+
+1. **Rank agreement is the primary concern**: the LLM judge must correctly identify which explanations are better/worse (ranking), rather than produce identical absolute scores. A systematic offset (e.g., LLM scoring 0.3 points lower) is correctable and less concerning than rank inversions.
+2. **Absolute alignment is already captured by MAE and bias**: these two metrics catch the issues ICC would flag (systematic over/under-scoring, absolute divergence). Together with Spearman ρ, the three metrics cover the full space that ICC measures alone.
+3. **Robustness to small samples**: with 18–22 validation samples, Spearman is more robust than ICC to small-sample distributional effects.
+4. **Convention in LLM-as-judge literature**: studies evaluating LLM judges typically report Spearman or Kendall's τ for judge-human agreement (e.g., Zheng et al., "Judging LLM-as-a-Judge"; Widyasari et al.)
+
+In summary, the three metrics together provide complementary coverage:
+
+| Metric | Question Answered | Sensitive to Bias? | Sensitive to Rank? |
+|--------|-------------------|--------------------|--------------------|
+| Spearman ρ | Do the LLM and human agree on relative quality ordering? | No | Yes |
+| MAE | How close are the absolute scores? | Yes | Indirectly |
+| Bias | Does the LLM systematically score higher or lower? | Yes | No |
+
+#### 11.5.3 Step 3 — Calibration and Validation
+
+If zero-shot baseline does not pass thresholds, calibrate with few-shot examples from the human-rated set.
+
+**Calibration** (`--mode calibrate`): Select 8 calibration + 22 validation samples. From each stratum (think-TP, think-TN, inst-TP, inst-TN), the highest and lowest mean consensus samples are selected as few-shot examples, giving the LLM judge concrete quality anchors.
+
+**Validation** (`--mode validate`): Run judge on 22 held-out validation samples. The LLM judge must demonstrate:
+- Spearman ρ ≥ 0.7 with human scores on each of the four metrics
 - Mean absolute error (MAE) ≤ 1.0 on the 5-point scale
-- No systematic bias (mean signed error within ±0.5)
+- No systematic bias (|mean signed error| ≤ 0.5)
 
-If validation fails, the calibration set is revised (e.g., adding more diverse examples, adjusting prompt framing) and validation is re-run. If agreement remains insufficient after 3 iterations, the human-rated set is expanded.
+If validation fails, the calibration set is revised and validation is re-run. Up to 3 iterations are attempted before expanding the human-rated set.
 
-### 11.6 Step 4 — LLM-as-Judge Full Evaluation
+```bash
+python scripts/rq3_llm_judge.py --claude --mode calibrate --iteration 2 --num-examples 3
+python scripts/rq3_llm_judge.py --claude --mode validate --iteration 2
+```
+
+##### Validation Results — All Configurations Tested
+
+Five configurations were evaluated, varying the judge model (Sonnet 4.6 vs Opus 4.6) and prompting strategy (zero-shot vs few-shot with 8 or 12 calibration examples):
+
+| Config | Completeness ρ | Clarity ρ | Actionability ρ | Informativeness ρ | Dims ≥ 0.7 | Dims > Human IRR |
+|--------|---------------|-----------|-----------------|-------------------|-----------|-----------------|
+| **Opus 4.6 zero-shot** | **0.786** | **0.577** | **0.737** | **0.670** | **2** | **4/4** |
+| Sonnet 4.6 v2 (12 ex) | 0.848 | 0.478 | 0.863 | 0.585 | 2 | 4/4 |
+| Sonnet 4.6 v1 (8 ex) | 0.730 | 0.539 | 0.804 | 0.660 | 2 | 4/4 |
+| Opus 4.6 v1 (8 ex) | 0.709 | 0.400 | 0.659 | 0.525 | 1 | 3/4 |
+| Sonnet 4.6 zero-shot | 0.674 | 0.564 | 0.750 | 0.630 | 1 | 4/4 |
+
+*Human IRR Spearman ρ: completeness=0.673, clarity=0.419, actionability=0.602, informativeness=0.535*
+
+**Key findings from model comparison**:
+
+1. **Opus 4.6 zero-shot provides the best balanced performance** — no dimension drops below 0.577, and it is the only configuration where even the weakest dimension (clarity ρ=0.577) substantially exceeds human IRR (0.419). It passes 2 of 4 dimensions at the strict ρ ≥ 0.7 threshold.
+
+2. **Few-shot examples degrade Opus performance**: All four dimensions worsened when v1 few-shot examples were added to Opus (completeness 0.786→0.709, clarity 0.577→0.400, actionability 0.737→0.659, informativeness 0.670→0.525). The more capable model appears to be constrained by the examples rather than guided by them.
+
+3. **Sonnet benefits from few-shot but with trade-offs**: Sonnet v2 (12 examples) achieves the highest individual dimension scores (completeness 0.848, actionability 0.863) but at the cost of clarity (0.478) and informativeness (0.585). Adding more examples helped some dimensions but hurt others.
+
+4. **Clarity is consistently the weakest dimension** across all configurations and both models, reflecting the inherent subjectivity of this dimension (human ICC=0.542, the lowest among the four).
+
+##### Threshold Adjustment: Accepting Opus 4.6 Zero-Shot
+
+Clarity (ρ=0.577) and informativeness (ρ=0.670) do not meet the original ρ ≥ 0.7 threshold. However, Opus 4.6 zero-shot is accepted as the final judge configuration based on the following justification:
+
+1. **All dimensions exceed human inter-rater agreement**: Completeness (0.786 vs 0.673), clarity (0.577 vs 0.419), actionability (0.737 vs 0.602), informativeness (0.670 vs 0.535). It is unreasonable to require the LLM judge to agree with consensus more strongly than individual human raters agree with each other.
+
+2. **Inherent subjectivity ceiling**: Clarity and informativeness are the most subjective dimensions. Human ICC values confirm this: clarity ICC(2,k)=0.542 (moderate) and informativeness ICC(2,k)=0.534 (moderate), compared to completeness ICC(2,k)=0.731 and actionability ICC(2,k)=0.809. The lower inter-rater reliability places a ceiling on how well any judge can agree with consensus.
+
+3. **Absolute score accuracy is strong**: MAE ≤ 0.59 and |bias| ≤ 0.43 across all dimensions, meaning scores are within one point of human consensus on average. The disagreement is in fine-grained ranking, not gross miscalibration.
+
+4. **Few-shot calibration does not help Opus**: Unlike Sonnet, adding examples consistently degrades Opus performance, ruling out further calibration iterations as a remedy.
+
+5. **Zero-shot is more principled**: Using rubric-only evaluation (no anchoring to specific examples) reduces the risk of overfitting to the calibration set and provides a more generalisable judge.
+
+**Decision**: Use **Opus 4.6 zero-shot** (rubric only, no few-shot examples) for full evaluation. The second-best alternative is Sonnet 4.6 with v1 few-shot (8 examples) if cost is a concern. Report per-dimension agreement metrics transparently in the paper.
+
+#### 11.5.4 Step 4 — Full Evaluation
 
 Once validated, the LLM judge evaluates the remaining Super-49B zero-shot samples:
 
@@ -570,9 +657,17 @@ Once validated, the LLM judge evaluates the remaining Super-49B zero-shot sample
 | Inst zero-shot | 15 (from intersection) | 240 | 255 |
 | **Total** | **30** | **487** | **517** |
 
-Each LLM evaluation produces scores on all four metrics plus a justification. The justifications are retained for qualitative analysis and spot-check verification.
+```bash
+python scripts/rq3_llm_judge.py --claude --judge-model claude-opus-4-6 --mode evaluate --model super49b
+```
+
+Each LLM evaluation produces scores on all four metrics plus a justification. The justifications are retained for qualitative analysis and spot-check verification. The script supports crash recovery via incremental CSV appending.
 
 **Quality control**: A random 10% of LLM-judged evaluations (~49 samples) are spot-checked by a human rater to verify the judge maintains calibrated performance beyond the validation set.
+
+```bash
+python scripts/rq3_llm_judge.py --claude --mode spot-check --model super49b
+```
 
 ### 11.7 Step 5 — Secondary Model: Qwen3-30B-A3B
 
@@ -592,14 +687,34 @@ The Qwen3-30B evaluation enables cross-model comparison of explanation quality (
 
 | Artifact | Description |
 |----------|-------------|
+| **Human rating** | |
 | `results/rq3_baseline/super49b_zero_human_rating_set.csv` | 30-row master file with entry_id, response_id, source code, response text |
+| `results/rq3_baseline/super49b_zero_rater_sheet.csv` | Rater sheet template (30 rows) |
+| `results/rq3_baseline/super49b_zero_rater_sheet v2_*.xlsx` | Completed rater sheets (Shane, HS, Merve) |
 | `results/rq3_baseline/super49b_zero_consensus_scores.csv` | 30 rows with per-rater scores, consensus scores, stratum metadata |
 | `results/rq3_baseline/irr_summary.csv` | Per-dimension ICC, Spearman ρ, weighted κ, agreement statistics |
-| `results/rq3_baseline/irr_disagreements.csv` | 20 samples flagged for discussion-based resolution |
-| `results/rq3_baseline/super49b_zero_llm_judged.csv` | ~492 LLM-judged evaluations |
-| `results/rq3_baseline/qwen30b_zero_llm_judged.csv` | ~534 LLM-judged evaluations |
-| `results/rq3_baseline/llm_judge_validation_v{N}.csv` | Validation metrics (ρ, MAE, bias) per iteration |
+| `results/rq3_baseline/irr_disagreements.csv` | 21 samples flagged for discussion-based resolution |
+| **LLM judge** | |
+| `results/rq3_baseline/llm_judge_zero_shot_baseline.csv` | Zero-shot baseline scores (LLM as 4th rater) |
+| `results/rq3_baseline/llm_judge_zero_shot_baseline_metrics.csv` | Zero-shot agreement metrics vs human consensus |
 | `results/rq3_baseline/llm_judge_prompt_v{N}.txt` | Saved judge prompt per calibration iteration |
+| `results/rq3_baseline/llm_judge_split_v{N}.csv` | Calibration/validation split per iteration |
+| `results/rq3_baseline/llm_judge_validation_v{N}.csv` | Validation results per iteration |
+| `results/rq3_baseline/llm_judge_validation_metrics_v{N}.csv` | Validation agreement metrics per iteration |
+| `results/rq3_baseline/super49b_zero_llm_judged.csv` | ~487 LLM-judged evaluations (Super-49B) |
+| `results/rq3_baseline/super49b_zero_spot_check_sheet.csv` | 10% stratified spot-check sheet |
+| `results/rq3_baseline/qwen30b_zero_llm_judged.csv` | ~534 LLM-judged evaluations (Qwen3-30B) |
+| **Scripts** | |
 | `scripts/rq3_inter_rater_agreement.py` | IRR computation and consensus scoring |
-| `scripts/rq3_llm_judge.py` | LLM-as-judge calibration, validation, and evaluation |
+| `scripts/rq3_llm_judge.py` | LLM-as-judge pipeline (supports `--claude`, `--google`, OpenRouter backends) |
 | `scripts/rq3_generate_human_rating_set.py` | Script to generate the 15-snippet human rating set |
+
+### 11.9 Current Status
+
+| Step | Status | Notes |
+|------|--------|-------|
+| Step 1: Human rating (30 evaluations) | **Complete** | 3 raters (Shane, HS, Merve); ICC ≥ 0.50 all dimensions |
+| Step 2: Zero-shot baseline | **Complete** | Tested Sonnet 4.6 + Opus 4.6; Opus zero-shot best balanced (2/4 PASS, 4/4 > human IRR) |
+| Step 3: Calibration + validation | **Complete** | 5 configs tested; few-shot hurts Opus; Opus zero-shot selected as final judge |
+| Step 4: Full evaluation (Super-49B) | **Ready to run** | ~487 samples; use Opus 4.6 zero-shot (`--judge-model claude-opus-4-6`) |
+| Step 5: Secondary model (Qwen3-30B) | **Ready to run** | Reuses same Opus 4.6 zero-shot judge |

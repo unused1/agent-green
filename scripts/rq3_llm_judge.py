@@ -9,7 +9,22 @@ Modes:
     --mode evaluate   Run judge on full pool (~487 Super-49B or ~534 Qwen3-30B)
     --mode spot-check Generate 10% stratified sample for human verification
 
+Backends:
+    --claude   Use Anthropic API directly (requires ANTHROPIC_API_KEY)
+    --google   Use Google AI Studio / Gemini (requires GOOGLE_API_KEY)
+    (default)  Use OpenRouter (requires OPENROUTER_API_KEY)
+
 Usage:
+    # Claude (direct Anthropic API — recommended)
+    export ANTHROPIC_API_KEY=<key>
+    python scripts/rq3_llm_judge.py --claude --mode zero-shot-baseline
+    python scripts/rq3_llm_judge.py --claude --judge-model claude-opus-4-20250514 --mode evaluate --model super49b
+
+    # Google Gemini
+    export GOOGLE_API_KEY=<key>
+    python scripts/rq3_llm_judge.py --google --mode zero-shot-baseline
+
+    # OpenRouter (legacy, routes to any model)
     export OPENROUTER_API_KEY=<key>
     python scripts/rq3_llm_judge.py --mode zero-shot-baseline
     python scripts/rq3_llm_judge.py --mode calibrate
@@ -48,10 +63,19 @@ DIMENSIONS = ["completeness", "clarity", "actionability", "informativeness"]
 STRATA = ["think-TP", "think-TN", "inst-TP", "inst-TN"]
 
 # Judge model — independent family from study models (Qwen/Nemotron)
-DEFAULT_JUDGE_MODEL = "anthropic/claude-sonnet-4"
-JUDGE_MODEL = os.getenv("RQ3_JUDGE_MODEL", DEFAULT_JUDGE_MODEL)
+# Backend-specific defaults
+JUDGE_MODELS = {
+    "openrouter": "anthropic/claude-sonnet-4.6",
+    "claude": "claude-sonnet-4-6",
+    "google": "gemini-3-flash-preview",
+}
+JUDGE_BACKEND = "openrouter"  # default, overridden by --claude / --google flags
+JUDGE_MODEL = os.getenv("RQ3_JUDGE_MODEL", "")  # env override for any backend
+
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_API_BASE = os.getenv("OPENROUTER_API_BASE", "https://openrouter.ai/api/v1")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 
 # Validation thresholds
 MIN_SPEARMAN = 0.7
@@ -171,19 +195,19 @@ def prepare_rater_response_text(response_text: str, response_id: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# OpenRouter API
+# LLM API backends
 # ---------------------------------------------------------------------------
-def call_llm_judge(
-    system_prompt: str,
-    user_prompt: str,
-    model: str = None,
-    temperature: float = 0.0,
-    max_retries: int = 3,
-) -> Optional[str]:
-    """Call the LLM judge via OpenRouter API.
+def _get_judge_model() -> str:
+    """Return the effective judge model for the active backend."""
+    if JUDGE_MODEL:
+        return JUDGE_MODEL
+    return JUDGE_MODELS.get(JUDGE_BACKEND, JUDGE_MODELS["openrouter"])
 
-    Returns the assistant's response text, or None on failure.
-    """
+
+def _call_openrouter(
+    system_prompt: str, user_prompt: str, temperature: float, max_retries: int,
+) -> Optional[str]:
+    """Call judge via OpenRouter (OpenAI-compatible API)."""
     try:
         import openai
     except ImportError:
@@ -192,11 +216,8 @@ def call_llm_judge(
     if not OPENROUTER_API_KEY:
         sys.exit("ERROR: OPENROUTER_API_KEY environment variable not set")
 
-    model = model or JUDGE_MODEL
-    client = openai.OpenAI(
-        api_key=OPENROUTER_API_KEY,
-        base_url=OPENROUTER_API_BASE,
-    )
+    model = _get_judge_model()
+    client = openai.OpenAI(api_key=OPENROUTER_API_KEY, base_url=OPENROUTER_API_BASE)
 
     for attempt in range(max_retries):
         try:
@@ -217,6 +238,97 @@ def call_llm_judge(
                 print(f"  Retrying in {wait}s...")
                 time.sleep(wait)
     return None
+
+
+def _call_claude(
+    system_prompt: str, user_prompt: str, temperature: float, max_retries: int,
+) -> Optional[str]:
+    """Call judge via Anthropic API directly."""
+    try:
+        from anthropic import Anthropic
+    except ImportError:
+        sys.exit("ERROR: anthropic package required. Install with: pip install anthropic")
+
+    if not ANTHROPIC_API_KEY:
+        sys.exit("ERROR: ANTHROPIC_API_KEY environment variable not set")
+
+    model = _get_judge_model()
+    client = Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    for attempt in range(max_retries):
+        try:
+            response = client.messages.create(
+                model=model,
+                max_tokens=2000,
+                temperature=temperature,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_prompt}],
+            )
+            return "".join(
+                block.text for block in response.content if block.type == "text"
+            )
+        except Exception as e:
+            print(f"  API error (attempt {attempt + 1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                wait = 2 ** (attempt + 1)
+                print(f"  Retrying in {wait}s...")
+                time.sleep(wait)
+    return None
+
+
+def _call_google(
+    system_prompt: str, user_prompt: str, temperature: float, max_retries: int,
+) -> Optional[str]:
+    """Call judge via Google AI Studio (Gemini) API."""
+    try:
+        from google import genai
+    except ImportError:
+        sys.exit("ERROR: google-genai package required. Install with: pip install google-genai")
+
+    if not GOOGLE_API_KEY:
+        sys.exit("ERROR: GOOGLE_API_KEY environment variable not set")
+
+    model = _get_judge_model()
+    client = genai.Client(api_key=GOOGLE_API_KEY)
+
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=f"{system_prompt}\n\n{user_prompt}",
+                config=genai.types.GenerateContentConfig(
+                    temperature=temperature,
+                    max_output_tokens=2000,
+                ),
+            )
+            return response.text
+        except Exception as e:
+            print(f"  API error (attempt {attempt + 1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                wait = 2 ** (attempt + 1)
+                print(f"  Retrying in {wait}s...")
+                time.sleep(wait)
+    return None
+
+
+def call_llm_judge(
+    system_prompt: str,
+    user_prompt: str,
+    model: str = None,
+    temperature: float = 0.0,
+    max_retries: int = 3,
+) -> Optional[str]:
+    """Call the LLM judge via the configured backend.
+
+    Backend is set by --claude, --google flags or defaults to OpenRouter.
+    """
+    dispatch = {
+        "openrouter": _call_openrouter,
+        "claude": _call_claude,
+        "google": _call_google,
+    }
+    fn = dispatch.get(JUDGE_BACKEND, _call_openrouter)
+    return fn(system_prompt, user_prompt, temperature, max_retries)
 
 
 def parse_judge_response(response_text: str) -> Optional[dict]:
@@ -467,9 +579,9 @@ def mode_zero_shot_baseline():
     # Load all 30 human-rated samples
     consensus_df = load_consensus_scores()
     rater_sheet = pd.read_csv(RATER_SHEET_CSV)
+    # ground_truth_label already in consensus_df; only merge columns not already present
     consensus_df = consensus_df.merge(
-        rater_sheet[["sample_id", "source_code", "response_text", "cwe", "cve_desc",
-                      "ground_truth_label"]],
+        rater_sheet[["sample_id", "source_code", "response_text", "cwe", "cve_desc"]],
         on="sample_id",
         how="left",
     )
@@ -611,9 +723,16 @@ def mode_zero_shot_baseline():
 # ---------------------------------------------------------------------------
 # Mode: calibrate
 # ---------------------------------------------------------------------------
-def mode_calibrate(iteration: int = 1):
-    """Select calibration/validation split and build prompt template."""
-    print(f"=== CALIBRATION (iteration {iteration}) ===\n")
+def mode_calibrate(iteration: int = 1, num_per_stratum: int = 2):
+    """Select calibration/validation split and build prompt template.
+
+    Args:
+        iteration: Calibration iteration number.
+        num_per_stratum: Number of calibration samples per stratum (default 2).
+            Samples are selected to span the quality range: lowest, highest,
+            and (if >2) evenly spaced between them.
+    """
+    print(f"=== CALIBRATION (iteration {iteration}, {num_per_stratum} per stratum) ===\n")
 
     consensus_df = load_consensus_scores()
     print(f"Loaded {len(consensus_df)} consensus scores")
@@ -623,14 +742,14 @@ def mode_calibrate(iteration: int = 1):
 
     # Load response text from rater sheet for few-shot examples
     rater_sheet = pd.read_csv(RATER_SHEET_CSV)
-    # Join response text and source code to consensus by sample_id
+    # ground_truth_label already in consensus_df; only merge columns not already present
     consensus_df = consensus_df.merge(
         rater_sheet[["sample_id", "source_code", "response_text"]],
         on="sample_id",
         how="left",
     )
 
-    # Select 2 calibration samples per stratum (highest + lowest mean consensus)
+    # Select calibration samples per stratum spanning the quality range
     consensus_df["mean_consensus"] = consensus_df[
         [f"{d}_consensus" for d in DIMENSIONS]
     ].mean(axis=1)
@@ -638,14 +757,24 @@ def mode_calibrate(iteration: int = 1):
     calibration_ids = []
     for stratum in STRATA:
         sub = consensus_df[consensus_df["stratum"] == stratum].copy()
-        if len(sub) < 2:
-            print(f"  WARNING: stratum {stratum} has only {len(sub)} samples")
+        if len(sub) <= num_per_stratum:
+            print(f"  WARNING: stratum {stratum} has only {len(sub)} samples, using all")
             calibration_ids.extend(sub["sample_id"].tolist())
             continue
-        # Pick highest and lowest mean consensus
+        # Sort by mean consensus and pick evenly spaced samples
         sorted_sub = sub.sort_values("mean_consensus")
-        calibration_ids.append(sorted_sub.iloc[0]["sample_id"])  # lowest
-        calibration_ids.append(sorted_sub.iloc[-1]["sample_id"])  # highest
+        n = len(sorted_sub)
+        if num_per_stratum == 1:
+            indices = [n // 2]  # middle
+        elif num_per_stratum == 2:
+            indices = [0, n - 1]  # lowest + highest
+        else:
+            # Evenly spaced: always include lowest and highest
+            indices = [int(round(i * (n - 1) / (num_per_stratum - 1)))
+                       for i in range(num_per_stratum)]
+            indices = sorted(set(indices))  # deduplicate if rounding collides
+        for idx in indices:
+            calibration_ids.append(sorted_sub.iloc[idx]["sample_id"])
 
     calibration_df = consensus_df[consensus_df["sample_id"].isin(calibration_ids)].copy()
     validation_df = consensus_df[~consensus_df["sample_id"].isin(calibration_ids)].copy()
@@ -716,9 +845,9 @@ def mode_validate(iteration: int = 1):
     # Load consensus scores and rater sheet
     consensus_df = load_consensus_scores()
     rater_sheet = pd.read_csv(RATER_SHEET_CSV)
+    # ground_truth_label already in consensus_df; only merge columns not already present
     consensus_df = consensus_df.merge(
-        rater_sheet[["sample_id", "source_code", "response_text", "cwe", "cve_desc",
-                      "ground_truth_label"]],
+        rater_sheet[["sample_id", "source_code", "response_text", "cwe", "cve_desc"]],
         on="sample_id",
         how="left",
     )
@@ -805,64 +934,133 @@ def mode_validate(iteration: int = 1):
 # Mode: evaluate
 # ---------------------------------------------------------------------------
 def mode_evaluate(model_key: str, iteration: int = 1):
-    """Run judge on the full evaluation pool for a model."""
-    print(f"=== FULL EVALUATION: {model_key} (prompt v{iteration}) ===\n")
+    """Run judge on the intersection pool (both modes correct) for VulTrial-870.
 
-    # Load prompt
-    prompt_path = os.path.join(OUTPUT_DIR, f"llm_judge_prompt_v{iteration}.txt")
-    if not os.path.exists(prompt_path):
-        sys.exit(f"ERROR: Prompt file not found: {prompt_path}")
-    with open(prompt_path) as f:
-        system_prompt = f.read()
+    Evaluates only samples where BOTH thinking and instruct modes produced
+    correct predictions on the same code snippet, enabling paired comparison.
+    Loads from both VulTrial-486 and VulTrial-384-incr directories.
 
-    # Load source JSONL files
-    think_jsonl, inst_jsonl = find_source_files(model_key)
-    print(f"Thinking JSONL: {think_jsonl}")
-    print(f"Instruct JSONL: {inst_jsonl}")
+    For zero-shot judge (iteration=0), uses the rubric-only system prompt.
+    For few-shot (iteration>=1), uses the calibrated prompt.
+    """
+    judge_label = "zero-shot" if iteration == 0 else f"prompt v{iteration}"
+    print(f"=== FULL EVALUATION: {model_key} ({judge_label}) ===\n")
 
-    think_data = load_jsonl(think_jsonl)
-    inst_data = load_jsonl(inst_jsonl)
-    print(f"Thinking records: {len(think_data)}")
+    # Load system prompt
+    if iteration == 0:
+        # Zero-shot: build rubric-only prompt
+        rubric_text = load_rubric_text()
+        system_prompt = build_system_prompt(rubric_text)
+        print(f"Using zero-shot rubric-only prompt ({len(system_prompt)} chars)")
+    else:
+        prompt_path = os.path.join(OUTPUT_DIR, f"llm_judge_prompt_v{iteration}.txt")
+        if not os.path.exists(prompt_path):
+            sys.exit(f"ERROR: Prompt file not found: {prompt_path}")
+        with open(prompt_path) as f:
+            system_prompt = f.read()
+        print(f"Using few-shot prompt v{iteration} ({len(system_prompt)} chars)")
+
+    # Load source JSONL files from BOTH 486 and 384-incr (VulTrial-870)
+    results_dir = os.path.join(PROJECT_ROOT, "results")
+    vuln_dirs = [
+        os.path.join(results_dir, "runpod_vuln_486"),
+        os.path.join(results_dir, "runpod_vuln_384_incremental"),
+    ]
+
+    model_map = {
+        "super49b": "Nemotron-Super-49B",
+        "qwen30b": "Qwen3-30B-A3B",
+    }
+    model_name = model_map.get(model_key)
+    if not model_name:
+        sys.exit(f"ERROR: Unknown model key '{model_key}'")
+
+    import glob as glob_mod
+
+    think_data = {}
+    inst_data = {}
+    for vuln_dir in vuln_dirs:
+        for jsonl_path in sorted(glob_mod.glob(os.path.join(vuln_dir, "Sa-zero_*_detailed_results.jsonl"))):
+            fname = os.path.basename(jsonl_path)
+            if model_name == "Nemotron-Super-49B" and "Super-49B" not in fname:
+                continue
+            if model_name == "Qwen3-30B-A3B" and "Qwen3-30B" not in fname:
+                continue
+            is_think = "_thinking_" in fname
+            target = think_data if is_think else inst_data
+            records = load_jsonl(jsonl_path)
+            for idx, rec in records.items():
+                if idx not in target:
+                    target[idx] = rec
+            print(f"  Loaded {len(records)} from {os.path.basename(jsonl_path)}")
+
+    print(f"\nThinking records: {len(think_data)}")
     print(f"Instruct records: {len(inst_data)}")
 
-    # For Super-49B, exclude already human-rated samples
-    human_rated_ids = set()
-    if model_key == "super49b":
-        consensus_df = load_consensus_scores()
-        for _, row in consensus_df.iterrows():
-            eid = int(row["entry_id"])
-            rid = row["response_id"]
-            human_rated_ids.add((eid, rid))
-        print(f"Human-rated samples to skip: {len(human_rated_ids)}")
+    # Find intersection: both modes correct on same snippet
+    common_idx = set(think_data.keys()) & set(inst_data.keys())
+    intersection_ids = set()
+    for idx in common_idx:
+        t_rec = think_data[idx]
+        i_rec = inst_data[idx]
+        t_gt = int(t_rec.get("ground_truth", t_rec.get("target", -1)))
+        t_pred = int(t_rec.get("vuln", -1))
+        i_gt = int(i_rec.get("ground_truth", i_rec.get("target", -1)))
+        i_pred = int(i_rec.get("vuln", -1))
+        if t_pred == t_gt and i_pred == i_gt:
+            intersection_ids.add(idx)
 
-    # Load VulTrial dataset for source code and metadata
-    vuln_dataset_path = os.path.join(
-        PROJECT_ROOT, "vuln_database", "VulTrial_486_samples_balanced.jsonl"
-    )
+    # Count TP/TN in intersection
+    tp_count = sum(1 for idx in intersection_ids
+                   if int(think_data[idx].get("ground_truth",
+                          think_data[idx].get("target", 0))) == 1)
+    tn_count = len(intersection_ids) - tp_count
+    print(f"Intersection (both correct): {len(intersection_ids)} snippets "
+          f"({tp_count} TP, {tn_count} TN)")
+    print(f"Total evaluations: {len(intersection_ids) * 2}")
+
+    # Save intersection list for reference
+    intersection_path = os.path.join(OUTPUT_DIR, f"{model_key}_870_intersection.csv")
+    with open(intersection_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["entry_id", "ground_truth", "label"])
+        writer.writeheader()
+        for idx in sorted(intersection_ids):
+            gt = int(think_data[idx].get("ground_truth",
+                     think_data[idx].get("target", 0)))
+            writer.writerow({"entry_id": idx, "ground_truth": gt,
+                             "label": "TP" if gt == 1 else "TN"})
+    print(f"Intersection list saved: {intersection_path}")
+
+    # Include all intersection samples (including human-rated) for complete evaluation
+    human_rated_ids = set()  # no exclusions — LLM judges all samples
+
+    # Load VulTrial datasets for source code and metadata
     vuln_ds = {}
-    with open(vuln_dataset_path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            rec = json.loads(line)
-            vuln_ds[int(rec["idx"])] = rec
+    for ds_path in [
+        os.path.join(PROJECT_ROOT, "vuln_database", "VulTrial_486_samples_balanced.jsonl"),
+        os.path.join(PROJECT_ROOT, "vuln_database", "VulTrial_384_incremental.jsonl"),
+    ]:
+        if os.path.exists(ds_path):
+            with open(ds_path) as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    rec = json.loads(line)
+                    idx = int(rec.get("idx", rec.get("id", -1)))
+                    if idx not in vuln_ds:
+                        vuln_ds[idx] = rec
 
-    # Build evaluation queue
+    # Build evaluation queue (intersection only)
     eval_queue = []
     for mode_label, data_dict, resp_id in [
         ("thinking", think_data, "think"),
         ("instruct", inst_data, "inst"),
     ]:
-        for eid, rec in sorted(data_dict.items()):
+        for eid in sorted(intersection_ids):
             if (eid, resp_id) in human_rated_ids:
                 continue
-            gt = int(rec["ground_truth"])
-            pred = int(rec["vuln"])
-            # Only evaluate correct predictions
-            if pred != gt:
-                continue
-
+            rec = data_dict[eid]
+            gt = int(rec.get("ground_truth", rec.get("target", 0)))
             response_text = rec.get("reasoning", "")
             rater_text = prepare_rater_response_text(response_text, resp_id)
 
@@ -884,14 +1082,17 @@ def mode_evaluate(model_key: str, iteration: int = 1):
             })
 
     print(f"\nEvaluation queue: {len(eval_queue)} samples")
-    # Breakdown by stratum
     from collections import Counter
     strat_counts = Counter(e["stratum"] for e in eval_queue)
     for s in sorted(strat_counts):
         print(f"  {s}: {strat_counts[s]}")
 
-    # Output file (incremental)
-    output_path = os.path.join(OUTPUT_DIR, f"{model_key}_zero_llm_judged.csv")
+    # Output file — include judge model short name for disambiguation
+    judge_short = _get_judge_model().replace("claude-", "").replace("-20250514", "")
+    iter_tag = "zeroshot" if iteration == 0 else f"v{iteration}"
+    output_path = os.path.join(
+        OUTPUT_DIR, f"{model_key}_870_llm_judged_{judge_short}_{iter_tag}.csv"
+    )
     fieldnames = [
         "entry_id", "response_id", "ground_truth", "ground_truth_label", "stratum",
     ] + [f"{d}_score" for d in DIMENSIONS] + [f"{d}_justification" for d in DIMENSIONS]
@@ -1072,12 +1273,52 @@ def main():
         default=1,
         help="Calibration iteration number (default: 1)",
     )
+
+    # Backend selection (mutually exclusive)
+    backend_group = parser.add_mutually_exclusive_group()
+    backend_group.add_argument(
+        "--claude",
+        action="store_true",
+        help="Use Anthropic API directly (requires ANTHROPIC_API_KEY)",
+    )
+    backend_group.add_argument(
+        "--google",
+        action="store_true",
+        help="Use Google AI Studio / Gemini (requires GOOGLE_API_KEY)",
+    )
+
+    parser.add_argument(
+        "--judge-model",
+        default=None,
+        help="Override judge model ID (e.g., claude-sonnet-4-20250514, gemini-2.5-flash)",
+    )
+    parser.add_argument(
+        "--num-examples",
+        type=int,
+        default=2,
+        help="Number of calibration examples per stratum (default: 2, i.e., 8 total)",
+    )
+
     args = parser.parse_args()
+
+    # Configure backend
+    global JUDGE_BACKEND, JUDGE_MODEL
+    if args.claude:
+        JUDGE_BACKEND = "claude"
+    elif args.google:
+        JUDGE_BACKEND = "google"
+
+    if args.judge_model:
+        JUDGE_MODEL = args.judge_model
+
+    effective_model = _get_judge_model()
+    print(f"Judge backend: {JUDGE_BACKEND}")
+    print(f"Judge model:   {effective_model}\n")
 
     if args.mode == "zero-shot-baseline":
         mode_zero_shot_baseline()
     elif args.mode == "calibrate":
-        mode_calibrate(iteration=args.iteration)
+        mode_calibrate(iteration=args.iteration, num_per_stratum=args.num_examples)
     elif args.mode == "validate":
         mode_validate(iteration=args.iteration)
     elif args.mode == "evaluate":

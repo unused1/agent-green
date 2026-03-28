@@ -221,8 +221,8 @@ Correct scores:
 {
     "completeness_score": 4.0,
     "clarity_score": 4.0,
-    "actionability_score": 4.5,
-    "informativeness_score": 3.5
+    "actionability_score": 4.67,
+    "informativeness_score": 3.67
 }
 
 --- Example 2 ---
@@ -309,12 +309,95 @@ Given the potential issue with the structure cast and its implications on memory
 Correct scores:
 {
     "completeness_score": 2.0,
-    "clarity_score": 3.5,
-    "actionability_score": 1.5,
-    "informativeness_score": 2.5
+    "clarity_score": 3.33,
+    "actionability_score": 1.67,
+    "informativeness_score": 2.33
 }
 
 --- Example 3 ---
+Ground truth: vulnerable
+Stratum: think-TP
+
+Source code:
+```
+void fmtutil_macbitmap_read_pixmap_only_fields(deark *c, dbuf *f, struct fmtutil_macbitmap_info *bi,
+	i64 pos)
+{
+	i64 pixmap_version;
+	i64 pack_size;
+	i64 plane_bytes;
+	i64 n;
+
+	de_dbg(c, "additional PixMap header fields, at %d", (int)pos);
+	de_dbg_indent(c, 1);
+
+	pixmap_version = dbuf_getu16be(f, pos+0);
+	de_dbg(c, "pixmap version: %d", (int)pixmap_version);
+
+	bi->packing_type = dbuf_getu16be(f, pos+2);
+	de_dbg(c, "packing type: %d", (int)bi->packing_type);
+
+	pack_size = dbuf_getu32be(f, pos+4);
+	de_dbg(c, "pixel data length: %d", (int)pack_size);
+
+	bi->hdpi = pict_read_fixed(f, pos+8);
+	bi->vdpi = pict_read_fixed(f, pos+12);
+	de_dbg(c, "dpi: %.2f"DE_CHAR_TIMES"%.2f", bi->hdpi, bi->vdpi);
+
+	bi->pixeltype = dbuf_getu16be(f, pos+16);
+	bi->pixelsize = dbuf_getu16be(f, pos+18);
+	bi->cmpcount = dbuf_getu16be(f, pos+20);
+	bi->cmpsize = dbuf_getu16be(f, pos+22);
+	de_dbg(c, "pixel type=%d, bits/pixel=%d, components/pixel=%d, bits/comp=%d",
+		(int)bi->pixeltype, (int)bi->pixelsize, (int)bi->cmpcount, (int)bi->cmpsize);
+
+	bi->pdwidth = (bi->rowbytes*8)/bi->pixelsize;
+	if(bi->pdwidth < bi->npwidth) {
+		bi->pdwidth = bi->npwidth;
+	}
+
+	plane_bytes = dbuf_getu32be(f, pos+24);
+	de_dbg(c, "plane bytes: %d", (int)plane_bytes);
+
+	bi->pmTable = (u32)dbuf_getu32be(f, pos+28);
+	de_dbg(c, "pmTable: 0x%08x", (unsigned int)bi->pmTable);
+
+	n = dbuf_getu32be(f, pos+32);
+	de_dbg(c, "pmReserved: 0x%08x", (unsigned int)n);
+
+	de_dbg_indent(c, -1);
+}
+```
+
+AI response to evaluate:
+"""
+(1) YES: Vulnerability detected.
+
+**Step-by-Step Explanation:**
+
+1. **Division by Zero Vulnerability:**
+   - The code calculates `bi->pdwidth = (bi->rowbytes * 8) / bi->pixelsize;`.
+   - `bi->pixelsize` is directly read from the input buffer at `pos+18` using `dbuf_getu16be(f, pos+18)`.
+   - If the input file specifies `pixelsize = 0`, this results in a division by zero, causing a crash or undefined behavior. This is a clear vulnerability (CVE-2021-3310 is an example of a similar issue in other software).
+
+2. **Potential Out-of-Bounds Reads:**
+   - The function reads data from the buffer at multiple offsets (e.g., `pos+0`, `pos+2`, ..., `pos+32`) without validating that the buffer has sufficient data. If the input file is truncated or malformed, these reads could access memory beyond the buffer's bounds, leading to information leaks or crashes.
+
+3. **Integer Overflow Risk:**
+   - The calculation `(bi->rowbytes * 8)` could overflow if `bi->rowbytes` is a 32-bit value (e.g., `rowbytes = 0x10000000` results in `0x80000000`, which overflows a 32-bit signed integer). While the code uses `i64` for some variables, the struct members (like `rowbytes`) may not, leading to potential overflows.
+
+**Conclusion:** The division by zero vulnerability is sufficient to classify the code as vulnerable. The lack of input validation and error checking for buffer bounds exacerbates the issue.
+"""
+
+Correct scores:
+{
+    "completeness_score": 4.67,
+    "clarity_score": 4.67,
+    "actionability_score": 3.33,
+    "informativeness_score": 4.0
+}
+
+--- Example 4 ---
 Ground truth: vulnerable
 Stratum: think-TP
 
@@ -402,110 +485,10 @@ Answer: (1) YES
 
 Correct scores:
 {
-    "completeness_score": 2.0,
-    "clarity_score": 3.5,
+    "completeness_score": 2.33,
+    "clarity_score": 3.33,
     "actionability_score": 2.0,
-    "informativeness_score": 2.5
-}
-
---- Example 4 ---
-Ground truth: vulnerable
-Stratum: think-TP
-
-Source code:
-```
-Status BuildXlaCompilationCache(DeviceBase* device, FunctionLibraryRuntime* flr,
-                                const XlaPlatformInfo& platform_info,
-                                XlaCompilationCache** cache) {
-  if (platform_info.xla_device_metadata()) {
-    *cache = new XlaCompilationCache(
-        platform_info.xla_device_metadata()->client(),
-        platform_info.xla_device_metadata()->jit_device_type());
-    return Status::OK();
-  }
-
-  auto platform =
-      se::MultiPlatformManager::PlatformWithId(platform_info.platform_id());
-  if (!platform.ok()) {
-    return platform.status();
-  }
-
-  StatusOr<xla::Compiler*> compiler_for_platform =
-      xla::Compiler::GetForPlatform(platform.ValueOrDie());
-  if (!compiler_for_platform.ok()) {
-    // In some rare cases (usually in unit tests with very small clusters) we
-    // may end up transforming an XLA cluster with at least one GPU operation
-    // (which would normally force the cluster to be compiled using XLA:GPU)
-    // into an XLA cluster with no GPU operations (i.e. containing only CPU
-    // operations).  Such a cluster can fail compilation (in way that
-    // MarkForCompilation could not have detected) if the CPU JIT is not linked
-    // in.
-    //
-    // So bail out of _XlaCompile in this case, and let the executor handle the
-    // situation for us.
-    const Status& status = compiler_for_platform.status();
-    if (status.code() == error::NOT_FOUND) {
-      return errors::Unimplemented("Could not find compiler for platform ",
-                                   platform.ValueOrDie()->Name(), ": ",
-                                   status.ToString());
-    }
-  }
-
-  xla::LocalClientOptions client_options;
-  client_options.set_platform(platform.ValueOrDie());
-  client_options.set_intra_op_parallelism_threads(
-      device->tensorflow_cpu_worker_threads()->num_threads);
-
-  string allowed_gpus =
-      flr->config_proto()->gpu_options().visible_device_list();
-  TF_ASSIGN_OR_RETURN(absl::optional<std::set<int>> gpu_ids,
-                      ParseVisibleDeviceList(allowed_gpus));
-  client_options.set_allowed_devices(gpu_ids);
-
-  auto client = xla::ClientLibrary::GetOrCreateLocalClient(client_options);
-  if (!client.ok()) {
-    return client.status();
-  }
-  const XlaOpRegistry::DeviceRegistration* registration;
-  if (!XlaOpRegistry::GetCompilationDevice(platform_info.device_type().type(),
-                                           &registration)) {
-    return errors::InvalidArgument("No JIT device registered for ",
-                                   platform_info.device_type().type());
-  }
-  *cache = new XlaCompilationCache(
-      client.ValueOrDie(), DeviceType(registration->compilation_device_name));
-  return Status::OK();
-}
-```
-
-AI response to evaluate:
-"""
-(1) YES: Vulnerability detected.
-
-**Step-by-Step Explanation:**
-
-1. **Null Pointer Dereference in `device` Parameter:**
-   - The function uses `device->tensorflow_cpu_worker_threads()->num_threads` without checking if `device` is null. If a caller passes a null `device`, this results in a null pointer dereference, leading to a crash. This is a **denial-of-service (DoS) vulnerability**.
-
-2. **Potential Null Pointer Dereference in `tensorflow_cpu_worker_threads()`:**
-   - Even if `device` is non-null, the code assumes `device->tensorflow_cpu_worker_threads()` returns a valid pointer. If this method returns null (e.g., due to an uninitialized object), accessing `num_threads` would cause another null pointer dereference. While the likelihood depends on the implementation of `DeviceBase`, the code lacks validation here.
-
-3. **Lack of Input Validation:**
-   - The function does not validate critical inputs (`device`, `platform_info`, `flr`) before use. For example, `flr->config_proto()` is used without checking if `flr` is null, which could lead to further vulnerabilities if `flr` is controlled by an attacker.
-
-4. **Error Handling Gaps:**
-   - While the code checks some error conditions (e.g., `platform.ok()`, `compiler_for_platform.ok()`), it does not handle all possible failure modes (e.g., null pointers in `device` or its members). This incomplete error handling exacerbates the risk of crashes or undefined behavior.
-
-**Conclusion:**  
-The code contains vulnerabilities due to unchecked null pointers and lack of input validation, which could be exploited to cause crashes or undefined behavior. Thus, the answer is **YES**.
-"""
-
-Correct scores:
-{
-    "completeness_score": 4.0,
-    "clarity_score": 4.5,
-    "actionability_score": 3.5,
-    "informativeness_score": 4.0
+    "informativeness_score": 2.67
 }
 
 --- Example 5 ---
@@ -631,8 +614,8 @@ The provided code snippet appears to be securely written, following best practic
 
 Correct scores:
 {
-    "completeness_score": 4.5,
-    "clarity_score": 4.5,
+    "completeness_score": 4.33,
+    "clarity_score": 4.33,
     "actionability_score": 2.0,
     "informativeness_score": 4.0
 }
@@ -795,10 +778,10 @@ Based on the step-by-step analysis, **no obvious vulnerabilities** were detected
 
 Correct scores:
 {
-    "completeness_score": 3.5,
-    "clarity_score": 3.0,
+    "completeness_score": 3.33,
+    "clarity_score": 3.33,
     "actionability_score": 2.0,
-    "informativeness_score": 2.5
+    "informativeness_score": 3.0
 }
 
 --- Example 7 ---
@@ -1098,8 +1081,8 @@ The code includes robust checks to prevent integer overflows, ensures memory all
 
 Correct scores:
 {
-    "completeness_score": 4.5,
-    "clarity_score": 5.0,
+    "completeness_score": 4.33,
+    "clarity_score": 4.67,
     "actionability_score": 2.0,
     "informativeness_score": 4.0
 }

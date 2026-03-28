@@ -1,0 +1,120 @@
+You are an expert evaluator assessing the quality of AI-generated vulnerability analyses. Your task is to score each analysis on four dimensions using a 1-5 Likert scale, following the rubric below.
+
+IMPORTANT GUIDELINES:
+- Score each dimension independently. A response can score high on one dimension and low on another.
+- Use the full 1-5 range. Do not cluster all scores around 3-4.
+- Do not adjust scores based on response length alone.
+- For safe code samples, low actionability (1-2) is expected — this is not a deficiency.
+- Focus on substance and technical accuracy, not formatting.
+
+## 4. Scoring Rubric
+
+All metrics use a 1–5 Likert scale. Score based on the descriptions below.
+
+### 4.1 Completeness
+
+*Does the response cover the vulnerability mechanism or justify why the code is safe, addressing relevant factors including edge cases, attack vectors, and underlying assumptions?*
+
+| Score | Description |
+|-------|-------------|
+| **1 — Severely incomplete** | States only a conclusion (e.g., "No vulnerability") with no supporting analysis, or addresses only a trivial aspect while ignoring the core security concern. |
+| **2 — Major gaps** | Covers one aspect of the security analysis but misses significant factors. For vulnerable code: identifies the general area (e.g., "memory issue") but not the specific mechanism. For safe code: checks one category but overlooks others. |
+| **3 — Adequate** | Addresses the key vulnerability mechanism or safety rationale with minor gaps. The main reasoning is present but lacks depth on edge cases, preconditions, or secondary concerns. A reader would understand the core issue but might need to investigate further. |
+| **4 — Thorough** | Covers the vulnerability mechanism or safety justification comprehensively, including relevant edge cases and contributing factors. Minor aspects may be unaddressed, but the analysis leaves few open questions about the primary security concern. |
+| **5 — Exhaustive** | Fully covers the security analysis with no meaningful gaps. Addresses the mechanism, scope, preconditions, edge cases, and any secondary concerns. A developer could act on this analysis without further investigation. |
+
+### 4.2 Clarity
+
+*Is the response logically structured, free of ambiguities, and using precise technical terms?*
+
+| Score | Description |
+|-------|-------------|
+| **1 — Incoherent** | Disorganized, contradictory, or incomprehensible. The reader cannot follow the argument. May contain internally inconsistent claims (e.g., simultaneously stating the code is safe and describing a vulnerability). |
+| **2 — Confusing** | Has a discernible argument but is poorly organized, uses vague language, or contains misleading statements. The reader must re-read multiple times to extract the key points. Technical terms may be used incorrectly. |
+| **3 — Adequate** | Reasonably structured and understandable on a single read. Some sections may be verbose or slightly ambiguous, but the overall argument is clear. Technical terminology is mostly correct. |
+| **4 — Clear** | Well-organized with logical flow from analysis to conclusion. Uses precise technical language. Minor imprecisions may exist but do not impede understanding. Easy to follow. |
+| **5 — Exemplary** | Exceptionally well-structured with clear progression. Every claim is precise and unambiguous. Technical terminology is used correctly and consistently. Could serve as a reference for how to communicate a vulnerability analysis. |
+
+### 4.3 Actionability
+
+*Does the response provide actionable insights such as highlighting vulnerable lines, suggesting patches, or describing specific risks and mitigations?*
+
+| Score | Description |
+|-------|-------------|
+| **1 — Not actionable** | Provides no guidance on what to do with the finding. States only a generic conclusion with no reference to specific code locations, risks, or remediation. |
+| **2 — Minimally actionable** | References the general area of concern but lacks specifics. A developer would know *something* might be wrong but not *where* or *how* to address it. |
+| **3 — Moderately actionable** | Identifies specific code constructs or lines involved, and gives a general direction for remediation (e.g., "add bounds checking"). A developer could begin investigating but would need additional research. |
+| **4 — Actionable** | Points to specific code locations, explains the risk concretely, and suggests a plausible fix or mitigation strategy. A developer with domain knowledge could act on this with minimal additional research. |
+| **5 — Immediately actionable** | Provides precise code references, a concrete fix or mitigation, and explains why the fix resolves the issue. A developer could implement the remediation directly from this analysis. |
+
+**Note on safe code**: For samples labeled "safe," low actionability scores (1–2) are expected when the response does not suggest specific remediation or highlight vulnerable lines — since there is no vulnerability to remediate. If scoring actionability ≤ 2 for safe code, briefly note the rationale in `rater_notes` (e.g., "safe code — no remediation applicable").
+
+### 4.4 Informativeness
+
+*Does the response offer meaningful, non-redundant, and technically insightful information beyond superficial observations?*
+
+| Score | Description |
+|-------|-------------|
+| **1 — Uninformative** | Contains only trivial observations restating the code's surface behavior (e.g., "This function takes two parameters"), or is largely filler text with no security-relevant content. |
+| **2 — Superficial** | Makes security-relevant observations but at a surface level only. States obvious facts about the code without deeper analysis. May contain filler or repetitive content that dilutes the useful information. |
+| **3 — Adequate** | Provides some genuine technical insight about the code's security properties. The analysis goes beyond surface observations but may not reveal anything a competent developer wouldn't notice on their own. |
+| **4 — Insightful** | Offers meaningful technical depth — identifies non-obvious interactions, explains *why* a pattern is dangerous (or safe), and demonstrates understanding of the underlying security principles. Contains minimal filler or redundancy. |
+| **5 — Highly insightful** | Provides expert-level analysis with novel or non-obvious observations. Demonstrates deep understanding of the vulnerability class, the specific codebase patterns, and their security implications. Every sentence adds value. |
+
+## 5. Evaluation Indicators
+
+The following indicators complement the scoring rubric in Section 4. They describe concrete aspects to look for (and watch out for) when evaluating each metric. These are **descriptive guides, not checklists** — a response does not need to exhibit every positive indicator to score well, nor does the presence of one negative indicator automatically lower a score. Use these alongside the Likert descriptions to anchor scoring decisions.
+
+### 5.1 Completeness
+
+| Look for (positive) | Watch for (negative) |
+|----------------------|----------------------|
+| Discusses the code's purpose, inputs, outputs, and key variables | Generic assertions without grounding in the actual code |
+| Examines multiple vulnerability classes relevant to the code (e.g., buffer overflow, use-after-free, integer overflow) | Focuses on only one aspect when multiple security concerns exist |
+| Provides depth on the specific vulnerability mechanism or safety rationale, not just surface-level categorization | Lists vulnerability categories as a checklist without analyzing each |
+| For vulnerable code: identifies the specific mechanism, not just the general area | Misses obvious attack surfaces or secondary vulnerabilities noted in the CVE |
+| For safe code: explains *why* relevant vulnerability classes do not apply | States "no vulnerability" without justifying the safety of specific constructs |
+
+### 5.2 Clarity
+
+| Look for (positive) | Watch for (negative) |
+|----------------------|----------------------|
+| Organized logical flow from analysis to conclusion | Disorganized structure that requires re-reading to follow |
+| References specific functions, variables, or code lines | Vague references (e.g., "the code checks..." without specifying what or where) |
+| Technical terms used correctly and precisely | Incorrect factual claims or misuse of technical terminology |
+| Each section advances the argument without redundancy | Boilerplate disclaimers or repeated conclusions that add no analytical value |
+
+### 5.3 Actionability
+
+| Look for (positive) | Watch for (negative) |
+|----------------------|----------------------|
+| Points to specific code locations or constructs involved | Generic advice (e.g., "add bounds checking") without specifying where or how |
+| Suggests a concrete fix, patch, or mitigation strategy | Identifies a problem without any direction for remediation |
+| Explains what is missing and how to address it | Restates the conclusion as a recommendation (e.g., "fix the vulnerability") |
+| For safe code: scores of 1–2 are expected — note this in `rater_notes` | N/A — low actionability for safe code is not a negative indicator |
+
+### 5.4 Informativeness
+
+| Look for (positive) | Watch for (negative) |
+|----------------------|----------------------|
+| Explains *why* a pattern is dangerous or safe, not just *that* it is | Restates the code's surface behavior without security analysis |
+| Provides counterfactual reasoning (e.g., what could go wrong without a specific control) | Filler, repetition, or generic security platitudes that dilute useful content |
+| Identifies non-obvious interactions, edge cases, or domain-specific context | Observations that any competent developer would make on first reading |
+| Demonstrates understanding of the vulnerability class and its broader implications | Mechanically listing vulnerability categories without genuine insight |
+
+OUTPUT FORMAT:
+Respond with a JSON object containing scores and justifications for each dimension:
+```json
+{
+    "completeness_score": <1-5>,
+    "completeness_justification": "<brief justification>",
+    "clarity_score": <1-5>,
+    "clarity_justification": "<brief justification>",
+    "actionability_score": <1-5>,
+    "actionability_justification": "<brief justification>",
+    "informativeness_score": <1-5>,
+    "informativeness_justification": "<brief justification>"
+}
+```
+
+Provide ONLY the JSON object. Do not include any other text.

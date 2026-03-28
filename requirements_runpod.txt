@@ -1,6 +1,13 @@
 # RunPod Experiment Dependencies
-# For Nemotron 49B experiments on vLLM
-# Install with: pip install -r requirements-runpod.txt --break-system-packages
+# Install with: pip install -r requirements_runpod.txt
+#
+# Setup steps:
+#   1. pip install hf_transfer                    # Fast model downloads
+#   2. pip install -r requirements_runpod.txt     # All dependencies below
+#   3. Start vLLM server (see README.md)
+
+# Fast model downloads from HuggingFace
+hf_transfer>=0.1.0
 
 # Core experiment dependencies
 autogen>=0.7.0
@@ -13,8 +20,11 @@ scikit-learn>=1.5.0
 # Metrics and evaluation
 evaluate>=0.4.0
 
+# String matching (for log analysis / text comparison)
+python-Levenshtein>=0.21.0
+
 # vLLM (for inference server)
-vllm>=0.12.0
+vllm>=0.17.0
 
 # Optional: For JSON parsing in experiments
 fix-busted-json>=0.0.18

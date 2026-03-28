@@ -1,0 +1,5 @@
+dimension,spearman_rho,spearman_p,mae,bias,pass
+completeness,0.7299,0.000116,0.515,-0.031,True
+clarity,0.539,0.009645,0.438,0.076,False
+actionability,0.8043,6e-06,0.423,-0.06,True
+informativeness,0.6599,0.000833,0.591,-0.289,False

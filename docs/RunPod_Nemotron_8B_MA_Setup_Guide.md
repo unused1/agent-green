@@ -73,8 +73,13 @@ scp -P $POD_PORT -i $SSH_KEY /Users/shanetan/Documents/Code_Projects/SMU/SCIS_En
 ```bash
 cd /workspace/agent-green
 
-pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn Levenshtein --break-system-packages
-pip install vllm --break-system-packages
+# Install hf_transfer for fast model downloads
+pip install hf_transfer
+
+# Install experiment dependencies
+pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn python-Levenshtein
+
+pip install vllm
 
 # Note: 'autogen' is an alias for 'ag2'. Do NOT use 'pyautogen'.
 ```
