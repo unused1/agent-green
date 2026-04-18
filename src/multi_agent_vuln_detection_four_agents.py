@@ -50,7 +50,9 @@ os.makedirs(RESULT_DIR, exist_ok=True)
 DESIGN = f"MA-vuln-four-{args.prompt_type}"
 model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-exp_name = f"{DESIGN}_{model}_{timestamp}"
+exp_name = os.getenv("EXP_NAME") or f"{DESIGN}_{model}_{timestamp}"
+if os.getenv("EXP_NAME"):
+    print(f"Using EXP_NAME env override: {exp_name}")
 
 print(f"Experiment: {exp_name}")
 print(f"Dataset: {DATASET_FILE}")

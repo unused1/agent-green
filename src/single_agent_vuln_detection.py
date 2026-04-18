@@ -73,6 +73,9 @@ project_name = DESIGN.capitalize()
 if RESUME_EXP_NAME:
     exp_name = RESUME_EXP_NAME
     print(f"Using existing experiment name: {exp_name}")
+elif os.getenv("EXP_NAME"):
+    exp_name = os.getenv("EXP_NAME")
+    print(f"Using EXP_NAME env override: {exp_name}")
 else:
     exp_name = f"{project_name}_{model}_{timestamp}"
 input_dataset_file = "VulTrial_386_samples_balanced.jsonl"  # Example dataset file name

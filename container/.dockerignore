@@ -1,0 +1,20 @@
+# Exclude everything by default; Dockerfile explicitly COPIES what it needs
+*
+
+# Allow only what the Dockerfile needs
+!requirements_runpod.txt
+!src/single_agent_vuln_detection.py
+!src/no_agent_vuln_detection.py
+!src/dual_agent_vuln.py
+!src/multi_agent_vuln_detection_four_agents.py
+!src/agent_utils_vuln.py
+!src/vuln_evaluation.py
+!src/ollama_utils.py
+!src/resume_utils.py
+!src/config.py
+!src/config_nemotron.py
+!vuln_database/VulTrial_870_samples_balanced.jsonl
+!vuln_database/VulTrial_10_samples_test.jsonl
+!container/entrypoint.sh
+!container/REPLICATION_README.md
+!container/Dockerfile

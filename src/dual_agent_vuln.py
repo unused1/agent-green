@@ -349,7 +349,9 @@ def main():
 
     model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    exp_name = f"{DESIGN}_{model}_vuln_{timestamp}"
+    exp_name = os.getenv("EXP_NAME") or f"{DESIGN}_{model}_vuln_{timestamp}"
+    if os.getenv("EXP_NAME"):
+        print(f"Using EXP_NAME env override: {exp_name}")
 
     print("Starting Ollama server ....")
     proc = start_ollama_server()

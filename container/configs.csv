@@ -1,0 +1,65 @@
+design,mode,model,prompting,tp_size,gpu_count,approx_minutes_per_run,notes
+NA,instruct,qwen3-4b,zero,1,1,30,
+NA,instruct,qwen3-4b,few,1,1,30,
+NA,instruct,qwen3-30b,zero,1,1,60,
+NA,instruct,qwen3-30b,few,1,1,60,
+NA,instruct,nemotron-nano-8b,zero,1,1,45,
+NA,instruct,nemotron-nano-8b,few,1,1,45,
+NA,instruct,nemotron-super-49b,zero,2,2,90,requires 2x H100
+NA,instruct,nemotron-super-49b,few,2,2,90,requires 2x H100
+NA,thinking,qwen3-4b,zero,1,1,90,
+NA,thinking,qwen3-4b,few,1,1,90,
+NA,thinking,qwen3-30b,zero,1,1,180,
+NA,thinking,qwen3-30b,few,1,1,180,
+NA,thinking,nemotron-nano-8b,zero,1,1,120,
+NA,thinking,nemotron-nano-8b,few,1,1,120,
+NA,thinking,nemotron-super-49b,zero,2,2,360,requires 2x H100; long run
+NA,thinking,nemotron-super-49b,few,2,2,360,requires 2x H100; long run
+SA,instruct,qwen3-4b,zero,1,1,35,
+SA,instruct,qwen3-4b,few,1,1,35,
+SA,instruct,qwen3-30b,zero,1,1,70,
+SA,instruct,qwen3-30b,few,1,1,70,
+SA,instruct,nemotron-nano-8b,zero,1,1,50,
+SA,instruct,nemotron-nano-8b,few,1,1,50,
+SA,instruct,nemotron-super-49b,zero,2,2,100,requires 2x H100
+SA,instruct,nemotron-super-49b,few,2,2,100,requires 2x H100
+SA,thinking,qwen3-4b,zero,1,1,100,
+SA,thinking,qwen3-4b,few,1,1,100,
+SA,thinking,qwen3-30b,zero,1,1,200,
+SA,thinking,qwen3-30b,few,1,1,200,
+SA,thinking,nemotron-nano-8b,zero,1,1,130,
+SA,thinking,nemotron-nano-8b,few,1,1,130,
+SA,thinking,nemotron-super-49b,zero,2,2,400,requires 2x H100; long run
+SA,thinking,nemotron-super-49b,few,2,2,400,requires 2x H100; long run
+DA,instruct,qwen3-4b,zero,1,1,60,
+DA,instruct,qwen3-4b,few,1,1,60,
+DA,instruct,qwen3-30b,zero,1,1,120,
+DA,instruct,qwen3-30b,few,1,1,120,
+DA,instruct,nemotron-nano-8b,zero,1,1,90,
+DA,instruct,nemotron-nano-8b,few,1,1,90,
+DA,instruct,nemotron-super-49b,zero,2,2,180,requires 2x H100
+DA,instruct,nemotron-super-49b,few,2,2,180,requires 2x H100
+DA,thinking,qwen3-4b,zero,1,1,180,
+DA,thinking,qwen3-4b,few,1,1,180,
+DA,thinking,qwen3-30b,zero,1,1,360,
+DA,thinking,qwen3-30b,few,1,1,360,
+DA,thinking,nemotron-nano-8b,zero,1,1,240,
+DA,thinking,nemotron-nano-8b,few,1,1,240,
+DA,thinking,nemotron-super-49b,zero,2,2,720,requires 2x H100; expensive
+DA,thinking,nemotron-super-49b,few,2,2,720,requires 2x H100; expensive
+MA,instruct,qwen3-4b,zero,1,1,90,
+MA,instruct,qwen3-4b,few,1,1,90,
+MA,instruct,qwen3-30b,zero,1,1,180,
+MA,instruct,qwen3-30b,few,1,1,180,
+MA,instruct,nemotron-nano-8b,zero,1,1,120,
+MA,instruct,nemotron-nano-8b,few,1,1,120,
+MA,instruct,nemotron-super-49b,zero,2,2,240,requires 2x H100
+MA,instruct,nemotron-super-49b,few,2,2,240,requires 2x H100
+MA,thinking,qwen3-4b,zero,1,1,300,
+MA,thinking,qwen3-4b,few,1,1,300,
+MA,thinking,qwen3-30b,zero,1,1,600,
+MA,thinking,qwen3-30b,few,1,1,600,
+MA,thinking,nemotron-nano-8b,zero,1,1,360,
+MA,thinking,nemotron-nano-8b,few,1,1,360,
+MA,thinking,nemotron-super-49b,zero,2,2,1200,requires 2x H100; most expensive
+MA,thinking,nemotron-super-49b,few,2,2,1200,requires 2x H100; most expensive

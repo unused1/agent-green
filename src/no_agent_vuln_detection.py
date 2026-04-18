@@ -91,6 +91,9 @@ timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 if args.resume:
     exp_name = args.resume
     print(f"Resuming experiment: {exp_name}")
+elif os.getenv("EXP_NAME"):
+    exp_name = os.getenv("EXP_NAME")
+    print(f"Using EXP_NAME env override: {exp_name}")
 else:
     exp_name = f"{DESIGN}_{model}_{timestamp}"
 
