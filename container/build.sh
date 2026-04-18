@@ -65,11 +65,14 @@ Tarball: $(pwd)/${OUTPUT_TARBALL}
 Next steps:
   1. Run a local smoke test (see REPLICATION_README.md):
      docker run --rm --gpus all \\
+       --user \$(id -u):\$(id -g) \\
        -v \$(pwd)/results:/workspace/results \\
        -e DESIGN=SA -e MODE=instruct -e MODEL=qwen3-4b \\
        -e PROMPTING=zero -e SEED=1 -e SMOKE_TEST=1 \\
        --name ${USER_PREFIX}_replication_smoke \\
        ${IMAGE_NAME}:${TAG}
+
+     (--user flag ensures output files are owned by you, not root)
 
   2. scp tarball to your Mac:
      scp ${OUTPUT_TARBALL} user@mac:~/Downloads/

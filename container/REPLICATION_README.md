@@ -27,6 +27,7 @@ Verifies the full pipeline with 10 samples (~5 minutes):
 
 ```bash
 docker run --rm --gpus all \
+  --user $(id -u):$(id -g) \
   -v $(pwd)/results:/workspace/results \
   -e DESIGN=SA -e MODE=instruct -e MODEL=qwen3-4b \
   -e PROMPTING=zero -e SEED=1 -e SMOKE_TEST=1 \
@@ -39,6 +40,7 @@ docker run --rm --gpus all \
 
 ```bash
 docker run --rm --gpus all \
+  --user $(id -u):$(id -g) \
   -v $(pwd)/results:/workspace/results \
   -e DESIGN=SA -e MODE=thinking -e MODEL=qwen3-4b \
   -e PROMPTING=zero -e SEED=1 \
@@ -54,6 +56,7 @@ Results are written to `./results/run1/SA_thinking_qwen3-4b_zero/`.
 ```bash
 for SEED in 1 2 3; do
   docker run --rm --gpus all \
+    --user $(id -u):$(id -g) \
     -v $(pwd)/results:/workspace/results \
     -e DESIGN=SA -e MODE=thinking -e MODEL=qwen3-4b \
     -e PROMPTING=zero -e SEED=$SEED \
@@ -130,6 +133,18 @@ results/
 
 Each config × seed produces its own directory; analysis scripts can compare across seeds.
 
+## File Ownership: `--user $(id -u):$(id -g)`
+
+All `docker run` examples above use `--user $(id -u):$(id -g)`. Without this flag, the container runs as root (UID 0) and writes output files to the bind-mounted `results/` directory with root ownership on the host — making them undeletable by your normal user account without `sudo`.
+
+The flag maps the container's user/group to your host UID/GID so output files belong to you.
+
+**If you already have root-owned files from an earlier run** and cannot delete them:
+
+```bash
+docker run --rm -v $(pwd)/results:/r --entrypoint /bin/sh alpine -c 'rm -rf /r/*'
+```
+
 ## Container Resource Limits (Optional)
 
 Resource limits are NOT enforced by default. For shared-server deployments (e.g., DGX H100 per admin guidelines), pass limits explicitly:
@@ -150,6 +165,7 @@ On Mars (A5000 server) and RunPod, defaults are fine — no limits needed.
 
 ```bash
 docker run -it --rm --gpus all \
+  --user $(id -u):$(id -g) \
   -v $(pwd)/results:/workspace/results \
   --entrypoint /bin/bash \
   agent-green:v1.0-replication
@@ -163,6 +179,7 @@ docker run -it --rm --gpus all \
 
 ```bash
 docker run -d --gpus all \
+  --user $(id -u):$(id -g) \
   -v $(pwd)/results:/workspace/results \
   -e DESIGN=SA -e MODE=instruct -e MODEL=qwen3-4b -e PROMPTING=zero \
   --name huabengtan_longrun \
