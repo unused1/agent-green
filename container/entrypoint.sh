@@ -105,10 +105,14 @@ FULL_RESULTS_DIR="${RESULTS_BASE}/${CONFIG_SUBDIR}"
 mkdir -p "$FULL_RESULTS_DIR"
 
 # === Export env vars consumed by src/config*.py and patched runners ===
+# USE_RUNPOD=true selects the vLLM OpenAI-compatible backend (vs local Ollama default in config.py)
+export USE_RUNPOD=true
 export MODEL_FAMILY="$MODEL_FAMILY_VAL"
 export ENABLE_REASONING="$ENABLE_REASONING_VAL"
 export VULN_DATASET="$VULN_DATASET_PATH"
 export RESULTS_DIR="$FULL_RESULTS_DIR"
+export REASONING_ENDPOINT="http://localhost:8000/v1"
+export BASELINE_ENDPOINT="http://localhost:8000/v1"
 export REASONING_MODEL="$HF_MODEL"
 export BASELINE_MODEL="$HF_MODEL"
 export LLM_MODEL="$HF_MODEL"
