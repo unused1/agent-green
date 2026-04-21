@@ -10,12 +10,16 @@
 hf_transfer>=0.1.0
 
 # Core experiment dependencies
-autogen>=0.7.0
+# autogen>=0.10.0 required (team reported inference errors on older versions)
+autogen>=0.10.0
 python-dotenv>=1.0.0
 codecarbon>=3.0.0
 pandas>=2.0.0
 numpy>=2.0.0
 scikit-learn>=1.5.0
+
+# Ollama Python client (used when INFERENCE_BACKEND=ollama)
+ollama>=0.1.0
 
 # Metrics and evaluation
 evaluate>=0.4.0

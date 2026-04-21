@@ -16,6 +16,10 @@ COPY requirements_runpod.txt .
 RUN pip install --no-cache-dir hf_transfer && \
     pip install --no-cache-dir -r requirements_runpod.txt
 
+# Install ollama binary (used when INFERENCE_BACKEND=ollama; serves models on port 11434)
+# Models are downloaded on first run; cache with -v /host/path:/root/.ollama
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
 # Copy selected source files (4 runners + direct/transitive imports + config modules)
 COPY src/single_agent_vuln_detection.py \
      src/no_agent_vuln_detection.py \

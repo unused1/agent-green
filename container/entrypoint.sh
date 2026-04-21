@@ -1,7 +1,7 @@
 #!/bin/bash
 # Agent-Green Replication Container — Entrypoint
-# Starts vLLM server, waits for readiness, dispatches to the appropriate runner,
-# and supports deterministic exp_name for auto-resume on re-invocation.
+# Starts the inference backend (vLLM or ollama), waits for readiness, dispatches
+# to the appropriate runner, and supports deterministic exp_name for auto-resume.
 set -euo pipefail
 
 # === Required env vars ===
@@ -12,13 +12,40 @@ set -euo pipefail
 
 # === Optional env vars ===
 SEED="${SEED:-1}"
-MAX_MODEL_LEN="${MAX_MODEL_LEN:-65536}"
-GPU_MEM_UTIL="${GPU_MEM_UTIL:-0.9}"
 SMOKE_TEST="${SMOKE_TEST:-0}"
 HF_TOKEN="${HF_TOKEN:-}"
+INFERENCE_BACKEND="${INFERENCE_BACKEND:-vllm}"
+
+# vLLM-specific
+MAX_MODEL_LEN="${MAX_MODEL_LEN:-65536}"
+GPU_MEM_UTIL="${GPU_MEM_UTIL:-0.9}"
+VLLM_DTYPE="${VLLM_DTYPE:-auto}"
 VLLM_READY_TIMEOUT="${VLLM_READY_TIMEOUT:-900}"
 
-# === MODEL → HF identifier + vLLM args + tensor-parallel size ===
+# Ollama-specific
+OLLAMA_MODEL="${OLLAMA_MODEL:-}"
+OLLAMA_NUM_CTX="${OLLAMA_NUM_CTX:-65536}"
+OLLAMA_READY_TIMEOUT="${OLLAMA_READY_TIMEOUT:-1800}"
+
+# === Validate INFERENCE_BACKEND ===
+case "$INFERENCE_BACKEND" in
+  vllm|ollama) ;;
+  *)
+    echo "[ERROR] Unknown INFERENCE_BACKEND: $INFERENCE_BACKEND (must be vllm or ollama)" >&2
+    exit 1
+    ;;
+esac
+
+# === Ollama extra validation ===
+if [[ "$INFERENCE_BACKEND" == "ollama" && -z "$OLLAMA_MODEL" ]]; then
+  echo "[ERROR] OLLAMA_MODEL required when INFERENCE_BACKEND=ollama (e.g., qwen3:4b, qwen3:4b-instruct-q8_0)" >&2
+  exit 1
+fi
+
+# === MODEL → HF identifier + vLLM args + tensor-parallel size + model family ===
+# MODEL is used for exp_name/results dir naming and selecting the right config module
+# (config_nemotron for nemotron-* models, config for qwen3-*). For ollama, the actual
+# served model is OLLAMA_MODEL; HF IDs here are only used for the vllm backend path.
 case "$MODEL" in
   qwen3-4b)
     HF_INSTRUCT="Qwen/Qwen3-4B-Instruct-2507"
@@ -35,7 +62,6 @@ case "$MODEL" in
     MODEL_FAMILY_VAL=""
     ;;
   nemotron-nano-8b)
-    # Nemotron uses the same checkpoint for instruct/thinking; mode toggled via prompt prefix
     HF_INSTRUCT="nvidia/Llama-3.1-Nemotron-Nano-8B-v1"
     HF_THINKING="nvidia/Llama-3.1-Nemotron-Nano-8B-v1"
     VLLM_EXTRA="--enable-auto-tool-choice --tool-call-parser hermes --trust-remote-code"
@@ -55,7 +81,7 @@ case "$MODEL" in
     ;;
 esac
 
-# === MODE → reasoning toggle + model selection ===
+# === MODE → reasoning toggle + HF model selection ===
 case "$MODE" in
   instruct)
     ENABLE_REASONING_VAL="false"
@@ -90,95 +116,146 @@ else
 fi
 
 # === Deterministic experiment name (enables auto-resume on re-invocation) ===
-# Format: <DESIGN>-vuln-<prompt_type>_<model_slug>_seed<N>[_smoke]
-MODEL_SLUG=$(echo "$HF_MODEL" | tr '/:' '__')
-EXP_NAME_VAL="${DESIGN}-vuln-${PROMPT_TYPE}_${MODEL_SLUG}_seed${SEED}"
-if [[ "$SMOKE_TEST" == "1" ]]; then
-  EXP_NAME_VAL="${EXP_NAME_VAL}_smoke"
+# Format uses the served model's effective ID, so vllm/ollama runs land in different exp_names
+if [[ "$INFERENCE_BACKEND" == "ollama" ]]; then
+  SERVED_MODEL="$OLLAMA_MODEL"
+else
+  SERVED_MODEL="$HF_MODEL"
 fi
+MODEL_SLUG=$(echo "$SERVED_MODEL" | tr '/:' '__')
+EXP_NAME_VAL="${DESIGN}-vuln-${PROMPT_TYPE}_${MODEL_SLUG}_seed${SEED}"
+[[ "$SMOKE_TEST" == "1" ]] && EXP_NAME_VAL="${EXP_NAME_VAL}_smoke"
 
-# === Output directory (mount this from host via -v /host/path:/workspace/results) ===
+# === Output directory ===
 RESULTS_BASE="${RESULTS_DIR:-/workspace/results}"
-CONFIG_SUBDIR="run${SEED}/${DESIGN}_${MODE}_${MODEL}_${PROMPTING}"
+CONFIG_SUBDIR="run${SEED}/${INFERENCE_BACKEND}_${DESIGN}_${MODE}_${MODEL}_${PROMPTING}"
 [[ "$SMOKE_TEST" == "1" ]] && CONFIG_SUBDIR="${CONFIG_SUBDIR}_smoke"
 FULL_RESULTS_DIR="${RESULTS_BASE}/${CONFIG_SUBDIR}"
 mkdir -p "$FULL_RESULTS_DIR"
 
 # === Export env vars consumed by src/config*.py and patched runners ===
-# USE_RUNPOD=true selects the vLLM OpenAI-compatible backend (vs local Ollama default in config.py)
-export USE_RUNPOD=true
 export MODEL_FAMILY="$MODEL_FAMILY_VAL"
 export ENABLE_REASONING="$ENABLE_REASONING_VAL"
 export VULN_DATASET="$VULN_DATASET_PATH"
 export RESULTS_DIR="$FULL_RESULTS_DIR"
-export REASONING_ENDPOINT="http://localhost:8000/v1"
-export BASELINE_ENDPOINT="http://localhost:8000/v1"
-export REASONING_MODEL="$HF_MODEL"
-export BASELINE_MODEL="$HF_MODEL"
-export LLM_MODEL="$HF_MODEL"
 export EXP_NAME="$EXP_NAME_VAL"
 export HF_HUB_ENABLE_HF_TRANSFER=1
 [[ -n "$HF_TOKEN" ]] && export HF_TOKEN
 
+if [[ "$INFERENCE_BACKEND" == "vllm" ]]; then
+  # vLLM + OpenAI-compatible API at localhost:8000
+  export USE_RUNPOD=true
+  export LLM_SERVICE=openai
+  export REASONING_ENDPOINT="http://localhost:8000/v1"
+  export BASELINE_ENDPOINT="http://localhost:8000/v1"
+  export REASONING_MODEL="$HF_MODEL"
+  export BASELINE_MODEL="$HF_MODEL"
+  export LLM_MODEL="$HF_MODEL"
+else
+  # Ollama at localhost:11434 (config.py Ollama path reads LLM_MODEL + LLM_API_BASE)
+  export USE_RUNPOD=false
+  export LLM_SERVICE=ollama
+  export LLM_MODEL="$OLLAMA_MODEL"
+  export LLM_API_BASE="http://localhost:11434"
+  # config_nemotron.py reads REASONING_MODEL/BASELINE_MODEL when USE_RUNPOD path is used;
+  # also set these for consistency in case any runner paths reference them.
+  export REASONING_MODEL="$OLLAMA_MODEL"
+  export BASELINE_MODEL="$OLLAMA_MODEL"
+  export REASONING_ENDPOINT="http://localhost:11434"
+  export BASELINE_ENDPOINT="http://localhost:11434"
+fi
+
 # === Log configuration ===
 cat <<EOF
 ========================================
-  AGENT-GREEN REPLICATION CONTAINER v1.0
+  AGENT-GREEN REPLICATION CONTAINER v1.1
 ========================================
-DESIGN        = $DESIGN
-MODE          = $MODE  (ENABLE_REASONING=$ENABLE_REASONING_VAL)
-MODEL         = $MODEL  -> $HF_MODEL
-PROMPTING     = $PROMPTING  ($PROMPT_TYPE)
-SEED          = $SEED
-SMOKE_TEST    = $SMOKE_TEST
-DATASET       = $VULN_DATASET_PATH
-RESULTS_DIR   = $FULL_RESULTS_DIR
-EXP_NAME      = $EXP_NAME_VAL
-TP_SIZE       = $TP
-MAX_MODEL_LEN = $MAX_MODEL_LEN
-GPU_MEM_UTIL  = $GPU_MEM_UTIL
-MODEL_FAMILY  = $MODEL_FAMILY_VAL
-========================================
+INFERENCE_BACKEND = $INFERENCE_BACKEND
+DESIGN            = $DESIGN
+MODE              = $MODE  (ENABLE_REASONING=$ENABLE_REASONING_VAL)
+MODEL             = $MODEL
+  served as       = $SERVED_MODEL
+PROMPTING         = $PROMPTING  ($PROMPT_TYPE)
+SEED              = $SEED
+SMOKE_TEST        = $SMOKE_TEST
+DATASET           = $VULN_DATASET_PATH
+RESULTS_DIR       = $FULL_RESULTS_DIR
+EXP_NAME          = $EXP_NAME_VAL
+MODEL_FAMILY      = $MODEL_FAMILY_VAL
 EOF
 
-# === Start vLLM server in background ===
-echo "[vLLM] Starting server for $HF_MODEL (TP=$TP)..."
-nohup python -m vllm.entrypoints.openai.api_server \
-  --model "$HF_MODEL" \
-  --served-model-name "$HF_MODEL" \
-  --host 0.0.0.0 \
-  --port 8000 \
-  --dtype auto \
-  --max-model-len "$MAX_MODEL_LEN" \
-  --gpu-memory-utilization "$GPU_MEM_UTIL" \
-  --tensor-parallel-size "$TP" \
-  $VLLM_EXTRA \
-  > /workspace/vllm.log 2>&1 &
-VLLM_PID=$!
+if [[ "$INFERENCE_BACKEND" == "vllm" ]]; then
+cat <<EOF
+TP_SIZE           = $TP
+MAX_MODEL_LEN     = $MAX_MODEL_LEN
+GPU_MEM_UTIL      = $GPU_MEM_UTIL
+VLLM_DTYPE        = $VLLM_DTYPE
+EOF
+else
+cat <<EOF
+OLLAMA_NUM_CTX    = $OLLAMA_NUM_CTX
+EOF
+fi
+echo "========================================"
 
-# Ensure vLLM is shut down on exit (clean or otherwise)
-trap 'echo "[Cleanup] Stopping vLLM (PID $VLLM_PID)..."; kill $VLLM_PID 2>/dev/null || true; wait $VLLM_PID 2>/dev/null || true' EXIT
+# === Start inference backend ===
+if [[ "$INFERENCE_BACKEND" == "vllm" ]]; then
+  echo "[vLLM] Starting server for $HF_MODEL (TP=$TP, dtype=$VLLM_DTYPE)..."
+  nohup python -m vllm.entrypoints.openai.api_server \
+    --model "$HF_MODEL" \
+    --served-model-name "$HF_MODEL" \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --dtype "$VLLM_DTYPE" \
+    --max-model-len "$MAX_MODEL_LEN" \
+    --gpu-memory-utilization "$GPU_MEM_UTIL" \
+    --tensor-parallel-size "$TP" \
+    $VLLM_EXTRA \
+    > /workspace/vllm.log 2>&1 &
+  BACKEND_PID=$!
+  HEALTH_URL="http://localhost:8000/v1/models"
+  READY_TIMEOUT="$VLLM_READY_TIMEOUT"
+  BACKEND_LOG=/workspace/vllm.log
+  BACKEND_LABEL=vLLM
+else
+  echo "[Ollama] Starting ollama server..."
+  nohup ollama serve > /workspace/ollama.log 2>&1 &
+  BACKEND_PID=$!
+  HEALTH_URL="http://localhost:11434/api/tags"
+  READY_TIMEOUT="$OLLAMA_READY_TIMEOUT"
+  BACKEND_LOG=/workspace/ollama.log
+  BACKEND_LABEL=Ollama
+fi
 
-# === Wait for vLLM readiness ===
-echo "[vLLM] Waiting for server (timeout ${VLLM_READY_TIMEOUT}s)..."
+# Ensure backend is shut down on exit
+trap 'echo "[Cleanup] Stopping $BACKEND_LABEL (PID $BACKEND_PID)..."; kill $BACKEND_PID 2>/dev/null || true; wait $BACKEND_PID 2>/dev/null || true' EXIT
+
+# === Wait for backend readiness ===
+echo "[$BACKEND_LABEL] Waiting for server (timeout ${READY_TIMEOUT}s)..."
 WAIT_START=$(date +%s)
-until curl -sf http://localhost:8000/v1/models > /dev/null 2>&1; do
-  if ! kill -0 $VLLM_PID 2>/dev/null; then
-    echo "[ERROR] vLLM process died during startup. Last 100 lines of log:" >&2
-    tail -100 /workspace/vllm.log >&2
+until curl -sf "$HEALTH_URL" > /dev/null 2>&1; do
+  if ! kill -0 $BACKEND_PID 2>/dev/null; then
+    echo "[ERROR] $BACKEND_LABEL process died during startup. Last 100 lines of log:" >&2
+    tail -100 "$BACKEND_LOG" >&2
     exit 1
   fi
-  NOW=$(date +%s)
-  ELAPSED=$((NOW - WAIT_START))
-  if [[ $ELAPSED -gt $VLLM_READY_TIMEOUT ]]; then
-    echo "[ERROR] vLLM startup timeout (${VLLM_READY_TIMEOUT}s). Last 100 lines of log:" >&2
-    tail -100 /workspace/vllm.log >&2
+  ELAPSED=$(( $(date +%s) - WAIT_START ))
+  if [[ $ELAPSED -gt $READY_TIMEOUT ]]; then
+    echo "[ERROR] $BACKEND_LABEL startup timeout (${READY_TIMEOUT}s). Last 100 lines of log:" >&2
+    tail -100 "$BACKEND_LOG" >&2
     exit 1
   fi
   sleep 5
 done
-WAIT_END=$(date +%s)
-echo "[vLLM] Server ready after $((WAIT_END - WAIT_START))s"
+echo "[$BACKEND_LABEL] Server ready after $(( $(date +%s) - WAIT_START ))s"
+
+# === Ollama: pull model on first run (cached in /root/.ollama across runs) ===
+if [[ "$INFERENCE_BACKEND" == "ollama" ]]; then
+  echo "[Ollama] Ensuring model $OLLAMA_MODEL is available (pull if missing)..."
+  PULL_START=$(date +%s)
+  ollama pull "$OLLAMA_MODEL"
+  echo "[Ollama] Model ready after $(( $(date +%s) - PULL_START ))s"
+fi
 
 # === Dispatch to the appropriate runner ===
 cd /workspace

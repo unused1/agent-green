@@ -1,4 +1,4 @@
-# Agent-Green Replication Container (v1.0-replication)
+# Agent-Green Replication Container (v1.1-replication)
 
 This container packages the Agent-Green vulnerability detection pipeline for consistent replication of RQ1/RQ2/RQ3 experiments on the VulTrial-870 dataset, across all 64 configurations in the ASE 2026 paper.
 
@@ -6,7 +6,10 @@ This container packages the Agent-Green vulnerability detection pipeline for con
 
 - Base image: `runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404` (Ubuntu 24.04, CUDA 12.8.1, PyTorch 2.8.0)
 - 4 vulnerability-detection runners (NA, SA, DA, MA) — patched to support deterministic `EXP_NAME` for auto-resume
-- vLLM server (OpenAI-compatible API) embedded and started per invocation
+- Two inference backends, selectable per-run:
+  - **vLLM** (default) — OpenAI-compatible server at localhost:8000, full-precision weights
+  - **Ollama** — Ollama server at localhost:11434, serves GGUF-format (typically quantized) models
+- AG2 (autogen) ≥ 0.10.0
 - CodeCarbon offline emissions tracker
 - VulTrial-870 dataset + 10-sample smoke-test dataset
 - Deterministic seed-based results layout for 3-run replication
@@ -77,17 +80,32 @@ done
 | `MODEL` | `qwen3-4b`, `qwen3-30b`, `nemotron-nano-8b`, `nemotron-super-49b` | Model variant |
 | `PROMPTING` | `zero`, `few` | Prompt strategy |
 
-### Optional
+### Optional (shared)
 
 | Var | Default | Description |
 |-----|---------|-------------|
 | `SEED` | `1` | Replication seed (1, 2, 3 for 3 runs) |
 | `SMOKE_TEST` | `0` | Set to `1` to use 10-sample dataset |
 | `HF_TOKEN` | *(none)* | HuggingFace token; required for Nemotron (gated) |
+| `RESULTS_DIR` | `/workspace/results` | Base directory inside container for outputs |
+| `INFERENCE_BACKEND` | `vllm` | `vllm` (default) or `ollama`. See *Inference Backend* section below. |
+
+### Backend-specific (vLLM)
+
+| Var | Default | Description |
+|-----|---------|-------------|
+| `VLLM_DTYPE` | `auto` | Precision: `auto` (from model config — bf16 for Qwen3/Nemotron), `float16`, `bfloat16`, `float32` |
 | `MAX_MODEL_LEN` | `65536` | vLLM max context length |
 | `GPU_MEM_UTIL` | `0.9` | vLLM GPU memory utilization fraction |
 | `VLLM_READY_TIMEOUT` | `900` | Seconds to wait for vLLM startup (15 min default) |
-| `RESULTS_DIR` | `/workspace/results` | Base directory inside container for outputs |
+
+### Backend-specific (Ollama)
+
+| Var | Default | Description |
+|-----|---------|-------------|
+| `OLLAMA_MODEL` | *(required)* | Full ollama model tag, e.g., `qwen3:4b`, `qwen3:4b-instruct-q8_0`. Precision is implied by the tag. |
+| `OLLAMA_NUM_CTX` | `65536` | Ollama context window (passed via config.py) |
+| `OLLAMA_READY_TIMEOUT` | `1800` | Seconds to wait for ollama startup + first model pull (30 min default) |
 
 ## GPU Requirements
 
@@ -99,6 +117,71 @@ done
 | `nemotron-super-49b` | 2× H100 80GB | Tensor parallel (TP=2); gated model |
 
 For multi-GPU runs (Nemotron-Super-49B), ensure `--gpus all` on a 2× H100 pod.
+
+## Inference Backend: vLLM vs Ollama
+
+Set `INFERENCE_BACKEND=vllm` (default) or `INFERENCE_BACKEND=ollama`.
+
+### vLLM (default)
+
+Loads HuggingFace safetensors weights and serves an OpenAI-compatible API. `VLLM_DTYPE=auto` picks up the checkpoint's native precision — **bf16 for Qwen3 and Nemotron**, matching the ASE 2026 paper experiments.
+
+```bash
+docker run --rm --gpus all \
+  --user $(id -u):$(id -g) \
+  -v $(pwd)/results:/workspace/results \
+  -e INFERENCE_BACKEND=vllm \
+  -e DESIGN=SA -e MODE=instruct -e MODEL=qwen3-4b \
+  -e PROMPTING=zero -e SEED=1 \
+  -e HF_TOKEN="$HF_TOKEN" \
+  --name huabengtan_vllm_run \
+  agent-green:v1.1-replication
+```
+
+### Ollama
+
+Loads GGUF-format (typically quantized) weights and serves the Ollama API. The team member specifies the exact ollama model tag — including precision — via `OLLAMA_MODEL`.
+
+**The ollama model cache is required to persist across container invocations** — without it, every run re-downloads the model. Mount a host directory to `/root/.ollama`:
+
+```bash
+mkdir -p ollama_cache results
+
+docker run --rm --gpus all \
+  --user $(id -u):$(id -g) \
+  -v $(pwd)/results:/workspace/results \
+  -v $(pwd)/ollama_cache:/root/.ollama \
+  -e INFERENCE_BACKEND=ollama \
+  -e DESIGN=SA -e MODE=instruct -e MODEL=qwen3-4b \
+  -e PROMPTING=zero -e SEED=1 \
+  -e OLLAMA_MODEL=qwen3:4b \
+  --name huabengtan_ollama_run \
+  agent-green:v1.1-replication
+```
+
+Note: because the ollama model cache directory is also written by the root user inside the container, use the `--user` flag consistently; the first run creates the cache with your UID.
+
+### Precision / Quantization
+
+- **vLLM default** (`VLLM_DTYPE=auto`) loads model weights at the checkpoint's native precision — **bf16** for Qwen3 and Nemotron. This matches the ASE 2026 paper experiments.
+- **Ollama precision** is determined entirely by the **model tag** specified via `OLLAMA_MODEL`. The default tags on the ollama library (e.g., `qwen3:4b`) are typically **4-bit quantized (Q4_K_M)**. Team members should pick explicit precision tags (e.g., `...-q8_0`, `...-fp16`, `...-bf16`) if matched precision is required for a fair vLLM-vs-ollama comparison.
+- An out-of-the-box `vllm` vs `ollama` run with default settings measures **both backend and precision effects simultaneously**. Interpret results accordingly.
+- Nemotron-Super-49B is **not** in the official ollama library at the time of writing; running it on the ollama backend would require a custom `ollama create` with a local GGUF file (not provided by this container).
+
+### Results Layout (backend-differentiated)
+
+Results directories include the backend name so vLLM and ollama runs don't overwrite each other:
+
+```
+results/
+├── run1/
+│   ├── vllm_SA_instruct_qwen3-4b_zero/
+│   └── ollama_SA_instruct_qwen3-4b_zero/
+├── run2/
+│   └── ...
+└── run3/
+    └── ...
+```
 
 ## Decoding: Deterministic (temp=0)
 
@@ -114,24 +197,19 @@ The runners use a deterministic `EXP_NAME` derived from `DESIGN / MODE / MODEL /
 
 No special `--resume` flag needed — the deterministic exp_name makes it automatic.
 
-## Results Layout
+## Results Layout (per-config files)
+
+Each `<backend>_<design>_<mode>_<model>_<prompting>/` directory contains:
 
 ```
-results/
-├── run1/
-│   ├── SA_thinking_qwen3-4b_zero/
-│   │   ├── SA-vuln-zero_shot_Qwen__Qwen3-4B-Thinking-2507_seed1_detailed_results.jsonl
-│   │   ├── SA-vuln-zero_shot_Qwen__Qwen3-4B-Thinking-2507_seed1_energy_tracking.json
-│   │   ├── emissions.csv
-│   │   └── *_metrics.csv
-│   └── ...
-├── run2/
-│   └── ...
-└── run3/
-    └── ...
+├── <EXP_NAME>_detailed_results.jsonl      # per-sample predictions + reasoning
+├── <EXP_NAME>_detailed_results.csv        # CSV mirror of above
+├── <EXP_NAME>_energy_tracking.json        # cumulative energy/emissions
+├── emissions.csv                          # CodeCarbon per-session data
+└── *_metrics.csv                          # DA/MA only — classification metrics
 ```
 
-Each config × seed produces its own directory; analysis scripts can compare across seeds.
+Each config × seed × backend produces its own directory; analysis scripts can compare across seeds and backends.
 
 ## File Ownership: `--user $(id -u):$(id -g)`
 
@@ -191,10 +269,11 @@ docker logs -f huabengtan_longrun              # follow runner output
 
 ## Known Limitations
 
-- vLLM restarts for each `docker run` invocation (~2-5 min overhead for model load). Plan per-config overhead accordingly when budgeting runs.
+- Inference backend restarts for each `docker run` invocation (~2-5 min overhead for model load on vLLM; first-run ollama pull adds extra time per model). Plan per-config overhead accordingly when budgeting runs.
 - Only VulTrial-870 is included. RQ3 LLM-as-judge evaluation is API-based (Claude Opus) and runs separately on the host — not part of this container.
-- Nemotron models are gated on HuggingFace — team members must have their own `HF_TOKEN` with access.
+- Nemotron models are gated on HuggingFace — team members must have their own `HF_TOKEN` with access for the vLLM backend. Nemotron-Super-49B is not in the official ollama library.
 - Driver requirement: NVIDIA driver ≥ 550.54.14 for CUDA 12.8 support. RunPod H100 pods meet this; older on-prem servers (e.g., driver 535) will fail at inference time.
+- vLLM-vs-ollama comparison is not precision-matched by default (see *Precision / Quantization* above).
 
 ## Troubleshooting
 
@@ -216,6 +295,7 @@ docker logs -f huabengtan_longrun              # follow runner output
 
 ## Image Provenance
 
-- Built from repository `agent-green` at git tag `v1.0-replication`
+- Built from repository `agent-green` at git tag `v1.1-replication`
 - See `/workspace/src/` inside the container for the exact Python source shipped
 - Dataset: `/workspace/vuln_database/VulTrial_870_samples_balanced.jsonl` (870 samples, 435 PrimeVul pairs)
+- Changes from v1.0: adds ollama backend option, bumps AG2 to ≥0.10.0, adds `VLLM_DTYPE`

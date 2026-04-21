@@ -5,7 +5,7 @@
 set -euo pipefail
 
 IMAGE_NAME="agent-green"
-TAG="v1.0-replication"
+TAG="v1.1-replication"
 USER_PREFIX="${USER:-huabengtan}"
 BUILD_CONTAINER_NAME="${USER_PREFIX}_replication_build"
 OUTPUT_TARBALL="${IMAGE_NAME}-${TAG}.tar.gz"
