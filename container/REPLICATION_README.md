@@ -279,7 +279,7 @@ docker logs -f huabengtan_longrun              # follow runner output
 
 ### "vLLM process died during startup"
 
-- Check `docker logs <container>` for the vLLM log tail.
+- Check `docker logs <container>` for the vLLM log tail (also saved to `results/.../vllm.log`).
 - Most common cause: insufficient GPU memory. Try reducing `GPU_MEM_UTIL` (e.g., `0.85`) or `MAX_MODEL_LEN` (e.g., `32768`).
 - For Nemotron-Super-49B: ensure 2× H100 are visible (`nvidia-smi` inside container).
 
@@ -291,7 +291,55 @@ docker logs -f huabengtan_longrun              # follow runner output
 ### Container exits immediately
 
 - Verify required env vars are set: `DESIGN`, `MODE`, `MODEL`, `PROMPTING`.
+- If `INFERENCE_BACKEND=ollama`, also need `OLLAMA_MODEL`.
 - Check `docker logs <container>` for the `[ERROR]` message.
+
+## Version Dependencies & Rebuild Notes
+
+The image pins several versions due to known compatibility traps discovered during v1.1 builds. Anyone rebuilding the image (e.g., pulling a fresh base or updating AG2) should be aware of these:
+
+### `vllm>=0.17.0,<0.18.0` (upper bound)
+
+`vllm>=0.18.0` pulls deep transitive changes (newer torch inductor paths) that trigger startup assertion errors regardless of torch version. Until vllm and the RunPod base image are jointly upgraded, keep this cap. Confirmed working: vllm 0.17.1 + torch 2.10.0.
+
+### Uninstall base-image torch before installing requirements
+
+The Dockerfile runs `pip uninstall -y torch torchvision torchaudio` **before** installing `requirements_runpod.txt`. Reason:
+
+- The base image `runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404` ships **torch 2.8.0**
+- `vllm 0.17.x` transitively requires **torch==2.10.0**
+- Without the explicit uninstall, pip installs torch 2.10 *alongside* the base's torch 2.8 (because `--ignore-installed` skips cleanup), producing two torch trees in `dist-packages`
+- Result: `AssertionError: duplicate template name` in `torch._inductor.select_algorithm` when vLLM's subprocess inspects the model architecture
+
+Do **not** pin `torch==2.8.0` in `requirements_runpod.txt` — it conflicts with vllm's explicit `torch==2.10.0` requirement and `pip install` will fail with `ResolutionImpossible`.
+
+### `--ignore-installed cryptography` only (not all packages)
+
+The base image's `cryptography` was installed via `apt-get` (dpkg), so it lacks a pip `RECORD` file. When a transitive dep wants to upgrade it, pip fails with *"Cannot uninstall cryptography — no RECORD file was found"*.
+
+Fix: `pip install --no-cache-dir --ignore-installed cryptography` **before** the main install.
+
+Do **not** apply `--ignore-installed` globally — it skips the uninstall step for every package, which is why earlier attempts left duplicate `torch` installs behind.
+
+### `--user <host-UID>` runtime workarounds
+
+When the container runs with `--user $(id -u):$(id -g)` (which all `docker run` examples above use), the non-root UID may not exist in the container's `/etc/passwd`. Several libraries fall over:
+
+| Issue | Fix |
+|-------|-----|
+| `getpass.getuser() → KeyError: getpwuid(): uid not found` | Dockerfile `ENV HOME=/tmp`; entrypoint `export USER` |
+| HF downloads to root-owned `/workspace/.cache/huggingface/` | Dockerfile `ENV HF_HOME=/tmp/hf_cache` (overrides base image default) |
+| flashinfer creates `/.cache` (root-only) | Dockerfile `ENV FLASHINFER_WORKSPACE_BASE=/tmp` |
+| torch inductor writes to cwd | Dockerfile `ENV TORCHINDUCTOR_CACHE_DIR=/tmp/torchinductor` |
+| Server logs can't write to `/workspace/` | Entrypoint redirects vllm/ollama logs to the bind-mounted results dir |
+
+All above are baked in — team members just need to remember to pass `--user $(id -u):$(id -g)`. Without the flag, the container runs as root and outputs become root-owned on the host (undeletable without sudo).
+
+### If rebuilding fails
+
+1. **Check `docker system df`** — the build needs ~30 GB transient space. Clear cache if needed with `docker builder prune`.
+2. **Check pip resolution order** — if a new dep introduces a torch version conflict, `pip install` fails with `ResolutionImpossible`. Inspect the build log tail; pip names the conflicting packages explicitly.
+3. **Uninstall + reinstall everything** as a last resort: `docker rmi agent-green:v1.1-replication && docker build --no-cache -t agent-green:v1.1-replication -f container/Dockerfile .`
 
 ## Image Provenance
 

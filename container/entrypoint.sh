@@ -4,6 +4,17 @@
 # to the appropriate runner, and supports deterministic exp_name for auto-resume.
 set -euo pipefail
 
+# When container runs with --user <host-UID>, the UID may not have an /etc/passwd
+# entry, breaking pwd.getpwuid() calls by torch/codecarbon/etc. Setting USER + HOME
+# makes getpass.getuser() pick them up via its env-var fallback path.
+export USER="${USER:-replication}"
+export HOME="${HOME:-/tmp}"
+
+# Cache dirs are set via Dockerfile ENV (defaulting to /tmp/...) so they're user-writable
+# when the container runs with --user <host-UID>. Team members can override at runtime
+# with -e HF_HOME=/mnt/persistent/... for persistent caching across invocations.
+mkdir -p "$HF_HOME" "$XDG_CACHE_HOME" "$OLLAMA_MODELS"
+
 # === Required env vars ===
 : "${DESIGN:?DESIGN required: NA | SA | DA | MA}"
 : "${MODE:?MODE required: instruct | thinking}"
@@ -211,19 +222,19 @@ if [[ "$INFERENCE_BACKEND" == "vllm" ]]; then
     --gpu-memory-utilization "$GPU_MEM_UTIL" \
     --tensor-parallel-size "$TP" \
     $VLLM_EXTRA \
-    > /workspace/vllm.log 2>&1 &
+    > "$FULL_RESULTS_DIR/vllm.log" 2>&1 &
   BACKEND_PID=$!
   HEALTH_URL="http://localhost:8000/v1/models"
   READY_TIMEOUT="$VLLM_READY_TIMEOUT"
-  BACKEND_LOG=/workspace/vllm.log
+  BACKEND_LOG="$FULL_RESULTS_DIR/vllm.log"
   BACKEND_LABEL=vLLM
 else
   echo "[Ollama] Starting ollama server..."
-  nohup ollama serve > /workspace/ollama.log 2>&1 &
+  nohup ollama serve > "$FULL_RESULTS_DIR/ollama.log" 2>&1 &
   BACKEND_PID=$!
   HEALTH_URL="http://localhost:11434/api/tags"
   READY_TIMEOUT="$OLLAMA_READY_TIMEOUT"
-  BACKEND_LOG=/workspace/ollama.log
+  BACKEND_LOG="$FULL_RESULTS_DIR/ollama.log"
   BACKEND_LABEL=Ollama
 fi
 

@@ -28,7 +28,11 @@ evaluate>=0.4.0
 python-Levenshtein>=0.21.0
 
 # vLLM (for inference server)
-vllm>=0.17.0
+# Upper bound pinned to <0.19 because 0.19.x requires torch 2.9, while the base image
+# runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404 ships torch 2.8.0. Symptom without
+# this cap: AssertionError "duplicate template name" in torch._inductor.select_algorithm
+# during vllm engine startup. Confirmed working: vllm 0.17.x / 0.18.x with torch 2.8.
+vllm>=0.17.0,<0.18.0
 
 # Optional: For JSON parsing in experiments
 fix-busted-json>=0.0.18
