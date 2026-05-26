@@ -1169,6 +1169,121 @@ def mode_evaluate(model_key: str, iteration: int = 1):
 
 
 # ---------------------------------------------------------------------------
+# Mode: evaluate-incorrect (Reviewer B5 follow-up)
+# ---------------------------------------------------------------------------
+def mode_evaluate_incorrect():
+    """Score the incorrect-intersection rating set produced by
+    `scripts/rq3_generate_incorrect_rating_set.py`.
+
+    Uses the same Opus 4.6 zero-shot rubric prompt selected as the final
+    judge configuration (Section 11.5.3). Reads a pre-built CSV of 30
+    eval-queue rows (15 snippets × {think, inst}) and emits scores in the
+    same schema as `super49b_870_llm_judged_*_zeroshot.csv` so downstream
+    comparison is direct.
+    """
+    print("=== EVALUATE-INCORRECT: Super-49B SA zero-shot incorrect-intersection ===\n")
+
+    rating_set_path = os.path.join(OUTPUT_DIR, "super49b_zero_incorrect_rating_set.csv")
+    if not os.path.exists(rating_set_path):
+        sys.exit(f"ERROR: rating set not found: {rating_set_path}\n"
+                 f"Run: python scripts/rq3_generate_incorrect_rating_set.py")
+
+    rubric_text = load_rubric_text()
+    system_prompt = build_system_prompt(rubric_text)
+    print(f"Using zero-shot rubric-only prompt ({len(system_prompt)} chars)")
+
+    eval_queue = []
+    with open(rating_set_path, newline="") as f:
+        for row in csv.DictReader(f):
+            eval_queue.append({
+                "entry_id": int(row["entry_id"]),
+                "response_id": row["response_id"],
+                "ground_truth": int(row["ground_truth"]),
+                "ground_truth_label": row["ground_truth_label"],
+                "stratum": row["stratum"],
+                "source_code": row["source_code"],
+                "response_text": prepare_rater_response_text(
+                    row["response_text"], row["response_id"]),
+                "cwe": row.get("cwe", ""),
+                "cve_desc": row.get("cve_desc", ""),
+            })
+
+    print(f"Loaded {len(eval_queue)} evaluations from {os.path.basename(rating_set_path)}")
+    from collections import Counter
+    strat_counts = Counter(e["stratum"] for e in eval_queue)
+    for s in sorted(strat_counts):
+        print(f"  {s}: {strat_counts[s]}")
+
+    judge_short = _get_judge_model().replace("claude-", "").replace("-20250514", "")
+    output_path = os.path.join(
+        OUTPUT_DIR, f"super49b_zero_incorrect_llm_judged_{judge_short}_zeroshot.csv"
+    )
+    fieldnames = [
+        "entry_id", "response_id", "ground_truth", "ground_truth_label", "stratum",
+    ] + [f"{d}_score" for d in DIMENSIONS] + [f"{d}_justification" for d in DIMENSIONS]
+
+    # Crash-recovery: resume from any existing rows
+    completed_keys = set()
+    if os.path.exists(output_path):
+        with open(output_path, newline="") as f:
+            for row in csv.DictReader(f):
+                completed_keys.add((int(row["entry_id"]), row["response_id"]))
+        print(f"\nResuming: {len(completed_keys)} already completed")
+    else:
+        with open(output_path, "w", newline="") as f:
+            csv.DictWriter(f, fieldnames=fieldnames).writeheader()
+
+    remaining = [e for e in eval_queue
+                 if (e["entry_id"], e["response_id"]) not in completed_keys]
+    print(f"Remaining to evaluate: {len(remaining)}\n")
+
+    if not remaining:
+        print("All samples already evaluated.")
+        print(f"Results: {output_path}")
+        return
+
+    success = failed = 0
+    for i, sample in enumerate(remaining, 1):
+        eid, rid = sample["entry_id"], sample["response_id"]
+        print(f"  [{i}/{len(remaining)}] entry={eid} resp={rid} "
+              f"stratum={sample['stratum']} ... ", end="", flush=True)
+
+        user_prompt = build_evaluation_prompt(
+            source_code=sample["source_code"],
+            response_text=sample["response_text"],
+            ground_truth_label=sample["ground_truth_label"],
+            cwe=sample["cwe"],
+            cve_desc=sample["cve_desc"],
+        )
+        response = call_llm_judge(system_prompt, user_prompt)
+        parsed = parse_judge_response(response) if response else None
+
+        if parsed:
+            row = {
+                "entry_id": eid,
+                "response_id": rid,
+                "ground_truth": sample["ground_truth"],
+                "ground_truth_label": sample["ground_truth_label"],
+                "stratum": sample["stratum"],
+            }
+            for dim in DIMENSIONS:
+                row[f"{dim}_score"] = parsed[f"{dim}_score"]
+                row[f"{dim}_justification"] = parsed[f"{dim}_justification"]
+            with open(output_path, "a", newline="") as f:
+                csv.DictWriter(f, fieldnames=fieldnames).writerow(row)
+            scores = [parsed[f"{d}_score"] for d in DIMENSIONS]
+            print(f"scores={scores}")
+            success += 1
+        else:
+            print("FAILED")
+            failed += 1
+        time.sleep(REQUEST_DELAY_SECONDS)
+
+    print(f"\nCompleted: {success} success, {failed} failed")
+    print(f"Results: {output_path}")
+
+
+# ---------------------------------------------------------------------------
 # Mode: spot-check
 # ---------------------------------------------------------------------------
 def mode_spot_check(model_key: str):
@@ -1258,7 +1373,7 @@ def main():
     parser.add_argument(
         "--mode",
         required=True,
-        choices=["zero-shot-baseline", "calibrate", "validate", "evaluate", "spot-check"],
+        choices=["zero-shot-baseline", "calibrate", "validate", "evaluate", "evaluate-incorrect", "spot-check"],
         help="Pipeline mode",
     )
     parser.add_argument(
@@ -1323,6 +1438,8 @@ def main():
         mode_validate(iteration=args.iteration)
     elif args.mode == "evaluate":
         mode_evaluate(model_key=args.model, iteration=args.iteration)
+    elif args.mode == "evaluate-incorrect":
+        mode_evaluate_incorrect()
     elif args.mode == "spot-check":
         mode_spot_check(model_key=args.model)
 
