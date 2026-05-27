@@ -7,6 +7,18 @@ Uses model-specific tokenizers:
 
 Computes both input tokens (system prompt + task prompt + source code) and
 output tokens (all agent response fields).
+
+Caveat on cost / duration:
+    cost_usd = duration_hours x gpu_count x RUNPOD_H100_RATE.
+    duration_hours is the sum of CodeCarbon session durations attributed to
+    each (design, model, mode, prompting) cell. Configurations that were
+    executed across more sessions (more pod restarts, separate zero/few-shot
+    pods, intermittent crashes) carry more setup/idle overhead. Cost is
+    therefore an experimental-execution measurement, not an intrinsic-cost
+    ranking. The num_sessions column is preserved in the output CSV so
+    readers can see this directly; close per-cell cost comparisons across
+    designs at the same model + mode + prompting should be interpreted
+    with the corresponding num_sessions in mind.
 """
 
 import json
@@ -275,13 +287,20 @@ def main():
         avg_output = round(total_output / count) if count else 0
 
         # Cost
+        # NOTE: duration_hours is the sum of CodeCarbon session durations for this
+        # config. Configurations executed across more sessions (e.g., due to pod
+        # restarts) accumulate more setup/idle overhead, so cost is an
+        # experimental-execution measurement rather than an intrinsic-cost ranking.
+        # The num_sessions column is preserved so readers can see this directly.
         gpu_count = int(r.get("gpu_count", 1)) if pd.notna(r.get("gpu_count")) else 1
+        num_sessions = int(r.get("num_sessions", 0)) if pd.notna(r.get("num_sessions")) else 0
         cost = r["duration_hours"] * gpu_count * RUNPOD_H100_RATE
 
         rows.append({
             "design": design, "model": model, "mode": mode, "prompting": prompting,
             "duration_hours": round(r["duration_hours"], 1),
             "energy_kwh": round(r["total_energy_kwh"], 2),
+            "num_sessions": num_sessions,
             "avg_input_tokens": avg_input,
             "avg_output_tokens": avg_output,
             "avg_total_tokens": avg_input + avg_output,
