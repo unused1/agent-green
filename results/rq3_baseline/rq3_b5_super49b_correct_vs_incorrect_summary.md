@@ -1,4 +1,4 @@
-# RQ3 — Correct vs Incorrect Explanation Quality (Reviewer B5)
+# RQ3 — Correct vs Incorrect Explanation Quality — Nemotron-Super-49B
 
 Source: super49b_870_llm_judged_opus-4-6_zeroshot.csv (462 rows), super49b_zero_incorrect_llm_judged_opus-4-6_zeroshot.csv (30 rows)
 

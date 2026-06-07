@@ -1,10 +1,9 @@
 """
 Generate the incorrect-intersection rating set for RQ3 (Reviewer B5 follow-up).
 
-Mirrors `rq3_generate_human_rating_set.py` but samples from the
-Nemotron-Super-49B SA zero-shot **incorrect**-intersection pool (entries where
-*both* thinking and instruct modes produced an incorrect prediction on the
-same code snippet). Used to address Reviewer #2084C, point B5:
+Samples from a model's SA zero-shot **incorrect**-intersection pool (entries
+where *both* thinking and instruct modes produced an incorrect prediction on
+the same code snippet). Used to address Reviewer #2084C, point B5:
 
     "Why is the manual explanation evaluation limited to 30 correctly
      classified instances? What happens if incorrectly classified instances
@@ -14,13 +13,18 @@ The 15 snippets are stratified 8 FP / 7 FN (mirroring the 8 TP / 7 TN split
 of the correct pilot) and drawn with seed=42. Each snippet yields two rows
 (think + inst), giving 30 evaluation rows ready for the LLM judge.
 
-Output: results/rq3_baseline/super49b_zero_incorrect_rating_set.csv
+Supported models (--model):
+  super49b — Nemotron-Super-49B (single model with instruct/thinking modes)
+  qwen30b  — Qwen3-30B-A3B (separate Instruct + Thinking model variants)
+
+Outputs to results/rq3_baseline/{model}_zero_incorrect_rating_set.csv.
 
 The output schema matches the eval_queue records used inside
-`rq3_llm_judge.mode_evaluate`, so a sibling `--mode evaluate-incorrect`
-addition to the judge can consume this CSV directly.
+`rq3_llm_judge.mode_evaluate`, so the `--mode evaluate-incorrect` mode
+of the judge can consume this CSV directly.
 """
 
+import argparse
 import csv
 import json
 import os
@@ -40,7 +44,19 @@ VULN_DATASETS = [
     os.path.join(PROJECT_ROOT, "vuln_database", "VulTrial_384_incremental.jsonl"),
 ]
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "results", "rq3_baseline")
-OUTPUT_CSV = os.path.join(OUTPUT_DIR, "super49b_zero_incorrect_rating_set.csv")
+
+# Model registry: maps CLI key -> consolidated_performance.csv model-name filter.
+# Qwen3-30B ships as two separate model checkpoints (Instruct + Thinking),
+# while Super-49B is a single checkpoint with mode toggling. The filter
+# captures whichever rows together cover both thinking + instruct.
+MODEL_REGISTRY = {
+    "super49b": {
+        "models": ("Nemotron-Super-49B",),  # one model, two modes
+    },
+    "qwen30b": {
+        "models": ("Qwen3-30B-A3B-Instruct", "Qwen3-30B-A3B-Thinking"),
+    },
+}
 
 TARGET_FP = 8   # gt=0, pred=1 in both modes (false alarm)
 TARGET_FN = 7   # gt=1, pred=0 in both modes (missed vulnerability)
@@ -51,23 +67,25 @@ SEED = 42
 # ---------------------------------------------------------------------------
 # Loaders
 # ---------------------------------------------------------------------------
-def find_source_files(consolidated_csv: str):
-    """Locate Super-49B SA zero-shot thinking + instruct JSONL paths (VulTrial-870)."""
+def find_source_files(consolidated_csv: str, model_key: str):
+    """Locate <model> SA zero-shot thinking + instruct JSONL paths (VulTrial-870)."""
+    model_names = MODEL_REGISTRY[model_key]["models"]
     think_paths, inst_paths = [], []
     with open(consolidated_csv) as f:
         for row in csv.DictReader(f):
-            if (row["dataset"] == "VulTrial-870"
+            if not (row["dataset"] == "VulTrial-870"
                     and row["design"] == "SA"
-                    and row["model"] == "Nemotron-Super-49B"
+                    and row["model"] in model_names
                     and row["prompting"] == "zero-shot"):
-                paths = [p.strip() for p in row["source_file"].split(";") if p.strip()]
-                if row["mode"] == "thinking":
-                    think_paths.extend(paths)
-                elif row["mode"] == "instruct":
-                    inst_paths.extend(paths)
+                continue
+            paths = [p.strip() for p in row["source_file"].split(";") if p.strip()]
+            if row["mode"] == "thinking":
+                think_paths.extend(paths)
+            elif row["mode"] == "instruct":
+                inst_paths.extend(paths)
     if not think_paths or not inst_paths:
-        sys.exit("ERROR: Could not find Super-49B SA zero-shot source files in "
-                 "consolidated_performance.csv")
+        sys.exit(f"ERROR: Could not find {model_key} SA zero-shot source files in "
+                 f"consolidated_performance.csv (model_names={model_names})")
     return think_paths, inst_paths
 
 
@@ -106,7 +124,22 @@ def load_vuln_datasets(paths):
 # Main
 # ---------------------------------------------------------------------------
 def main():
-    think_paths, inst_paths = find_source_files(CONSOLIDATED_CSV)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--model",
+        choices=list(MODEL_REGISTRY.keys()),
+        default="super49b",
+        help="Which model's SA zero-shot incorrect-intersection pool to sample from. "
+             "Default: super49b (backwards-compatible).",
+    )
+    args = parser.parse_args()
+
+    output_csv = os.path.join(
+        OUTPUT_DIR, f"{args.model}_zero_incorrect_rating_set.csv")
+
+    print(f"=== Generating incorrect rating set for {args.model} ===\n")
+
+    think_paths, inst_paths = find_source_files(CONSOLIDATED_CSV, args.model)
     print("Thinking JSONLs:")
     for p in think_paths:
         print(f"  {p}")
@@ -205,12 +238,12 @@ def main():
         "ground_truth_label", "stratum", "source_code", "response_text",
         "cwe", "cve_desc",
     ]
-    with open(OUTPUT_CSV, "w", newline="") as f:
+    with open(output_csv, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
         w.writerows(rows)
 
-    print(f"Wrote: {OUTPUT_CSV}")
+    print(f"Wrote: {output_csv}")
     print(f"  Total rows: {len(rows)}")
     strata = Counter(r["stratum"] for r in rows)
     print("  Stratum distribution:")

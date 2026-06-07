@@ -986,7 +986,31 @@ def mode_evaluate(model_key: str, iteration: int = 1):
                 continue
             if model_name == "Qwen3-30B-A3B" and "Qwen3-30B" not in fname:
                 continue
-            is_think = "_thinking_" in fname
+            # Mode detection must handle two conventions:
+            #   1. Runtime suffix `_thinking_` / `_instruct_` (used for Nemotron, where
+            #      a single checkpoint is mode-toggled). Always reliable when present.
+            #   2. Model-name substring `Thinking` / `Instruct` (Qwen3-30B ships
+            #      separate checkpoints; the runtime suffix is inconsistently
+            #      applied across 486 vs 384-incremental files).
+            # Nemotron 384 instruct files lack any suffix at all (e.g.
+            # `..._20260318-151410_detailed_results.jsonl`); for Nemotron those
+            # default to instruct, mirroring the original loader's behaviour and
+            # matching the existing super49b_870_llm_judged baseline.
+            if "_thinking_" in fname:
+                is_think = True
+            elif "_instruct_" in fname:
+                is_think = False
+            elif "Thinking" in fname:
+                is_think = True
+            elif "Instruct" in fname:
+                is_think = False
+            elif model_name == "Nemotron-Super-49B":
+                # Nemotron 384-incremental files written without mode suffix
+                # default to instruct (the thinking 384 file does have the suffix).
+                is_think = False
+            else:
+                print(f"  WARN: cannot infer mode for {fname}; skipping")
+                continue
             target = think_data if is_think else inst_data
             records = load_jsonl(jsonl_path)
             for idx, rec in records.items():
@@ -1171,22 +1195,24 @@ def mode_evaluate(model_key: str, iteration: int = 1):
 # ---------------------------------------------------------------------------
 # Mode: evaluate-incorrect (Reviewer B5 follow-up)
 # ---------------------------------------------------------------------------
-def mode_evaluate_incorrect():
+def mode_evaluate_incorrect(model_key: str = "super49b"):
     """Score the incorrect-intersection rating set produced by
     `scripts/rq3_generate_incorrect_rating_set.py`.
 
     Uses the same Opus 4.6 zero-shot rubric prompt selected as the final
     judge configuration (Section 11.5.3). Reads a pre-built CSV of 30
     eval-queue rows (15 snippets × {think, inst}) and emits scores in the
-    same schema as `super49b_870_llm_judged_*_zeroshot.csv` so downstream
+    same schema as `{model_key}_870_llm_judged_*_zeroshot.csv` so downstream
     comparison is direct.
-    """
-    print("=== EVALUATE-INCORRECT: Super-49B SA zero-shot incorrect-intersection ===\n")
 
-    rating_set_path = os.path.join(OUTPUT_DIR, "super49b_zero_incorrect_rating_set.csv")
+    model_key: 'super49b' (default, backwards-compatible) or 'qwen30b'.
+    """
+    print(f"=== EVALUATE-INCORRECT: {model_key} SA zero-shot incorrect-intersection ===\n")
+
+    rating_set_path = os.path.join(OUTPUT_DIR, f"{model_key}_zero_incorrect_rating_set.csv")
     if not os.path.exists(rating_set_path):
         sys.exit(f"ERROR: rating set not found: {rating_set_path}\n"
-                 f"Run: python scripts/rq3_generate_incorrect_rating_set.py")
+                 f"Run: python scripts/rq3_generate_incorrect_rating_set.py --model {model_key}")
 
     rubric_text = load_rubric_text()
     system_prompt = build_system_prompt(rubric_text)
@@ -1216,7 +1242,7 @@ def mode_evaluate_incorrect():
 
     judge_short = _get_judge_model().replace("claude-", "").replace("-20250514", "")
     output_path = os.path.join(
-        OUTPUT_DIR, f"super49b_zero_incorrect_llm_judged_{judge_short}_zeroshot.csv"
+        OUTPUT_DIR, f"{model_key}_zero_incorrect_llm_judged_{judge_short}_zeroshot.csv"
     )
     fieldnames = [
         "entry_id", "response_id", "ground_truth", "ground_truth_label", "stratum",
@@ -1439,7 +1465,7 @@ def main():
     elif args.mode == "evaluate":
         mode_evaluate(model_key=args.model, iteration=args.iteration)
     elif args.mode == "evaluate-incorrect":
-        mode_evaluate_incorrect()
+        mode_evaluate_incorrect(model_key=args.model)
     elif args.mode == "spot-check":
         mode_spot_check(model_key=args.model)
 
