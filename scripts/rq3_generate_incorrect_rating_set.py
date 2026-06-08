@@ -29,10 +29,69 @@ import csv
 import json
 import os
 import random
+import re
 import sys
 from collections import Counter
 
 csv.field_size_limit(sys.maxsize)
+
+# ---------------------------------------------------------------------------
+# Text-vs-parser consistency filter
+# ---------------------------------------------------------------------------
+# Background: the JSONL `vuln` field is written by the runtime parser. Audit
+# showed ~3-6% of entries have the response text stating one verdict while the
+# parser stored the opposite, almost always due to known parser substring bugs
+# (e.g., "vulnerability detected" matching inside "no vulnerability detected"
+# for instruct mode, or thinking-mode responses using "Final Answer: YES"
+# rather than the template's "(1) YES").
+#
+# For the incorrect-intersection pool we want entries where the model truly
+# disagreed with ground truth, not where the parser misread the model's
+# correct verdict. The filter below excludes any entry whose response text
+# states a confident verdict that contradicts the parsed `vuln` field, for
+# either of the two modes.
+# ---------------------------------------------------------------------------
+_TEMPLATE_YES = re.compile(r"\(1\)\s*\*?\*?\s*YES", re.IGNORECASE)
+_TEMPLATE_NO  = re.compile(r"\(2\)\s*\*?\*?\s*NO\b", re.IGNORECASE)
+_FINAL_YES    = re.compile(r"(final\s+(?:answer|verdict|decision)|conclusion)[:\s\*]*\s*\*?\*?\s*(yes|vulnerable|vulnerability\s+detected)", re.IGNORECASE)
+_FINAL_NO     = re.compile(r"(final\s+(?:answer|verdict|decision)|conclusion)[:\s\*]*\s*\*?\*?\s*(no|not\s+vulnerable|no\s+vulnerability|safe)", re.IGNORECASE)
+
+
+def stated_verdict(text: str):
+    """Return the model's last stated verdict (1=vulnerable, 0=safe, or None).
+
+    Priority: template markers `(1) YES` / `(2) NO` (last wins) → "Final
+    answer/verdict/conclusion: YES/NO" (last wins) → tail-anchored vuln
+    keyword fallback. None means we cannot confidently decide.
+    """
+    t = text or ""
+    last_yes = max([m.start() for m in _TEMPLATE_YES.finditer(t)] or [-1])
+    last_no  = max([m.start() for m in _TEMPLATE_NO.finditer(t)]  or [-1])
+    if last_yes >= 0 or last_no >= 0:
+        return 1 if last_yes > last_no else 0
+    last_fy = max([m.start() for m in _FINAL_YES.finditer(t)] or [-1])
+    last_fn = max([m.start() for m in _FINAL_NO.finditer(t)]  or [-1])
+    if last_fy >= 0 or last_fn >= 0:
+        return 1 if last_fy > last_fn else 0
+    tail = t[-400:].lower()
+    if re.search(r"\b(double[- ]?free|buffer\s+overflow|null\s+deref|race\s+condition|use[- ]after[- ]free|memory\s+leak|injection|cwe)", tail):
+        if re.search(r"no\s+vulnerability|not\s+vulnerable|is\s+safe|is\s+benign", tail):
+            return None
+        return 1
+    return None
+
+
+def text_parser_mismatch(rec: dict) -> bool:
+    """True if the response's stated verdict confidently contradicts `vuln`."""
+    sv = stated_verdict(rec.get("reasoning", ""))
+    if sv is None:
+        return False  # cannot tell — be conservative, do not flag
+    parsed = rec.get("vuln")
+    try:
+        parsed = int(parsed)
+    except (TypeError, ValueError):
+        return False
+    return sv != parsed
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -162,6 +221,7 @@ def main():
     pool_fp = []  # gt=0, pred=1 in both modes
     pool_fn = []  # gt=1, pred=0 in both modes
     skipped_unparseable = 0
+    skipped_text_parser_mismatch = 0
     for eid in sorted(common):
         t, i = think_data[eid], inst_data[eid]
         gt = int(t.get("ground_truth", t.get("target", -1)))
@@ -172,6 +232,12 @@ def main():
             continue
         if t_pred == gt or i_pred == gt:
             continue  # at least one correct → not in incorrect-intersection
+        # Drop entries where either mode's stated text verdict confidently
+        # contradicts the parsed `vuln` field — those are parser bugs, not
+        # the model genuinely being wrong about the sample.
+        if text_parser_mismatch(t) or text_parser_mismatch(i):
+            skipped_text_parser_mismatch += 1
+            continue
         if gt == 0 and t_pred == 1 and i_pred == 1:
             pool_fp.append(eid)
         elif gt == 1 and t_pred == 0 and i_pred == 0:
@@ -180,7 +246,8 @@ def main():
     print(f"Incorrect-intersection pool")
     print(f"  Both FP (gt=0, both predict 1): {len(pool_fp)}")
     print(f"  Both FN (gt=1, both predict 0): {len(pool_fn)}")
-    print(f"  Skipped (unparseable vuln/gt) : {skipped_unparseable}")
+    print(f"  Skipped (unparseable vuln/gt)         : {skipped_unparseable}")
+    print(f"  Skipped (text-parser verdict mismatch): {skipped_text_parser_mismatch}")
     print()
 
     if len(pool_fp) < TARGET_FP:

@@ -10,66 +10,202 @@ Each case shows the source code, the model's response, the LLM judge's justifica
 ## Nemotron-Super-49B
 
 
-### Case: Nemotron-Super-49B · instruct · FN · entry_id=216515
+### Case: Nemotron-Super-49B · instruct · FN · entry_id=195388
 
 **Ground truth**: vulnerable (model predicted safe)  
 
-**CWE**: ['CWE-362']  
+**CWE**: ['CWE-522']  
 
-**CVE description**: Race condition in the ssl3_get_new_session_ticket function in ssl/s3_clnt.c in OpenSSL before 0.9.8zg, 1.0.0 before 1.0.0s, 1.0.1 before 1.0.1n, and 1.0.2 before 1.0.2b, when used for a multi-threaded client, allows remo […]  
+**CVE description**: A man-in-the-middle attacker can inject false responses to the client's first few queries, despite the use of SSL certificate verification and encryption.  
 
-**Plausibility-disconnect score**: +4  
+**Plausibility-disconnect score**: +2  
 
-**Judge scores** — completeness 1, clarity 4, actionability 2, informativeness 1
+**Judge scores** — completeness 1, clarity 3, actionability 1, informativeness 1
 
 
 **Source code (excerpt)**:
 
 ```c
-int ssl3_get_new_session_ticket(SSL *s)
+PQconnectPoll(PGconn *conn)
 {
-    int ok, al, ret = 0, ticklen;
-    long n;
-    const unsigned char *p;
-    unsigned char *d;
+	bool		reset_connection_state_machine = false;
+	bool		need_new_connection = false;
+	PGresult   *res;
+	char		sebuf[PG_STRERROR_R_BUFLEN];
+	int			optval;
 
-    n = s->method->ssl_get_message(s,
-                                   SSL3_ST_CR_SESSION_TICKET_A,
-                                   SSL3_ST_CR_SESSION_TICKET_B,
-                                   SSL3_MT_NEWSESSION_TICKET, 16384, &ok);
+	if (conn == NULL)
+		return PGRES_POLLING_FAILED;
 
-    if (!ok)
-        return ((int)n);
+	/* Get the new data */
+	switch (conn->status)
+	{
+			/*
+			 * We really shouldn't have been polled in these two cases, but we
+			 * can handle it.
+			 */
+		case CONNECTION_BAD:
+			return PGRES_POLLING_FAILED;
+		case CONNECTION_OK:
+			return PGRES_POLLING_OK;
 
-    if (n < 6) {
-        /* need at least ticket_lifetime_hint + ticket length */
-        al = SSL_AD_DECODE_ERROR;
-        SSLerr(SSL_F_SSL3_GET_NEW_SESSION_TICKET, SSL_R_LENGTH_MISMATCH);
-        goto f_err;
-    }
-
-    p = d = (unsigned char *)s->init_msg;
-    n2l(p, s->session->tlsext_tick_lifetime_hint);
-    n2s(p, ticklen);
-    /* ticket_lifetime_hint + ticket_length + ticket */
-    if (ticklen + 6 != n) {
-        al = SSL_AD_DECODE_ERROR;
-        SSLerr(SSL_F_SSL3_GET_NEW_SESSION_TICKET, SSL_R_LENGTH_MISMATCH);
-        goto f_err;
+			/* These are reading states */
+		case CONNECTION_AWAITING_RESPONSE:
+		case CONNECTION_AUTH_OK:
+		case CONNECTION_CHECK_WRITABLE:
+		case CONNECTION_CONSUME:
+		case CONNECTION_CHECK_STANDBY:
+			{
 // […]
 ```
 
 
 **Model response (excerpt)**:
 
-> Let's analyze the provided code step-by-step for potential vulnerabilities:  **Code Overview** ----------------  The function `ssl3_get_new_session_ticket` appears to be part of an SSL/TLS implementation, specifically handling the reception of a new session ticket in the SSLv3/TLS protocol. The function processes the received ticket, extracts its components, and updates the session with the new ticket information.  **Step-by-Step Analysis** -------------------------  1. **Message Reception and Initial Checks**    - The function starts by receiving a message using `s->method->ssl_get_message`. […]
+> **Security Analysis of Provided Code**  **Overview**  The provided code is a part of the libpq library, which is the PostgreSQL client library. The function `PQconnectPoll` manages the connection process to a PostgreSQL server, handling various states and potential errors.  **Step-by-Step Analysis**  1. **Input Validation**: 	* The function checks if `conn` is `NULL` at the beginning, preventing null pointer dereferences. 	* It validates the `conn->status` to ensure it's in a recognized state. 	* Hostnames, ports, and other connection parameters are validated (e.g., port number range check). […]
 
 
 **Judge justifications (lowest-scoring dimensions)**:
 
-- *completeness* (score 1): The response completely misses the actual vulnerability (CWE-362, race condition). The CVE describes a race condition in multi-threaded clients where a NewSessionTicket during ticket reuse can cause a double free. The code modifies s->session directly without copying it first, meaning if the session is shared across th […]
+- *completeness* (score 1): The analysis completely misses the actual vulnerability (CWE-522). The CVE describes a man-in-the-middle attack where false responses can be injected to the client's first few queries despite SSL certificate verification. The critical issue is that after SSL negotiation completes and the connection transitions to CONNE […]
 
-- *informativeness* (score 1): The response fails to provide any meaningful insight about the actual vulnerability. It does not mention race conditions, double-free, multi-threading, or session sharing — all central to the CVE. The identified 'vulnerability' (unbounded ticklen) is not a real issue since the message size is already bounded by the 163 […]
+- *actionability* (score 1): The response concludes there is no vulnerability and provides no actionable guidance. It fails to identify the actual vulnerability, the specific code locations involved (the CONNECTION_CHECK_WRITABLE and CONNECTION_CHECK_STANDBY states where query results are trusted), or any remediation steps.
+
+
+**Analyst note**: treats one surface concern as the full picture, missing the actual mechanism; substance is thin (recommendation rather than analysis).
+
+
+---
+
+
+### Case: Nemotron-Super-49B · thinking · FN · entry_id=216903
+
+**Ground truth**: vulnerable (model predicted safe)  
+
+**CWE**: ['CWE-476']  
+
+**CVE description**: MariaDB through 10.5.9 allows an application crash in sub_select_postjoin_aggr for a NULL value of aggr.  
+
+**Plausibility-disconnect score**: +2  
+
+**Judge scores** — completeness 1, clarity 3, actionability 1, informativeness 1
+
+
+**Source code (excerpt)**:
+
+```c
+bool st_select_lex::optimize_unflattened_subqueries(bool const_only)
+{
+  SELECT_LEX_UNIT *next_unit= NULL;
+  for (SELECT_LEX_UNIT *un= first_inner_unit();
+       un;
+       un= next_unit ? next_unit : un->next_unit())
+  {
+    Item_subselect *subquery_predicate= un->item;
+    next_unit= NULL;
+
+    if (subquery_predicate)
+    {
+      if (!subquery_predicate->fixed)
+      {
+	/*
+	 This subquery was excluded as part of some expression so it is
+	 invisible from all prepared expression.
+       */
+	next_unit= un->next_unit();
+	un->exclude_level();
+	if (next_unit)
+	  continue;
+	break;
+      }
+      if (subquery_predicate->substype() == Item_subselect::IN_SUBS)
+      {
+        Item_in_subselect *in_subs= (Item_in_subselect*) subquery_predicate;
+        if (in_subs->is_jtbm_merged)
+          continue;
+      }
+// […]
+```
+
+
+**Model response (excerpt)**:
+
+> <think> Okay, let's take a look at this code. It's a C++ function called optimize_unflattened_subqueries in the st_select_lex class. The function seems to handle optimizing subqueries in a SQL query, possibly part of a database system like MySQL.  First, I need to check for any potential vulnerabilities. Common issues in C++ code could include memory leaks, buffer overflows, use of uninitialized variables, or issues with concurrency. But since this is static analysis, I should focus on code patterns that might lead to vulnerabilities.  Looking at the code structure: there's a loop over SELECT_ […]
+
+
+**Judge justifications (lowest-scoring dimensions)**:
+
+- *completeness* (score 1): The response completely misses the actual vulnerability (CWE-476, NULL pointer dereference). The CVE describes a crash in sub_select_postjoin_aggr for a NULL value of aggr. The analysis incorrectly concludes the code is safe, failing to identify the specific NULL pointer dereference condition that leads to the applicat […]
+
+- *actionability* (score 1): The response provides no actionable guidance since it incorrectly identifies the code as safe. No vulnerable lines are highlighted, no patches are suggested, and no specific risks related to the actual NULL pointer dereference vulnerability are described. A developer reading this would take no action on a genuinely vul […]
+
+
+**Analyst note**: treats one surface concern as the full picture, missing the actual mechanism; substance is thin (recommendation rather than analysis).
+
+
+---
+
+
+### Case: Nemotron-Super-49B · instruct · FP · entry_id=276993
+
+**Ground truth**: safe (model predicted vulnerable)  
+
+**CWE**: ['CWE-703']  
+
+**CVE description**: NULL Pointer Dereference in GitHub repository mruby/mruby prior to 3.2.  
+
+**Plausibility-disconnect score**: +2  
+
+**Judge scores** — completeness 2, clarity 4, actionability 2, informativeness 2
+
+
+**Source code (excerpt)**:
+
+```c
+fiber_switch(mrb_state *mrb, mrb_value self, mrb_int len, const mrb_value *a, mrb_bool resume, mrb_bool vmexec)
+{
+  struct mrb_context *c = fiber_check(mrb, self);
+  struct mrb_context *old_c = mrb->c;
+  enum mrb_fiber_state status;
+  mrb_value value;
+
+  fiber_check_cfunc(mrb, c);
+  status = c->status;
+  switch (status) {
+  case MRB_FIBER_TRANSFERRED:
+    if (resume) {
+      mrb_raise(mrb, E_FIBER_ERROR, "resuming transferred fiber");
+    }
+    break;
+  case MRB_FIBER_RUNNING:
+  case MRB_FIBER_RESUMED:
+    mrb_raise(mrb, E_FIBER_ERROR, "double resume");
+    break;
+  case MRB_FIBER_TERMINATED:
+    mrb_raise(mrb, E_FIBER_ERROR, "resuming dead fiber");
+    break;
+  default:
+    break;
+  }
+  old_c->status = resume ? MRB_FIBER_RESUMED : MRB_FIBER_TRANSFERRED;
+  c->prev = resume ? mrb->c : (c->prev ? c->prev : mrb->root_c);
+  fiber_switch_context(mrb, c);
+  if (status == MRB_FIBER_CREATED) {
+    mrb_value *b, *e;
+// […]
+```
+
+
+**Model response (excerpt)**:
+
+> Let's analyze the provided code step-by-step to determine if there's a vulnerability.  **Code Overview**  The `fiber_switch` function appears to be part of a fiber (lightweight thread) implementation, likely for the MRuby programming language. It handles switching between fibers, managing their states, and executing their code.  **Step-by-Step Analysis**  1. **Input Validation**: 	* The function takes several inputs: `mrb`, `self`, `len`, `a` (an array of `mrb_value`), `resume`, and `vmexec`. 	* **No explicit validation** is performed on `len` or the contents of `a`. **Potential issue**, but l […]
+
+
+**Judge justifications (lowest-scoring dimensions)**:
+
+- *completeness* (score 2): The analysis incorrectly concludes there is a vulnerability when the ground truth indicates the code is safe. The response fails to recognize that mrb_stack_extend(mrb, len+2) properly allocates sufficient space before the copy loop, making the out-of-bounds write claim incorrect. The analysis of fiber state management […]
+
+- *actionability* (score 2): The response identifies specific code locations and suggests bounds checking is needed, but since the code is actually safe, this actionability is misguided. The suggested remediation would be unnecessary work for a developer.
 
 
 **Analyst note**: treats one surface concern as the full picture, missing the actual mechanism; substance is thin (recommendation rather than analysis); written confidently and cleanly despite being wrong.
@@ -78,7 +214,78 @@ int ssl3_get_new_session_ticket(SSL *s)
 ---
 
 
-### Case: Nemotron-Super-49B · thinking · FN · entry_id=216515
+### Case: Nemotron-Super-49B · thinking · FP · entry_id=251946
+
+**Ground truth**: safe (model predicted vulnerable)  
+
+**CWE**: ['CWE-369']  
+
+**CVE description**: TensorFlow is an end-to-end open source platform for machine learning. In affected versions an attacker can craft a TFLite model that would trigger a null pointer dereference, which would result in a crash and denial of […]  
+
+**Plausibility-disconnect score**: +3  
+
+**Judge scores** — completeness 2, clarity 4, actionability 3, informativeness 2
+
+
+**Source code (excerpt)**:
+
+```c
+inline void BinaryBroadcastFiveFold(const ArithmeticParams& unswitched_params,
+                                    const RuntimeShape& unswitched_input1_shape,
+                                    const T* unswitched_input1_data,
+                                    const RuntimeShape& unswitched_input2_shape,
+                                    const T* unswitched_input2_data,
+                                    const RuntimeShape& output_shape,
+                                    T* output_data, ElementwiseF elementwise_f,
+                                    ScalarBroadcastF scalar_broadcast_f) {
+  ArithmeticParams switched_params = unswitched_params;
+  switched_params.input1_offset = unswitched_params.input2_offset;
+  switched_params.input1_multiplier = unswitched_params.input2_multiplier;
+  switched_params.input1_shift = unswitched_params.input2_shift;
+  switched_params.input2_offset = unswitched_params.input1_offset;
+  switched_params.input2_multiplier = unswitched_params.input1_multiplier;
+  switched_params.input2_shift = unswitched_params.input1_shift;
+
+  const bool use_unswitched =
+      unswitched_params.broadcast_category ==
+      tflite::BroadcastableOpCategory::kFirstInputBroadcastsFast;
+
+  const ArithmeticParams& params =
+      use_unswitched ? unswitched_params : switched_params;
+  const T* input1_data =
+      use_unswitched ? unswitched_input1_data : unswitched_input2_data;
+  const T* input2_data =
+      use_unswitched ? unswitched_input2_data : unswitched_input1_data;
+
+  // Fivefold nested loops. The second input resets its position for each
+  // iteration of the second loop. The first input resets its position at the
+  // beginning of the fourth loop. The innermost loop is an elementwise add of
+// […]
+```
+
+
+**Model response (excerpt)**:
+
+> <think> Okay, let's take a look at this code. Hmm, the function is called BinaryBroadcastFiveFold, which suggests it's handling some kind of broadcasting operation in a binary operation, maybe like adding two tensors with different shapes. The code seems to be part of a machine learning framework, possibly TensorFlow Lite given the namespace tflite.  First, I need to check for any potential security vulnerabilities. Common issues in such code could be buffer overflows, use of uninitialized variables, or incorrect handling of input data leading to out-of-bounds accesses.  Looking at the paramet […]
+
+
+**Judge justifications (lowest-scoring dimensions)**:
+
+- *completeness* (score 2): The response identifies a potential null pointer dereference concern, but the ground truth indicates this code is safe. The analysis fails to recognize that the null check in the y4==1 branch is a defensive measure, not evidence of a vulnerability in the y4>1 branch. The function's contract likely requires valid (non-n […]
+
+- *informativeness* (score 2): The response makes a superficial observation about asymmetric null checking between the two branches but fails to provide deeper insight into why this pattern exists or whether it actually constitutes a vulnerability. It doesn't consider that the null check in the y4==1 case might be a defensive/optional guard rather t […]
+
+
+**Analyst note**: treats one surface concern as the full picture, missing the actual mechanism; substance is thin (recommendation rather than analysis); written confidently and cleanly despite being wrong; still proposes remediation, just for the wrong underlying claim.
+
+
+---
+
+
+## Qwen3-30B-A3B
+
+
+### Case: Qwen3-30B-A3B · instruct · FN · entry_id=216515
 
 **Ground truth**: vulnerable (model predicted safe)  
 
@@ -130,216 +337,14 @@ int ssl3_get_new_session_ticket(SSL *s)
 
 **Model response (excerpt)**:
 
-> <think> Okay, let's take a look at this code. It's a function called ssl3_get_new_session_ticket in OpenSSL. The function seems to handle receiving a new session ticket from the server during the SSL/TLS handshake. My task is to check if there's any vulnerability here.  First, I'll start by understanding the code flow. The function starts by calling s->method->ssl_get_message to get the message from the server. If that fails (ok is false), it returns n. Then it checks if the message length n is less than 6. If so, it sets an error and jumps to f_err.   Next, it processes the message data. The […]
+> Step 1: Analyze the code carefully   The function `ssl3_get_new_session_ticket` is part of OpenSSL's SSL/TLS implementation and handles the reception of a `NEWSESSION_TICKET` message from the server during the handshake. The function performs the following steps:  - It receives a message from the server using `ssl_get_message`, which reads data into `s->init_msg` and returns the length `n`. - It checks if the received data length `n` is at least 6 bytes (minimum required for `ticket_lifetime_hint` and `ticket_length`). - It parses `ticket_lifetime_hint` (4 bytes) and `ticket_length` (2 bytes) […]
 
 
 **Judge justifications (lowest-scoring dimensions)**:
 
-- *completeness* (score 1): The response completely misses the actual vulnerability (CWE-362, race condition). The CVE describes a race condition in multi-threaded clients where a session being reused can be modified concurrently, leading to a double free. The analysis only examines sequential execution concerns (buffer overflows, input validatio […]
+- *completeness* (score 1): The response completely misses the actual vulnerability (CWE-362, race condition). The CVE describes a race condition in multi-threaded clients where the session object (s->session) may be shared across threads. When the function frees and reallocates tlsext_tick without creating a new session object first, another thr […]
 
-- *actionability* (score 1): The response declares no vulnerability exists, so it provides no remediation guidance. Since the code is actually vulnerable to a race condition, this is a false negative that provides no actionable information for addressing the real issue.
-
-
-**Analyst note**: treats one surface concern as the full picture, missing the actual mechanism; substance is thin (recommendation rather than analysis); written confidently and cleanly despite being wrong.
-
-
----
-
-
-### Case: Nemotron-Super-49B · instruct · FP · entry_id=250692
-
-**Ground truth**: safe (model predicted vulnerable)  
-
-**CWE**: ['CWE-552']  
-
-**CVE description**: This affects the package drogonframework/drogon before 1.7.5. The unsafe handling of file names during upload using HttpFile::save() method may enable attackers to write files to arbitrary locations outside the designate […]  
-
-**Plausibility-disconnect score**: +3  
-
-**Judge scores** — completeness 3, clarity 5, actionability 4, informativeness 3
-
-
-**Source code (excerpt)**:
-
-```c
-int HttpFileImpl::saveAs(const std::string &fileName) const
-{
-    assert(!fileName.empty());
-    filesystem::path fsFileName(utils::toNativePath(fileName));
-    if (!fsFileName.is_absolute() && (!fsFileName.has_parent_path() ||
-                                      (fsFileName.begin()->string() != "." &&
-                                       fsFileName.begin()->string() != "..")))
-    {
-        filesystem::path fsUploadPath(utils::toNativePath(
-            HttpAppFrameworkImpl::instance().getUploadPath()));
-        fsFileName = fsUploadPath / fsFileName;
-    }
-    if (fsFileName.has_parent_path() &&
-        !filesystem::exists(fsFileName.parent_path()))
-    {
-        LOG_TRACE << "create path:" << fsFileName.parent_path();
-        drogon::error_code err;
-        filesystem::create_directories(fsFileName.parent_path(), err);
-        if (err)
-        {
-            LOG_SYSERR;
-            return -1;
-        }
-    }
-    return saveTo(fsFileName);
-}
-```
-
-
-**Model response (excerpt)**:
-
-> Let's analyze the provided C++ code step-by-step from a **static program analysis** and **security** perspective.  ---  ### 🔍 Code Overview  This is a method `saveAs` in a class `HttpFileImpl`. It appears to be part of a web framework (likely [Drogon](https://github.com/drogonframework/drogon)), handling the saving of an HTTP file to disk.  The function:  1. Converts the provided `fileName` to a filesystem path. 2. If the path is not absolute and doesn't have a parent path or starts with `.` or `..`, it prepends the upload path. 3. If the parent path of the file doesn't exist, it tries to crea […]
-
-
-**Judge justifications (lowest-scoring dimensions)**:
-
-- *completeness* (score 3): The analysis covers path traversal concerns in detail and examines multiple aspects of the code. However, the ground truth labels this as safe code, and the response incorrectly identifies a vulnerability. The analysis does trace through the logic carefully but misinterprets the intent: when the first component IS '..' […]
-
-- *informativeness* (score 3): The analysis provides genuine technical depth about path traversal mechanics and the filesystem path API. However, the core conclusion is incorrect (false positive), which significantly diminishes the informativeness. The analysis of how the path components are checked is detailed but ultimately leads to a wrong conclu […]
-
-
-**Analyst note**: written confidently and cleanly despite being wrong; still proposes remediation, just for the wrong underlying claim.
-
-
----
-
-
-### Case: Nemotron-Super-49B · thinking · FP · entry_id=309831
-
-**Ground truth**: safe (model predicted vulnerable)  
-
-**CWE**: ['CWE-787']  
-
-**CVE description**: An issue was discovered in ncurses through v6.2-1. _nc_captoinfo in captoinfo.c has a heap-based buffer overflow.  
-
-**Plausibility-disconnect score**: +2  
-
-**Judge scores** — completeness 3, clarity 4, actionability 3, informativeness 2
-
-
-**Source code (excerpt)**:
-
-```c
-cvtchar(register const char *sp)
-/* convert a character to a terminfo push */
-{
-    unsigned char c = 0;
-    int len;
-
-    switch (*sp) {
-    case '\\':
-	switch (*++sp) {
-	case '\'':
-	case '$':
-	case '\\':
-	case '%':
-	    c = UChar(*sp);
-	    len = 2;
-	    break;
-	case '\0':
-	    c = '\\';
-	    len = 1;
-	    break;
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	    len = 1;
-	    while (isdigit(UChar(*sp))) {
-		c = UChar(8 * c + (*sp++ - '0'));
-		len++;
-	    }
-	    break;
-// […]
-```
-
-
-**Model response (excerpt)**:
-
-> <think> Okay, let's take a look at this code. Hmm, the function is called cvtchar, and it's supposed to convert a character into some terminfo push. The code seems to handle various escape sequences and different cases for characters. I need to check for any possible vulnerabilities here.  First, the function starts by taking a pointer 'sp' which is a register const char. Then there's a switch on *sp. The first case is a backslash, which then has another switch on the next character. Let's see what happens here.  In the first case, when the first character is a backslash, it checks the next ch […]
-
-
-**Judge justifications (lowest-scoring dimensions)**:
-
-- *informativeness* (score 2): While the analysis demonstrates understanding of escape sequence parsing and provides detailed code walkthrough, the core insight is wrong. The backslash-null case is standard C string handling — the null terminator is not a 'character to consume' but the end of the string. The DoS concern about octal digit processing […]
-
-- *completeness* (score 3): The analysis covers multiple aspects of the code including escape sequence handling, octal processing, and output generation. However, it incorrectly identifies the code as vulnerable when the ground truth says it's safe. The backslash-null handling is actually intentional — when a backslash is at the end of a string ( […]
-
-
-**Analyst note**: substance is thin (recommendation rather than analysis); written confidently and cleanly despite being wrong; still proposes remediation, just for the wrong underlying claim.
-
-
----
-
-
-## Qwen3-30B-A3B
-
-
-### Case: Qwen3-30B-A3B · instruct · FN · entry_id=214909
-
-**Ground truth**: vulnerable (model predicted safe)  
-
-**CWE**: ['CWE-401']  
-
-**CVE description**: A memory leak in the mlx5_fpga_conn_create_cq() function in drivers/net/ethernet/mellanox/mlx5/core/fpga/conn.c in the Linux kernel before 5.3.11 allows attackers to cause a denial of service (memory consumption) by trig […]  
-
-**Plausibility-disconnect score**: +2  
-
-**Judge scores** — completeness 1, clarity 4, actionability 1, informativeness 2
-
-
-**Source code (excerpt)**:
-
-```c
-static int mlx5_fpga_conn_create_cq(struct mlx5_fpga_conn *conn, int cq_size)
-{
-	struct mlx5_fpga_device *fdev = conn->fdev;
-	struct mlx5_core_dev *mdev = fdev->mdev;
-	u32 temp_cqc[MLX5_ST_SZ_DW(cqc)] = {0};
-	u32 out[MLX5_ST_SZ_DW(create_cq_out)];
-	struct mlx5_wq_param wqp;
-	struct mlx5_cqe64 *cqe;
-	int inlen, err, eqn;
-	unsigned int irqn;
-	void *cqc, *in;
-	__be64 *pas;
-	u32 i;
-
-	cq_size = roundup_pow_of_two(cq_size);
-	MLX5_SET(cqc, temp_cqc, log_cq_size, ilog2(cq_size));
-
-	wqp.buf_numa_node = mdev->priv.numa_node;
-	wqp.db_numa_node  = mdev->priv.numa_node;
-
-	err = mlx5_cqwq_create(mdev, &wqp, temp_cqc, &conn->cq.wq,
-			       &conn->cq.wq_ctrl);
-	if (err)
-		return err;
-
-	for (i = 0; i < mlx5_cqwq_get_size(&conn->cq.wq); i++) {
-		cqe = mlx5_cqwq_get_wqe(&conn->cq.wq, i);
-		cqe->op_own = MLX5_CQE_INVALID << 4 | MLX5_CQE_OWNER_MASK;
-	}
-
-// […]
-```
-
-
-**Model response (excerpt)**:
-
-> Step 1: Analyze the code carefully   The function `mlx5_fpga_conn_create_cq` is responsible for creating a Completion Queue (CQ) in an MLX5 FPGA connection context. It performs the following steps:   - Rounds up `cq_size` to the nearest power of two.   - Initializes a CQ context (`temp_cqc`) with the log size.   - Sets up a work queue parameter (`wqp`) with NUMA node information from the device.   - Creates a CQ work queue (`mlx5_cqwq_create`) using the provided parameters.   - Initializes CQE entries in the WQ to invalid state.   - Allocates memory for the `create_cq_in` input buffer using `k […]
-
-
-**Judge justifications (lowest-scoring dimensions)**:
-
-- *completeness* (score 1): The response completely misses the actual vulnerability (CWE-401 memory leak). When mlx5_vector2eqn() fails, the code jumps to err_cqwq without freeing the 'in' buffer that was allocated by kvzalloc. The response explicitly lists 'Memory safety' as not an issue and even notes the error handling path but fails to recogn […]
-
-- *actionability* (score 1): The response concludes the code is safe and provides no remediation guidance. Since the code is actually vulnerable, this is a critical failure in actionability — a developer reading this would take no action on a real memory leak vulnerability.
+- *actionability* (score 1): The response concludes the code is secure and provides no remediation guidance. Since the code is actually vulnerable, this is a critical failure in actionability — a developer reading this would take no action on a real vulnerability.
 
 
 **Analyst note**: treats one surface concern as the full picture, missing the actual mechanism; substance is thin (recommendation rather than analysis); written confidently and cleanly despite being wrong.
@@ -416,13 +421,13 @@ static Image *ReadPCLImage(const ImageInfo *image_info,ExceptionInfo *exception)
 ---
 
 
-### Case: Qwen3-30B-A3B · instruct · FP · entry_id=273880
+### Case: Qwen3-30B-A3B · instruct · FP · entry_id=259732
 
 **Ground truth**: safe (model predicted vulnerable)  
 
-**CWE**: ['CWE-787']  
+**CWE**: ['CWE-703']  
 
-**CVE description**: An unauthenticated stack-based buffer overflow vulnerability in common.c's handle_PORT in uftpd FTP server versions 2.10 and earlier can be abused to cause a crash and could potentially lead to remote code execution.  
+**CVE description**: TensorFlow is an open source platform for machine learning. Prior to versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4, the implementation of `tf.raw_ops.QuantizeAndDequantizeV4Grad` does not fully validate the input arguments. Th […]  
 
 **Plausibility-disconnect score**: +3  
 
@@ -432,48 +437,50 @@ static Image *ReadPCLImage(const ImageInfo *image_info,ExceptionInfo *exception)
 **Source code (excerpt)**:
 
 ```c
-static void handle_PORT(ctrl_t *ctrl, char *str)
-{
-	int a, b, c, d, e, f;
-	char addr[INET_ADDRSTRLEN];
-	struct sockaddr_in sin;
+  void Compute(OpKernelContext* ctx) override {
+    const Tensor& gradient = ctx->input(0);
+    const Tensor& input = ctx->input(1);
+    Tensor* input_backprop = nullptr;
+    OP_REQUIRES_OK(ctx,
+                   ctx->allocate_output(0, input.shape(), &input_backprop));
+    OP_REQUIRES(
+        ctx, axis_ >= -1,
+        errors::InvalidArgument("Axis must be at least -1. Found ", axis_));
+    OP_REQUIRES(ctx, (axis_ == -1 || axis_ < input.shape().dims()),
+                errors::InvalidArgument(
+                    "Axis should be -1 or 0 or a positive value less than ",
+                    input.shape().dims(), "but given axis value was ", axis_));
 
-	if (ctrl->data_sd > 0) {
-		uev_io_stop(&ctrl->data_watcher);
-		close(ctrl->data_sd);
-		ctrl->data_sd = -1;
-	}
-
-	/* Convert PORT command's argument to IP address + port */
-	sscanf(str, "%d,%d,%d,%d,%d,%d", &a, &b, &c, &d, &e, &f);
-	snprintf(addr, sizeof(addr), "%d.%d.%d.%d", a, b, c, d);
-
-	/* Check IPv4 address using inet_aton(), throw away converted result */
-	if (!inet_aton(addr, &(sin.sin_addr))) {
-		ERR(0, "Invalid address '%s' given to PORT command", addr);
-		send_msg(ctrl->sd, "500 Illegal PORT command.\r\n");
-		return;
-	}
-
-	strlcpy(ctrl->data_address, addr, sizeof(ctrl->data_address));
-	ctrl->data_port = e * 256 + f;
-
-	DBG("Client PORT command accepted for %s:%d", ctrl->data_address, ctrl->data_port);
-	send_msg(ctrl->sd, "200 PORT command successful.\r\n");
-}
+    OP_REQUIRES(
+        ctx, input.IsSameSize(gradient),
+        errors::InvalidArgument("gradient and input must be the same size"));
+    const int depth = (axis_ == -1) ? 1 : input.dim_size(axis_);
+    const Tensor& input_min_tensor = ctx->input(2);
+    OP_REQUIRES(ctx,
+                input_min_tensor.dims() == 0 || input_min_tensor.dims() == 1,
+                errors::InvalidArgument(
+                    "Input min tensor must have dimension 0 or 1. Received ",
+                    input_min_tensor.dims(), "."));
+    const Tensor& input_max_tensor = ctx->input(3);
+    OP_REQUIRES(ctx,
+                input_max_tensor.dims() == 0 || input_max_tensor.dims() == 1,
+                errors::InvalidArgument(
+                    "Input max tensor must have dimension 0 or 1. Received ",
+                    input_max_tensor.dims(), "."));
+// […]
 ```
 
 
 **Model response (excerpt)**:
 
-> Let's analyze the provided code step by step to determine whether there is a vulnerability.  ---  ### **1. Context and Purpose** This function `handle_PORT` processes the `PORT` command in an FTP server. The `PORT` command is used to specify the IP address and port number that the client wants the server to use for data connections.  The input `str` is expected to be in the format:   `a,b,c,d,e,f`   where: - `a,b,c,d` form the IP address (e.g., 192,168,1,100) - `e,f` form the port number: `e * 256 + f`  ---  ### **2. Input Parsing** ```c sscanf(str, "%d,%d,%d,%d,%d,%d", &a, &b, &c, &d, &e, &f) […]
+> Let's analyze the provided code step by step to determine whether there is a security vulnerability.  ---  ### **1. Context and Purpose** This is a TensorFlow `OpKernel` implementation (likely for a quantization/dequantization gradient operation). It computes gradients for a quantized operation, with support for both per-tensor (axis = -1) and per-channel (axis >= 0) quantization.  Key inputs: - `gradient`: gradient tensor - `input`: input tensor - `input_min_tensor`: minimum value(s) for quantization - `input_max_tensor`: maximum value(s) for quantization  Outputs: - `input_backprop`: gradien […]
 
 
 **Judge justifications (lowest-scoring dimensions)**:
 
-- *completeness* (score 3): The analysis covers multiple aspects of the code including input parsing, IP validation, and port construction. However, the ground truth indicates this code is safe, and the response incorrectly identifies a vulnerability. While the analysis of missing range validation on e and f is technically accurate as a code qual […]
+- *completeness* (score 3): The analysis is thorough in examining most validation checks and tensor operations. However, it incorrectly identifies a vulnerability. In TensorFlow's Eigen tensor library, `flat_inner_outer_dims<T, 3>` with argument -1 is actually a valid and commonly used pattern — it means all dimensions are collapsed into the 'inn […]
 
-- *informativeness* (score 3): The analysis provides genuine technical insight about FTP PORT command processing, inet_aton behavior, and snprintf buffer safety. However, it incorrectly classifies the code as vulnerable. The concern about e and f validation is a legitimate code quality observation but is overstated as a security vulnerability — pass […]
+- *informativeness* (score 3): The analysis demonstrates good understanding of TensorFlow kernel patterns, input validation, and tensor operations. It provides genuine technical depth in examining each validation check. However, the core insight about `flat_inner_outer_dims` with -1 being invalid is incorrect — this is a well-known Eigen pattern in […]
 
 
 **Analyst note**: written confidently and cleanly despite being wrong; still proposes remediation, just for the wrong underlying claim.
@@ -482,69 +489,69 @@ static void handle_PORT(ctrl_t *ctrl, char *str)
 ---
 
 
-### Case: Qwen3-30B-A3B · thinking · FP · entry_id=264657
+### Case: Qwen3-30B-A3B · thinking · FP · entry_id=259732
 
 **Ground truth**: safe (model predicted vulnerable)  
 
-**CWE**: ['CWE-416']  
+**CWE**: ['CWE-703']  
 
-**CVE description**: Use After Free in GitHub repository gpac/gpac prior to v2.1.0-DEV.  
+**CVE description**: TensorFlow is an open source platform for machine learning. Prior to versions 2.9.0, 2.8.1, 2.7.2, and 2.6.4, the implementation of `tf.raw_ops.QuantizeAndDequantizeV4Grad` does not fully validate the input arguments. Th […]  
 
-**Plausibility-disconnect score**: +3  
+**Plausibility-disconnect score**: +4  
 
-**Judge scores** — completeness 2, clarity 4, actionability 2, informativeness 1
+**Judge scores** — completeness 3, clarity 5, actionability 4, informativeness 2
 
 
 **Source code (excerpt)**:
 
 ```c
-static GF_Err BM_ParseGlobalQuantizer(GF_BifsDecoder *codec, GF_BitStream *bs, GF_List *com_list)
-{
-	GF_Node *node;
-	GF_Command *com;
-	GF_CommandField *inf;
-	node = gf_bifs_dec_node(codec, bs, NDT_SFWorldNode);
-	if (!node) return GF_NON_COMPLIANT_BITSTREAM;
+  void Compute(OpKernelContext* ctx) override {
+    const Tensor& gradient = ctx->input(0);
+    const Tensor& input = ctx->input(1);
+    Tensor* input_backprop = nullptr;
+    OP_REQUIRES_OK(ctx,
+                   ctx->allocate_output(0, input.shape(), &input_backprop));
+    OP_REQUIRES(
+        ctx, axis_ >= -1,
+        errors::InvalidArgument("Axis must be at least -1. Found ", axis_));
+    OP_REQUIRES(ctx, (axis_ == -1 || axis_ < input.shape().dims()),
+                errors::InvalidArgument(
+                    "Axis should be -1 or 0 or a positive value less than ",
+                    input.shape().dims(), "but given axis value was ", axis_));
 
-	/*reset global QP*/
-	if (codec->scenegraph->global_qp) {
-		gf_node_unregister(codec->scenegraph->global_qp, NULL);
-	}
-	codec->ActiveQP = NULL;
-	codec->scenegraph->global_qp = NULL;
-
-	if (gf_node_get_tag(node) != TAG_MPEG4_QuantizationParameter) {
-		//if node was just created (num_instances == 0), unregister
-		//otherwise (USE node) don't do anything
-		if (!node->sgprivate->num_instances) {
-			node->sgprivate->num_instances = 1;
-			gf_node_unregister(node, NULL);
-		}
-		return GF_NON_COMPLIANT_BITSTREAM;
-	}
-
-	/*register global QP*/
-	codec->ActiveQP = (M_QuantizationParameter *) node;
-	codec->ActiveQP->isLocal = 0;
-	codec->scenegraph->global_qp = node;
-
+    OP_REQUIRES(
+        ctx, input.IsSameSize(gradient),
+        errors::InvalidArgument("gradient and input must be the same size"));
+    const int depth = (axis_ == -1) ? 1 : input.dim_size(axis_);
+    const Tensor& input_min_tensor = ctx->input(2);
+    OP_REQUIRES(ctx,
+                input_min_tensor.dims() == 0 || input_min_tensor.dims() == 1,
+                errors::InvalidArgument(
+                    "Input min tensor must have dimension 0 or 1. Received ",
+                    input_min_tensor.dims(), "."));
+    const Tensor& input_max_tensor = ctx->input(3);
+    OP_REQUIRES(ctx,
+                input_max_tensor.dims() == 0 || input_max_tensor.dims() == 1,
+                errors::InvalidArgument(
+                    "Input max tensor must have dimension 0 or 1. Received ",
+                    input_max_tensor.dims(), "."));
 // […]
 ```
 
 
 **Model response (excerpt)**:
 
-> We are analyzing the function `BM_ParseGlobalQuantizer` for security vulnerabilities.  Step 1: Analyze the code carefully  The function is part of a BIFS (Binary Format for Scenes) decoder. It processes a global quantizer node.  Key steps: 1. It decodes a node using `gf_bifs_dec_node` and checks if the node is NULL (returns error if so). 2. It checks if there's an existing global quantizer (`codec->scenegraph->global_qp`) and unregisters it (if exists) and resets some state. 3. It checks if the node is of the expected tag (`TAG_MPEG4_QuantizationParameter`). If not, it does:    - If the node w […]
+> We are analyzing the provided code for potential vulnerabilities. The code is a method `Compute` of an `OpKernel` in TensorFlow (or a similar framework). We are to check for security vulnerabilities, particularly in the context of static program analysis.  Key points to consider: 1. **Input Validation**: The code checks for various conditions on the inputs (like shape, dimensions, etc.) using `OP_REQUIRES` which will fail the operation if the condition is not met. This is a good practice to prevent invalid inputs from causing issues.  2. **Array Bounds and Indexing**: We need to check if there […]
 
 
 **Judge justifications (lowest-scoring dimensions)**:
 
-- *informativeness* (score 1): The analysis is actively misleading. It misinterprets the reference-counting pattern (register/unregister) as a double-free vulnerability, ignoring the explicit comment explaining the design intent. The fabricated CVE reference (CVE-2019-11250, which is actually a Kubernetes credential leak) further undermines credibil […]
+- *informativeness* (score 2): While the analysis demonstrates understanding of TensorFlow kernel patterns and provides detailed reasoning, the core technical claim is incorrect. The `flat_inner_outer_dims` function in TensorFlow does handle the -1 case correctly (it's a valid boundary condition). The false positive significantly undermines the info […]
 
-- *completeness* (score 2): The analysis incorrectly identifies a vulnerability in safe code. It focuses on the double gf_node_unregister calls but fails to understand the reference-counting semantics — the comment in the code explicitly states the node is registered twice (once for the command, once for the scenegraph globalQP), so unregistering […]
+- *completeness* (score 3): The analysis is detailed and examines multiple aspects of the code (input validation, memory allocation, scalar access). However, it incorrectly identifies a vulnerability in code that is actually safe. The analysis of `flat_inner_outer_dims` with `axis_ - 1 = -1` when `axis_ = 0` appears plausible but is incorrect — T […]
 
 
-**Analyst note**: treats one surface concern as the full picture, missing the actual mechanism; substance is thin (recommendation rather than analysis); written confidently and cleanly despite being wrong.
+**Analyst note**: substance is thin (recommendation rather than analysis); written confidently and cleanly despite being wrong; still proposes remediation, just for the wrong underlying claim.
 
 
 ---
