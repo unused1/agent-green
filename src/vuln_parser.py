@@ -36,6 +36,7 @@ convention. Callers that need the tri-state (for auditing) should call
 final_text_verdict directly.
 """
 
+import ast
 import json
 import re
 from typing import Optional, Tuple
@@ -47,8 +48,14 @@ __all__ = [
     "parse_na_sa",
     "parse_da",
     "parse_ma",
+    "parse_ma_affirm",
+    "parse_ma_constrained",
     "classify",
 ]
+
+
+def _try_literal(s):
+    return ast.literal_eval(s)
 
 
 # ---------------------------------------------------------------------------
@@ -439,6 +446,93 @@ def parse_ma_affirm(board_response: str) -> Tuple[int, bool]:
     if has_affirm:
         return 1, True
     return 0, False  # no signal -> safe default, undetermined
+
+
+def _ma_verdict_fields(board_response: str):
+    """Extract structured Review Board verdicts as (decision, severity, action) tuples.
+
+    For the VulTrial-faithful constrained prompt, the board emits a JSON array of
+    objects with a closed-vocabulary `decision` (valid / invalid / partially valid),
+    a `severity`, and a `recommended_action`. Returns [] if nothing parseable.
+    """
+    if not board_response:
+        return []
+    text = strip_markdown_fences(strip_think_block(board_response))
+    m = re.search(r'(\[[\s\S]*\]|\{[\s\S]*\})', text)
+    cand = m.group(1) if m else text.strip()
+    obj = None
+    for ld in (json.loads, _try_literal):
+        try:
+            obj = ld(cand)
+            break
+        except Exception:  # noqa: BLE001
+            continue
+    if obj is None:
+        # Field-by-field regex fallback (objects in textual order).
+        decs = re.findall(r'"decision"\s*:\s*"([^"]*)"', text, flags=re.I)
+        sevs = re.findall(r'"severity"\s*:\s*"([^"]*)"', text, flags=re.I)
+        acts = re.findall(r'"recommended_action"\s*:\s*"([^"]*)"', text, flags=re.I)
+        out = []
+        for i, d in enumerate(decs):
+            out.append((d, sevs[i] if i < len(sevs) else "",
+                        acts[i] if i < len(acts) else ""))
+        return out
+    if isinstance(obj, dict):
+        for k in ("verdicts", "review_board", "findings", "results"):
+            if isinstance(obj.get(k), list):
+                obj = obj[k]
+                break
+        else:
+            obj = [obj]
+    if not isinstance(obj, list):
+        return []
+    out = []
+    for v in obj:
+        if isinstance(v, dict):
+            out.append((str(v.get("decision", "")), str(v.get("severity", "")),
+                        str(v.get("recommended_action", v.get("recommended action", "")))))
+    return out
+
+
+def _is_valid_decision(d: str) -> bool:
+    """VulTrial 'valid' (full validity): excludes 'invalid' and 'partially valid'."""
+    s = d.lower()
+    if "invalid" in s or "partial" in s:
+        return False
+    return "valid" in s
+
+
+def parse_ma_constrained(board_response: str, rule: str = "strict") -> Tuple[int, bool]:
+    """VulTrial-faithful MA binarization from the constrained Review Board verdicts.
+
+    A function is VULNERABLE iff at least one finding meets the rule's criteria,
+    applied to the closed-vocabulary fields. Returns (verdict, determined).
+    The label is a pure function of the stored board verdicts, so the binarization
+    can be changed and re-run with NO re-inference.
+
+    rule:
+      "strict"     valid AND high severity AND fix-immediately  (VulTrial paper)
+      "valid_high" valid AND high severity
+      "valid_any"  valid (any severity)
+      "incl_partial" valid OR partially valid (any severity)
+    """
+    verdicts = _ma_verdict_fields(board_response)
+    if not verdicts:
+        return 0, False
+    for dec, sev, act in verdicts:
+        valid = _is_valid_decision(dec)
+        partial = "partial" in dec.lower() and "invalid" not in dec.lower()
+        high = "high" in sev.lower() or "critical" in sev.lower()
+        immediate = "immediat" in act.lower() or "urgent" in act.lower()
+        if rule == "strict" and valid and high and immediate:
+            return 1, True
+        if rule == "valid_high" and valid and high:
+            return 1, True
+        if rule == "valid_any" and valid:
+            return 1, True
+        if rule == "incl_partial" and (valid or partial):
+            return 1, True
+    return 0, True
 
 
 def classify(design: str, raw_text: str) -> Tuple[int, bool]:

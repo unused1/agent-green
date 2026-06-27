@@ -23,6 +23,7 @@ from vuln_parser import (  # noqa: E402
     parse_da,
     parse_ma,
     parse_ma_affirm,
+    parse_ma_constrained,
     classify,
 )
 
@@ -272,6 +273,61 @@ def test_affirm_text_fallback_no_json():
 
 def test_affirm_empty_is_safe_undetermined():
     assert parse_ma_affirm("") == (0, False)
+
+
+# ---------------------------------------------------------------------------
+# parse_ma_constrained — VulTrial strict binarization (Option B)
+# ---------------------------------------------------------------------------
+_VT_STRICT = ('[{"vulnerability": "BOF", "decision": "valid", "severity": "high", '
+              '"recommended_action": "fix immediately", "reason": "x"}]')
+_VT_PARTIAL = ('[{"vulnerability": "X", "decision": "partially valid", "severity": "high", '
+               '"recommended_action": "fix immediately"}]')
+_VT_VALID_LOW = ('[{"vulnerability": "X", "decision": "valid", "severity": "low", '
+                 '"recommended_action": "monitor"}]')
+_VT_INVALID = ('[{"vulnerability": "X", "decision": "invalid", "severity": "none", '
+               '"recommended_action": "no action needed"}]')
+
+
+def test_constrained_strict_valid_high_immediate_is_vuln():
+    assert parse_ma_constrained(_VT_STRICT, "strict") == (1, True)
+
+
+def test_constrained_strict_partially_valid_is_safe():
+    """VulTrial excludes partially valid from the strict vulnerable set."""
+    assert parse_ma_constrained(_VT_PARTIAL, "strict") == (0, True)
+
+
+def test_constrained_strict_valid_low_is_safe():
+    """valid but low severity -> not vulnerable under strict."""
+    assert parse_ma_constrained(_VT_VALID_LOW, "strict") == (0, True)
+
+
+def test_constrained_invalid_is_safe_all_rules():
+    for rule in ("strict", "valid_high", "valid_any", "incl_partial"):
+        assert parse_ma_constrained(_VT_INVALID, rule) == (0, True)
+
+
+def test_constrained_any_finding_meets_rule_wins():
+    resp = ('[{"decision": "invalid", "severity": "none", "recommended_action": "none"}, '
+            '{"decision": "valid", "severity": "high", "recommended_action": "fix immediately"}]')
+    assert parse_ma_constrained(resp, "strict") == (1, True)
+
+
+def test_constrained_rule_sensitivity_same_input():
+    """Same verdict, different rule -> different label (the reparse lever)."""
+    assert parse_ma_constrained(_VT_VALID_LOW, "strict") == (0, True)
+    assert parse_ma_constrained(_VT_VALID_LOW, "valid_any") == (1, True)
+    assert parse_ma_constrained(_VT_PARTIAL, "strict") == (0, True)
+    assert parse_ma_constrained(_VT_PARTIAL, "incl_partial") == (1, True)
+
+
+def test_constrained_markdown_fenced_array():
+    resp = "```json\n" + _VT_STRICT + "\n```"
+    assert parse_ma_constrained(resp, "strict") == (1, True)
+
+
+def test_constrained_empty_is_undetermined():
+    assert parse_ma_constrained("", "strict") == (0, False)
 
 
 def _run_self():

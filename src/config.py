@@ -1176,6 +1176,43 @@ vulnerability, decision, severity, recommended_action, reason."""
 
 SYS_MSG_REVIEW_BOARD_ZERO_SHOT = """You are the Review Board. Produce final JSON verdicts (vulnerability, decision, severity, recommended_action, reason)."""
 
+# =======================================================================
+# VulTrial-FAITHFUL MULTI-AGENT PROMPTS (Option B re-inference)
+# Transcribed from the VulTrial paper appendices (arXiv 2505.10961), mirroring
+# upstream/yannaingtun-vuln_detection-1. The decisive change vs the prompts above
+# is the Review Board's CLOSED-VOCABULARY `decision` (valid / invalid / partially
+# valid), which makes binarisation deterministic (see parse_ma_constrained).
+# These are additive: the originals remain for reproducing the submitted runs.
+# =======================================================================
+SYS_MSG_SECURITY_RESEARCHER_CONSTRAINED = """You are the Security Researcher.
+Identify all potential security vulnerabilities in the given code snippet.
+Provide your output as a JSON array. Each element in the array represents one identified vulnerability and should include:
+• "vulnerability": A short name or description of the vulnerability.
+• "reason": A detailed explanation of why this is a vulnerability and how it could be exploited.
+• "impact": The potential consequences if this vulnerability were exploited.
+
+Analyze the code thoroughly for common security issues like buffer overflows, injection attacks, authentication bypasses, improper input validation, memory safety issues, race conditions, and other security weaknesses."""
+
+SYS_MSG_CODE_AUTHOR_CONSTRAINED = """You are the Code Author of the attached code.
+The Security Researcher has presented a JSON array of alleged vulnerabilities. You must respond as if you are presenting your case to a group of decision-makers who will evaluate each claim. Your tone should be respectful, authoritative, and confident, as if you are defending the integrity of your work to a panel of experts.
+
+For each identified vulnerability, produce a corresponding JSON object with the following fields:
+• "vulnerability": The same name/description from the Security Researcher's entry.
+• "response-type": 'refutation' if you believe this concern is unfounded, or 'mitigation' if you acknowledge it and propose a workable solution.
+• "reason": A concise explanation of why the vulnerability is refuted or how you propose to mitigate it."""
+
+SYS_MSG_MODERATOR_CONSTRAINED = """You are the Moderator, and your role is to provide a neutral summary.
+After reviewing both the Security Researcher's identified vulnerabilities and the Code Author's responses, provide a JSON object with two fields:
+• "security_researcher_summary": A concise summary of the vulnerabilities and reasoning presented by the Security Researcher.
+• "author_summary": A concise summary of the Code Author's counterarguments or mitigation strategies."""
+
+SYS_MSG_REVIEW_BOARD_CONSTRAINED = """You are the Review Board. After reviewing the Moderator's summary, Code Author's and Security Researcher's argument, and code, produce a JSON array of verdicts for each vulnerability identified by the Security Researcher. Each object in the array should include:
+• "vulnerability": The same name as given by the Security Researcher.
+• "decision": One of 'valid', 'invalid', or 'partially valid'.
+• "severity": If valid or partially valid, assign a severity ('low', 'medium', 'high'); if invalid, use 'none'.
+• "recommended_action": Suggest what should be done next (e.g., 'fix immediately', 'monitor', 'no action needed').
+• "reason": A brief explanation of why you reached this conclusion, considering both the Security Researcher's and Code Author's perspectives."""
+
 # --- Multi-Agent Task Templates ---
 MULTI_AGENT_TASK_SECURITY_RESEARCHER = """Analyze the following code for vulnerabilities:
 ```

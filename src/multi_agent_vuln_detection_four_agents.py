@@ -34,6 +34,13 @@ def parse_arguments():
         default="zero_shot",
         help="Prompt type: zero_shot, few_shot (default: zero_shot)"
     )
+    parser.add_argument(
+        "--constrained",
+        action="store_true",
+        help="Option B: use the VulTrial-faithful constrained prompt set "
+             "(closed-vocabulary Review Board decision: valid/invalid/partially valid) "
+             "and binarise the live label via parse_ma_constrained (strict)."
+    )
     return parser.parse_args()
 
 args = parse_arguments()
@@ -43,11 +50,17 @@ args = parse_arguments()
 # ---------------------------
 llm_config = config.LLM_CONFIG
 DATASET_FILE = config.VULN_DATASET
-RESULT_DIR = config.RESULT_DIR
+# Option B runs route to a separate folder via RESULT_DIR_OVERRIDE so the
+# constrained experiment and its emissions never overwrite the submitted runs.
+RESULT_DIR = os.getenv("RESULT_DIR_OVERRIDE", config.RESULT_DIR)
 os.makedirs(RESULT_DIR, exist_ok=True)
 
-# Design configuration
-DESIGN = f"MA-vuln-four-{args.prompt_type}"
+# Live-label parser selection: constrained runs binarise with parse_ma_constrained
+# (VulTrial strict); default runs keep parse_ma_affirm (Option A).
+USE_CONSTRAINED_PARSER = args.constrained
+
+# Design configuration (suffix keeps constrained outputs distinct from originals)
+DESIGN = f"MA-vuln-four-{args.prompt_type}" + ("-constrained" if args.constrained else "")
 model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 exp_name = os.getenv("EXP_NAME") or f"{DESIGN}_{model}_{timestamp}"
@@ -72,6 +85,19 @@ else:  # few_shot
     author_prompt = config.SYS_MSG_CODE_AUTHOR_FEW_SHOT
     moderator_prompt = config.SYS_MSG_MODERATOR_FEW_SHOT
     review_board_prompt = config.SYS_MSG_REVIEW_BOARD_FEW_SHOT
+
+# Option B: override with the VulTrial-faithful constrained prompts. Sourced from
+# the base config module regardless of MODEL_FAMILY, so every model reproduces
+# VulTrial's exact prompts (the Nemotron thinking toggle below still wraps them).
+if args.constrained:
+    import config as _base_config
+    researcher_prompt = _base_config.SYS_MSG_SECURITY_RESEARCHER_CONSTRAINED
+    author_prompt = _base_config.SYS_MSG_CODE_AUTHOR_CONSTRAINED
+    moderator_prompt = _base_config.SYS_MSG_MODERATOR_CONSTRAINED
+    review_board_prompt = _base_config.SYS_MSG_REVIEW_BOARD_CONSTRAINED
+    print("[Option B] VulTrial constrained prompt set active "
+          "(decision in {valid, invalid, partially valid}); "
+          "live label via parse_ma_constrained(strict)")
 
 # Apply Nemotron thinking toggle if using Nemotron config
 if _model_family == 'nemotron' and hasattr(config, 'prepend_thinking_toggle'):
@@ -210,8 +236,13 @@ def extract_vulnerability_decision(review_board_response):
     if that lands, revisit this mapping. The reasoning returned is the raw board
     text (the verdict-bearing output the rule reads).
     """
-    from vuln_parser import parse_ma_affirm
-    verdict, _determined = parse_ma_affirm(review_board_response)
+    if globals().get("USE_CONSTRAINED_PARSER", False):
+        # Option B: VulTrial strict (valid + high severity + fix-immediately).
+        from vuln_parser import parse_ma_constrained
+        verdict, _determined = parse_ma_constrained(review_board_response, rule="strict")
+    else:
+        from vuln_parser import parse_ma_affirm
+        verdict, _determined = parse_ma_affirm(review_board_response)
     return verdict, review_board_response
 
 
