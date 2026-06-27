@@ -30,7 +30,7 @@ import sys
 from collections import defaultdict
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
-from vuln_parser import classify  # noqa: E402
+from vuln_parser import classify, parse_ma_affirm  # noqa: E402
 
 csv.field_size_limit(sys.maxsize)
 
@@ -142,7 +142,12 @@ def main():
                 except (TypeError, ValueError):
                     old = None
                 raw = get_raw_field(design, rec)
-                new, determined = classify(design, raw)
+                # MA uses the deterministic affirm-unless-rejected rule (Option A);
+                # NA/SA/DA use the canonical design parsers.
+                if design.upper() == "MA":
+                    new, determined = parse_ma_affirm(raw)
+                else:
+                    new, determined = classify(design, raw)
 
                 d = per_design[design]
                 d["n"] += 1

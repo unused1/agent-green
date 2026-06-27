@@ -82,9 +82,6 @@ vuln_database/VulTrial_486_split*.jsonl
 # CleanVul dataset CSVs — public, reproducible via PROVENANCE.md (do not commit)
 vuln_database/CleanVul/vulnerability_score_*.csv
 
-# Teammate-shared external experiment outputs (do not commit)
-results/MA_Vuln_STF_Server/
-
 # Scratch notes (personal working notes, not for version control)
 docs/scratch/
 
