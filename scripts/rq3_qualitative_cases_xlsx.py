@@ -8,6 +8,7 @@ Output: results/rq3_baseline/rq3_b5_qualitative_cases_rater_sheet.xlsx
 """
 
 import csv
+import re
 import sys
 from pathlib import Path
 
@@ -16,6 +17,21 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 csv.field_size_limit(sys.maxsize)
+
+
+def _strip_think_tags(text: str) -> str:
+    """Remove <think>...</think> blocks from response (matches the
+    same processing applied in the Phase A rater sheet and to the LLM
+    judge inputs)."""
+    text = re.sub(r"<think>.*?</think>\s*", "", text or "", flags=re.DOTALL)
+    if "</think>" in text:
+        text = text.split("</think>", 1)[1].strip()
+    return text
+
+
+def _prepare_rater_text(text: str, response_id: str) -> str:
+    """Strip think tags for thinking-mode responses; leave instruct as-is."""
+    return _strip_think_tags(text) if response_id == "think" else (text or "")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = PROJECT_ROOT / "results" / "rq3_baseline"
@@ -158,7 +174,7 @@ def write_xlsx(cases: list):
             rs.get("cwe", ""),
             rs.get("cve_desc", ""),
             rs.get("source_code", ""),
-            rs.get("response_text", ""),
+            _prepare_rater_text(rs.get("response_text", ""), case["response_id"]),
             int(j.get("completeness_score") or 0),
             int(j.get("clarity_score") or 0),
             int(j.get("actionability_score") or 0),
