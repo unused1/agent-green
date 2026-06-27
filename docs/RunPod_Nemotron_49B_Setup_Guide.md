@@ -113,6 +113,24 @@ export ENABLE_REASONING=false  # for instruct mode
 
 **Note**: Simply using `source .env` does NOT export variables - Python scripts won't see them!
 
+### 2.6 Set Hugging Face Token (recommended)
+
+The vLLM log warns: *"You are sending unauthenticated requests to the HF Hub.
+Please set a HF_TOKEN..."*. For a public model the download still works but is
+rate-limited and slower; a read token raises the rate limit (and is **required**
+for any gated repo). Export the token **before** starting vLLM so the download
+authenticates:
+
+```bash
+# Use a Hugging Face READ token (https://huggingface.co/settings/tokens)
+export HF_TOKEN="hf_xxxxxxxxxxxxxxxxxxxx"
+# (older tooling reads HUGGING_FACE_HUB_TOKEN; export both to be safe)
+export HUGGING_FACE_HUB_TOKEN="$HF_TOKEN"
+```
+
+Do **not** commit the token. Prefer exporting it in the shell (as above) or
+adding it to the (gitignored) `.env`; never hard-code it in scripts or this guide.
+
 ---
 
 ## Step 3: Deploy vLLM Server
@@ -120,6 +138,11 @@ export ENABLE_REASONING=false  # for instruct mode
 ### 3.1 Start vLLM with Tensor Parallelism
 ```bash
 cd /workspace/agent-green
+
+# Authenticate HF downloads (see Step 2.6) — raises rate limits / avoids the
+# "unauthenticated requests to the HF Hub" warning in vllm.log
+export HF_TOKEN="hf_xxxxxxxxxxxxxxxxxxxx"
+export HUGGING_FACE_HUB_TOKEN="$HF_TOKEN"
 
 # IMPORTANT: Unset HF_HUB_ENABLE_HF_TRANSFER to avoid vLLM startup errors
 unset HF_HUB_ENABLE_HF_TRANSFER
