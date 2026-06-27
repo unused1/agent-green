@@ -35,8 +35,9 @@ export REASONING_API_KEY="${REASONING_API_KEY:-dummy-key}"
 case "$CFG" in
   super49b)
     export MODEL_FAMILY=nemotron
-    export BASELINE_MODEL="${BASELINE_MODEL:-nvidia/Llama-3.1-Nemotron-Super-49B-v1.5}"
-    MODELTAG="nvidia-Llama-3.1-Nemotron-Super-49B-v1.5"
+    # Must match the vLLM --served-model-name (see RunPod_Nemotron_49B_Setup_Guide.md).
+    export BASELINE_MODEL="${BASELINE_MODEL:-nvidia/Llama-3_3-Nemotron-Super-49B-v1_5}"
+    MODELTAG="nvidia-Llama-3_3-Nemotron-Super-49B-v1_5"
     ;;
   qwen30b)
     export MODEL_FAMILY=                       # empty -> Qwen3 (base config)
