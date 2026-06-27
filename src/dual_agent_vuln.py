@@ -63,56 +63,13 @@ def append_result(result, detailed_file, csv_file, header_fields):
 def extract_vulnerability_decision(response):
     """Extract (1=vulnerable, 0=safe) and reasoning text.
 
-    Fixed 2026-03-22: Strip markdown code blocks before JSON parsing.
-    Some models (especially Qwen3 30B instruct) wrap JSON in ```json ... ```
-    which caused the JSON path to be skipped, falling through to keyword
-    matching that defaulted to safe (0).
+    Delegates to the canonical parser in src/vuln_parser.py (single source of
+    truth shared across NA/SA/DA/MA and the offline reparser). It prefers the
+    analyst JSON `vulnerability_detected` field, strips markdown/think wrapping,
+    and falls back to last-decisive-marker text reading.
     """
-    import re
-    try:
-        # Strip think block — parse only the response after </think>
-        text = response.split("</think>", 1)[1].strip() if "</think>" in response else response.strip()
-        # Strip markdown code blocks (handles ```json ... ``` wrapping)
-        text = re.sub(r'```(?:json)?\s*', '', text)
-        text = re.sub(r'```\s*', '', text)
-        text = text.strip()
-        if text.startswith("{") or text.startswith("["):
-            data = json.loads(text)
-            if isinstance(data, dict):
-                decision = data.get("vulnerability_detected", False)
-                reasoning = data.get("analysis", data.get("reasoning", text))
-            elif isinstance(data, list):
-                decision = any(d.get("vulnerability_detected", False) for d in data)
-                reasoning = "; ".join(d.get("analysis", d.get("reasoning", "")) for d in data)
-            else:
-                decision, reasoning = False, text
-        else:
-            lowered = text.lower()
-            # NO-before-YES ordering to prevent substring false positives
-            if any(p in lowered for p in [
-                "final answer: no", "final answer: (2) no", "(2) no",
-                "answer: no", "no vulnerability", "no security vulnerability",
-                "no, the code", "no:",
-            ]):
-                decision = False
-            elif any(p in lowered for p in [
-                "final answer: yes", "final answer: (1) yes", "(1) yes",
-                "answer: yes", "vulnerability detected", "yes, the code",
-                "yes: vulnerability", "yes:",
-            ]):
-                decision = True
-            elif any(k in lowered for k in [
-                "is vulnerable", "contains a vulnerability",
-                "security vulnerability exists", "can be exploited",
-            ]):
-                decision = True
-            else:
-                decision = False
-            reasoning = text
-            
-        return (1 if decision else 0), reasoning
-    except Exception as e:
-        return 0, f"Error parsing: {e}"
+    from vuln_parser import parse_da
+    return parse_da(response)
 
 
 # ================================================================

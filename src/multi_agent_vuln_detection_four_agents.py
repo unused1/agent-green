@@ -194,133 +194,25 @@ def append_result(result, detailed_file, csv_file):
 
 
 def extract_vulnerability_decision(review_board_response):
-    """Parse review board response into (decision, reasoning)
+    """Parse the Review Board response into (decision, reasoning).
 
-    Handles both Qwen3 (clean JSON) and Nemotron (markdown-wrapped JSON) formats.
+    Delegates to the canonical parser in src/vuln_parser.py (single source of
+    truth shared across NA/SA/DA/MA and the offline reparser). MA uses the
+    deterministic "affirm-unless-rejected" rule (parse_ma_affirm): the board
+    verdict is VULNERABLE if it affirms any finding (valid/confirmed/accepted,
+    incl. "accepted and mitigated"), SAFE only if it rejects all findings
+    (invalid / no vulnerability / not exploitable).
 
-    MA Workflow Context:
-    - Security Researcher reports vulnerabilities
-    - Code Author responds/disputes
-    - Moderator summarizes
-    - Review Board issues FINAL VERDICT on each vulnerability claim
-
-    Decision Interpretation (Review Board validates/rejects the vulnerability claim):
-
-    VULNERABLE (1) - RB accepts the vulnerability claim as valid:
-    - "confirmed", "accept", "valid", "partially valid"
-    - "critical", "high", "vulnerable"
-    - "accept with mitigation", "fix required"
-
-    SAFE (0) - RB rejects the claim OR says issue was addressed:
-    - "no vulnerability", "reject", "invalid", "safe", "not exploitable"
-    - "mitigated", "resolved", "fixed" (issue was addressed)
+    NOTE (P0, ASE 2026 revision): this rule corrects the earlier convention that
+    mapped "mitigated/accepted-and-mitigated -> safe", which inverted the board's
+    affirmations. It is Option-A and provisional pending the team decision on the
+    Review Board prompt (constrained `valid/invalid/partially valid` vocabulary);
+    if that lands, revisit this mapping. The reasoning returned is the raw board
+    text (the verdict-bearing output the rule reads).
     """
-    import re
-
-    try:
-        # Step 0: Strip think block — parse only the response after </think>
-        clean_response = review_board_response.split("</think>", 1)[1].strip() if "</think>" in review_board_response else review_board_response
-
-        # Step 1: Strip markdown code blocks (handles Nemotron's format)
-        text = re.sub(r'```(?:json)?\s*', '', clean_response)
-        text = re.sub(r'```\s*', '', text)
-
-        # Step 2: Extract JSON from response — handles both arrays and single objects
-        # Fixed 2026-03-22: Previously only matched arrays [...], missing single objects {...}
-        # Some models return {"vulnerability": true, ...} instead of [{...}, ...]
-        match_array = re.search(r'(\[[\s\S]*\])', text)
-        match_object = re.search(r'(\{[\s\S]*\})', text)
-
-        if match_array:
-            json_str = match_array.group(1)
-        elif match_object:
-            json_str = match_object.group(1)
-        else:
-            json_str = text.strip()
-
-        parsed = json.loads(json_str)
-
-        # Normalize to list of verdict dicts
-        if isinstance(parsed, dict):
-            # Single object — check for direct vulnerability boolean field
-            if "vulnerability_detected" in parsed:
-                decision = parsed.get("vulnerability_detected", False)
-                reasoning = parsed.get("analysis", parsed.get("reasoning", str(parsed)))
-                return (1 if decision else 0), reasoning
-            if "vulnerability" in parsed and isinstance(parsed["vulnerability"], bool):
-                decision = parsed["vulnerability"]
-                reasoning = parsed.get("analysis", parsed.get("reasoning", str(parsed)))
-                return (1 if decision else 0), reasoning
-            # Wrap single verdict in list for uniform processing
-            verdicts = [parsed]
-        elif isinstance(parsed, list):
-            verdicts = parsed
-        else:
-            verdicts = []
-
-        # Step 3: Analyze each verdict
-        vuln_signals = 0
-        safe_signals = 0
-
-        for v in verdicts:
-            if not isinstance(v, dict):
-                continue
-            decision = v.get('decision', '').lower().strip()
-            severity = v.get('severity', '').lower().strip()
-
-            # === SAFE signals (RB rejects claim or says issue addressed) ===
-            if any(kw in decision for kw in ['no vulnerability', 'no_vulnerability', 'reject', 'invalid', 'safe', 'not exploitable']):
-                safe_signals += 2
-                continue
-            if any(kw in decision for kw in ['mitigated', 'resolved', 'fixed', 'patched']):
-                safe_signals += 2
-                continue
-
-            # === VULNERABLE signals (RB accepts the vulnerability claim) ===
-            if any(kw in decision for kw in ['confirmed', 'vulnerable', 'exploitable']):
-                vuln_signals += 2
-                continue
-            if decision in ['valid', 'partially valid']:
-                vuln_signals += 2
-                continue
-            if 'accept' in decision:
-                vuln_signals += 2
-                continue
-            if decision in ['critical', 'high', 'high severity', 'critical severity']:
-                vuln_signals += 2
-                continue
-            if any(kw in decision for kw in ['fix required', 'action required', 'requires fix']):
-                vuln_signals += 1
-                continue
-            if decision in ['medium', 'low', 'moderate', 'medium severity', 'low severity']:
-                vuln_signals += 1
-                continue
-
-            # === AMBIGUOUS - use severity field as tiebreaker ===
-            if severity in ['critical', 'high']:
-                vuln_signals += 1
-            elif severity in ['low', 'medium', 'moderate']:
-                safe_signals += 1
-
-        # Build reasoning string
-        reasoning = "; ".join(
-            f"{v.get('vulnerability','Unknown')}: {v.get('decision','Unknown')} ({v.get('reason','No reason')[:100]})"
-            for v in verdicts
-        )
-
-        # Decision: more vuln signals than safe signals = vulnerable
-        # Tie goes to vulnerable (conservative for security)
-        has_vulnerability = vuln_signals >= safe_signals and vuln_signals > 0
-        return (1 if has_vulnerability else 0), reasoning
-
-    except Exception as e:
-        # Fallback: keyword matching on cleaned response (but exclude overly broad terms)
-        text = clean_response.lower()
-        if any(k in text for k in ['confirmed vulnerability', 'critical vulnerability', 'exploitable']):
-            return 1, review_board_response
-        if any(k in text for k in ['no vulnerability', 'not vulnerable', 'safe', 'mitigated', 'resolved']):
-            return 0, review_board_response
-        return 0, f"Parse error: {e}"
+    from vuln_parser import parse_ma_affirm
+    verdict, _determined = parse_ma_affirm(review_board_response)
+    return verdict, review_board_response
 
 
 # --- Inference with Emissions ---

@@ -32,6 +32,7 @@ COPY src/single_agent_vuln_detection.py \
      src/dual_agent_vuln.py \
      src/multi_agent_vuln_detection_four_agents.py \
      src/agent_utils_vuln.py \
+     src/vuln_parser.py \
      src/vuln_evaluation.py \
      src/ollama_utils.py \
      src/resume_utils.py \

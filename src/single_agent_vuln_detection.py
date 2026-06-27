@@ -90,52 +90,14 @@ def parse_vulnerability_response(response_text):
             decision: 1 (vulnerable) or 0 (not vulnerable)
             reasoning: str containing the full response
 
-    Fixed 2026-02-22: Reorder NO before YES to prevent "no vulnerability detected"
-    matching the YES substring "vulnerability detected". Removed broad fallback
-    keywords that matched in negative contexts (e.g., "no buffer overflow detected").
+    Canonical implementation lives in src/vuln_parser.py (single source of truth
+    shared by all NA/SA/DA/MA scripts and the offline reparser). This delegates to
+    it so live inference and re-parsing can never diverge. The canonical parser
+    uses last-decisive-marker-wins on the post-</think> output (supersedes the
+    earlier first-match-wins logic).
     """
-    # Strip think block — parse only the response after </think>
-    parse_text = response_text.split("</think>", 1)[1].strip() if "</think>" in response_text else response_text
-    response_lower = parse_text.lower()
-
-    # Check for explicit NO answers — checked FIRST to avoid
-    # "no vulnerability detected" matching the YES substring "vulnerability detected"
-    if any(pattern in response_lower for pattern in [
-        'final answer: no',
-        'final answer: (2) no',
-        '(2) no',
-        'answer: no',
-        'no vulnerability',
-        'no security vulnerability',
-        'no, the code',
-        'no:',
-    ]):
-        return 0, response_text
-
-    # Check for explicit YES answers
-    if any(pattern in response_lower for pattern in [
-        'final answer: yes',
-        'final answer: (1) yes',
-        '(1) yes',
-        'answer: yes',
-        'vulnerability detected',
-        'yes, the code',
-        'yes: vulnerability',
-        'yes:',
-    ]):
-        return 1, response_text
-
-    # Fallback: only strong positive indicators
-    if any(keyword in response_lower for keyword in [
-        'is vulnerable',
-        'contains a vulnerability',
-        'security vulnerability exists',
-        'can be exploited'
-    ]):
-        return 1, response_text
-
-    # Default to not vulnerable
-    return 0, response_text
+    from vuln_parser import parse_na_sa
+    return parse_na_sa(response_text)
 
 
 # --- Agent Creation ---
