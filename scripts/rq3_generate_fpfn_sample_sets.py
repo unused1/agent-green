@@ -21,8 +21,10 @@ Outputs (results/rq3_baseline/):
                           (sample_id -> family/mode/stratum/entry_id/gt).
   fpfn_rater_sheet.xlsx   Human sheet matching the prior pilot format
                           (super49b_zero_rater_sheet): sample_id, source_code,
-                          ground_truth_label, cwe, cve_desc, response_text, four
-                          blank Likert columns, rater_notes. The ground-truth
+                          ground_truth_label, cwe, cve_desc, response_text,
+                          parsed_label (TEMP) (the parser's prediction, for the
+                          label spot-check; drop before the blinded rating round),
+                          four blank Likert columns, rater_notes. The ground-truth
                           context (label/cwe/cve) is shown so raters can judge
                           explanation quality against the real vulnerability;
                           model, mode (thinking/instruct), and stratum/correctness
@@ -247,7 +249,7 @@ def main():
     ws = wb.active
     ws.title = "FP-FN rater sheet"
     headers = ["sample_id", "source_code", "ground_truth_label", "cwe", "cve_desc",
-               "response_text", "completeness_score", "clarity_score",
+               "response_text", "parsed_label (TEMP)", "completeness_score", "clarity_score",
                "actionability_score", "informativeness_score", "rater_notes"]
     hf = PatternFill("solid", fgColor="DDDDDD"); hb = Font(bold=True)
     for c, h in enumerate(headers, 1):
@@ -260,13 +262,14 @@ def main():
         safe = r["ground_truth_label"] == "safe"
         cwe = "" if safe else r["cwe"]
         cve = "" if safe else r["cve_desc"]
+        parsed = "vulnerable" if int(r["prediction"]) == 1 else "safe"
         ws.append([r["sample_id"], r["source_code"], r["ground_truth_label"],
-                   cwe, cve, r["response_text"], "", "", "", "", ""])
+                   cwe, cve, r["response_text"], parsed, "", "", "", "", ""])
     for c in range(1, len(headers) + 1):
         for cell in ws[openpyxl.utils.get_column_letter(c)]:
             cell.alignment = Alignment(vertical="top", wrap_text=True)
     widths = {"A": 9, "B": 80, "C": 16, "D": 14, "E": 50, "F": 80,
-              "G": 13, "H": 11, "I": 14, "J": 15, "K": 32}
+              "G": 16, "H": 13, "I": 11, "J": 14, "K": 15, "L": 32}
     for col, w in widths.items():
         ws.column_dimensions[col].width = w
     ws.freeze_panes = "A2"
