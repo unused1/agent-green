@@ -28,7 +28,7 @@ ENDPOINT="${ENDPOINT:-http://localhost:8000/v1}"
 
 export USE_RUNPOD=true
 export ENABLE_CODECARBON=true                 # fresh, separate emissions
-export VULN_DATASET="${PROJECT_ROOT}/vuln_database/VulTrial_870_samples_balanced.jsonl"
+export VULN_DATASET="${VULN_DATASET:-${PROJECT_ROOT}/vuln_database/VulTrial_870_samples_balanced.jsonl}"
 export RESULTS_DIR="${PROJECT_ROOT}/results/runpod_vuln_870_constrained"
 export BASELINE_ENDPOINT="$ENDPOINT"
 export REASONING_ENDPOINT="$ENDPOINT"
@@ -70,7 +70,8 @@ fi
 # Append _thinking only for thinking, so instruct EXP_NAME is unchanged and the
 # already-running instruct pods stay resume-safe.
 SUFFIX=""; [ "$MODE" = thinking ] && SUFFIX="_thinking"
-export EXP_NAME="MA-vuln-four-zero_shot-constrained_${MODELTAG}${SUFFIX}"
+# Respect a pre-set EXP_NAME (e.g. a per-shard name for split/parallel runs).
+export EXP_NAME="${EXP_NAME:-MA-vuln-four-zero_shot-constrained_${MODELTAG}${SUFFIX}}"
 
 echo "================ Option B: ${CFG} / ${MODE} ================"
 echo "  model    : ${ACTIVE}  (ENABLE_REASONING=${ENABLE_REASONING})"
