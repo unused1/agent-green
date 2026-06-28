@@ -83,7 +83,7 @@ cd /workspace/agent-green
 pip install hf_transfer
 
 # Install experiment dependencies
-pip install autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn python-Levenshtein
+pip install pyautogen autogen python-dotenv codecarbon pandas numpy evaluate scikit-learn python-Levenshtein --ignore-installed --break-system-packages
 
 pip install vllm
 ```
