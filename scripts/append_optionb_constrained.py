@@ -30,10 +30,27 @@ from sklearn.metrics import (accuracy_score, precision_score, recall_score,
 
 csv.field_size_limit(sys.maxsize)
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from consolidate_emissions import load_emissions_from_dir  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CDIR = os.path.join(ROOT, "results", "runpod_vuln_870_constrained")
 PERF_CSV = os.path.join(ROOT, "results", "consolidated_performance.csv")
 PC_CSV = os.path.join(ROOT, "results", "rq3_baseline", "pairwise_correct_all_configs.csv")
+EMISSIONS_CSV = os.path.join(ROOT, "results", "consolidated_emissions.csv")
+EDIR = os.path.join(CDIR, "emissions")
+
+# Energy is parse-independent -> these rows are variant=constrained / label_rule=any
+# (sentinel). Join to consolidated_performance.csv on (model, design, mode,
+# prompting, dataset, variant), NOT label_rule. Super-49B-thinking sums 3 shards.
+EMISSIONS_SUBDIRS = {
+    ("Nemotron-Super-49B", "instruct"): ["super49b_instruct"],
+    ("Nemotron-Super-49B", "thinking"): ["super49b_thinking_shard1",
+                                         "super49b_thinking_shard2",
+                                         "super49b_thinking_shard3"],
+    ("Qwen3-30B-A3B-Instruct", "instruct"): ["qwen30b_instruct"],
+    ("Qwen3-30B-A3B-Thinking", "thinking"): ["qwen30b_thinking"],
+}
 
 LABEL_RULE = "constrained_strict_optionB"
 VARIANT = "constrained"
@@ -130,6 +147,73 @@ def perf_and_pc(recs):
     }
 
 
+def append_emissions():
+    """Append the 4 constrained-MA emission rows (preserving the existing file).
+
+    Existing rows are tagged variant=freeform / label_rule=any; constrained rows
+    sum their per-config subdirs (Super-49B-thinking across 3 shards). Re-run safe.
+    """
+    # Build constrained emission records
+    crows = []
+    for (model, mode), subdirs in EMISSIONS_SUBDIRS.items():
+        parts = [load_emissions_from_dir(os.path.join(EDIR, s)) for s in subdirs]
+        parts = [p for p in parts if p]
+        if not parts:
+            print(f"  emissions MISSING for {model}/{mode}")
+            continue
+        dur = sum(p["duration_s"] for p in parts)
+        fam, params = ("Nemotron", 49) if "Nemotron" in model else ("Qwen", 30)
+        wavg = lambda key: (sum(p[key] * p["duration_s"] for p in parts) / dur) if dur else 0
+        crows.append({
+            "model": model, "model_family": fam, "parameters_b": params,
+            "design": "MA", "task": "vulnerability_detection", "dataset": "VulTrial-870",
+            "mode": mode, "prompting": "zero-shot", "thinking_enabled": mode == "thinking",
+            "num_sessions": sum(p["num_sessions"] for p in parts),
+            "total_duration_s": dur, "duration_hours": dur / 3600,
+            "total_emissions_kg": sum(p["emissions_kg"] for p in parts),
+            "emissions_g": sum(p["emissions_kg"] for p in parts) * 1000,
+            "total_energy_kwh": sum(p["energy_kwh"] for p in parts),
+            "total_cpu_energy_kwh": sum(p["cpu_energy_kwh"] for p in parts),
+            "total_gpu_energy_kwh": sum(p["gpu_energy_kwh"] for p in parts),
+            "total_ram_energy_kwh": sum(p["ram_energy_kwh"] for p in parts),
+            "avg_cpu_power_w": wavg("cpu_power_w"), "avg_gpu_power_w": wavg("gpu_power_w"),
+            "avg_ram_power_w": wavg("ram_power_w"),
+            "gpu_model": parts[0]["gpu_model"], "gpu_count": parts[0]["gpu_count"],
+            "cpu_model": parts[0]["cpu_model"], "country": parts[0]["country"],
+            "source_note": "; ".join(os.path.join(EDIR, s) for s in subdirs),
+            "variant": "constrained", "label_rule": "any",
+        })
+
+    with open(EMISSIONS_CSV, newline="") as f:
+        reader = csv.DictReader(f)
+        fields = list(reader.fieldnames)
+        rows = list(reader)
+    for col in ("variant", "label_rule"):
+        if col not in fields:
+            fields.append(col)
+    kept = []
+    for r in rows:
+        if r.get("variant") == "constrained":
+            continue  # re-run safe
+        r.setdefault("variant", "freeform")
+        r.setdefault("label_rule", "any")
+        if not r.get("variant"):
+            r["variant"] = "freeform"
+        if not r.get("label_rule"):
+            r["label_rule"] = "any"
+        kept.append(r)
+    with open(EMISSIONS_CSV, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        for r in kept:
+            w.writerow({k: r.get(k, "") for k in fields})
+        for r in crows:
+            w.writerow({k: r.get(k, "") for k in fields})
+    tot_kwh = sum(r["total_energy_kwh"] for r in crows)
+    print(f"emissions: kept {len(kept)} + appended {len(crows)} constrained "
+          f"({tot_kwh:.1f} kWh) -> {EMISSIONS_CSV}")
+
+
 def main():
     perf_rows, pc_rows = [], []
     print(f"{'config':40s} {'n':>4} {'excl':>4}  F1    PPR   P-C")
@@ -193,6 +277,9 @@ def main():
         for r in pc_rows:
             w.writerow({k: r.get(k, "") for k in pc_fields})
     print(f"P-C:  kept {len(pc_kept)} + appended {len(pc_rows)} constrained -> {PC_CSV}")
+
+    # --- append constrained emissions (preserve existing file) ---
+    append_emissions()
 
 
 if __name__ == "__main__":
