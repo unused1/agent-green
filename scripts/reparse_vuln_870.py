@@ -109,8 +109,18 @@ def main():
                     help="Flipped-entry samples to print per design (dry-run).")
     args = ap.parse_args()
 
-    configs = [r for r in csv.DictReader(open(CONSOLIDATED_CSV))
-               if r["dataset"] == "VulTrial-870"]
+    # consolidated now carries multiple variant rows per config (submitted +
+    # corrected); dedupe by config so each source file is parsed once.
+    _seen_cfg = set()
+    configs = []
+    for r in csv.DictReader(open(CONSOLIDATED_CSV)):
+        if r["dataset"] != "VulTrial-870":
+            continue
+        key = (r["design"], r["model"], r["mode"], r["prompting"])
+        if key in _seen_cfg:
+            continue
+        _seen_cfg.add(key)
+        configs.append(r)
     print(f"VulTrial-870 configs: {len(configs)}\n")
 
     out_rows = []
