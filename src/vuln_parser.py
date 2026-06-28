@@ -99,24 +99,35 @@ def strip_markdown_fences(text: str) -> str:
 # Tier 1: decisive verdict markers. These are the explicit answer formats the
 # VulTrial prompt requests, plus common equivalents. When present they are
 # authoritative regardless of how many section-header phrasings precede them.
+# Markdown-tolerant: [\s\*]* absorbs bold markers/spaces around the label word and
+# the colon (e.g. "**Answer**: **NO**", "**Result:** **NO**").
 _DECISIVE_YES = [
-    r"\(1\)\s*\*{0,2}\s*yes",                       # (1) YES, (1) **YES**
-    r"final\s+answer\s*[:\-]?\s*\*{0,2}\s*\(?1?\)?\s*\*{0,2}\s*yes",
-    r"final\s+answer\s*[:\-]?\s*\*{0,2}\s*vulnerab",
-    r"final\s+(?:verdict|decision)\s*[:\-]?\s*\*{0,2}\s*(?:yes|vulnerab)",
-    r"\banswer\s*[:\-]\s*\*{0,2}\s*yes\b",
-    r"\bconclusion\s*[:\-]?\s*\*{0,2}\s*(?:yes\b|the code is vulnerab|vulnerab)",
-    r"\byes\s*[:\-]\s*vulnerab",
+    r"\(1\)[\s\*]*yes",                              # (1) YES, (1) **YES**
+    r"\bfinal\s+answer[\s\*]*[:\-][\s\*]*\(?1?\)?[\s\*]*yes",
+    r"\bfinal\s+answer[\s\*]*[:\-][\s\*]*vulnerab",
+    r"\bfinal\s+(?:verdict|decision)[\s\*]*[:\-]?[\s\*]*(?:yes|vulnerab)",
+    r"\b(?:answer|result)[\s\*]*[:\-][\s\*]*yes\b",
+    r"\b(?:answer|result)[\s\*]*[:\-][\s\*]*vulnerab",
+    r"\bconclusion[\s\*]*[:\-]?[\s\*]*(?:yes\b|the code is vulnerab|vulnerab)",
+    r"\byes[\s\*]*[:\-][\s\*]*vulnerab",
     r"\byes,\s*the code\b",
+    # bare "vulnerable" conclusions (guarded against "not vulnerable" by adjacency)
+    r"\b(?:the\s+)?code\s+(?:is|appears|seems|becomes)\s+vulnerable\b",
+    r"\bmaking\s+(?:the\s+)?code\s+vulnerable\b",
 ]
 _DECISIVE_NO = [
-    r"\(2\)\s*\*{0,2}\s*no\b",                      # (2) NO, (2) **NO**
-    r"final\s+answer\s*[:\-]?\s*\*{0,2}\s*\(?2?\)?\s*\*{0,2}\s*no\b",
-    r"final\s+answer\s*[:\-]?\s*\*{0,2}\s*(?:not\s+vulnerab|no\s+vulnerab|safe)",
-    r"final\s+(?:verdict|decision)\s*[:\-]?\s*\*{0,2}\s*(?:no\b|not\s+vulnerab|safe)",
-    r"\banswer\s*[:\-]\s*\*{0,2}\s*no\b",
-    r"\bconclusion\s*[:\-]?\s*\*{0,2}\s*(?:no\b|the code is (?:safe|not vulnerab)|not vulnerab|safe\b)",
+    r"\(2\)[\s\*]*no\b",                             # (2) NO, (2) **NO**
+    r"\bfinal\s+answer[\s\*]*[:\-][\s\*]*\(?2?\)?[\s\*]*no\b",
+    r"\bfinal\s+answer[\s\*]*[:\-][\s\*]*(?:not\s+vulnerab|no\s+vulnerab|safe)",
+    r"\bfinal\s+(?:verdict|decision)[\s\*]*[:\-]?[\s\*]*(?:no\b|not\s+vulnerab|safe)",
+    r"\b(?:answer|result)[\s\*]*[:\-][\s\*]*no\b",
+    r"\bconclusion[\s\*]*[:\-]?[\s\*]*(?:no\b|the code is (?:safe|not vulnerab)|not vulnerab|safe\b)",
     r"\bno,\s*the code\b",
+    # "no [clear/direct/security] vulnerability detected/found/present" → decisive NO
+    # (catches the conclusion before the soft tier can false-positive on the
+    # embedded "vulnerability detected" substring)
+    r"\bno\s+(?:\w+\s+){0,3}vulnerabilit\w*\s+(?:detected|found|present|identified|observ)",
+    r"\bno\s+(?:\w+\s+){0,2}vulnerabilit\w*\b",
 ]
 
 # Tier 2: soft phrasings, consulted only if no decisive marker exists.

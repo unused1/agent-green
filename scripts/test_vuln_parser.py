@@ -104,6 +104,37 @@ def test_truncated_thinking_no_output_is_undetermined():
     assert parse_na_sa(text)[0] == 0
 
 
+def test_result_marker_no_vuln_detected():
+    """Human-review case (sid 33): 'Result: NO (No vulnerability detected)' -> 0.
+    Soft 'vulnerability detected' must not win over the decisive NO."""
+    text = "Analysis...\n**Result:** **NO** (No vulnerability detected in the snippet)"
+    assert parse_na_sa(text)[0] == 0
+
+
+def test_markdown_answer_no():
+    """Human-review case (sid 86): '**Answer**: **NO**' (markdown) -> 0."""
+    text = "...discussion of buffer overflow risks...\n**Answer**: **NO**"
+    assert parse_na_sa(text)[0] == 0
+
+
+def test_no_direct_vulnerability_detected():
+    """Human-review case (sid 96): 'NO (No direct vulnerability detected)' -> 0."""
+    text = "Review...\n**NO** (No direct vulnerability detected in the provided snippet)"
+    assert parse_na_sa(text)[0] == 0
+
+
+def test_bare_vulnerable_conclusion_is_yes():
+    """Human-review case (sid 189): concludes 'making the code vulnerable' -> 1."""
+    text = "These issues could trigger memory corruption, making the code vulnerable."
+    assert parse_na_sa(text)[0] == 1
+
+
+def test_code_is_not_vulnerable_guard():
+    """Negation guard: 'the code is not vulnerable' must stay 0, not match YES."""
+    text = "After review, the code is not vulnerable to the reported issue."
+    assert parse_na_sa(text)[0] == 0
+
+
 def test_no_tags_whole_text_is_output():
     """No think tags at all (e.g. Nemotron-Nano-8B): parse the full text."""
     text = "Step-by-step analysis of the function.\n(1) YES: Vulnerability detected."
