@@ -19,15 +19,22 @@ import pandas as pd
 
 csv.field_size_limit(sys.maxsize)
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sa_noresp_overlay import load_overlay, is_noresp  # noqa: E402
+
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = os.path.join(PROJECT_ROOT, "results")
 
 
-def compute_pc(jsonl_paths: list) -> dict:
+def compute_pc(jsonl_paths: list, model: str = None, mode: str = None) -> dict:
     """Compute pairwise metrics from one or more JSONL files.
 
-    Returns dict with pc, pv, pb, pr counts and percentages.
+    Applies the SA no-response gap-fill overlay (by model,mode,idx) and excludes
+    any pair containing a remaining no-output member (a non-prediction cannot be
+    scored). Returns dict with pc, pv, pb, pr counts/percentages + excluded pairs.
     """
+    overlay = load_overlay()
+
     # Load all predictions, dedup by idx
     preds = {}
     for path in jsonl_paths:
@@ -43,27 +50,37 @@ def compute_pc(jsonl_paths: list) -> dict:
                 if idx not in preds:
                     preds[idx] = rec
 
-    # Group by commit_id
+    # Group by commit_id, resolving overlay + no-output flag per member
     pairs = {}
     for idx, rec in preds.items():
         cid = rec.get("commit_id", "")
         if not cid:
             continue
         if cid not in pairs:
-            pairs[cid] = {"ground_truth": [], "prediction": [], "idx": []}
+            pairs[cid] = {"ground_truth": [], "prediction": [], "noresp": [], "idx": []}
         gt = int(rec.get("ground_truth", rec.get("target", -1)))
-        pred = int(rec.get("vuln", -1))
+        ov = overlay.get((model, mode, idx)) if model else None
+        if ov is not None:
+            pred, noresp = ov, False
+        else:
+            pred, noresp = int(rec.get("vuln", -1)), is_noresp(rec)
         pairs[cid]["ground_truth"].append(gt)
         pairs[cid]["prediction"].append(pred)
+        pairs[cid]["noresp"].append(noresp)
         pairs[cid]["idx"].append(idx)
 
     # Compute pairwise metrics
     results = {"pc": 0, "pv": 0, "pb": 0, "pr": 0}
     pair_count = 0
+    excluded_pairs = 0
 
     for cid, data in pairs.items():
         i = 0
         while i + 1 < len(data["ground_truth"]):
+            if data["noresp"][i] or data["noresp"][i + 1]:
+                excluded_pairs += 1  # non-prediction member -> drop the pair
+                i += 2
+                continue
             pair_count += 1
             gt1 = data["ground_truth"][i]
             gt2 = data["ground_truth"][i + 1]
@@ -93,6 +110,7 @@ def compute_pc(jsonl_paths: list) -> dict:
         "pv_pct": round(pct["pv"], 2),
         "pb_pct": round(pct["pb"], 2),
         "pr_pct": round(pct["pr"], 2),
+        "excluded_pairs": excluded_pairs,
     }
 
 
@@ -234,7 +252,7 @@ def main():
             })
             continue
 
-        pc = compute_pc(files)
+        pc = compute_pc(files, model=model, mode=mode)
         results.append({
             "design": design, "model": model, "mode": mode,
             "prompting": prompting, "pairs": pc["pairs"],

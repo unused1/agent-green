@@ -17,6 +17,9 @@ from pathlib import Path
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from sa_noresp_overlay import load_overlay, is_noresp  # noqa: E402
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = PROJECT_ROOT / "results"
 DIR_486 = RESULTS_DIR / "runpod_vuln_486"
@@ -59,7 +62,7 @@ def parse_config_from_filename(filename: str) -> dict:
 
 
 def load_predictions(jsonl_path: Path) -> dict:
-    """Load JSONL, return {idx: (pred_norm, gt)} dict."""
+    """Load JSONL, return {idx: (pred_norm, gt, noresp)} dict."""
     preds = {}
     with open(jsonl_path, "r", encoding="utf-8") as f:
         for line in f:
@@ -72,7 +75,7 @@ def load_predictions(jsonl_path: Path) -> dict:
             if idx is None or gt is None:
                 continue
             pred_norm = normalize_vuln_basic(pred)
-            preds[int(idx)] = (pred_norm, int(gt))
+            preds[int(idx)] = (pred_norm, int(gt), is_noresp(entry))
     return preds
 
 
@@ -183,9 +186,20 @@ def main():
         all_preds.update(preds_486)
         all_preds.update(preds_384)
 
-        predictions = [v[0] for v in all_preds.values()]
-        ground_truths = [v[1] for v in all_preds.values()]
-        skipped = sum(1 for v in all_preds.values() if v[0] == 1 and v[1] is not None)
+        # Option-A gap-fill: overlay the re-inferred labels for transient
+        # no-response samples (original JSONLs stay pristine); exclude any
+        # remaining no-output (a non-prediction must not be scored as a class).
+        overlay = load_overlay()
+        predictions, ground_truths = [], []
+        n_excluded = 0
+        for idx, (pred, gt, noresp) in all_preds.items():
+            ov = overlay.get((model, mode, idx))
+            if ov is not None:
+                predictions.append(ov); ground_truths.append(gt)
+            elif noresp:
+                n_excluded += 1
+            else:
+                predictions.append(pred); ground_truths.append(gt)
 
         if len(predictions) == 0:
             print(f"  Skipping {key}: no predictions")
@@ -221,7 +235,7 @@ def main():
             "failed_samples": "",
             "total_samples": len(predictions),
             "correct_predictions": correct,
-            "skipped_samples": 0,
+            "skipped_samples": n_excluded,
             "source_type": "runpod_vuln_870_combined",
             "source_file": f"{info_486['path']}; {info_384['path']}",
             # Cataloging dimensions (see docs/scratch memos):
