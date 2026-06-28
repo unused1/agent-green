@@ -300,55 +300,85 @@ def run_inference_with_emissions(samples, llm_config, exp_name, result_dir, desi
             sample_info = f"Sample {overall_progress}/{len(samples)}, idx: {sample['idx']}"
             print(f"\n--- Processing {sample_info} ---")
 
-            # Step 1: Security Researcher
-            print(f"\n[{sample_info}] Phase 1/4: Security Researcher analyzing...")
-            researcher = user_proxy.initiate_chat(
-                recipient=security_researcher,
-                message=config.MULTI_AGENT_TASK_SECURITY_RESEARCHER.format(code=sample['func']),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
+            # The 4-agent chain is wrapped so a per-sample failure does not kill
+            # the whole run. In particular, multi-agent THINKING can overflow the
+            # model context at the Review Board turn (accumulated researcher +
+            # author + moderator + reasoning traces > max_model_len), which vLLM
+            # rejects with a 400. On any such error we record a skip (vuln=-1) and
+            # continue; resume then will not retry the offending sample.
+            try:
+                # Step 1: Security Researcher
+                print(f"\n[{sample_info}] Phase 1/4: Security Researcher analyzing...")
+                researcher = user_proxy.initiate_chat(
+                    recipient=security_researcher,
+                    message=config.MULTI_AGENT_TASK_SECURITY_RESEARCHER.format(code=sample['func']),
+                    max_turns=1,
+                    summary_method="last_msg"
+                ).summary.strip()
 
-            # Step 2: Code Author
-            print(f"\n[{sample_info}] Phase 2/4: Code Author responding...")
-            author = user_proxy.initiate_chat(
-                recipient=code_author,
-                message=config.MULTI_AGENT_TASK_CODE_AUTHOR.format(
-                    researcher_findings=researcher,
-                    code=sample['func']
-                ),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
+                # Step 2: Code Author
+                print(f"\n[{sample_info}] Phase 2/4: Code Author responding...")
+                author = user_proxy.initiate_chat(
+                    recipient=code_author,
+                    message=config.MULTI_AGENT_TASK_CODE_AUTHOR.format(
+                        researcher_findings=researcher,
+                        code=sample['func']
+                    ),
+                    max_turns=1,
+                    summary_method="last_msg"
+                ).summary.strip()
 
-            # Step 3: Moderator
-            print(f"\n[{sample_info}] Phase 3/4: Moderator summarizing...")
-            moderator_resp = user_proxy.initiate_chat(
-                recipient=moderator,
-                message=config.MULTI_AGENT_TASK_MODERATOR.format(
-                    researcher_findings=researcher,
-                    author_response=author
-                ),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
+                # Step 3: Moderator
+                print(f"\n[{sample_info}] Phase 3/4: Moderator summarizing...")
+                moderator_resp = user_proxy.initiate_chat(
+                    recipient=moderator,
+                    message=config.MULTI_AGENT_TASK_MODERATOR.format(
+                        researcher_findings=researcher,
+                        author_response=author
+                    ),
+                    max_turns=1,
+                    summary_method="last_msg"
+                ).summary.strip()
 
-            # Step 4: Review Board
-            print(f"\n[{sample_info}] Phase 4/4: Review Board deciding...")
-            board = user_proxy.initiate_chat(
-                recipient=review_board,
-                message=config.MULTI_AGENT_TASK_REVIEW_BOARD.format(
-                    moderator_summary=moderator_resp,
-                    code=sample['func'],
-                    researcher_findings=researcher,
-                    author_response=author
-                ),
-                max_turns=1,
-                summary_method="last_msg"
-            ).summary.strip()
+                # Step 4: Review Board
+                print(f"\n[{sample_info}] Phase 4/4: Review Board deciding...")
+                board = user_proxy.initiate_chat(
+                    recipient=review_board,
+                    message=config.MULTI_AGENT_TASK_REVIEW_BOARD.format(
+                        moderator_summary=moderator_resp,
+                        code=sample['func'],
+                        researcher_findings=researcher,
+                        author_response=author
+                    ),
+                    max_turns=1,
+                    summary_method="last_msg"
+                ).summary.strip()
 
-            # Decision
-            vuln_decision, reasoning = extract_vulnerability_decision(board)
+                # Decision
+                vuln_decision, reasoning = extract_vulnerability_decision(board)
+            except Exception as e:  # noqa: BLE001 — skip-and-continue on any per-sample failure
+                print(f"[{sample_info}] SKIPPED ({type(e).__name__}): {str(e)[:200]}")
+                skip = {
+                    'idx': sample['idx'],
+                    'project': sample.get('project'),
+                    'commit_id': sample.get('commit_id'),
+                    'project_url': sample.get('project_url'),
+                    'commit_url': sample.get('commit_url'),
+                    'commit_message': sample.get('commit_message'),
+                    'ground_truth': sample.get('target'),
+                    'vuln': -1,
+                    'reasoning': f'SKIPPED: {type(e).__name__}: {str(e)[:300]}',
+                    'full_discussion': {},
+                    'cwe': sample.get('cwe'),
+                    'cve': sample.get('cve'),
+                    'cve_desc': sample.get('cve_desc'),
+                    'session': 1,
+                    'timestamp': datetime.now().isoformat(),
+                    'skipped': True,
+                }
+                append_result(skip, detailed_file, csv_file)
+                results.append(skip)
+                continue
 
             result = {
                 'idx': sample['idx'],
