@@ -45,6 +45,8 @@ from collections import defaultdict
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 from vuln_parser import strip_think_block  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sa_noresp_overlay import load_overlay_full, is_noresp  # noqa: E402
 
 csv.field_size_limit(sys.maxsize)
 
@@ -104,8 +106,14 @@ def config_index():
     return idx
 
 
-def load_preds(files):
-    """{idx: (gt, pred, reasoning)} deduped by idx; skips/undetermined excluded."""
+def load_preds(files, model, mode):
+    """{idx: (gt, pred, reasoning)} deduped by idx.
+
+    Applies the SA no-response gap-fill overlay (re-inferred label + response for
+    the transient cases); excludes skips and any remaining no-output (so the rater
+    never sees a 'No response from agent' explanation).
+    """
+    overlay = load_overlay_full()
     out = {}
     for p in files:
         for line in open(p):
@@ -115,15 +123,24 @@ def load_preds(files):
             i = rec.get("idx")
             if i is None or int(i) in out:
                 continue
+            i = int(i)
             gt = rec.get("ground_truth", rec.get("target"))
-            v = rec.get("vuln")
             try:
-                gt = int(gt); v = int(v)
+                gt = int(gt)
             except (TypeError, ValueError):
                 continue
-            if v == -1:
+            ov = overlay.get((model, mode, i))
+            if ov is not None:
+                out[i] = (gt, ov[0], ov[1])  # re-inferred label + response
                 continue
-            out[int(i)] = (gt, v, rec.get("reasoning", ""))
+            v = rec.get("vuln")
+            try:
+                v = int(v)
+            except (TypeError, ValueError):
+                continue
+            if v == -1 or is_noresp(rec):
+                continue  # skip / no-output -> exclude
+            out[i] = (gt, v, rec.get("reasoning", ""))
     return out
 
 
@@ -141,8 +158,8 @@ def main():
     for family, modes in FAMILIES.items():
         tk_model, tk_mode = modes["thinking"]
         in_model, in_mode = modes["instruct"]
-        think = load_preds(cfg[(tk_model, tk_mode)])
-        inst = load_preds(cfg[(in_model, in_mode)])
+        think = load_preds(cfg[(tk_model, tk_mode)], tk_model, tk_mode)
+        inst = load_preds(cfg[(in_model, in_mode)], in_model, in_mode)
         common = set(think) & set(inst)
 
         for stratum, (gt_req, tk_req, in_req) in STRATA.items():
