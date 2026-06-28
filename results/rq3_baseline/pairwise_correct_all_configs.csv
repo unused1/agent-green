@@ -127,3 +127,7 @@ NoAgent,Qwen3-4B-Thinking,thinking,few-shot,433,12.93,10.85,65.82,10.39,freeform
 NoAgent,Qwen3-4B-Thinking,thinking,zero-shot,433,18.94,12.7,55.2,13.16,freeform,canonical
 SA,Qwen3-4B-Thinking,thinking,few-shot,426,17.14,7.98,64.55,10.33,freeform,canonical
 SA,Qwen3-4B-Thinking,thinking,zero-shot,427,15.93,14.99,59.02,10.07,freeform,canonical
+MA,Nemotron-Super-49B,instruct,zero-shot,433,18.71,41.11,18.01,22.17,constrained,constrained_strict_optionB
+MA,Nemotron-Super-49B,thinking,zero-shot,433,20.79,21.48,35.57,22.17,constrained,constrained_strict_optionB
+MA,Qwen3-30B-A3B-Instruct,instruct,zero-shot,433,20.09,51.27,14.55,14.09,constrained,constrained_strict_optionB
+MA,Qwen3-30B-A3B-Thinking,thinking,zero-shot,420,21.67,33.1,27.14,18.1,constrained,constrained_strict_optionB
