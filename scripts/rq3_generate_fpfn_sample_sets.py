@@ -144,13 +144,37 @@ def load_preds(files, model, mode):
     return out
 
 
+def load_reuse_idx(path):
+    """{family: set(entry_id)} of snippets sampled in a prior (reviewed) frame.
+
+    Preferring these when sampling keeps the human review valid: a reused snippet
+    contributes the identical response_text, so only genuinely-new snippets need
+    re-review. Strata stay balanced; reuse just reorders the within-pool pick.
+    """
+    if not path or not os.path.exists(path):
+        return None
+    by_fam = {}
+    for r in csv.DictReader(open(path)):
+        by_fam.setdefault(r["family"], set()).add(int(r["entry_id"]))
+    return by_fam
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--per-stratum", type=int, default=30)
+    ap.add_argument("--reuse-from",
+                    default=os.path.join(ROOT, "results", "rq3_baseline",
+                                         "fpfn_sample_frame_v1.csv"),
+                    help="Prior frame CSV whose sampled snippets to prefer "
+                         "(minimises human re-review). Set '' to disable.")
     args = ap.parse_args()
 
     vuln_ds = load_vuln_ds()
     cfg = config_index()
+    reuse_idx = load_reuse_idx(args.reuse_from)
+    if reuse_idx:
+        print(f"Reuse-preferring from {args.reuse_from} "
+              f"({{ {', '.join(f'{k}:{len(v)}' for k, v in reuse_idx.items())} }})\n")
     rng = random.Random(SEED)
 
     rows = []
@@ -168,6 +192,11 @@ def main():
                     and inst[i][0] == gt_req and inst[i][1] == in_req]
             pool.sort()
             rng.shuffle(pool)
+            if reuse_idx is not None:
+                fam_rev = reuse_idx.get(family, set())
+                reviewed = [i for i in pool if i in fam_rev]
+                fresh = [i for i in pool if i not in fam_rev]
+                pool = reviewed + fresh  # reviewed first -> max reuse, balance kept
             take = pool[:args.per_stratum]
             if len(pool) < args.per_stratum:
                 print(f"  WARN {family} {stratum}: only {len(pool)} in intersection")
