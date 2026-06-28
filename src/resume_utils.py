@@ -113,7 +113,19 @@ class ExperimentResume:
         # Check for existing experiment
         existing_base = self.find_most_recent_results()
         if existing_base:
-            exp_name, skip_next_sample = self.prompt_resume_options(existing_base)
+            # Non-interactive (nohup / no tty): auto-resume from the last completed
+            # sample instead of blocking on input(), which raises EOFError under
+            # nohup and would crash the resume. AUTO_RESUME=skip instead skips the
+            # next (previously-crashing) sample; AUTO_RESUME=1/continue resumes.
+            import sys
+            auto = os.getenv("AUTO_RESUME")
+            if auto or not sys.stdin.isatty():
+                skip_next_sample = str(auto).lower() == "skip"
+                print(f"[RESUME] Non-interactive: resuming '{existing_base}' from last "
+                      f"completed sample{' (skipping next sample)' if skip_next_sample else ''}")
+                exp_name = existing_base
+            else:
+                exp_name, skip_next_sample = self.prompt_resume_options(existing_base)
 
         # Construct file paths
         detailed_file = os.path.join(self.result_dir, f"{exp_name}_detailed_results.jsonl")
