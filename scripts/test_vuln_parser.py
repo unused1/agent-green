@@ -357,6 +357,18 @@ def test_constrained_markdown_fenced_array():
     assert parse_ma_constrained(resp, "strict") == (1, True)
 
 
+def test_constrained_empty_array_is_determined_safe():
+    """An explicit empty array = determinate 'no findings' -> safe (0, True),
+    not undetermined. Covers the Review-Board 'no vulnerabilities' case."""
+    assert parse_ma_constrained("```json\n[]\n```", "strict") == (0, True)
+    assert parse_ma_constrained("...analysis...</think>\n\n[]", "strict") == (0, True)
+
+
+def test_constrained_unparseable_is_undetermined():
+    """No verdict array and no explicit empty array -> undetermined (0, False)."""
+    assert parse_ma_constrained("the board did not return a verdict", "strict") == (0, False)
+
+
 def test_constrained_empty_is_undetermined():
     assert parse_ma_constrained("", "strict") == (0, False)
 

@@ -529,6 +529,12 @@ def parse_ma_constrained(board_response: str, rule: str = "strict") -> Tuple[int
     """
     verdicts = _ma_verdict_fields(board_response)
     if not verdicts:
+        # An explicit empty array is a determinate "no findings" -> safe verdict
+        # (the constrained prompt instructs an empty array when nothing is found);
+        # distinguish it from a genuinely unparseable board (undetermined).
+        txt = strip_markdown_fences(strip_think_block(board_response or ""))
+        if re.search(r"\[\s*\]", txt):
+            return 0, True
         return 0, False
     for dec, sev, act in verdicts:
         valid = _is_valid_decision(dec)
