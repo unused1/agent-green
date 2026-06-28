@@ -86,6 +86,34 @@ def config_key(parsed: dict) -> tuple:
     )
 
 
+SUBMITTED_COMMIT = "c829127"  # pre-P0 consolidated_performance.csv = as-submitted metrics
+
+
+def load_submitted_870_records(fieldnames):
+    """Load the submitted (pre-P0) VulTrial-870 rows from git, for provenance.
+
+    Tagged variant=freeform / label_rule=original_submitted so the live catalog is
+    self-contained (submitted + corrected + constrained all queryable in one file).
+    """
+    import subprocess
+    try:
+        blob = subprocess.run(
+            ["git", "show", f"{SUBMITTED_COMMIT}:results/consolidated_performance.csv"],
+            cwd=str(PROJECT_ROOT), capture_output=True, text=True, check=True,
+        ).stdout
+    except Exception as e:  # noqa: BLE001
+        print(f"  WARN: could not load submitted rows from git {SUBMITTED_COMMIT}: {e}")
+        return []
+    out = []
+    for row in csv.DictReader(blob.splitlines()):
+        if row.get("dataset") != "VulTrial-870":
+            continue
+        row["variant"] = "freeform"
+        row["label_rule"] = "original_submitted"
+        out.append({k: row.get(k, "") for k in fieldnames})
+    return out
+
+
 def main():
     print("Generating VulTrial-870 performance metrics...")
     print(f"  486 dir: {DIR_486}")
@@ -196,6 +224,11 @@ def main():
             "skipped_samples": 0,
             "source_type": "runpod_vuln_870_combined",
             "source_file": f"{info_486['path']}; {info_384['path']}",
+            # Cataloging dimensions (see docs/scratch memos):
+            #   variant     = prompt scheme (freeform submitted prompts here)
+            #   label_rule  = binarisation/parser used for these labels
+            "variant": "freeform",
+            "label_rule": "affirm_optionA" if parsed.get("design") == "MA" else "canonical",
         }
         records_870.append(record)
 
@@ -208,28 +241,41 @@ def main():
     existing = []
     with open(OUTPUT_CSV, newline="") as f:
         reader = csv.DictReader(f)
-        fieldnames = reader.fieldnames
+        fieldnames = list(reader.fieldnames)
         for row in reader:
             # Remove any existing VulTrial-870 rows (re-run safe)
             if row.get("dataset") == "VulTrial-870":
                 continue
             existing.append(row)
 
-    print(f"Existing records (non-870): {len(existing)}")
+    # Ensure cataloging columns exist; default non-870 rows to single-state.
+    for col in ("variant", "label_rule"):
+        if col not in fieldnames:
+            fieldnames.append(col)
+    for row in existing:
+        row.setdefault("variant", "freeform")
+        row.setdefault("label_rule", "original")
+        if not row.get("variant"):
+            row["variant"] = "freeform"
+        if not row.get("label_rule"):
+            row["label_rule"] = "original"
+
+    # Interleave the submitted (pre-P0) VulTrial-870 rows from git for provenance.
+    submitted_870 = load_submitted_870_records(fieldnames)
+    print(f"Existing records (non-870): {len(existing)}  | submitted-870 from git: {len(submitted_870)}")
 
     # Write back
     with open(OUTPUT_CSV, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for row in existing:
-            writer.writerow(row)
-        for rec in records_870:
-            # Ensure all fields present
-            row = {k: rec.get(k, "") for k in fieldnames}
-            writer.writerow(row)
+            writer.writerow({k: row.get(k, "") for k in fieldnames})
+        for rec in submitted_870 + records_870:
+            writer.writerow({k: rec.get(k, "") for k in fieldnames})
 
-    total = len(existing) + len(records_870)
-    print(f"Written {total} records to {OUTPUT_CSV}")
+    total = len(existing) + len(submitted_870) + len(records_870)
+    print(f"Written {total} records to {OUTPUT_CSV} "
+          f"({len(existing)} non-870 + {len(submitted_870)} submitted-870 + {len(records_870)} freeform-870)")
     print(f"  ({len(existing)} existing + {len(records_870)} VulTrial-870)")
 
     # Summary
