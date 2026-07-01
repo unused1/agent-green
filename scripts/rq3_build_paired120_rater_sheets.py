@@ -19,10 +19,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = os.path.join(ROOT, "results/rq3_baseline")
 MASTER = os.path.join(BASE, "fpfn_human_frame_120.csv")
 SCORE_COLS = ["completeness_score", "clarity_score", "actionability_score", "informativeness_score"]
-HEADERS = ["sample_id", "source_code", "ground_truth_label", "cwe", "cve_desc",
-           "response_text"] + SCORE_COLS + ["rater_notes"]
-WIDTHS = {"A": 9, "B": 80, "C": 16, "D": 14, "E": 50, "F": 80,
-          "G": 13, "H": 11, "I": 14, "J": 15, "K": 32}
+# Blinded: ground_truth_label / cwe / cve_desc are WITHHELD. With FP/FN in the set,
+# showing them would reveal prediction (in)correctness and conflate explanation
+# quality with correctness -> raters judge from code + explanation only.
+HEADERS = ["sample_id", "source_code", "response_text"] + SCORE_COLS + ["rater_notes"]
+WIDTHS = {"A": 9, "B": 80, "C": 80, "D": 13, "E": 11, "F": 14, "G": 15, "H": 32}
 
 
 def rater_name(path):
@@ -63,16 +64,13 @@ def main():
             cell.alignment = Alignment(vertical="top", wrap_text=True)
         matched = 0
         for r in master:
-            safe = r["ground_truth_label"] == "safe"
             reused = r["reused_prior"] == "1"
             sc = scores.get(r["response_text"].strip()) if reused else None
             if reused and sc is not None:
                 matched += 1
             vals = [sc.get(k) if sc else "" for k in SCORE_COLS]
             note = "prior (already rated)" if (reused and sc) else ""
-            row = [int(r["sample_id"]), r["source_code"], r["ground_truth_label"],
-                   "" if safe else r["cwe"], "" if safe else r["cve_desc"],
-                   r["response_text"], *vals, note]
+            row = [int(r["sample_id"]), r["source_code"], r["response_text"], *vals, note]
             ws.append(row)
             if reused and sc:  # tint the pre-filled rows
                 for c in range(1, len(HEADERS) + 1):
