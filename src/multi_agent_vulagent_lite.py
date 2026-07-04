@@ -49,11 +49,13 @@ llm_config = copy.deepcopy(config.LLM_CONFIG)
 # forward (specialists -> aggregator prompt -> validator prompt), so at 10k/stage
 # the aggregator prompt is ~code + 4x10k = ~42k tokens, still leaving room under
 # the 65536 context window; larger caps risk truncating the downstream calls.
-# Thinking mode emits a <think> trace before the answer, so it needs more room to
-# reach a parseable verdict; the trace is stripped between stages (reply()), so a
-# larger cap does not inflate downstream prompts. Instruct keeps the tighter cap.
-_reasoning = os.getenv("ENABLE_REASONING", "false").lower() == "true"
-_MAX_TOKENS = int(os.getenv("VULAGENT_MAX_TOKENS", "20480" if _reasoning else "10240"))
+# Universal per-call cap. The validator emits VERDICT on its first line, so the
+# label is captured even if a long justification is truncated here; the cap only
+# trims trailing justification noise (downstream-filtered) and severs Qwen3-30B's
+# degenerate runaway (~48k tokens/call). One value across instruct/thinking keeps
+# the reasoning-on/off comparison free of a cap difference; the trace is stripped
+# between stages (reply()), so the size never inflates downstream prompts.
+_MAX_TOKENS = int(os.getenv("VULAGENT_MAX_TOKENS", "20480"))
 llm_config["max_tokens"] = _MAX_TOKENS
 for _c in llm_config["config_list"]:
     _c["max_tokens"] = _MAX_TOKENS
@@ -101,9 +103,11 @@ VALIDATOR_SYS = (
     "check, bound, guard, length/null test, or early return in the code that prevents it. Mark it "
     "INVALID if it relies on unstated assumptions about callers or external state that the function "
     "itself does not establish, if a plausible guard is present, or if the evidence is speculative. "
-    "When genuinely in doubt, mark INVALID. For each candidate, state VALID or INVALID with a one-line "
-    "justification that cites the specific code. Then output a final line exactly as "
-    "'VERDICT: VULNERABLE' if at least one candidate is VALID, otherwise 'VERDICT: NOT VULNERABLE'."
+    "When genuinely in doubt, mark INVALID. "
+    "Output your decision on the FIRST line, exactly as 'VERDICT: VULNERABLE' if at least one candidate "
+    "is VALID, otherwise 'VERDICT: NOT VULNERABLE'. Then, below that line, justify it: for each candidate "
+    "state VALID or INVALID with a one-line justification that cites the specific code. Putting the "
+    "verdict first ensures it is never lost if the justification runs long."
 )
 
 
