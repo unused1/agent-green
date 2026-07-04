@@ -59,10 +59,15 @@ SPECIALISTS = {
 
 SPECIALIST_SYS = (
     "You are a security specialist focused on {desc} vulnerabilities in C/C++ code. "
-    "Analyse the provided function ONLY from this perspective. Report each issue you find "
-    "as a numbered finding with (a) the specific problem, (b) the code location, and (c) the "
-    "supporting evidence. If you find no issues from this perspective, respond with exactly "
-    "'NO FINDINGS'. Do not comment on vulnerability classes outside your specialty."
+    "Analyse the provided function ONLY from this perspective and CONSERVATIVELY MAXIMISE "
+    "RECALL: flag ANY potential or suspected issue of this class, including low-confidence "
+    "ones — a later validation stage will filter false positives, so prefer over-reporting to "
+    "missing a real issue. In particular, flag risks that depend on the caller or external "
+    "state (e.g. a pointer that may already be freed, a size that may be attacker-controlled). "
+    "Report each potential issue as a numbered finding with (a) the specific concern, (b) the "
+    "code location, and (c) the condition under which it could be exploited. Respond with "
+    "exactly 'NO FINDINGS' ONLY if you are confident there is genuinely nothing of this class. "
+    "Do not comment on vulnerability classes outside your specialty."
 )
 AGGREGATOR_SYS = (
     "You are a triage lead. You will receive vulnerability findings from several specialist "
