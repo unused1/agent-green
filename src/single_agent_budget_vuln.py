@@ -36,7 +36,7 @@ else:
 from autogen import AssistantAgent  # noqa: E402
 from codecarbon import OfflineEmissionsTracker  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from vuln_parser import parse_na_sa  # noqa: E402
+from vuln_parser import parse_na_sa, strip_think_block  # noqa: E402
 
 # --- Budget config ---
 MODE = os.getenv("MODE", "self_revision").lower()          # self_revision | best_of_n
@@ -101,7 +101,11 @@ def run_self_revision(agent, func):
         if k > 0:
             msgs.append({"content": REVISE_PROMPT, "role": "user"})
         text = reply_text(agent, msgs)
-        msgs.append({"content": text, "role": "assistant"})
+        # Feed only the stripped answer back into the conversation: revision should
+        # act on the prior answer, not re-read the raw CoT, and (critically for
+        # thinking mode) this stops long <think> traces from accumulating across
+        # rounds and overflowing the model context. No-op for instruct output.
+        msgs.append({"content": strip_think_block(text), "role": "assistant"})
         v, _ = parse_na_sa(text)
         rounds.append({"round": k + 1, "vuln": v, "response": text})
     final = rounds[-1]

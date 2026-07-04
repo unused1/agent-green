@@ -49,7 +49,11 @@ llm_config = copy.deepcopy(config.LLM_CONFIG)
 # forward (specialists -> aggregator prompt -> validator prompt), so at 10k/stage
 # the aggregator prompt is ~code + 4x10k = ~42k tokens, still leaving room under
 # the 65536 context window; larger caps risk truncating the downstream calls.
-_MAX_TOKENS = int(os.getenv("VULAGENT_MAX_TOKENS", "10240"))
+# Thinking mode emits a <think> trace before the answer, so it needs more room to
+# reach a parseable verdict; the trace is stripped between stages (reply()), so a
+# larger cap does not inflate downstream prompts. Instruct keeps the tighter cap.
+_reasoning = os.getenv("ENABLE_REASONING", "false").lower() == "true"
+_MAX_TOKENS = int(os.getenv("VULAGENT_MAX_TOKENS", "20480" if _reasoning else "10240"))
 llm_config["max_tokens"] = _MAX_TOKENS
 for _c in llm_config["config_list"]:
     _c["max_tokens"] = _MAX_TOKENS
