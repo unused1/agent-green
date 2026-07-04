@@ -68,7 +68,7 @@ save hours of wasted GPU billing.
 pip install hf_transfer
 
 # Install experiment dependencies
-pip install pyautogen python-dotenv codecarbon pandas numpy evaluate scikit-learn python-Levenshtein --ignore-installed --break-system-packages
+pip install pyautogen python-dotenv codecarbon pandas numpy evaluate scikit-learn python-Levenshtein --break-system-packages
 
 pip install vllm
 ```
@@ -76,6 +76,19 @@ pip install vllm
 **Note**: vLLM will automatically download models from HuggingFace when you start the server. No need to pre-download.
 
 ### 2.3 Start vLLM Server
+
+> **Cache weights on the pod volume, not the container overlay.** The Hugging
+> Face cache defaults to `/root/.cache`, which lives on the small container
+> overlay (~30 GB on RunPod); large checkpoints then fail mid-download with
+> `RuntimeError: IO Error: No space left on device`. Export `HF_HOME` to the
+> `/workspace` volume (150 GB+) **before** starting vLLM — set this on every
+> freshly provisioned pod, as it is not baked into the base image:
+> ```bash
+> export HF_HOME=/workspace/.cache/huggingface
+> ```
+> Symptom check: `df -h /` near 100% while `df -h /workspace` has room means the
+> cache is on the wrong filesystem. This matters most for the 30B+ models and is
+> mandatory for Nemotron-49B (~98 GB); see the Nemotron-49B setup guide, Step 2.7.
 
 #### For 30B Baseline Model (Instruct - Non-Reasoning)
 ```bash

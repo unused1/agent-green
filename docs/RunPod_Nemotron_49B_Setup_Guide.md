@@ -131,6 +131,34 @@ export HUGGING_FACE_HUB_TOKEN="$HF_TOKEN"
 Do **not** commit the token. Prefer exporting it in the shell (as above) or
 adding it to the (gitignored) `.env`; never hard-code it in scripts or this guide.
 
+### 2.7 Point the Hugging Face cache at the pod volume (avoids "No space left on device")
+
+By default the Hugging Face cache resolves to `/root/.cache`, which lives on the
+**container overlay filesystem** (~30 GB on RunPod) — far too small for the
+~98 GB Nemotron-49B weights. The download then fails partway with
+`RuntimeError: IO Error: No space left on device`, and the vLLM worker aborts in
+`load_model` → `_prepare_weights`. The pod **volume** mounted at `/workspace`
+(150 GB+) is the correct target. `HF_HOME` must be exported to a path under
+`/workspace` **before** any download or vLLM start:
+
+```bash
+export HF_HOME=/workspace/.cache/huggingface
+# HF_HUB_CACHE=/workspace/.cache/huggingface/hub is equivalent; HF_HOME covers it
+```
+
+Recognising the symptom: `df -h /` shows the overlay near 100% while
+`df -h /workspace` still has room — the cache is pointed at the wrong filesystem.
+If a partial download already landed on the overlay, reclaim the space before
+retrying:
+
+```bash
+rm -rf /root/.cache/huggingface/hub/models--nvidia--Llama-3_3-Nemotron-Super-49B-v1_5
+```
+
+This env is not baked into the base image, so a freshly provisioned pod needs it
+set explicitly even when sibling pods appear to cache under `/workspace` (they
+had it exported at serve time).
+
 ---
 
 ## Step 3: Deploy vLLM Server
@@ -143,6 +171,10 @@ cd /workspace/agent-green
 # "unauthenticated requests to the HF Hub" warning in vllm.log
 export HF_TOKEN="hf_xxxxxxxxxxxxxxxxxxxx"
 export HUGGING_FACE_HUB_TOKEN="$HF_TOKEN"
+
+# IMPORTANT: cache weights on the pod volume, NOT the ~30 GB container overlay
+# (see Step 2.7) — otherwise the ~98 GB download fails with "No space left on device"
+export HF_HOME=/workspace/.cache/huggingface
 
 # IMPORTANT: Unset HF_HUB_ENABLE_HF_TRANSFER to avoid vLLM startup errors
 unset HF_HUB_ENABLE_HF_TRANSFER
