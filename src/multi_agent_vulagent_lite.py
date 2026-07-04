@@ -40,6 +40,19 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from vuln_parser import strip_think_block, parse_na_sa  # noqa: E402
 
 llm_config = copy.deepcopy(config.LLM_CONFIG)
+# Per-call generation cap. Chosen to be non-binding for legitimate output while
+# severing degenerate repetition. Measured per-call sizes: Nemotron tops out at
+# ~2.5k tokens (max over 330 calls); Qwen's genuine output tail reaches ~4k
+# tokens. 10240 clears both with wide headroom, yet cuts Qwen3-30B's runaway
+# loops (~48k tokens/call of repeated text) that would otherwise run to the vLLM
+# context limit and stall the pod. This is the practical ceiling: outputs chain
+# forward (specialists -> aggregator prompt -> validator prompt), so at 10k/stage
+# the aggregator prompt is ~code + 4x10k = ~42k tokens, still leaving room under
+# the 65536 context window; larger caps risk truncating the downstream calls.
+_MAX_TOKENS = int(os.getenv("VULAGENT_MAX_TOKENS", "10240"))
+llm_config["max_tokens"] = _MAX_TOKENS
+for _c in llm_config["config_list"]:
+    _c["max_tokens"] = _MAX_TOKENS
 DATASET_FILE = config.VULN_DATASET
 RESULT_DIR = config.RESULT_DIR
 model = llm_config["config_list"][0]["model"].replace(":", "-").replace("/", "-")
