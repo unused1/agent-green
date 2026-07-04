@@ -24,8 +24,8 @@ ENDPOINT="${ENDPOINT:-http://localhost:8000/v1}"
 
 export USE_RUNPOD=true
 export ENABLE_CODECARBON=true
-export VULN_DATASET="${VULN_DATASET:-${PROJECT_ROOT}/vuln_database/VulTrial_386_samples_balanced.jsonl}"
-export RESULTS_DIR="${PROJECT_ROOT}/results/runpod_vuln_386_vulagent"
+export VULN_DATASET="${VULN_DATASET:-${PROJECT_ROOT}/vuln_database/VulTrial_386_paired.jsonl}"
+export RESULTS_DIR="${PROJECT_ROOT}/results/runpod_vuln_386paired_vulagent"
 export BASELINE_ENDPOINT="$ENDPOINT"
 export REASONING_ENDPOINT="$ENDPOINT"
 export BASELINE_API_KEY="${BASELINE_API_KEY:-dummy-key}"
