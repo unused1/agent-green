@@ -150,22 +150,32 @@ def main():
         agent = AssistantAgent(name="budget_detector", system_message=sys_prompt,
                                llm_config=llm_config, human_input_mode="NEVER")
         for i, s in enumerate(remaining):
-            if MODE == "self_revision":
-                vuln, reasoning, traj = run_self_revision(agent, s["func"])
-            else:
-                vuln, reasoning, traj = run_best_of_n(agent, s["func"])
-            rec = {
+            base = {
                 "idx": s.get("idx"), "project": s.get("project"),
                 "commit_id": s.get("commit_id"), "project_url": s.get("project_url"),
                 "commit_url": s.get("commit_url"), "commit_message": s.get("commit_message"),
-                "ground_truth": s["target"], "vuln": vuln, "reasoning": reasoning,
-                "cwe": s.get("cwe"), "cve": s.get("cve"), "cve_desc": s.get("cve_desc"),
-                "budget_mode": MODE, "n_calls": N_CALLS, "trajectory": traj,
+                "ground_truth": s["target"], "cwe": s.get("cwe"), "cve": s.get("cve"),
+                "cve_desc": s.get("cve_desc"), "budget_mode": MODE, "n_calls": N_CALLS,
             }
+            try:
+                if MODE == "self_revision":
+                    vuln, reasoning, traj = run_self_revision(agent, s["func"])
+                else:
+                    vuln, reasoning, traj = run_best_of_n(agent, s["func"])
+                rec = {**base, "vuln": vuln, "reasoning": reasoning, "trajectory": traj}
+            except Exception as e:
+                # A sample whose accumulated prompt exceeds the model context (or any
+                # transient call failure) is recorded as skipped and excluded at
+                # metric time, rather than crashing the whole run. Mirrors the
+                # no-response exclusion policy.
+                msg = f"{type(e).__name__}: {str(e)[:300]}"
+                print(f"  SKIP idx {s.get('idx')}: {msg}")
+                rec = {**base, "vuln": 0, "reasoning": f"SKIPPED:{msg}",
+                       "trajectory": None, "skipped": True}
             with open(detailed_file, "a") as f:
                 f.write(json.dumps(rec) + "\n")
             if (i + 1) % 10 == 0:
-                print(f"  {i + 1}/{len(remaining)} (idx {s.get('idx')} -> vuln={vuln})")
+                print(f"  {i + 1}/{len(remaining)} (idx {s.get('idx')} -> vuln={rec.get('vuln')})")
     finally:
         em = tracker.stop()
         energy["total_emissions"] += em
