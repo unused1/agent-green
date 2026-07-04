@@ -39,8 +39,14 @@ def load_overlay():
 
 
 def is_noresp(rec):
-    """True if the record carries no usable model output (NA/SA `reasoning`)."""
-    return str(rec.get("reasoning", "")).strip().lower() in NORESP_STRINGS
+    """True if the record carries no usable model output (NA/SA `reasoning`).
+
+    Covers both the transient 'No response from agent' cases and skip markers
+    (e.g. 'SKIPPED: timeout' from a thinking-mode runaway) — neither is a real
+    prediction, so both are excluded / must be patched.
+    """
+    t = str(rec.get("reasoning", "")).strip().lower()
+    return t in NORESP_STRINGS or t.startswith("skipped")
 
 
 # Full overlay (label + re-inferred response) for consumers that need the patched
