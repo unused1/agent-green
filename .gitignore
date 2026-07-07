@@ -61,6 +61,8 @@ results/runpod_vuln_384_incremental/
 results/runpod_vuln_870/
 results/runpod_870_batch*_raw/
 results/runpod_na486_raw/
+results/runpod_vuln_386paired_budget/
+results/runpod_vuln_386paired_vulagent/
 
 # Keep processed analysis results (negation patterns)
 !results/analysis/
@@ -78,6 +80,9 @@ results/rq3_baseline/share/
 # Temporary dataset splits (for parallelized RunPod runs)
 vuln_database/VulTrial_486_part*.jsonl
 vuln_database/VulTrial_486_split*.jsonl
+vuln_database/VulTrial_386_paired_v*.jsonl
+vuln_database/VulTrial_386_paired_bH*.jsonl
+vuln_database/VulTrial_386_smoke*.jsonl
 
 # CleanVul dataset CSVs — public, reproducible via PROVENANCE.md (do not commit)
 vuln_database/CleanVul/vulnerability_score_*.csv
