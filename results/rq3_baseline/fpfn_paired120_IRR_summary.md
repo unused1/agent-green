@@ -52,5 +52,10 @@ completeness.
 ## 3. Files
 
 - Human ratings: `fpfn_paired120_rater_HSv2.xlsx`, `fpfn_paired120_rater_Shane.xlsx`
-- LLM-judge ratings (Opus-4.6, when the run completes): `fpfn_llm_judged_opus-4-6.csv`
-  (join to the human ratings on `entry_id` + `mode`, Nemotron family).
+- LLM-judge ratings (Opus-4.6): **`fpfn_llm_judged_opus-4-6_blind.csv`** is the
+  primary file — the judge is run blinded (source + response only) to match the
+  blinded human raters. `fpfn_llm_judged_opus-4-6.csv` is the unblinded run, kept
+  only as a robustness reference. Join to the human ratings on `entry_id` + `mode`
+  (Nemotron family).
+- Full RQ3 FP/FN findings (ordering validation, thinking-vs-instruct,
+  correct-vs-incorrect, human↔LLM agreement): `fpfn_rq3_results_note.md`.
