@@ -73,6 +73,8 @@ results/archive/
 
 # Temporary sharing artifacts
 results/rq3_baseline/share/
+# Pre-reconciliation backups (old versions preserved in git history)
+results/rq3_baseline/*_preA.*
 
 # Archive zip files
 *.zip
