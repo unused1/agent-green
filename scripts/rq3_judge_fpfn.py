@@ -43,6 +43,8 @@ def main():
                     help="Anthropic judge model id (e.g. claude-opus-4-6)")
     ap.add_argument("--frame", default="results/rq3_baseline/fpfn_sample_frame.csv",
                     help="reconciled frame CSV (carries entry_id/family/mode for the IRR join)")
+    ap.add_argument("--blind", action="store_true",
+                    help="omit ground_truth/CWE/CVE from the prompt, matching the blinded human raters")
     ap.add_argument("--limit", type=int, default=0, help="0 = all rows (smoke-test with small N)")
     args = ap.parse_args()
 
@@ -63,8 +65,10 @@ def main():
         rows = rows[:args.limit]
     print(f"Rows to grade: {len(rows)} from {os.path.basename(args.frame)}")
 
-    short = args.model.replace("claude-", "")
+    short = args.model.replace("claude-", "") + ("_blind" if args.blind else "")
     out_path = os.path.join(ROOT, "results", "rq3_baseline", f"fpfn_llm_judged_{short}.csv")
+    if args.blind:
+        print("BLIND mode: ground_truth/CWE/CVE withheld (matches the blinded human raters)")
     fields = (["sample_id", "family", "model", "mode", "stratum", "entry_id",
                "ground_truth_label", "prediction"]
               + [f"{d}_score" for d in J.DIMENSIONS]
@@ -84,13 +88,19 @@ def main():
         sid = str(r["sample_id"])
         if sid in done:
             continue
-        user = J.build_evaluation_prompt(
-            source_code=r.get("source_code", ""),
-            response_text=r.get("response_text", ""),
-            ground_truth_label=r.get("ground_truth_label", ""),
-            cwe=r.get("cwe", ""),
-            cve_desc=r.get("cve_desc", ""),
-        )
+        if args.blind:
+            # exactly what the blinded human raters saw: source + response only
+            user = (f'Source code:\n```\n{r.get("source_code", "")}\n```\n\n'
+                    f'AI response to evaluate:\n"""\n{r.get("response_text", "")}\n"""\n\n'
+                    "Score this response on the four dimensions. Respond with JSON only.")
+        else:
+            user = J.build_evaluation_prompt(
+                source_code=r.get("source_code", ""),
+                response_text=r.get("response_text", ""),
+                ground_truth_label=r.get("ground_truth_label", ""),
+                cwe=r.get("cwe", ""),
+                cve_desc=r.get("cve_desc", ""),
+            )
         print(f"  [{i}/{len(rows)}] sid={sid} {r['family'].split('-')[0]}/{r['mode']}/{r['stratum']} "
               f"entry={r['entry_id']} ... ", end="", flush=True)
         resp = J.call_llm_judge(system_prompt, user)
