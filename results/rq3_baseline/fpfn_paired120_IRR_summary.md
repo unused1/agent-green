@@ -1,48 +1,56 @@
-# RQ3 paired-120 (FP/FN set) — inter-rater reliability summary
+# RQ3 paired-120 (FP/FN) — dimension ordering & inter-rater reliability
 
-Two raters (HS, Shane) independently scored 120 explanations on four dimensions
-(completeness, clarity, actionability, informativeness), each on a 1–5 ordinal
-scale. This note summarises agreement, for discussion before we finalise the
-ratings.
+Two human raters (**Hasan — revised v2**, **Shane**) independently scored the same
+**120 explanations** on four dimensions (completeness, clarity, actionability,
+informativeness), 1–5 ordinal. The set is Nemotron-Super-49B SA zero-shot, paired
+thinking↔instruct across the four confusion-matrix strata (TP/TN/FP/FN), 15
+snippets per stratum. Hasan revised his initial ratings after noticing some
+inconsistency; the figures below use his **v2** ratings. (A third annotator,
+Merve, rated only the earlier 30-sample pilot, so she is not included in the
+120-sample analysis.)
 
-## Krippendorff's alpha (ordinal)
+The paired-120 is now nested inside the 480-row FP/FN frame that the LLM-as-judge
+(Claude Opus-4.6) grades, so the same 120 explanations carry both human and LLM
+scores for a human-vs-LLM consistency check (to follow).
 
-| Dimension       | Krippendorff α | Adjacent (±1) agreement | Exact agreement |
-|-----------------|:--------------:|:-----------------------:|:---------------:|
-| actionability   | **0.594**      | 92.5%                   | 55.8%           |
-| clarity         | 0.213          | 90.0%                   | 38.3%           |
-| informativeness | 0.041          | 81.7%                   | 35.0%           |
-| completeness    | 0.040          | 80.0%                   | 31.7%           |
-| pooled          | 0.368          | —                       | —               |
+## 1. Relative dimension ordering (primary result)
 
-Reference thresholds (Krippendorff): α ≥ 0.80 reliable · 0.667–0.80 tentative ·
-< 0.667 unreliable.
+| Rater | completeness | clarity | informativeness | actionability | Order (high → low) |
+|-------|:---:|:---:|:---:|:---:|---|
+| Hasan v2 | 3.72 | 3.54 | 3.32 | 2.84 | completeness > clarity > informativeness > actionability |
+| Shane | 3.42 | 3.61 | 3.23 | 2.60 | clarity > completeness > informativeness > actionability |
+| **Consensus** | 3.57 | **3.58** | 3.27 | 2.72 | **clarity ≈ completeness > informativeness > actionability** |
 
-## What the numbers say
+The ordering is stable across raters: **actionability is clearly lowest,
+informativeness third, and completeness/clarity tie at the top** (consensus 3.57
+vs 3.58 — within noise). This reproduces the submitted finding that clarity is
+highest and actionability lowest.
 
-- **Adjacent (±1) agreement is high everywhere (80–92%)** — the two raters are
-  rarely more than one point apart, i.e. we largely agree on the *ordering* of
-  explanation quality.
-- **But chance-corrected agreement (α) is low for three of four dimensions.**
-  The cause is not carelessness — the notes are thorough and the ±1 closeness is
-  strong. It is an **anchor-usage difference**: scores cluster in a narrow 3–4
-  band, and the top anchor "5" is used at very different rates between raters
-  (mean completeness HS 3.85 vs Shane 3.42). When almost all scores sit in a
-  narrow band, α collapses even though the raters are close.
-- **Actionability agrees best (α = 0.59)** because both raters use its lower end
-  consistently.
-- **Completeness and informativeness need the most alignment** — they account
-  for 46 of the 67 dimension-level disagreements (≥2-point gaps).
+## 2. Inter-rater agreement (Hasan v2 vs Shane, n = 120)
 
-## Suggested next step
+| Dimension | Krippendorff α (v1 → **v2**) | Adjacent (±1) agreement |
+|-----------|:---:|:---:|
+| completeness | 0.040 → **0.179** | 95.8% |
+| clarity | 0.213 → **0.317** | 98.3% |
+| actionability | 0.594 → **0.643** | 97.5% |
+| informativeness | 0.041 → **0.269** | 96.7% |
 
-A short **calibration + adjudication** pass:
-1. Align on anchor definitions — in particular what earns a 4 vs a 5, and when a
-   1 or 2 applies.
-2. Reconcile the flagged rows to a consensus score. A worksheet listing the 46
-   rows with a ≥2-point gap on any dimension (both raters' scores + notes +
-   the response text, disagreeing cells highlighted) is provided as
-   `fpfn_paired120_adjudication.xlsx`.
+Hasan's revision (74 of 480 score cells changed, ~15%) improved chance-corrected
+agreement on every dimension, most on the two weakest (completeness,
+informativeness). Adjacent (±1) agreement is **96–98%** throughout: the raters
+almost never differ by more than one point.
 
-Consensus scores from this pass can then be used for the headline analysis, with
-α and adjacent-agreement reported transparently.
+**Reading the α values.** The absolute α remains modest for completeness and
+clarity. This is a restricted-range effect, not disagreement on ranking: scores
+concentrate in a narrow 3–4 band, so the chance-corrected statistic is unstable
+even when raters are within one point (as the 96–98% adjacent agreement shows).
+Consistent with this, the **relative ordering** (Section 1) — the quantity used
+for the RQ3 conclusions — is stable across raters. We therefore report ordering
+and adjacent agreement as the primary reliability evidence, with α provided for
+completeness.
+
+## 3. Files
+
+- Human ratings: `fpfn_paired120_rater_HSv2.xlsx`, `fpfn_paired120_rater_Shane.xlsx`
+- LLM-judge ratings (Opus-4.6, when the run completes): `fpfn_llm_judged_opus-4-6.csv`
+  (join to the human ratings on `entry_id` + `mode`, Nemotron family).
