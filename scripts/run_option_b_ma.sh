@@ -38,7 +38,7 @@ export REASONING_API_KEY="${REASONING_API_KEY:-dummy-key}"
 case "$MODE" in
   instruct) export ENABLE_REASONING=false ;;
   thinking) export ENABLE_REASONING=true ;;
-  *) echo "usage: $0 {super49b|qwen30b} [instruct|thinking]" >&2; exit 1 ;;
+  *) echo "usage: $0 {super49b|qwen30b|nano8b|qwen4b} [instruct|thinking]" >&2; exit 1 ;;
 esac
 
 case "$CFG" in
@@ -55,8 +55,21 @@ case "$CFG" in
       SERVED="Qwen/Qwen3-30B-A3B-Instruct-2507"; MODELTAG="Qwen-Qwen3-30B-A3B-Instruct-2507"
     fi
     ;;
+  nano8b)
+    export MODEL_FAMILY=nemotron                        # Nano-8B uses "detailed thinking on/off" toggle
+    SERVED="nvidia/Llama-3.1-Nemotron-Nano-8B-v1"       # same checkpoint, mode via toggle
+    MODELTAG="nvidia-Llama-3.1-Nemotron-Nano-8B-v1"
+    ;;
+  qwen4b)
+    export MODEL_FAMILY=                                # empty -> Qwen3 (base config)
+    if [ "$MODE" = thinking ]; then
+      SERVED="Qwen/Qwen3-4B-Thinking-2507"; MODELTAG="Qwen-Qwen3-4B-Thinking-2507"
+    else
+      SERVED="Qwen/Qwen3-4B-Instruct-2507"; MODELTAG="Qwen-Qwen3-4B-Instruct-2507"
+    fi
+    ;;
   *)
-    echo "usage: $0 {super49b|qwen30b} [instruct|thinking]" >&2; exit 1 ;;
+    echo "usage: $0 {super49b|qwen30b|nano8b|qwen4b} [instruct|thinking]" >&2; exit 1 ;;
 esac
 
 # Point the active mode's model var at the served model (config reads BASELINE_*
