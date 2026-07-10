@@ -1213,6 +1213,63 @@ SYS_MSG_REVIEW_BOARD_CONSTRAINED = """You are the Review Board. After reviewing 
 • "recommended_action": Suggest what should be done next (e.g., 'fix immediately', 'monitor', 'no action needed').
 • "reason": A brief explanation of why you reached this conclusion, considering both the Security Researcher's and Code Author's perspectives."""
 
+# --- Option B FEW-SHOT variant (constrained format + canonical few-shot examples) ---
+# Same three canonical examples as the freeform few-shot (Buffer Overflow / safe /
+# Memory Leak) so few-shot Option B is directly comparable to the freeform few-shot
+# runs, while every stage KEEPS the VulTrial-faithful constrained format — in
+# particular the Review Board's closed-vocabulary decision (valid / invalid /
+# partially valid), so binarisation stays deterministic (parse_ma_constrained).
+# DRAFT: examples pending research-team review before the few-shot Option B runs.
+SYS_MSG_SECURITY_RESEARCHER_CONSTRAINED_FEW_SHOT = f"""{SYS_MSG_SECURITY_RESEARCHER_CONSTRAINED}
+
+Use these examples as a guide for the expected output:
+
+Example 1 (C vulnerable):
+{EXAMPLE_C_VULN}
+Output:
+[{{"vulnerability": "Buffer Overflow", "reason": "strcpy() copies user_input into a fixed 10-byte buffer with no bounds checking.", "impact": "Stack buffer overflow enabling memory corruption or code execution."}}]
+
+Example 2 (C safe):
+{EXAMPLE_C_SAFE}
+Output: []
+
+Example 3 (C++ vulnerable):
+{EXAMPLE_CPP_VULN}
+Output:
+[{{"vulnerability": "Memory Leak", "reason": "User objects allocated with new are never deleted; the destructor is empty.", "impact": "Resource exhaustion under sustained use."}}]
+
+Now analyze the given code."""
+
+SYS_MSG_CODE_AUTHOR_CONSTRAINED_FEW_SHOT = f"""{SYS_MSG_CODE_AUTHOR_CONSTRAINED}
+
+Use these examples as a guide:
+
+Example 1 (Buffer Overflow):
+[{{"vulnerability": "Buffer Overflow", "response-type": "mitigation", "reason": "Replace strcpy with strncpy and validate that the input length is below the buffer size."}}]
+
+Example 2 (no findings):
+[]
+
+Example 3 (Memory Leak):
+[{{"vulnerability": "Memory Leak", "response-type": "mitigation", "reason": "Add a destructor that deletes each User held in the vector."}}]"""
+
+SYS_MSG_MODERATOR_CONSTRAINED_FEW_SHOT = SYS_MSG_MODERATOR_CONSTRAINED + """
+
+Summarise using the same canonical examples for consistency, keeping the JSON object format above."""
+
+SYS_MSG_REVIEW_BOARD_CONSTRAINED_FEW_SHOT = SYS_MSG_REVIEW_BOARD_CONSTRAINED + """
+
+Use these examples as a guide (note the closed-vocabulary "decision" field):
+
+Example 1 (Buffer Overflow — confirmed):
+[{"vulnerability": "Buffer Overflow", "decision": "valid", "severity": "high", "recommended_action": "fix immediately", "reason": "Unbounded strcpy into a fixed buffer is a genuine overflow; the Author's mitigation is required."}]
+
+Example 2 (refuted claim — no real issue):
+[{"vulnerability": "Integer Overflow", "decision": "invalid", "severity": "none", "recommended_action": "no action needed", "reason": "The index is bounds-checked before use; the Author's refutation holds."}]
+
+Example 3 (Memory Leak — partially valid):
+[{"vulnerability": "Memory Leak", "decision": "partially valid", "severity": "medium", "recommended_action": "fix", "reason": "The leak is real but only under sustained allocation; the proposed destructor resolves it."}]"""
+
 # --- Multi-Agent Task Templates ---
 MULTI_AGENT_TASK_SECURITY_RESEARCHER = """Analyze the following code for vulnerabilities:
 ```

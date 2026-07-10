@@ -23,6 +23,8 @@ set -euo pipefail
 
 CFG="${1:-}"
 MODE="${2:-instruct}"
+PROMPT_TYPE="${3:-zero_shot}"          # zero_shot | few_shot (few_shot uses constrained few-shot prompts)
+case "$PROMPT_TYPE" in zero_shot|few_shot) ;; *) echo "bad prompt_type: $PROMPT_TYPE (zero_shot|few_shot)" >&2; exit 1 ;; esac
 export PROJECT_ROOT="${PROJECT_ROOT:-/workspace/agent-green}"
 ENDPOINT="${ENDPOINT:-http://localhost:8000/v1}"
 
@@ -84,7 +86,7 @@ fi
 # already-running instruct pods stay resume-safe.
 SUFFIX=""; [ "$MODE" = thinking ] && SUFFIX="_thinking"
 # Respect a pre-set EXP_NAME (e.g. a per-shard name for split/parallel runs).
-export EXP_NAME="${EXP_NAME:-MA-vuln-four-zero_shot-constrained_${MODELTAG}${SUFFIX}}"
+export EXP_NAME="${EXP_NAME:-MA-vuln-four-${PROMPT_TYPE}-constrained_${MODELTAG}${SUFFIX}}"
 
 echo "================ Option B: ${CFG} / ${MODE} ================"
 echo "  model    : ${ACTIVE}  (ENABLE_REASONING=${ENABLE_REASONING})"
@@ -95,4 +97,4 @@ echo "  exp_name : ${EXP_NAME}  (resumable)"
 echo "==========================================================="
 
 cd "${PROJECT_ROOT}"
-python src/multi_agent_vuln_detection_four_agents.py --prompt_type zero_shot --constrained
+python src/multi_agent_vuln_detection_four_agents.py --prompt_type "$PROMPT_TYPE" --constrained

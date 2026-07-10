@@ -91,12 +91,20 @@ else:  # few_shot
 # VulTrial's exact prompts (the Nemotron thinking toggle below still wraps them).
 if args.constrained:
     import config as _base_config
-    researcher_prompt = _base_config.SYS_MSG_SECURITY_RESEARCHER_CONSTRAINED
-    author_prompt = _base_config.SYS_MSG_CODE_AUTHOR_CONSTRAINED
-    moderator_prompt = _base_config.SYS_MSG_MODERATOR_CONSTRAINED
-    review_board_prompt = _base_config.SYS_MSG_REVIEW_BOARD_CONSTRAINED
-    print("[Option B] VulTrial constrained prompt set active "
-          "(decision in {valid, invalid, partially valid}); "
+    if args.prompt_type == "few_shot":
+        researcher_prompt = _base_config.SYS_MSG_SECURITY_RESEARCHER_CONSTRAINED_FEW_SHOT
+        author_prompt = _base_config.SYS_MSG_CODE_AUTHOR_CONSTRAINED_FEW_SHOT
+        moderator_prompt = _base_config.SYS_MSG_MODERATOR_CONSTRAINED_FEW_SHOT
+        review_board_prompt = _base_config.SYS_MSG_REVIEW_BOARD_CONSTRAINED_FEW_SHOT
+        print("[Option B] VulTrial constrained FEW-SHOT prompt set active "
+              "(constrained format + canonical examples)")
+    else:
+        researcher_prompt = _base_config.SYS_MSG_SECURITY_RESEARCHER_CONSTRAINED
+        author_prompt = _base_config.SYS_MSG_CODE_AUTHOR_CONSTRAINED
+        moderator_prompt = _base_config.SYS_MSG_MODERATOR_CONSTRAINED
+        review_board_prompt = _base_config.SYS_MSG_REVIEW_BOARD_CONSTRAINED
+        print("[Option B] VulTrial constrained (zero-shot) prompt set active")
+    print("  decision in {valid, invalid, partially valid}; "
           "live label via parse_ma_constrained(strict)")
 
 # Apply Nemotron thinking toggle if using Nemotron config
