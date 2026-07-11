@@ -7,26 +7,51 @@ VulTrial-870 is constructed from two JSONL files:
 - `vuln_database/VulTrial_384_incremental.jsonl` — 384 records (384 unique idx)
 - **Union**: 868 unique samples (0 overlap between files)
 
-## Duplicate Entries in VulTrial-486
+## Identity: this IS the PrimeVul-Pair test split
 
-Two `idx` values appear twice in the 486 base file, both benign (target=0):
+VulTrial-870 is the PrimeVul-Pair **test** split (see
+`vuln_database/VulTrial_870_PROVENANCE.md`): the idx multiset and the function
+code / labels (`func`, `target`) are identical to upstream
+`primevul_test_paired.jsonl`. It is a standard benchmark, not a local
+construction — so results are comparable to other PrimeVul-Pair work.
 
-| idx | target | CWE | func_len | Note |
-|-----|--------|-----|----------|------|
-| 349259 | 0 (safe) | CWE-200 | 3,559 chars | `squashfs_opendir(...)` |
-| 439495 | 0 (safe) | CWE-22 | 3,559 chars | Same function as 349259 |
+The only field difference is `commit_id` on 2 benign records (idx 230147,
+187732). Because `commit_id` is the Pairwise-Correct pairing key, this is not
+cosmetic: in this file those two benigns are grouped with their vulnerable
+partners (2 clean pairs), whereas upstream leaves them orphaned. Net effect: 2
+extra clean pairs here vs upstream, no effect on model inputs, labels, or
+confusion-matrix metrics.
 
-Both entries are exact duplicates (identical function content and length). The same benign function was paired with two different vulnerable counterparts (CWE-200 and CWE-22) during PrimeVul Pair construction, resulting in the safe function appearing twice in the flat JSONL.
+## Duplicate rows (inherent to PrimeVul, not a construction error)
 
-## Impact on Experiments
+The PrimeVul test split itself contains **2 duplicate benign functions** — each
+appears **twice, byte-identical, both `target=0`** (confirmed in the upstream
+file):
 
-- All experiment runs processed the full 486 records (including duplicates), so models evaluated these functions twice per config
-- When combining 486 + 384 for VulTrial-870 metrics, deduplication by `idx` yields 868 unique samples (435 vulnerable, 433 safe)
-- Performance metrics report n=868 per config (some configs show 866–867 due to additional skipped/failed inference entries)
+| idx | target | CWE | Note |
+|-----|--------|-----|------|
+| 349259 | 0 (safe) | CWE-200 | appears 2× byte-identical |
+| 439495 | 0 (safe) | CWE-22 | appears 2× byte-identical; a *different* function from 349259 (different `func_hash`/length) |
 
-## Reporting Convention
+These are **two separate benign functions, each duplicated** — NOT one benign
+shared across two pairs (an earlier note claimed this; it was incorrect). Both sit
+in **multi-vulnerability commit groups** (each commit fixes 3 vulnerable functions
+and carries 2 benign versions), so they fall **outside the clean vulnerable/benign
+commit pairs** used for Pairwise-Correct.
 
-For the paper, we report the dataset as **VulTrial-870** (870 total instances, 435 vulnerable, 435 benign, 50%/50% balanced). The 2 duplicate entries are treated as part of the dataset design rather than data errors — they reflect the PrimeVul Pair pairing structure where one benign function can serve as the counterpart for multiple vulnerable functions.
+## Reporting convention
+
+The dataset is reported as **VulTrial-870** (870 instances, 435 vulnerable / 435
+benign), matching the canonical PrimeVul-Pair test set. Metrics are computed on the
+**canonical 870** (the 2 inherent duplicates counted as in PrimeVul), so numbers are
+comparable to other work on this benchmark. The consolidation de-duplicates by idx
+then counts idx 349259 and 439495 twice, reproducing the raw 870 regardless of
+per-run resume behaviour.
+
+Impact of the duplicates: ~0.2% on confusion-matrix metrics (F1/accuracy — two
+benign weighted twice); **zero on Pairwise-Correct** (multi-vuln commits are
+excluded from clean pairs). The unique-idx count is 868 (435 vulnerable / 433
+benign), but the reported N is the canonical 870.
 
 ## Dataset Statistics (computed on 868 unique samples)
 

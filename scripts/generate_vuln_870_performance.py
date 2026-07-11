@@ -26,6 +26,12 @@ DIR_486 = RESULTS_DIR / "runpod_vuln_486"
 DIR_384 = RESULTS_DIR / "runpod_vuln_384_incremental"
 OUTPUT_CSV = RESULTS_DIR / "consolidated_performance.csv"
 
+# The PrimeVul-Pair test split contains 2 inherent duplicate benign functions
+# (both target=0), each appearing twice byte-identical. Reading by idx dedups them;
+# we count these 2 idx twice in the flat confusion matrix to report the canonical
+# VulTrial-870 (n=870). See vuln_database/VulTrial_870_PROVENANCE.md.
+DUP_IDX = {349259, 439495}
+
 csv.field_size_limit(sys.maxsize)
 
 
@@ -193,13 +199,18 @@ def main():
         predictions, ground_truths = [], []
         n_excluded = 0
         for idx, (pred, gt, noresp) in all_preds.items():
+            # canonical-870: the 2 inherent PrimeVul duplicate benigns are counted
+            # twice in the flat confusion matrix (see VulTrial_870_PROVENANCE.md).
+            mult = 2 if idx in DUP_IDX else 1
             ov = overlay.get((model, mode, idx))
             if ov is not None:
-                predictions.append(ov); ground_truths.append(gt)
+                for _ in range(mult):
+                    predictions.append(ov); ground_truths.append(gt)
             elif noresp:
-                n_excluded += 1
+                n_excluded += mult
             else:
-                predictions.append(pred); ground_truths.append(gt)
+                for _ in range(mult):
+                    predictions.append(pred); ground_truths.append(gt)
 
         if len(predictions) == 0:
             print(f"  Skipping {key}: no predictions")

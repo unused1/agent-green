@@ -131,3 +131,15 @@ MA,Nemotron-Super-49B,instruct,zero-shot,433,18.71,41.11,18.01,22.17,constrained
 MA,Nemotron-Super-49B,thinking,zero-shot,433,20.79,21.48,35.57,22.17,constrained,constrained_strict_optionB
 MA,Qwen3-30B-A3B-Instruct,instruct,zero-shot,433,20.09,51.27,14.55,14.09,constrained,constrained_strict_optionB
 MA,Qwen3-30B-A3B-Thinking,thinking,zero-shot,420,21.67,33.1,27.14,18.1,constrained,constrained_strict_optionB
+MA,Nemotron-Super-49B,instruct,few-shot,433,10.39,74.6,5.54,9.47,constrained,constrained_strict_optionB
+MA,Nemotron-Super-49B,thinking,few-shot,433,20.55,47.11,17.55,14.78,constrained,constrained_strict_optionB
+MA,Qwen3-30B-A3B-Instruct,instruct,few-shot,428,10.28,82.71,2.57,4.44,constrained,constrained_strict_optionB
+MA,Qwen3-30B-A3B-Thinking,thinking,few-shot,420,20.0,45.24,20.48,14.29,constrained,constrained_strict_optionB
+MA,Qwen3-4B-Instruct,instruct,few-shot,432,9.95,71.53,8.56,9.95,constrained,constrained_strict_optionB
+MA,Qwen3-4B-Thinking,thinking,few-shot,419,20.29,21.0,38.19,20.53,constrained,constrained_strict_optionB
+MA,Nemotron-Nano-8B,instruct,few-shot,385,19.22,39.48,18.96,22.34,constrained,constrained_strict_optionB
+MA,Nemotron-Nano-8B,thinking,few-shot,355,24.79,36.9,18.87,19.44,constrained,constrained_strict_optionB
+MA,Qwen3-4B-Instruct,instruct,zero-shot,431,15.31,52.67,11.14,20.88,constrained,constrained_strict_optionB
+MA,Qwen3-4B-Thinking,thinking,zero-shot,415,21.2,12.53,49.16,17.11,constrained,constrained_strict_optionB
+MA,Nemotron-Nano-8B,instruct,zero-shot,392,4.59,1.02,89.03,5.36,constrained,constrained_strict_optionB
+MA,Nemotron-Nano-8B,thinking,zero-shot,330,7.27,0.61,85.45,6.67,constrained,constrained_strict_optionB

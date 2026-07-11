@@ -32,13 +32,16 @@ OUT = "results/paired386_vs_870baseline_meeting.csv"
 TARGET = {"Nemotron-Super-49B", "Nemotron-Nano-8B",
           "Qwen3-30B-A3B-Instruct", "Qwen3-30B-A3B-Thinking",
           "Qwen3-4B-Instruct", "Qwen3-4B-Thinking"}
-# (design, variant, corrected_label_rule, display, nominal_calls, corrected_parse_tag)
+# (design, variant, corrected_label_rule, display, nominal_calls, corrected_parse_tag, promptings)
+# The freeform baselines were submitted zero-shot only; the constrained MA (Option B)
+# now has BOTH zero-shot and few-shot cells across all models, so it lists both.
 SLICES = [
-    ("NoAgent", "freeform", "canonical", "NoAgent", 1, "canonical"),
-    ("SA", "freeform", "canonical", "SA", 1, "canonical"),
-    ("DA", "freeform", "canonical", "DA", 2, "canonical"),
-    ("MA", "freeform", "affirm_optionA", "MA-A(freeform)", 4, "optionA"),
-    ("MA", "constrained", "constrained_strict_optionB", "MA-B(constrained)", 4, "optionB"),
+    ("NoAgent", "freeform", "canonical", "NoAgent", 1, "canonical", ("zero-shot",)),
+    ("SA", "freeform", "canonical", "SA", 1, "canonical", ("zero-shot",)),
+    ("DA", "freeform", "canonical", "DA", 2, "canonical", ("zero-shot",)),
+    ("MA", "freeform", "affirm_optionA", "MA-A(freeform)", 4, "optionA", ("zero-shot",)),
+    ("MA", "constrained", "constrained_strict_optionB", "MA-B(constrained)", 4, "optionB",
+     ("zero-shot", "few-shot")),
 ]
 
 
@@ -64,13 +67,26 @@ def _gt(r):
     return int(v) if v is not None else None
 
 
+# The 2 inherent PrimeVul duplicate benigns (both target=0), counted twice for the
+# canonical VulTrial-870. See vuln_database/VulTrial_870_PROVENANCE.md.
+DUP_IDX = {349259, 439495}
+
+
+def _w(r):
+    """Confusion-matrix weight: the 2 inherent duplicate idx count twice."""
+    return 2 if int(r["idx"]) in DUP_IDX else 1
+
+
 def raw_metrics(recs):
+    # canonical-870: count the 2 inherent PrimeVul duplicate benigns twice in the
+    # flat confusion matrix; P-C (commit-group) stays at weight 1 — those idx sit
+    # in multi-vuln groups outside clean pairs. See VulTrial_870_PROVENANCE.md.
     live = [r for r in recs if r.get("vuln") in (0, 1) and not r.get("skipped")]
-    tp = sum(1 for r in live if r["vuln"] == 1 and _gt(r) == 1)
-    tn = sum(1 for r in live if r["vuln"] == 0 and _gt(r) == 0)
-    fp = sum(1 for r in live if r["vuln"] == 1 and _gt(r) == 0)
-    fn = sum(1 for r in live if r["vuln"] == 0 and _gt(r) == 1)
-    n = len(live)
+    tp = sum(_w(r) for r in live if r["vuln"] == 1 and _gt(r) == 1)
+    tn = sum(_w(r) for r in live if r["vuln"] == 0 and _gt(r) == 0)
+    fp = sum(_w(r) for r in live if r["vuln"] == 1 and _gt(r) == 0)
+    fn = sum(_w(r) for r in live if r["vuln"] == 0 and _gt(r) == 1)
+    n = sum(_w(r) for r in live)
     prec = tp / (tp + fp) if (tp + fp) else 0
     rec = tp / (tp + fn) if (tp + fn) else 0
     f1 = 2 * prec * rec / (prec + rec) if (prec + rec) else 0
@@ -88,8 +104,8 @@ def raw_metrics(recs):
                 fpr=round(fpr, 3) if fpr is not None else "",
                 ppr=round(ppr, 3) if ppr is not None else "",
                 pc=round(pc, 3) if pc is not None else "", fp=fp,
-                n_total=len(recs), n_pairs=len(clean),
-                skipped=sum(1 for r in recs if r.get("skipped") or r.get("vuln") not in (0, 1)))
+                n_total=sum(_w(r) for r in recs), n_pairs=len(clean),
+                skipped=sum(_w(r) for r in recs if r.get("skipped") or r.get("vuln") not in (0, 1)))
 
 
 def main():
@@ -108,22 +124,23 @@ def main():
 
     out = []
     cover_warn = set()
-    for design, variant, corr_lr, disp, ncalls, parse_tag in SLICES:
+    for design, variant, corr_lr, disp, ncalls, parse_tag, promptings in SLICES:
+      for prompting in promptings:
         for model in TARGET:
             for mode in ("instruct", "thinking"):
-                corr = by_key.get((design, variant, model, mode, "zero-shot", corr_lr))
+                corr = by_key.get((design, variant, model, mode, prompting, corr_lr))
                 if not corr:  # fall back through the parse priority
                     for lr in ("canonical", "affirm_optionA", "constrained_strict_optionB", "original_submitted"):
-                        corr = by_key.get((design, variant, model, mode, "zero-shot", lr))
+                        corr = by_key.get((design, variant, model, mode, prompting, lr))
                         if corr:
                             break
                 if not corr:
                     continue
-                sub = by_key.get((design, variant, model, mode, "zero-shot", "original_submitted"))
+                sub = by_key.get((design, variant, model, mode, prompting, "original_submitted"))
                 recs = load_raw(corr["source_file"])
                 f1_sub = round(f(sub["f1_score"]), 3) if sub else ""
                 fp_sub = sub["false_positives"] if sub else ""
-                ek = en.get((design, variant, model, mode, "zero-shot"))
+                ek = en.get((design, variant, model, mode, prompting))
                 kwh = f(ek["total_energy_kwh"]) if ek else None
                 kg = f(ek["total_emissions_kg"]) if ek else None
                 gpuW = f(ek["avg_gpu_power_w"]) if ek else None
@@ -137,7 +154,7 @@ def main():
                 m = raw_metrics(recs)
                 out.append(dict(
                     block="baseline-870", design=disp, model=model,
-                    model_family=corr["model_family"], mode=mode, prompting="zero-shot",
+                    model_family=corr["model_family"], mode=mode, prompting=prompting,
                     sample_set="VulTrial-870", n_total=m["n_total"], n_pairs=m["n_pairs"],
                     f1_submitted=f1_sub, f1=m["f1"],
                     f1_delta=round(m["f1"] - f1_sub, 3) if f1_sub != "" else "",
@@ -156,11 +173,11 @@ def main():
                 sub386 = [r for r in recs if str(r["idx"]) in paired386]
                 got = {str(r["idx"]) for r in sub386}
                 if len(got) < len(paired386):
-                    cover_warn.add(f"{disp} {model} {mode}: {len(got)}/{len(paired386)} paired idx present")
+                    cover_warn.add(f"{disp} {model} {mode} {prompting}: {len(got)}/{len(paired386)} paired idx present")
                 m6 = raw_metrics(sub386)
                 out.append(dict(
                     block="baseline-386", design=disp, model=model,
-                    model_family=corr["model_family"], mode=mode, prompting="zero-shot",
+                    model_family=corr["model_family"], mode=mode, prompting=prompting,
                     sample_set="VulTrial-386-paired", n_total=m6["n_total"], n_pairs=m6["n_pairs"],
                     f1_submitted="", f1=m6["f1"], f1_delta="", corrected_parse=parse_tag,
                     precision=m6["precision"], recall=m6["recall"], fpr=m6["fpr"], ppr=m6["ppr"],
@@ -221,8 +238,8 @@ def main():
     print(f"wrote {OUT}: {len(out)} rows\n")
 
     order = {"baseline-870": 0, "baseline-386": 1, "Item5": 2, "Item9": 3}
-    out.sort(key=lambda x: (order[x["block"]], x["design"], x["model_family"], x["model"], x["mode"]))
-    hdr = f'{"block":14}{"design":18}{"model":24}{"mode":9}{"F1sub":>7}{"F1cor":>7}{"P-C":>6}{"smp":>6}'
+    out.sort(key=lambda x: (order[x["block"]], x["design"], x["prompting"], x["model_family"], x["model"], x["mode"]))
+    hdr = f'{"block":14}{"design":18}{"model":24}{"mode":9}{"prompt":10}{"F1sub":>7}{"F1cor":>7}{"P-C":>6}{"smp":>6}'
     print(hdr); print("-" * len(hdr))
     last = None
     for r in out:
@@ -231,7 +248,7 @@ def main():
         fs = f'{r["f1_submitted"]:.3f}' if r["f1_submitted"] != "" else "   -  "
         pc = f'{r["pc"]:.3f}' if r["pc"] not in ("", None) else "  -  "
         smp = "386" if "386" in r["sample_set"] else "870"
-        print(f'{r["block"]:14}{r["design"]:18}{r["model"]:24}{r["mode"]:9}{fs:>7}{r["f1"]:7.3f}{pc:>6}{smp:>6}')
+        print(f'{r["block"]:14}{r["design"]:18}{r["model"]:24}{r["mode"]:9}{r["prompting"]:10}{fs:>7}{r["f1"]:7.3f}{pc:>6}{smp:>6}')
 
 
 if __name__ == "__main__":

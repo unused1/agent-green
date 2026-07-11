@@ -13,9 +13,9 @@ VulTrial-386. Built by `scripts/build_meeting_table.py`.
 | `design` | Method: `NoAgent`, `SA`, `DA`, `MA-A(freeform)` = Option A, `MA-B(constrained)` = Option B, `budget-selfrev2/4`, `budget-bon4`, `vulagent-lite`. |
 | `model`, `model_family` | Backbone LLM and family (`Qwen` / `Nemotron`). |
 | `mode` | `instruct` or `thinking` (reasoning on). |
-| `prompting` | All rows are `zero-shot` (to match the Item 5/9 harnesses; few-shot baselines exist but are not in this sheet). |
-| `sample_set` | Evaluation set the metrics are computed on: `VulTrial-870` (868 unique; 2 duplicate idx deduped) or `VulTrial-386-paired` (193 balanced commit pairs). |
-| `n_total` | Records evaluated. |
+| `prompting` | `zero-shot` or `few-shot`. The freeform baselines (NoAgent/SA/DA/MA-A) and Item 5/9 are `zero-shot` only. The constrained MA (`MA-B(constrained)`) has BOTH — its `few-shot` rows are the newer Option-B few-shot cells across all 6 models (super49b/qwen30b/qwen4b/nano8b × instruct/thinking). |
+| `sample_set` | Evaluation set the metrics are computed on: `VulTrial-870` (the canonical PrimeVul-Pair test split) or `VulTrial-386-paired` (193 balanced commit pairs). |
+| `n_total` | Records evaluated. For `VulTrial-870` this is the **canonical 870**: reads dedup by idx to 868 unique, then the **2 inherent PrimeVul duplicate benigns** (idx 349259, 439495 — byte-identical rows present in the upstream `primevul_test_paired.jsonl`) are counted twice in the flat confusion matrix. A value of `869` means that run is missing one of the two dup idx. See `vuln_database/VulTrial_870_PROVENANCE.md`. P-C is unaffected (those idx sit in multi-vuln commits outside clean pairs). |
 | `n_pairs` | Clean vulnerable/benign commit pairs used for `pc` (both members present, one of each label). |
 
 ## Detection metrics
@@ -49,6 +49,6 @@ VulTrial-386. Built by `scripts/build_meeting_table.py`.
 ## Caveats for the reader
 
 1. **Energy comparability.** `wh_per_sample` and `total_energy_kwh` include GPU **idle time**, so they are only comparable within a measurement campaign. The 870 baselines and the 386 Item 5/9 runs are different campaigns. **Qwen-30B is a sparse MoE (~3B active)** and idled at ~150 W over many hours in the baseline runs vs ~350 W in the recent runs — so **Qwen energy is not directly comparable across `block`s**. **Nemotron-49B** drew ~1000 W in both campaigns and *is* comparable. When comparing energy, prefer `wh_per_call` and check `avg_gpu_power_w` / `duration_hours`.
-2. **Sample sets differ.** `baseline-870` metrics are on 868 samples; everything on `VulTrial-386-paired` is on the same 193 pairs — use the `-386` rows and Item 5/9 for true same-sample comparison. F1/PPR/FPR across 870 vs 386 are indicative, not identical-sample.
+2. **Sample sets differ.** `baseline-870` metrics are on the canonical 870 (the 2 inherent PrimeVul duplicate benigns double-counted; see caveat on `n_total`); everything on `VulTrial-386-paired` is on the same 193 pairs — use the `-386` rows and Item 5/9 for true same-sample comparison. F1/PPR/FPR across 870 vs 386 are indicative, not identical-sample.
 3. **MA parsing choice.** `MA-A(freeform)` uses **Option A** (affirmative reparse) and `MA-B(constrained)` uses **Option B**; both differ substantially from the submitted MA parse (see `f1_delta` on the `baseline-870` MA-A rows, +0.21 to +0.56). This is a parsing-methodology decision, not a bug.
 4. **P-C denominators.** 870 P-C is over clean size-2 commit pairs (`n_pairs`, ~409–421); the 386 set is fully pair-preserving (193 pairs).

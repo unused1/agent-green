@@ -40,31 +40,96 @@ PC_CSV = os.path.join(ROOT, "results", "rq3_baseline", "pairwise_correct_all_con
 EMISSIONS_CSV = os.path.join(ROOT, "results", "consolidated_emissions.csv")
 EDIR = os.path.join(CDIR, "emissions")
 
+# model display name -> (family, parameters_b)
+MODEL_META = {
+    "Nemotron-Super-49B": ("Nemotron", 49),
+    "Qwen3-30B-A3B-Instruct": ("Qwen", 30),
+    "Qwen3-30B-A3B-Thinking": ("Qwen", 30),
+    "Qwen3-4B-Instruct": ("Qwen", 4),
+    "Qwen3-4B-Thinking": ("Qwen", 4),
+    "Nemotron-Nano-8B": ("Nemotron", 8),
+}
+
 # Energy is parse-independent -> these rows are variant=constrained / label_rule=any
 # (sentinel). Join to consolidated_performance.csv on (model, design, mode,
-# prompting, dataset, variant), NOT label_rule. Super-49B-thinking sums 3 shards.
+# prompting, dataset, variant), NOT label_rule. Some cells sum multiple shard subdirs
+# (Super-49B-thinking zero = 3 shards; Nano-8B-thinking few = 4 disjoint shards).
+# Keyed by (model, mode, prompting).
 EMISSIONS_SUBDIRS = {
-    ("Nemotron-Super-49B", "instruct"): ["super49b_instruct"],
-    ("Nemotron-Super-49B", "thinking"): ["super49b_thinking_shard1",
-                                         "super49b_thinking_shard2",
-                                         "super49b_thinking_shard3"],
-    ("Qwen3-30B-A3B-Instruct", "instruct"): ["qwen30b_instruct"],
-    ("Qwen3-30B-A3B-Thinking", "thinking"): ["qwen30b_thinking"],
+    # --- zero-shot LARGE (original Option-B campaign) ---
+    ("Nemotron-Super-49B", "instruct", "zero-shot"): ["super49b_instruct"],
+    ("Nemotron-Super-49B", "thinking", "zero-shot"): ["super49b_thinking_shard1",
+                                                      "super49b_thinking_shard2",
+                                                      "super49b_thinking_shard3"],
+    ("Qwen3-30B-A3B-Instruct", "instruct", "zero-shot"): ["qwen30b_instruct"],
+    ("Qwen3-30B-A3B-Thinking", "thinking", "zero-shot"): ["qwen30b_thinking"],
+    # --- few-shot (all 4 models) ---
+    ("Nemotron-Super-49B", "instruct", "few-shot"): ["super49b_instruct_few"],
+    ("Nemotron-Super-49B", "thinking", "few-shot"): ["super49b_thinking_few"],
+    ("Qwen3-30B-A3B-Instruct", "instruct", "few-shot"): ["qwen30b_instruct_few"],
+    ("Qwen3-30B-A3B-Thinking", "thinking", "few-shot"): ["qwen30b_thinking_few"],
+    ("Qwen3-4B-Instruct", "instruct", "few-shot"): ["qwen4b_instruct_few"],
+    ("Qwen3-4B-Thinking", "thinking", "few-shot"): ["qwen4b_thinking_few"],
+    ("Nemotron-Nano-8B", "instruct", "few-shot"): ["nano8b_instruct_few"],
+    ("Nemotron-Nano-8B", "thinking", "few-shot"): ["nano8b_thinking_few_front",
+                                                   "nano8b_thinking_few_shardA",
+                                                   "nano8b_thinking_few_shardB",
+                                                   "nano8b_thinking_few_shardC"],
+    # --- zero-shot SMALL ---
+    ("Qwen3-4B-Instruct", "instruct", "zero-shot"): ["qwen4b_instruct_zero"],
+    ("Qwen3-4B-Thinking", "thinking", "zero-shot"): ["qwen4b_thinking_zero"],
+    ("Nemotron-Nano-8B", "instruct", "zero-shot"): ["nano8b_instruct_zero"],
+    ("Nemotron-Nano-8B", "thinking", "zero-shot"): ["nano8b_thinking_zero"],
 }
 
 LABEL_RULE = "constrained_strict_optionB"
 VARIANT = "constrained"
 
-# (model, model_family, parameters_b, mode, filename)
+# The PrimeVul-Pair test split contains 2 inherent duplicate benign functions
+# (both target=0), each appearing twice byte-identical. To report on the canonical
+# VulTrial-870 (comparable to other PrimeVul-Pair work), we dedup by idx for
+# reproducibility, then count these 2 idx twice in the flat confusion matrix
+# (F1/accuracy) so n = 870. They sit in multi-vulnerability commit groups outside
+# the clean pairs, so P-C is left untouched (see VulTrial_870_PROVENANCE.md).
+DUP_IDX = {349259, 439495}
+
+# (model, model_family, parameters_b, mode, prompting, filename)
 CONFIGS = [
-    ("Nemotron-Super-49B", "Nemotron", 49, "instruct",
+    # --- zero-shot LARGE (original Option-B campaign) ---
+    ("Nemotron-Super-49B", "Nemotron", 49, "instruct", "zero-shot",
      "MA-vuln-four-zero_shot-constrained_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_detailed_results.jsonl"),
-    ("Nemotron-Super-49B", "Nemotron", 49, "thinking",
+    ("Nemotron-Super-49B", "Nemotron", 49, "thinking", "zero-shot",
      "MA-vuln-four-zero_shot-constrained_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_thinking_detailed_results.jsonl"),
-    ("Qwen3-30B-A3B-Instruct", "Qwen", 30, "instruct",
+    ("Qwen3-30B-A3B-Instruct", "Qwen", 30, "instruct", "zero-shot",
      "MA-vuln-four-zero_shot-constrained_Qwen-Qwen3-30B-A3B-Instruct-2507_detailed_results.jsonl"),
-    ("Qwen3-30B-A3B-Thinking", "Qwen", 30, "thinking",
+    ("Qwen3-30B-A3B-Thinking", "Qwen", 30, "thinking", "zero-shot",
      "MA-vuln-four-zero_shot-constrained_Qwen-Qwen3-30B-A3B-Thinking-2507_thinking_detailed_results.jsonl"),
+    # --- few-shot (all 4 models) ---
+    ("Nemotron-Super-49B", "Nemotron", 49, "instruct", "few-shot",
+     "MA-vuln-four-few_shot-constrained_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_detailed_results.jsonl"),
+    ("Nemotron-Super-49B", "Nemotron", 49, "thinking", "few-shot",
+     "MA-vuln-four-few_shot-constrained_nvidia-Llama-3_3-Nemotron-Super-49B-v1_5_thinking_detailed_results.jsonl"),
+    ("Qwen3-30B-A3B-Instruct", "Qwen", 30, "instruct", "few-shot",
+     "MA-vuln-four-few_shot-constrained_Qwen-Qwen3-30B-A3B-Instruct-2507_detailed_results.jsonl"),
+    ("Qwen3-30B-A3B-Thinking", "Qwen", 30, "thinking", "few-shot",
+     "MA-vuln-four-few_shot-constrained_Qwen-Qwen3-30B-A3B-Thinking-2507_thinking_detailed_results.jsonl"),
+    ("Qwen3-4B-Instruct", "Qwen", 4, "instruct", "few-shot",
+     "MA-vuln-four-few_shot-constrained_Qwen-Qwen3-4B-Instruct-2507_detailed_results.jsonl"),
+    ("Qwen3-4B-Thinking", "Qwen", 4, "thinking", "few-shot",
+     "MA-vuln-four-few_shot-constrained_Qwen-Qwen3-4B-Thinking-2507_thinking_detailed_results.jsonl"),
+    ("Nemotron-Nano-8B", "Nemotron", 8, "instruct", "few-shot",
+     "MA-vuln-four-few_shot-constrained_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_detailed_results.jsonl"),
+    ("Nemotron-Nano-8B", "Nemotron", 8, "thinking", "few-shot",
+     "MA-vuln-four-few_shot-constrained_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_thinking_detailed_results.jsonl"),
+    # --- zero-shot SMALL ---
+    ("Qwen3-4B-Instruct", "Qwen", 4, "instruct", "zero-shot",
+     "MA-vuln-four-zero_shot-constrained_Qwen-Qwen3-4B-Instruct-2507_detailed_results.jsonl"),
+    ("Qwen3-4B-Thinking", "Qwen", 4, "thinking", "zero-shot",
+     "MA-vuln-four-zero_shot-constrained_Qwen-Qwen3-4B-Thinking-2507_thinking_detailed_results.jsonl"),
+    ("Nemotron-Nano-8B", "Nemotron", 8, "instruct", "zero-shot",
+     "MA-vuln-four-zero_shot-constrained_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_detailed_results.jsonl"),
+    ("Nemotron-Nano-8B", "Nemotron", 8, "thinking", "zero-shot",
+     "MA-vuln-four-zero_shot-constrained_nvidia-Llama-3.1-Nemotron-Nano-8B-v1_thinking_detailed_results.jsonl"),
 ]
 
 
@@ -101,11 +166,15 @@ def perf_and_pc(recs):
     for idx, r in recs.items():
         gt = int(r.get("ground_truth", r.get("target", -1)))
         skip = is_skipped(r)
+        # canonical-870: count the 2 inherent PrimeVul duplicates twice in the
+        # flat confusion matrix (pairing below is left at weight 1).
+        mult = 2 if idx in DUP_IDX else 1
         if skip:
-            n_excluded += 1
+            n_excluded += mult
         else:
             v = int(r.get("vuln"))
-            preds.append(v); gts.append(gt)
+            for _ in range(mult):
+                preds.append(v); gts.append(gt)
         cid = r.get("commit_id", "")
         if cid:
             pairs[cid]["gt"].append(gt)
@@ -155,19 +224,19 @@ def append_emissions():
     """
     # Build constrained emission records
     crows = []
-    for (model, mode), subdirs in EMISSIONS_SUBDIRS.items():
+    for (model, mode, prompting), subdirs in EMISSIONS_SUBDIRS.items():
         parts = [load_emissions_from_dir(os.path.join(EDIR, s)) for s in subdirs]
         parts = [p for p in parts if p]
         if not parts:
-            print(f"  emissions MISSING for {model}/{mode}")
+            print(f"  emissions MISSING for {model}/{mode}/{prompting}")
             continue
         dur = sum(p["duration_s"] for p in parts)
-        fam, params = ("Nemotron", 49) if "Nemotron" in model else ("Qwen", 30)
+        fam, params = MODEL_META[model]
         wavg = lambda key: (sum(p[key] * p["duration_s"] for p in parts) / dur) if dur else 0
         crows.append({
             "model": model, "model_family": fam, "parameters_b": params,
             "design": "MA", "task": "vulnerability_detection", "dataset": "VulTrial-870",
-            "mode": mode, "prompting": "zero-shot", "thinking_enabled": mode == "thinking",
+            "mode": mode, "prompting": prompting, "thinking_enabled": mode == "thinking",
             "num_sessions": sum(p["num_sessions"] for p in parts),
             "total_duration_s": dur, "duration_hours": dur / 3600,
             "total_emissions_kg": sum(p["emissions_kg"] for p in parts),
@@ -217,19 +286,19 @@ def append_emissions():
 def main():
     perf_rows, pc_rows = [], []
     print(f"{'config':40s} {'n':>4} {'excl':>4}  F1    PPR   P-C")
-    for model, fam, params, mode, fname in CONFIGS:
+    for model, fam, params, mode, prompting, fname in CONFIGS:
         path = os.path.join(CDIR, fname)
         if not os.path.exists(path):
             print(f"  MISSING: {fname}")
             continue
         m = perf_and_pc(load_dedup(path))
         ppr = (m["tp"] + m["fp"]) / m["n"] if m["n"] else 0
-        print(f"  {model+'/'+mode:38s} {m['n']:>4} {m['n_excluded']:>4}  "
+        print(f"  {model+'/'+mode+'/'+prompting:48s} {m['n']:>4} {m['n_excluded']:>4}  "
               f"{m['f1']:.3f} {ppr:.3f} {m['pc_pct']:.1f}%")
         perf_rows.append({
             "model": model, "model_family": fam, "parameters_b": params,
             "design": "MA", "task": "vulnerability_detection", "dataset": "VulTrial-870",
-            "mode": mode, "prompting": "zero-shot", "thinking_enabled": mode == "thinking",
+            "mode": mode, "prompting": prompting, "thinking_enabled": mode == "thinking",
             "accuracy": round(m["acc"], 6), "precision": round(m["prec"], 6),
             "recall": round(m["rec"], 6), "f1_score": round(m["f1"], 6),
             "true_positives": m["tp"], "true_negatives": m["tn"],
@@ -241,7 +310,7 @@ def main():
             "variant": VARIANT, "label_rule": LABEL_RULE,
         })
         pc_rows.append({
-            "design": "MA", "model": model, "mode": mode, "prompting": "zero-shot",
+            "design": "MA", "model": model, "mode": mode, "prompting": prompting,
             "pairs": m["pairs"], "pc_pct": m["pc_pct"], "pv_pct": m["pv_pct"],
             "pb_pct": m["pb_pct"], "pr_pct": m["pr_pct"],
             "variant": VARIANT, "label_rule": LABEL_RULE,

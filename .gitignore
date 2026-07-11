@@ -99,3 +99,4 @@ results/runpod_vuln_870_constrained/
 # Claude Code runtime state (locks, scheduled-task cache)
 .claude/scheduled_tasks.lock
 .claude/scheduled_tasks.json
+vuln_database/shards/
