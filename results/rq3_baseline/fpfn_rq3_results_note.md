@@ -47,19 +47,42 @@ informativeness; actionability is the weak exception).
 
 ## 3. Explanation quality is comparable on correct and incorrect predictions
 
-Under the blind judge, explanation-quality scores are essentially **equal** for
-correct (TP/TN) and incorrect (FP/FN) predictions:
+**Blind judge (all 480).** Scores are statistically indistinguishable between
+correct (TP/TN, n=240) and incorrect (FP/FN, n=240) predictions on every dimension
+(Mann–Whitney U, two-sided):
 
-| | completeness | clarity | actionability | informativeness |
-|---|:---:|:---:|:---:|:---:|
-| correct (TP/TN) | 3.20 | 4.19 | 2.53 | 2.98 |
-| incorrect (FP/FN) | 3.16 | 4.16 | 2.53 | 2.98 |
+| dimension | correct | incorrect | Δ | p |
+|-----------|:---:|:---:|:---:|:---:|
+| completeness | 3.20 | 3.16 | +0.04 | 0.52 |
+| clarity | 4.19 | 4.16 | +0.03 | 0.69 |
+| actionability | 2.53 | 2.53 | −0.00 | 0.79 |
+| informativeness | 2.98 | 2.98 | +0.00 | 0.98 |
 
+The null holds within each family too (Nemotron and Qwen separately, all p > 0.4).
 A fluent explanation for a wrong prediction reads as good as one for a correct
-prediction when the evaluator cannot see the label — the explanation does not
-reveal its own incorrectness. (The unblinded judge produced a large apparent gap,
-e.g. completeness 3.51 vs 2.23, but that was an artifact of it knowing the true
-label; it is not a property of the explanations.)
+prediction when the evaluator cannot see the label — the explanation does not reveal
+its own incorrectness. (The *unblinded* judge produced a large spurious gap, e.g.
+completeness 3.51 vs 2.23, but that was an artifact of it seeing the ground truth,
+not a property of the explanations.)
+
+**Human raters (blinded, Nemotron paired-120, HSv2+Shane consensus).** The humans —
+also blinded — are broadly consistent; **no dimension survives multiple-comparison
+correction** (Bonferroni α = 0.05/4 = 0.0125):
+
+| dimension | correct (n=60) | incorrect (n=60) | Δ | p |
+|-----------|:---:|:---:|:---:|:---:|
+| completeness | 3.47 | 3.67 | −0.20 | 0.098 |
+| clarity | 3.69 | 3.46 | +0.23 | 0.014 |
+| actionability | 2.63 | 2.81 | −0.17 | 0.21 |
+| informativeness | 3.26 | 3.29 | −0.03 | 0.94 |
+
+The one hint is **clarity** (correct-prediction explanations rated a touch clearer,
+p = 0.014) — but it does *not* pass Bonferroni (0.014 > 0.0125), and completeness
+trends the *opposite* way (n.s.). So the human data agrees with the judge in
+substance: explanation quality carries at most a faint, non-robust signal about a
+prediction's correctness — even blinded human readers cannot reliably tell a correct
+explanation from an incorrect one. (Tests use `mannwhitneyu`; see
+`fpfn_by_model_mode_breakdown.csv` companion analysis.)
 
 ## 4. Human ↔ LLM agreement (paired-120, blind judge)
 
