@@ -29,8 +29,44 @@ VulTrial-386. Built by `scripts/build_meeting_table.py`.
 | `precision`, `recall` | Corrected-parse precision / recall. |
 | `fpr` | False-positive rate = FP / (FP + TN). |
 | `ppr` | Positive-prediction rate = (TP + FP) / N — the fraction of samples flagged "vulnerable" (a high value signals flag-everything behaviour). |
-| `pc` | **Pairwise-Correct** — fraction of commit pairs where BOTH the vulnerable and benign member are predicted correctly. The revision's headline metric; harshly penalises over-flagging. |
+| `pc` | **Pairwise-Correct** — the revision's headline metric; harshly penalises over-flagging (see "How Pairwise-Correct works" below). Fraction of clean vulnerable/benign commit pairs where the model labels BOTH members correctly. |
 | `fp_submitted`, `fp` | False-positive counts, submitted vs corrected parse. |
+
+## How Pairwise-Correct (`pc`) works
+
+**Pairing comes from `commit_id`.** VulTrial-870 is the PrimeVul-Pair test split:
+PrimeVul pairs each *vulnerable* function with its *fixed (benign)* version from the
+**same security-fix commit**, so the two records share a `commit_id`. A **pair** is
+the set of records sharing a `commit_id`; a **clean/valid pair** is a commit group
+of size 2 with exactly one vulnerable (`target=1`) and one benign (`target=0`)
+member (`n_pairs` counts these).
+
+**Formula.** With `P` = the set of clean pairs and `correct(x)` = 1 when the model's
+prediction for member `x` equals its ground-truth label (and `x` was not skipped):
+
+```
+Pairwise-Correct  =  |{ (v, b) ∈ P : correct(v) = 1 AND correct(b) = 1 }|  /  |P|
+```
+
+i.e. a pair scores only when the model gets **both** the vulnerable and the benign
+member right; getting one wrong fails the whole pair.
+
+**Why it matters.** P-C is strictly harder than F1/accuracy and specifically
+punishes the *flag-everything* degeneracy: a model that calls everything vulnerable
+nails the vulnerable member but misses the benign member, so **every pair fails**.
+This is why the constrained MA (`MA-B(constrained)`, FPR ~0.6–0.9) shows low P-C
+(~10–25%) despite mid F1 — the paired structure exposes non-discrimination that a
+flat confusion matrix hides.
+
+**Two implementations (agree on the common size-2 case).**
+- `scripts/build_meeting_table.py` (`raw_metrics`) — the P-C reported in this sheet:
+  keeps only clean size-2 `{0,1}` commit groups; `pc` = both-correct pairs / clean
+  pairs.
+- `scripts/append_optionb_constrained.py` (`perf_and_pc`, → `pairwise_correct_all_configs.csv`):
+  groups by `commit_id`, pairs **consecutive** records `(i, i+1)`, **excludes** any
+  pair with a skipped member, and buckets each pair into `pc` (both correct),
+  `pv` (both→vulnerable), `pb` (both→benign), `pr` (mixed); `pc_pct = pc / total_pairs`.
+  On VulTrial-870 the pairs are overwhelmingly size-2 balanced, so the two agree.
 
 ## Cost / energy
 
