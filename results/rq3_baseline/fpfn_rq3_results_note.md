@@ -176,6 +176,53 @@ The Section 1 ordering **holds in every cell**:
 
 The ordering conclusion is therefore not an artifact of pooling models/modes.
 
+## 10. Comparison with the submitted paper and rebuttal commitments
+
+This note's corrected, blinded 480-frame analysis **confirms** some submitted/rebuttal
+points, **softens** others, and **contradicts** one. Flagged for the revision.
+
+**Confirms:**
+- Dimension ordering `clarity > completeness > informativeness > actionability`
+  (RQ3.tex) — §9 shows it holds in *every* model×mode cell.
+- Thinking > instruct on completeness / clarity / informativeness, actionability weak
+  (RQ3.tex) — §2 reproduces the direction on the blind frame.
+- Rebuttal **RA3** (thinking gains are length-mediated, *not* length-independent) —
+  §6 and §8 reinforce and extend it: the advantage is also **model-specific**
+  (Nemotron only) and **larger under the judge than the human means support**.
+
+**Softens / contrasts:**
+- **Human↔LLM agreement.** RQ3.tex reports ρ = 0.56–0.75 across *all* dimensions
+  (adjacent 90–97%) on the 30-instance manual sample, framed as validating the judge.
+  On the corrected, blinded FP/FN frame (§4, n=120, correct join) only **actionability**
+  is strong (ρ=0.777); completeness (0.105), clarity (0.076), and informativeness
+  (0.262) are weak (restricted-range). The blanket "moderate-to-strong agreement" should
+  be narrowed: the judge tracks humans on **actionability and aggregate ordering**, not
+  per-item on the other three dimensions.
+- **Cross-model robustness.** The submitted claim is "robust across evaluators," and
+  Qwen3-30B was added to confirm generalizability. §6 shows the thinking-explanation
+  advantage is **absent for Qwen** (no significant thinking–instruct difference on any
+  dimension) — it is a Nemotron phenomenon — and §8 shows the judge amplifies a gap the
+  Nemotron humans barely register. So Qwen does not corroborate the robustness claim.
+
+**Contradicts — needs reconciliation before integration:**
+- **FP/FN "incorrect explanations are worse" (rebuttal RA4/RA5).** The rebuttal
+  committed to reporting that incorrect-prediction explanations score significantly
+  lower — completeness **d=0.81** (p<0.001), clarity d=0.33 (p=0.029), informativeness
+  **d=0.81** (p<0.001), actionability n.s. — from a 15-snippet / 30-explanation
+  Super-49B SA analysis. The corrected, blinded Item-8 frame (§3; 480-row judge + 120
+  blinded humans) finds **no significant correct-vs-incorrect difference on any
+  dimension** (judge all p>0.5; no human dimension survives Bonferroni). The rebuttal's
+  effect size (d≈0.8 on completeness/informativeness) coincides exactly with this note's
+  **unblinded** judge (completeness 3.51 vs 2.23) — indicating RA4/RA5 is an
+  **unblinding artifact**: the evaluator scores incorrect explanations lower because it
+  can see the label, not because the explanations are worse. Under blind evaluation
+  (matching the blinded human raters — the methodologically correct setup) the gap
+  disappears. **Suggested reframing for RA4/RA5:** "Under blind evaluation, explanation
+  quality does not differ between correct and incorrect predictions; the apparent gap
+  arises only when the evaluator is shown the ground-truth label — itself a reason to
+  evaluate explanations blind." (The rebuttal's 15-snippet set is also much smaller and
+  restricted to both-modes-misclassified cases; the 480 frame supersedes it.)
+
 ## Files
 
 - Human ratings: `fpfn_paired120_rater_HSv2.xlsx`, `fpfn_paired120_rater_Shane.xlsx`
